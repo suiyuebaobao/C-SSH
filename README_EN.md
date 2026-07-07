@@ -141,6 +141,15 @@ Grab the latest build from [**Releases**](../../releases/latest):
   - First install requires enabling "Install unknown apps" in system settings.
 
 > All example configurations use placeholders such as `example.com` — replace them with your own server details.
+## 💬 Contact · Community
+
+- WeChat: **`suiyue_creation`**
+- QQ Group (AI Innovation Community): **[Join here](https://qm.qq.com/q/OWYQ9hwFWy)**
+
+Questions, feedback, or want to nudge us on iOS / open-source progress? Come say hi!
+
+---
+
 
 ---
 
