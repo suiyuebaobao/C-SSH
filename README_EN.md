@@ -82,6 +82,17 @@ A built-in AI assistant that can read monitoring data, inspect logs, write files
 
 ---
 
+## 📱 Mobile companion (Android)
+
+Desktop power, in your pocket. The same persistent tmux sessions, always-on monitoring and built-in AI assistant — continue your ops from anywhere on your phone.
+
+<div align="center">
+<img width="200" src="screenshots/mobile-hosts.png" alt="Hosts" />
+<img width="200" src="screenshots/mobile-terminal.png" alt="Terminal" />
+<img width="200" src="screenshots/mobile-ai.png" alt="AI assistant" />
+<img width="200" src="screenshots/mobile-me.png" alt="Settings / i18n" />
+</div>
+
 ## Why C-SSH
 
 - **Native client experience** — full-stack Rust + Tauri 2: fast to launch, light on resources, not a wrapped web panel, and as smooth to use as Xshell.
