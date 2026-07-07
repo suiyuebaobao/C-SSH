@@ -10,7 +10,7 @@
 [![下载 Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](../../releases/latest)
 [![支持全球](https://img.shields.io/badge/支持全球-Global-2ea44f)](../../releases/latest)
 [![永久免费](https://img.shields.io/badge/永久免费-Free%20Forever-ff69b4)](../../releases/latest)
-[![即将开源](https://img.shields.io/badge/即将开源-Open%20Source%20Soon-orange)](../../releases/latest)
+[![即将开源](https://img.shields.io/badge/开源计划-满500★或iOS完成即开源-success)](../../releases/latest)
 
 </div>
 

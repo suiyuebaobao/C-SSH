@@ -126,7 +126,9 @@ The product is **free forever** — no subscriptions, no paid tiers, no locked f
 
 ## 🔓 Open-source commitment
 
-**Once the iOS client is ready, the project will be fully open-sourced.** Our goal is to bring the community a genuinely great native SSH ops tool and maintain it openly, welcoming contributions for the long haul.
+**At 500 GitHub stars, or once the iOS client ships — whichever comes first — the project goes fully open-source.** Our goal is to bring the community a genuinely great native SSH ops tool and maintain it openly, welcoming contributions for the long haul.
+
+> In other words: if you want it open-sourced sooner, a ⭐ Star is the most direct nudge — 500 stars unlocks it.
 
 ---
 
