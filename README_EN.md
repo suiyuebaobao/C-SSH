@@ -146,6 +146,12 @@ Grab the latest build from [**Releases**](../../releases/latest):
 - WeChat: **`suiyue_creation`**
 - QQ Group (AI Innovation Community): **[Join here](https://qm.qq.com/q/OWYQ9hwFWy)**
 
+<div align="center">
+<img src="screenshots/qq-group-qr.png" width="260" alt="QQ group QR · AI Innovation Community" />
+<br/><sub>Scan to join the QQ group (AI Innovation Community) · Group No. 1041937161</sub>
+</div>
+
+
 Questions, feedback, or want to nudge us on iOS / open-source progress? Come say hi!
 
 ---

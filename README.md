@@ -146,6 +146,12 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 - 微信:**`suiyue_creation`**
 - QQ 群【AI 创新社区】:**[点击加入](https://qm.qq.com/q/OWYQ9hwFWy)**
 
+<div align="center">
+<img src="screenshots/qq-group-qr.png" width="260" alt="QQ 群二维码 · AI创新社区" />
+<br/><sub>扫码加入 QQ 群【AI 创新社区】· 群号 1041937161</sub>
+</div>
+
+
 有问题、建议、想催 iOS / 开源进度,欢迎来撩~
 
 ---
