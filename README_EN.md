@@ -139,10 +139,17 @@ Grab the latest build from [**Releases**](../../releases/latest):
 - **Windows**: download `Creation-SSH_x.y.z_x64-setup.exe` (recommended) or the `.msi`.
 - **Portable (recommended, no install)**: download `Creation-SSH-portable-Windows-x64.zip`, unzip and run — zero install; it bundles the agent & static tmux, keep the whole folder together.
   - If Windows SmartScreen appears on first launch, click "More info → Run anyway".
-- **Android**: download and install `creation-ssh_x.y.z_arm64.apk`.
+- **Android**: download and install `C-SSH-android-arm64.apk`.
   - First install requires enabling "Install unknown apps" in system settings.
 
 > All example configurations use placeholders such as `example.com` — replace them with your own server details.
+
+## 🧾 Releases & changelog
+
+- Download the latest installers and read the full release notes in [GitHub Releases](../../releases/latest).
+- Historical changes are tracked in [CHANGELOG_EN.md](CHANGELOG_EN.md).
+- Release notes are bilingual and include Added / Fixed / Verified / Downloads sections.
+
 ## 💬 Contact · Community
 
 - WeChat: **`suiyue_creation`**

@@ -126,7 +126,9 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 ## 🔓 开源承诺
 
-**iOS 客户端开发完成后,项目将全部开源。** 我们希望把一款真正好用的原生 SSH 运维工具带给社区,并以开源方式长期维护、接受贡献。
+**满 500 个 GitHub Star,或 iOS 客户端开发完成后,项目将全部开源;任一条件先达成即开源。** 我们希望把一款真正好用的原生 SSH 运维工具带给社区,并以开源方式长期维护、接受贡献。
+
+> 想更早开源的话,点一个 ⭐ Star 是最直接的推动。
 
 ---
 
@@ -137,10 +139,17 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 - **Windows**:下载 `Creation-SSH_x.y.z_x64-setup.exe`(推荐)或 `.msi` 安装。
 - **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH-portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
   - 首次运行若出现 SmartScreen 提示,点击「更多信息 → 仍要运行」即可。
-- **Android**:下载 `creation-ssh_x.y.z_arm64.apk` 安装。
+- **Android**:下载 `C-SSH-android-arm64.apk` 安装。
   - 首次安装需在系统设置中允许「安装未知来源应用」。
 
 > 示例配置一律使用 `example.com` 等占位地址,请替换为你自己的服务器信息。
+
+## 🧾 更新列表
+
+- 最新安装包与完整发布说明见 [GitHub Releases](../../releases/latest)。
+- 历史更新记录见 [CHANGELOG.md](CHANGELOG.md)。
+- Release 说明保持中英双语,包含「新增 / 修复 / 验证 / 下载」。
+
 ## 💬 联系 · 交流群
 
 - 微信:**`suiyue_creation`**
