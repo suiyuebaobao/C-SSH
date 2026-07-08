@@ -4,6 +4,31 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.1 - SSH Compatibility and Agent Fallback Fixes
+
+### Downloads
+- Windows installer: `Creation-SSH_0.1.0_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.1.0_x64_en-US.msi`
+- Windows portable: `Creation-SSH-portable-Windows-x64.zip`
+- Android arm64: `C-SSH-android-arm64.apk`
+- Android AAB: `C-SSH-android-arm64.aab`
+
+### Added
+- Added compatible login-key setup for CentOS/RHEL/FIPS/older OpenSSH environments: Ed25519 first, with RSA/ECDSA P-256 fallback when needed.
+- Added stable classification for server-side `direct-streamlocal` policy rejection so it is not mistaken for a bad SSH password.
+- Split desktop/mobile deployment helpers for credentials and assets, with documentation and code indexes updated to the current structure.
+
+### Fixed
+- Fixed agent private-key setup failures seen on CentOS 7.9-like environments.
+- Fixed repeated SSH password prompts when SSH works but the server rejects agent unix-socket forwarding; terminal now temporarily falls back to a plain SSH PTY.
+- Fixed lazy deploy/key repair so saved SSH passwords are reused before interrupting the user for password input.
+
+### Verified
+- Rust `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace` passed.
+- Desktop `npm run tauri build` produced the Windows setup/MSI, and the portable zip was rebuilt.
+- Android arm64 release APK/AAB were generated; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, SDK 24/36, and ABI `arm64-v8a` only.
+- Sanitized real-server verification covered CentOS 7.9 and Ubuntu 24: CentOS key setup works and falls back to SSH when the agent channel is policy-blocked; Ubuntu agent handshake and command execution work normally.
+
 ## v0.6 - Smooth Splash and Icon Safe Area
 
 ### Downloads
