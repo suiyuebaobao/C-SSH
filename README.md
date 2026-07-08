@@ -136,7 +136,7 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 前往 [**Releases**](../../releases/latest) 获取最新安装包:
 
-**当前最新版本**: `v0.6.1`。
+**当前最新版本**: `v0.6.2`。
 
 - **Windows**:下载 `Creation-SSH_x.y.z_x64-setup.exe`(推荐)或 `.msi` 安装。
 - **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH-portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。

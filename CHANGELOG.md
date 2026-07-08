@@ -4,6 +4,33 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.2 - AI 设置持久化与自定义模型体验修复
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.1.0_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.1.0_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH-portable-Windows-x64.zip`
+- Android arm64: `C-SSH-android-arm64.apk`
+- Android AAB: `C-SSH-android-arm64.aab`
+
+### 新增
+- 桌面 AI 助手页顶栏新增「工具循环」数字框,PC 端不用再进设置页深处寻找自定义次数入口。
+- 自定义 AI provider 增加上下文窗口设置,支持 4096 到 2,000,000 tokens,默认 128k;自定义模型的上下文剩余条会使用用户配置。
+- AI 配置持久化命令拆分为独立 `ai_config` 模块,后续扩展配置字段不会继续撑大执行循环文件。
+
+### 修复
+- 修复 AI 助手权限模式在离开页面再切回时又变回第一个「只读」的问题;现在会先用本会话缓存恢复选择,同时继续写入 SQLite。
+- 修复权限模式切换后立刻去做其他事情时保存不够及时的问题;前端改为同步 flush 触发保存。
+- 修复自定义 AI 保存配置时无法传递上下文窗口的问题,桌面端与移动端保持一致。
+- 修复桌面 clippy 因部署注释列表缩进触发 `doc_lazy_continuation` 的阻断。
+
+### 验证
+- 桌面/移动 `npm run build` 通过。
+- 桌面/移动 Tauri workspace `cargo check`、`cargo fmt --check`、`cargo clippy --all-targets -- -D warnings` 通过。
+- 9 种语言的 AI 文案 JSON 全部通过解析。
+- 桌面 `npm run tauri build` 已生成 Windows setup/MSI,并重新制作 portable zip。
+- Android arm64 release APK/AAB 已生成;APK 通过 `apksigner verify --verbose --print-certs` 与 `aapt dump badging` 检查,包名 `com.creationssh.mobile`,SDK 24/36,ABI 仅 `arm64-v8a`。
+
 ## v0.6.1 - 终端体验与 agent 兼容修复
 
 ### 下载

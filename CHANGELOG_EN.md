@@ -4,6 +4,33 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.2 - AI Settings Persistence and Custom Model UX Fixes
+
+### Downloads
+- Windows installer: `Creation-SSH_0.1.0_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.1.0_x64_en-US.msi`
+- Windows portable: `Creation-SSH-portable-Windows-x64.zip`
+- Android arm64: `C-SSH-android-arm64.apk`
+- Android AAB: `C-SSH-android-arm64.aab`
+
+### Added
+- Added a tool-loop number control directly to the desktop AI assistant toolbar, so PC users no longer need to dig through settings to customize the loop limit.
+- Added a context-window setting for custom AI providers, from 4,096 to 2,000,000 tokens with a 128k default; custom models now use this value for the context remaining indicator.
+- Split AI configuration persistence into a dedicated `ai_config` backend module, keeping the execution-loop module below the file-size limit.
+
+### Fixed
+- Fixed the AI assistant permission mode reverting to the first read-only option after leaving the page and returning; the app now restores the in-session cached mode while still persisting to SQLite.
+- Fixed permission-mode changes not being saved early enough when users immediately switch away after choosing a mode; the watcher now flushes synchronously.
+- Fixed custom AI settings not carrying a context-window value through the desktop and mobile save paths.
+- Fixed a desktop clippy blocker caused by lazy continuation in a deployment doc comment.
+
+### Verified
+- Desktop and mobile `npm run build` passed.
+- Desktop and mobile Tauri workspaces passed `cargo check`, `cargo fmt --check`, and `cargo clippy --all-targets -- -D warnings`.
+- AI locale JSON files for all 9 languages parse successfully.
+- Desktop `npm run tauri build` produced the Windows setup/MSI, and the portable zip was rebuilt.
+- Android arm64 release APK/AAB were generated; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, SDK 24/36, and ABI `arm64-v8a` only.
+
 ## v0.6.1 - Terminal UX and Agent Compatibility Fixes
 
 ### Downloads

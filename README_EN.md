@@ -136,7 +136,7 @@ The product is **free forever** — no subscriptions, no paid tiers, no locked f
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.1`.
+**Current latest version**: `v0.6.2`.
 
 - **Windows**: download `Creation-SSH_x.y.z_x64-setup.exe` (recommended) or the `.msi`.
 - **Portable (recommended, no install)**: download `Creation-SSH-portable-Windows-x64.zip`, unzip and run — zero install; it bundles the agent & static tmux, keep the whole folder together.
