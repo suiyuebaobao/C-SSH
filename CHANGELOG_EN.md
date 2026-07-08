@@ -4,7 +4,7 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
-## v0.6.1 - SSH Compatibility and Agent Fallback Fixes
+## v0.6.1 - Terminal UX and Agent Compatibility Fixes
 
 ### Downloads
 - Windows installer: `Creation-SSH_0.1.0_x64-setup.exe`
@@ -14,20 +14,28 @@ Download complete installers from [GitHub Releases](../../releases). Each releas
 - Android AAB: `C-SSH-android-arm64.aab`
 
 ### Added
+- Raised the AI tool-loop default from 16 to 30 iterations, with a configurable custom limit that stays inside the safety range.
+- Persisted all five AI assistant permission modes so reopening the app keeps the user's last selected mode.
 - Added compatible login-key setup for CentOS/RHEL/FIPS/older OpenSSH environments: Ed25519 first, with RSA/ECDSA P-256 fallback when needed.
 - Added stable classification for server-side `direct-streamlocal` policy rejection so it is not mistaken for a bad SSH password.
+- Added shared authentication-error classification so Files, Monitoring, System Management, App Center, and related agent pages use the same clear messages.
 - Split desktop/mobile deployment helpers for credentials and assets, with documentation and code indexes updated to the current structure.
 
 ### Fixed
+- Fixed the desktop terminal CLI/xterm area being too small: the terminal view now uses the full available width, with tighter header controls and a more stable toolbar on narrow screens.
+- Fixed the terminal cursor and last line being clipped at the bottom by adding proper xterm bottom padding and line-height constraints.
+- Fixed persistent-terminal status/mode display when the agent channel is unavailable; the app now temporarily falls back to a plain SSH PTY for the current connection without overwriting the user's saved terminal mode.
 - Fixed agent private-key setup failures seen on CentOS 7.9-like environments.
 - Fixed repeated SSH password prompts when SSH works but the server rejects agent unix-socket forwarding; terminal now temporarily falls back to a plain SSH PTY.
 - Fixed lazy deploy/key repair so saved SSH passwords are reused before interrupting the user for password input.
+- Fixed Files, Monitoring, System Management, App Center, and other agent pages treating `direct-streamlocal` rejection as a bad SSH password; they now report the server-side agent-channel policy block clearly.
 
 ### Verified
 - Rust `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace` passed.
 - Desktop `npm run tauri build` produced the Windows setup/MSI, and the portable zip was rebuilt.
 - Android arm64 release APK/AAB were generated; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, SDK 24/36, and ABI `arm64-v8a` only.
 - Sanitized real-server verification covered CentOS 7.9 and Ubuntu 24: CentOS key setup works and falls back to SSH when the agent channel is policy-blocked; Ubuntu agent handshake and command execution work normally.
+- GitHub Issues #1, #2, #3, and #4 were each answered with the fix details and linked to v0.6.1.
 
 ## v0.6 - Smooth Splash and Icon Safe Area
 
