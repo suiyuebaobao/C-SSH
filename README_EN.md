@@ -24,20 +24,31 @@ In one line: **native client + structured resident agent + persistent sessions**
 
 ---
 
-## Features
+## Desktop Page Guide
+
+> Screenshots below use sanitized demo data such as `example.com`; they do not include real servers or credentials.
 
 <div align="center">
 
-### Host Management With A Lightweight Dashboard
+### Host Management
 <img width="820" src="screenshots/hosts.png" alt="Host management" />
 
 </div>
 
-Manage all your servers in one place. The host list includes a lightweight resource dashboard so you can see online status and load at a glance. Group, search, and connect quickly; credentials are encrypted locally and never uploaded.
+The home page manages SSH hosts, groups, favorites, search, agent deployment, and repair. Host creation supports password or OpenSSH private-key authentication, and credentials stay in the local encrypted vault.
 
 <div align="center">
 
-### Dual-Mode Terminal (Persistent tmux + Direct SSH)
+### AI Assistant
+<img width="820" src="screenshots/ai.png" alt="AI assistant" />
+
+</div>
+
+The AI assistant works with host context: it can read metrics, inspect logs, edit files, and run commands under explicit permission modes. The top workspace keeps history, host selection, permissions, context usage, and performance presets close at hand; the desktop app also supports an independent AI pop-out window.
+
+<div align="center">
+
+### Terminal
 <img width="820" src="screenshots/terminal.png" alt="Dual-mode terminal" />
 
 </div>
@@ -46,7 +57,16 @@ In **persistent mode**, the agent drives tmux directly. After a disconnect, rebo
 
 <div align="center">
 
-### Always-On Monitoring
+### Monitoring Overview
+<img width="820" src="screenshots/monitor-list.png" alt="Monitoring overview" />
+
+</div>
+
+The monitoring overview shows health across all hosts before you drill into one machine. It is designed for quick daily checks: online state, load, warnings, and recent cached status are visible without opening a terminal.
+
+<div align="center">
+
+### Monitoring Detail
 <img width="820" src="screenshots/monitor.png" alt="Monitoring" />
 
 </div>
@@ -64,34 +84,95 @@ Browse remote files graphically with create, read, update, delete, online editin
 
 <div align="center">
 
+### Port Forwarding
+<img width="820" src="screenshots/ports.png" alt="Port forwarding" />
+
+</div>
+
+Port forwarding uses SSH local forwarding to expose remote internal services safely on your machine. Local listeners bind to `127.0.0.1` by default to avoid accidental LAN exposure, and saved forwards can be rebuilt, stopped, or removed.
+
+<div align="center">
+
+### Command Snippets
+<img width="820" src="screenshots/snippets.png" alt="Command snippets" />
+
+</div>
+
+Command snippets turn repeated operations into a local command library. Select multiple hosts, run a snippet, and review grouped results per host.
+
+<div align="center">
+
+### System Management
+<img width="820" src="screenshots/sysmgmt.png" alt="System management" />
+
+</div>
+
+System management covers read-only system facts, process control, firewall ports, and SSH password changes. Destructive actions require confirmation and run as the SSH login user without extra privilege escalation.
+
+<div align="center">
+
 ### App Center
 <img width="820" src="screenshots/appcenter.png" alt="App Center" />
 
 </div>
 
-Install Docker itself in one click, deploy common containerized apps such as Nginx and Redis, and manage Docker containers, images, and systemd services. Destructive actions require confirmation and run as the SSH login user without extra privilege escalation.
+Install Docker itself in one click, deploy common containerized apps such as Nginx and Redis, and manage Docker containers, images, and systemd services. Destructive actions require confirmation and run as the SSH login user.
 
 <div align="center">
 
-### Built-In AI Operations Assistant
-<img width="820" src="screenshots/ai.png" alt="AI assistant" />
+### Access Grants
+<img width="820" src="screenshots/grants.png" alt="Access grants" />
 
 </div>
 
-The built-in AI assistant can read monitoring data, inspect logs, write files, edit configs, and run commands to help diagnose issues and write scripts. Five permission tiers plus per-action confirmation keep write and execution actions controllable and auditable. Both OpenAI-compatible APIs and Anthropic are supported.
+Access grants centralize the local vault, generated SSH keys, one-time authorization, and AI audit records. Credentials stay on the local device and are never uploaded.
+
+<div align="center">
+
+### Settings
+<img width="820" src="screenshots/settings.png" alt="Settings" />
+
+</div>
+
+Settings collect AI provider configuration, custom context windows, tool-loop limits, system-language following, login password, desktop transparency, monitoring collection, and GitHub update checks.
 
 ---
 
-## Mobile Companion (Android)
+## Mobile Page Guide (Android)
 
-Desktop power in your pocket. The same persistent tmux sessions, always-on monitoring, and built-in AI assistant are available from Android.
+Desktop power in your pocket. The same persistent tmux sessions, monitoring, file management, and built-in AI assistant are available from Android.
 
 <div align="center">
-<img width="200" src="screenshots/mobile-hosts.png" alt="Hosts" />
-<img width="200" src="screenshots/mobile-terminal.png" alt="Terminal" />
-<img width="200" src="screenshots/mobile-ai.png" alt="AI assistant" />
-<img width="200" src="screenshots/mobile-me.png" alt="Settings and languages" />
+<img width="180" src="screenshots/mobile-login.png" alt="Mobile login" />
+<img width="180" src="screenshots/mobile-hosts.png" alt="Mobile hosts" />
+<img width="180" src="screenshots/mobile-terminal.png" alt="Mobile terminal" />
+<img width="180" src="screenshots/mobile-files.png" alt="Mobile files" />
+<img width="180" src="screenshots/mobile-monitor.png" alt="Mobile monitoring" />
+<img width="180" src="screenshots/mobile-ai.png" alt="Mobile AI assistant" />
+<img width="180" src="screenshots/mobile-sysmgmt.png" alt="Mobile system management" />
+<img width="180" src="screenshots/mobile-me.png" alt="Mobile Me" />
 </div>
+
+### Mobile Hosts
+The hosts page uses cards for server management, including creation, editing, deletion, agent deployment, and quick jumps into terminal, monitoring, and system management.
+
+### Mobile Terminal
+The terminal page keeps both persistent tmux and direct PTY modes, with mobile shortcut keys for Ctrl, Esc, Tab, and arrows.
+
+### Mobile Files
+The files page supports directory browsing, editing, downloading into the app sandbox, creating, renaming, deleting, and toggling hidden files.
+
+### Mobile Monitoring
+The monitoring page subscribes to live metrics and shows CPU, memory, disk, network, and top process state on a phone-sized layout.
+
+### Mobile AI Assistant
+The AI page keeps host selection, permissions, context, history, and configuration in mobile sheets. The input area avoids the soft keyboard so typed text stays visible.
+
+### Mobile System Management
+System management opens as an inner page from the host actions and covers system facts, firewall ports, process termination, and SSH password changes.
+
+### Me / Login Gate
+The Me page includes language, update checks, version information, login password, and local security settings. If a login password is configured, the app starts at the local login gate to unlock the vault.
 
 ## Why C-SSH
 
