@@ -9,9 +9,9 @@
 ### 下载
 - Windows 安装版: `Creation-SSH_0.6.3_x64-setup.exe`
 - Windows MSI: `Creation-SSH_0.6.3_x64_en-US.msi`
-- Windows 便携版: `Creation-SSH-portable-Windows-x64.zip`
-- Android arm64: `C-SSH-android-arm64.apk`
-- Android AAB: `C-SSH-android-arm64.aab`
+- Windows 便携版: `Creation-SSH_0.6.3_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.3_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.3_android-arm64.aab`
 
 ### 新增
 - agent 正式版本同步到 `0.6.3`,客户端懒部署现在同时检查协议号与 agent 包版本;协议不变但 agent 版本落后时也会自动升级。

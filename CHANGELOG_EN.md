@@ -9,9 +9,9 @@ Download complete installers from [GitHub Releases](../../releases). Each releas
 ### Downloads
 - Windows installer: `Creation-SSH_0.6.3_x64-setup.exe`
 - Windows MSI: `Creation-SSH_0.6.3_x64_en-US.msi`
-- Windows portable: `Creation-SSH-portable-Windows-x64.zip`
-- Android arm64: `C-SSH-android-arm64.apk`
-- Android AAB: `C-SSH-android-arm64.aab`
+- Windows portable: `Creation-SSH_0.6.3_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.3_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.3_android-arm64.aab`
 
 ### Added
 - Synchronized the server agent package version to `0.6.3`; lazy deployment now checks both protocol version and packaged agent version, so same-protocol older agents are upgraded too.
