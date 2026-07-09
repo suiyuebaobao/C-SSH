@@ -4,6 +4,46 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.6 - Agent Bridge Fallback, Concurrency Guard, and Key-Based Hosts
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.6_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.6_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.6_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.6_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.6_android-arm64.aab`
+
+### Added
+- Added an agent `--stdio-bridge` mode. When sshd rejects `direct-streamlocal`, the client automatically falls back to a bridge channel that still reaches the local unix socket, keeping agent-backed features usable on older systems such as CentOS 7.9.
+- Added Stable / Balanced / Fast / Ultra presets for short agent requests, with per-host persistence in local SQLite.
+- Added a desktop AI assistant pop-out entry so the current AI assistant can open in an independent window, preparing the UI for multiple AI assistant windows.
+- Added OpenSSH private-key authentication to desktop and mobile host creation; pasted keys are stored in the local encrypted vault and reused for later connections.
+- Improved host grouping, delete confirmation, authentication error guidance, multilingual host text, and synchronized public versioning to `0.6.6`.
+
+### Fixed
+- Fixed agent features being unavailable on CentOS 7.9/OpenSSH 7.4 environments when sshd returned `AdministrativelyProhibited` for `direct-streamlocal`; the client now falls back to the bridge without asking users to re-enter SSH passwords.
+- Fixed short agent requests lacking a shared concurrency limit under high-concurrency tool-call scenarios; all non-long-stream requests now go through the agent request guard and temporarily auto-downgrade to 1 concurrent request after SSH/channel/streamlocal transport errors.
+- Fixed desktop and mobile deploy / files / monitor / appcenter / sysmgmt paths that could bypass the shared agent concurrency guard.
+- Clarified the bridge failure message: users only see the fallback failure text when both direct streamlocal and bridge transport fail.
+- Fixed some host-credential flows still prompting for passwords after credentials had already been saved; successful host creation now prefers the local vault credential on later connections.
+
+### Verified
+- Rust `cargo fmt --check`, `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo check -p client`, and `cargo check -p agent` passed.
+- Desktop/mobile Tauri workspaces passed `cargo check`; desktop and mobile `npm run build` passed.
+- x86_64 and aarch64 Linux musl agent releases were built with `cargo zigbuild`, both synchronized to version `0.6.6`.
+- Desktop `npm run tauri build` produced Windows setup/MSI; the main executable reports file and product version `0.6.6`, and the portable zip was rebuilt.
+- Android x86_64 debug APK was installed on the MuMu emulator; `aapt dump badging` reports `versionName=0.6.6` and `native-code='x86_64'`. This package is for testing only and is not uploaded to the public Release.
+- Android arm64 release APK/AAB were generated; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, versionName `0.6.6`, versionCode `6006`, and ABI `arm64-v8a` only.
+- Real CentOS 7.9 verification: native `direct-streamlocal` is still rejected by sshd, but the current client automatically uses `stdio-bridge` and completes `handshake`, `sysinfo`, `metrics`, and `mon` streaming.
+- Source/docs, public repository text, and release notes passed sanitized scans for real credentials, tokens, private keys, and non-example IPs.
+
+### SHA256
+- `Creation-SSH_0.6.6_portable-Windows-x64.zip`: `68773A304D2C74C3BEE922F75FC3D0C5C61F3D077C57083132C4371E8F98EFBE`
+- `Creation-SSH_0.6.6_x64_en-US.msi`: `D7A22FB19E46BD4CFD0A17DBB2DF847051E8246961460111180E1FE2228C2989`
+- `Creation-SSH_0.6.6_x64-setup.exe`: `1D2EC3D2F9F22A52AAC94227AF68D2EACBAB4C93F7CD350B56F7C0A3E9C2D76C`
+- `C-SSH_0.6.6_android-arm64.aab`: `67E0EB455CA9A92F0379F785D31486A002884D3FAED9EED75E6C055AC2BFBEB4`
+- `C-SSH_0.6.6_android-arm64.apk`: `78990A2DB4F286E0E46C0FF0AD959A57A0CDE79A652DFF795028AE7AF504C8F7`
+
 ## v0.6.5 - AI Workspace, History Entry, and Sensitive Attachment Blocking
 
 ### Downloads

@@ -4,6 +4,46 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.6 - Agent 桥接兜底、并发保护与密钥主机
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.6_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.6_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH_0.6.6_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.6_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.6_android-arm64.aab`
+
+### 新增
+- agent 新增 `--stdio-bridge` 桥接模式:当服务器 sshd 拒绝 `direct-streamlocal` 时,客户端会自动退到桥接通道继续访问本机 unix socket,CentOS 7.9 等老系统也能使用 agent 能力。
+- agent 短请求新增低/中/高/超级性能档位,对应 Stable / Balanced / Fast / Ultra,并把每台主机的选择持久化到本地 SQLite。
+- 桌面端 AI 助手新增独立弹窗入口,可把当前 AI 助手弹出为单独窗口,为多 AI 助手窗口并行操作预留骨架。
+- 桌面端与移动端主机添加流程补齐 OpenSSH 私钥模式,支持粘贴私钥后保存到本地加密仓库,后续连接自动复用仓库凭据。
+- 主机管理补齐分组编辑、删除确认、认证失败提示与多语言文案,公开版本号同步到 `0.6.6`。
+
+### 修复
+- 修复 CentOS 7.9/OpenSSH 7.4 系列环境中 `direct-streamlocal` 被 sshd 返回 `AdministrativelyProhibited` 后 agent 能力不可用的问题;现在会自动启用桥接兜底,无需用户重复输入 SSH 密码。
+- 修复高并发工具调用下短 agent 请求没有统一限流的问题;所有非长流短请求统一经过 agent request guard,并在 SSH/channel/streamlocal 传输类错误后自动临时降级到 1 并发。
+- 修复移动端和桌面端部分 deploy / files / monitor / appcenter / sysmgmt 路径绕过统一 agent 并发保护的问题。
+- 修复“桥接不可用”提示容易误导的问题:只有直连与桥接都失败时才提示 agent 传输兜底失败。
+- 修复主机凭据保存后部分客户端路径仍可能要求用户重新输入密码的问题,添加成功后优先复用本地仓库凭据。
+
+### 验证
+- Rust `cargo fmt --check`、`cargo test --workspace`、`cargo clippy --workspace --all-targets -- -D warnings`、`cargo check -p client`、`cargo check -p agent` 通过。
+- 桌面/移动 Tauri workspace `cargo check` 通过;桌面与移动 `npm run build` 通过。
+- agent x86_64 与 aarch64 Linux musl release 通过 `cargo zigbuild` 构建,版本同步为 `0.6.6`。
+- 桌面 `npm run tauri build` 生成 Windows setup/MSI;主程序文件版本与产品版本均为 `0.6.6`,便携版 zip 已重打。
+- Android x86_64 debug APK 已安装到 MuMu 模拟器验证;`aapt dump badging` 确认 `versionName=0.6.6`、`native-code='x86_64'`。该包仅用于测试,不上传公开 Release。
+- Android arm64 release APK/AAB 通过构建;APK 通过 `apksigner verify --verbose --print-certs` 与 `aapt dump badging`,包名 `com.creationssh.mobile`,versionName `0.6.6`,versionCode `6006`,ABI 仅 `arm64-v8a`。
+- CentOS 7.9 真机验证:原生 `direct-streamlocal` 仍被 sshd 拒绝,但当前客户端自动走 `stdio-bridge`,并完成 `handshake`、`sysinfo`、`metrics` 与 `mon` 流式订阅。
+- 发布前对私有源码/文档、公开仓文案与 release notes 执行脱敏扫描,未发现真实凭据、token、私钥或非示例 IP。
+
+### SHA256
+- `Creation-SSH_0.6.6_portable-Windows-x64.zip`: `68773A304D2C74C3BEE922F75FC3D0C5C61F3D077C57083132C4371E8F98EFBE`
+- `Creation-SSH_0.6.6_x64_en-US.msi`: `D7A22FB19E46BD4CFD0A17DBB2DF847051E8246961460111180E1FE2228C2989`
+- `Creation-SSH_0.6.6_x64-setup.exe`: `1D2EC3D2F9F22A52AAC94227AF68D2EACBAB4C93F7CD350B56F7C0A3E9C2D76C`
+- `C-SSH_0.6.6_android-arm64.aab`: `67E0EB455CA9A92F0379F785D31486A002884D3FAED9EED75E6C055AC2BFBEB4`
+- `C-SSH_0.6.6_android-arm64.apk`: `78990A2DB4F286E0E46C0FF0AD959A57A0CDE79A652DFF795028AE7AF504C8F7`
+
 ## v0.6.5 - AI 工作区、历史入口与敏感附件拦截
 
 ### 下载

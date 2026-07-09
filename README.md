@@ -136,23 +136,23 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 前往 [**Releases**](../../releases/latest) 获取最新安装包:
 
-**当前最新版本**: `v0.6.5`。
+**当前最新版本**: `v0.6.6`。
 
-- **Windows**:下载 `Creation-SSH_0.6.5_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.5_x64_en-US.msi` 安装。
-- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.5_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
+- **Windows**:下载 `Creation-SSH_0.6.6_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.6_x64_en-US.msi` 安装。
+- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.6_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
   - 首次运行若出现 SmartScreen 提示,点击「更多信息 → 仍要运行」即可。
-- **Android**:下载 `C-SSH_0.6.5_android-arm64.apk` 安装。
+- **Android**:下载 `C-SSH_0.6.6_android-arm64.apk` 安装。
   - 首次安装需在系统设置中允许「安装未知来源应用」。
 
 > 示例配置一律使用 `example.com` 等占位地址,请替换为你自己的服务器信息。
 
-### v0.6.5 更新重点
+### v0.6.6 更新重点
 
-- AI 助手历史记录移动到顶部工作区栏,减少侧栏占用,切换历史会话更顺手。
-- 桌面端与移动端同步优化 AI 工作区布局,为后续同时打开多个 AI 助手窗口预留骨架。
-- 移动端 AI 输入区继续增强软键盘避让,输入时能看到正在编辑的内容。
-- AI 附件上传增加敏感文件名拦截,默认拒绝 `.env`、私钥、证书密钥等高风险文件。
-- Windows、Android、agent 与公开资产文件名全部同步到 `0.6.5`,并完成签名、版本号、ABI 与 SHA256 校验。
+- agent 新增 `stdio-bridge` 传输兜底,CentOS 7.9 等拒绝 `direct-streamlocal` 的老系统也能继续使用 agent 能力。
+- agent 短请求新增低/中/高/超级性能档位,并在传输异常时自动临时降级,降低高并发工具调用下的崩溃风险。
+- 桌面端 AI 助手新增独立弹窗入口,可把对话弹出为单独窗口,为同时操作多个 AI 助手窗口打好基础。
+- 主机添加流程补齐 OpenSSH 私钥模式,密码/私钥凭据继续只保存在本地加密仓库。
+- Windows、Android、agent 与公开资产文件名全部同步到 `0.6.6`,并完成签名、版本号、ABI 与 SHA256 校验。
 
 ## 🧾 更新列表
 
