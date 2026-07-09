@@ -4,6 +4,34 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.3 - 版本同步、AI 布局与发布包修复
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.3_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.3_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH-portable-Windows-x64.zip`
+- Android arm64: `C-SSH-android-arm64.apk`
+- Android AAB: `C-SSH-android-arm64.aab`
+
+### 新增
+- agent 正式版本同步到 `0.6.3`,客户端懒部署现在同时检查协议号与 agent 包版本;协议不变但 agent 版本落后时也会自动升级。
+- 固化版本同步规则:每次正式发布必须同步源码版本、Tauri 配置、npm 包版本、Android versionName/versionCode、关于页、agent 版本、公开 Release 文件名与文档。
+- 桌面端 AI 助手在窗口最大化后改为全宽铺满布局,和其他菜单页保持一致。
+
+### 修复
+- 修复 Windows 安装包、APK 应用信息、关于页面仍显示 `0.1` / `0.1.0` 的问题;本版统一显示 `0.6.3`。
+- 修复 agent 长期显示 `0.0.1` 的问题;agent 运行时版本现在来自包版本,并随发布更新。
+- 修复桌面透明度默认值没有按要求生效的问题;默认值改为 80%,旧的 0 值会迁移到 80%。
+- 修复 AI 助手执行档选择不会像权限模式一样持久化的问题;重新打开后保留上次选择。
+- 继续补齐 AI 权限模式、自定义上下文窗口、工具循环自定义次数等公开说明,避免用户找不到入口。
+
+### 验证
+- `cargo fmt --check`、`cargo check -p agent` 通过,agent 构建显示 `0.6.3`。
+- 桌面/移动 `npm run build` 通过;桌面/移动 Tauri workspace `cargo check` 通过。
+- 桌面 `npm run tauri build` 已生成 `0.6.3` Windows setup/MSI;Windows 可执行文件版本为 `0.6.3`。
+- Android x86_64 debug 包已安装到 MuMu 12 模拟器,系统包信息 `versionName=0.6.3`,关于页面显示 `0.6.3`。
+- Android arm64 release APK/AAB 已生成;APK 通过 `apksigner verify --verbose --print-certs` 与 `aapt dump badging`,包名 `com.creationssh.mobile`,SDK 24/36,ABI 仅 `arm64-v8a`。
+
 ## v0.6.2 - AI 设置持久化与自定义模型体验修复
 
 ### 下载

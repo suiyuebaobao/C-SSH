@@ -4,6 +4,34 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.3 - Version Sync, AI Layout, and Package Metadata Fixes
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.3_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.3_x64_en-US.msi`
+- Windows portable: `Creation-SSH-portable-Windows-x64.zip`
+- Android arm64: `C-SSH-android-arm64.apk`
+- Android AAB: `C-SSH-android-arm64.aab`
+
+### Added
+- Synchronized the server agent package version to `0.6.3`; lazy deployment now checks both protocol version and packaged agent version, so same-protocol older agents are upgraded too.
+- Formalized the version-sync rule for every release: source versions, Tauri config, npm package versions, Android versionName/versionCode, About page, agent version, public Release filenames, and docs must move together.
+- The desktop AI assistant now expands to the full available width when the window is maximized, matching the rest of the desktop app.
+
+### Fixed
+- Fixed Windows installers, Android app metadata, and About pages still showing `0.1` / `0.1.0`; this release consistently reports `0.6.3`.
+- Fixed the agent version staying at `0.0.1`; the runtime agent version now comes from the package version and changes with releases.
+- Fixed the desktop transparency default not applying as requested; the default is now 80%, and older saved `0` values migrate to 80%.
+- Fixed AI execution-mode selection not persisting like permission mode; reopening keeps the last selected option.
+- Clarified public notes for AI permission persistence, custom context windows, and custom tool-loop limits so users can find the new controls.
+
+### Verified
+- `cargo fmt --check` and `cargo check -p agent` passed, with the agent build reporting `0.6.3`.
+- Desktop/mobile `npm run build` passed; desktop/mobile Tauri workspaces passed `cargo check`.
+- Desktop `npm run tauri build` produced the `0.6.3` Windows setup/MSI; the Windows executable reports version `0.6.3`.
+- Android x86_64 debug APK was installed on the MuMu 12 emulator; system package info reports `versionName=0.6.3`, and the About page shows `0.6.3`.
+- Android arm64 release APK/AAB were generated; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, SDK 24/36, and ABI `arm64-v8a` only.
+
 ## v0.6.2 - AI Settings Persistence and Custom Model UX Fixes
 
 ### Downloads
