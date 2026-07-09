@@ -134,11 +134,11 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.3`.
+**Current latest version**: `v0.6.4`.
 
-- **Windows**: download `Creation-SSH_0.6.3_x64-setup.exe` (recommended) or `Creation-SSH_0.6.3_x64_en-US.msi`.
-- **Portable Windows**: download `Creation-SSH_0.6.3_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
-- **Android**: download and install `C-SSH_0.6.3_android-arm64.apk`.
+- **Windows**: download `Creation-SSH_0.6.4_x64-setup.exe` (recommended) or `Creation-SSH_0.6.4_x64_en-US.msi`.
+- **Portable Windows**: download `Creation-SSH_0.6.4_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
+- **Android**: download and install `C-SSH_0.6.4_android-arm64.apk`.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
 

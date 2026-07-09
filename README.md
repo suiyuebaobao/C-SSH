@@ -136,16 +136,22 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 前往 [**Releases**](../../releases/latest) 获取最新安装包:
 
-**当前最新版本**: `v0.6.3`。
+**当前最新版本**: `v0.6.4`。
 
-- **Windows**:下载 `Creation-SSH_0.6.3_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.3_x64_en-US.msi` 安装。
-- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.3_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
+- **Windows**:下载 `Creation-SSH_0.6.4_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.4_x64_en-US.msi` 安装。
+- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.4_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
   - 首次运行若出现 SmartScreen 提示,点击「更多信息 → 仍要运行」即可。
-- **Android**:下载 `C-SSH_0.6.3_android-arm64.apk` 安装。
+- **Android**:下载 `C-SSH_0.6.4_android-arm64.apk` 安装。
   - 首次安装需在系统设置中允许「安装未知来源应用」。
 
 > 示例配置一律使用 `example.com` 等占位地址,请替换为你自己的服务器信息。
 
+### v0.6.4 更新重点
+
+- AI 助手增强:运行状态恢复、权限/执行档持久化、工具调用次数自定义、高并发工具调用保护。
+- 体验修复:移动端 AI 输入框避让软键盘,桌面 AI 页最大化铺满,终端尺寸与状态栏体验持续稳定。
+- 多语言:默认可跟随系统语言,也可在设置中手动选择 9 种界面语言。
+- 更新入口:桌面关于页与移动端「我的/关于」可检查 GitHub 最新版本并跳转下载。
 ## 🧾 更新列表
 
 - 最新安装包与完整发布说明见 [GitHub Releases](../../releases/latest)。

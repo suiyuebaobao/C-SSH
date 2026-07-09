@@ -4,6 +4,42 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.4 - AI 运行恢复、系统语言与移动端输入修复
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.4_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.4_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH_0.6.4_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.4_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.4_android-arm64.aab`
+
+### 新增
+- 新增 AI 运行状态持久化与页面恢复:切换页面或重新进入 AI 助手后,正在运行/刚结束的回合可以恢复事件与状态。
+- 新增 ACP/Hermes 基础协议骨架,先提供能力描述与适配入口,后续继续扩展完整 Hermes 体验。
+- 新增桌面与移动端 GitHub 更新检测入口,提示用户到 GitHub Releases 下载,不做静默自动安装。
+- 新增系统语言跟随模式:默认跟随系统语言,也可手动选择 9 种界面语言;偏好继续落 SQLite。
+- 移动端 AI 可见图标改为组件化 SVG 图标,减少 emoji 在不同系统上的不一致显示。
+
+### 修复
+- 修复高并发工具调用场景下 AI 执行链路容易崩溃的问题:同一模型回合内的多个工具调用改为受控串行执行,并补充运行态 guard。
+- 修复移动端 AI 输入框被软键盘遮挡的问题:Android Activity 使用 `adjustResize`,前端按 `visualViewport` 调整底部空间。
+- 修复移动端 AI 权限模式、执行档、工具次数等偏好在退出/切换页面后回到默认值的问题。
+- 补齐 PC 端工具调用次数自定义入口,与移动端一样走持久化配置。
+- 本版继续包含终端尺寸/状态栏、默认透明度 80%、agent 版本同步、正式资产全带版本号等此前修复。
+
+### 验证
+- Rust `cargo fmt --check`、`cargo build --workspace`、`cargo test --workspace`、`cargo clippy --workspace --all-targets -- -D warnings` 全部通过。
+- 桌面/移动前端 `npm run build` 通过;系统语言回归、移动端 AI 键盘避让回归、启动动画回归脚本通过。
+- 桌面 `npm run tauri build` 生成 Windows setup/MSI;Windows 可执行文件与 setup 属性显示 `0.6.4`;便携版 zip 已重新制作。
+- Android arm64 release APK/AAB 已生成;APK 通过 `apksigner verify --verbose --print-certs` 与 `aapt dump badging`,包名 `com.creationssh.mobile`,versionName `0.6.4`,versionCode `6004`,ABI 仅 `arm64-v8a`;AAB 抽查只包含 `arm64-v8a` native lib。
+- 发布前对源码/文档与公开文案执行脱敏扫描,未发现私钥、token、真实凭据或非示例 IP。
+
+### SHA256
+- `Creation-SSH_0.6.4_portable-Windows-x64.zip`: `CFC6D71575E26C1F2E84539505AF1AC5DB72B0B63F182EF3DA2C6191AE3AE799`
+- `Creation-SSH_0.6.4_x64_en-US.msi`: `1B3D8364CED5BA4A6E53FD28F4024A53322C286D904C4AC95527A0827AF7BAF6`
+- `Creation-SSH_0.6.4_x64-setup.exe`: `48A0318A3AFDC7679301C00F46DCA0C6BCC329BD3FF2A8184A90B1B6298A6131`
+- `C-SSH_0.6.4_android-arm64.aab`: `891AC7731D7B592122294B28E508030DBEDB1792253F6DF8C09F296AAEF25001`
+- `C-SSH_0.6.4_android-arm64.apk`: `5F8099C77DFD547DCF969937D02AA07C184F3C05B1A5A107EE6BFA43F26CA664`
 ## v0.6.3 - 版本同步、AI 布局与发布包修复
 
 ### 下载

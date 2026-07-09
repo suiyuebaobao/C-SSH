@@ -4,6 +4,42 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.4 - AI Run Recovery, System Language, and Mobile Input Fixes
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.4_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.4_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.4_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.4_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.4_android-arm64.aab`
+
+### Added
+- Added AI run-state persistence and page recovery, so active or recently finished AI turns can restore their event stream and status after switching away and coming back.
+- Added the first ACP/Hermes protocol skeleton with capability descriptors and integration entry points; full Hermes workflow work remains staged for later releases.
+- Added GitHub update checks on desktop and mobile; the app opens the GitHub Releases page instead of silently auto-installing updates.
+- Added system-language following as the default language mode while keeping manual selection across 9 UI languages; preferences continue to be stored in SQLite.
+- Replaced visible mobile AI emoji indicators with componentized SVG icons for more consistent rendering.
+
+### Fixed
+- Fixed crashes in high-concurrency AI tool-call scenarios by executing multiple tool calls from the same model turn through a controlled serial path and adding run-state guards.
+- Fixed the mobile AI input area being covered by the Android soft keyboard: Activity now uses `adjustResize`, and the frontend adjusts bottom spacing from `visualViewport`.
+- Fixed mobile AI permission mode, execution mode, and tool-loop preferences reverting after leaving the page or restarting.
+- Added the missing PC-side custom tool-loop control, persisted the same way as mobile.
+- This release also carries forward terminal sizing/status-bar fixes, the 80% default desktop transparency, synchronized agent versioning, and versioned public asset names.
+
+### Verified
+- Rust `cargo fmt --check`, `cargo build --workspace`, `cargo test --workspace`, and `cargo clippy --workspace --all-targets -- -D warnings` all passed.
+- Desktop/mobile frontend `npm run build` passed; system-language, mobile AI keyboard avoidance, and splash timeline regression checks passed.
+- Desktop `npm run tauri build` produced Windows setup/MSI; the Windows executable and setup metadata report `0.6.4`; the portable zip was rebuilt.
+- Android arm64 release APK/AAB were generated; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, versionName `0.6.4`, versionCode `6004`, and ABI `arm64-v8a` only. The AAB was inspected and only contains the `arm64-v8a` native lib.
+- Source/docs and public release text passed sanitized scans for private keys, tokens, real credentials, and non-example IPs.
+
+### SHA256
+- `Creation-SSH_0.6.4_portable-Windows-x64.zip`: `CFC6D71575E26C1F2E84539505AF1AC5DB72B0B63F182EF3DA2C6191AE3AE799`
+- `Creation-SSH_0.6.4_x64_en-US.msi`: `1B3D8364CED5BA4A6E53FD28F4024A53322C286D904C4AC95527A0827AF7BAF6`
+- `Creation-SSH_0.6.4_x64-setup.exe`: `48A0318A3AFDC7679301C00F46DCA0C6BCC329BD3FF2A8184A90B1B6298A6131`
+- `C-SSH_0.6.4_android-arm64.aab`: `891AC7731D7B592122294B28E508030DBEDB1792253F6DF8C09F296AAEF25001`
+- `C-SSH_0.6.4_android-arm64.apk`: `5F8099C77DFD547DCF969937D02AA07C184F3C05B1A5A107EE6BFA43F26CA664`
 ## v0.6.3 - Version Sync, AI Layout, and Package Metadata Fixes
 
 ### Downloads
