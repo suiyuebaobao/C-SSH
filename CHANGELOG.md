@@ -4,6 +4,39 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.7 - AI 助手弹窗修复与发布前真实验证
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.7_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.7_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH_0.6.7_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.7_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.7_android-arm64.aab`
+
+### 新增
+- 固化发布前真实功能验证门禁:公开 Release / 新 tag / 上传安装包前,必须运行即将发布的正式桌面程序与移动测试包,逐项真实操作本次改动涉及功能。
+- 桌面 AI 弹窗回归检查补充 Windows WebView 创建方式约束,避免后续再次把动态窗口做成同步 command。
+
+### 修复
+- 修复桌面 AI 助手独立弹窗在 Windows 正式包中可能打开为白色空窗口的问题;后端窗口创建改为 Tauri 推荐的 async command。
+- 修复 AI 助手弹窗按钮、历史入口和 agent 性能档位在部分语言下显示乱码或错误 key 的问题。
+- 修复主窗口退出时 AI 子窗口可能残留的问题,主窗口关闭会同步清理 `ai-*` 弹窗。
+
+### 验证
+- 桌面 `npm run test:ai-window` 通过,覆盖 AI 弹窗 URL、`ai-*` 权限、async command、历史入口文案和多语言文案。
+- Rust `cargo fmt --check`、桌面 Tauri workspace `cargo fmt --check`、`cargo check` 通过;桌面 `npm run build` 与 `npm run tauri build` 通过。
+- 正式 Windows 程序重新运行后,AI 助手独立弹窗渲染正常(用户现场复测确认),不再出现白色空窗口。
+- Android arm64 release APK 通过 `apksigner verify --verbose --print-certs` 与 `aapt dump badging`,包名 `com.creationssh.mobile`,versionName `0.6.7`,versionCode `6007`,ABI 仅 `arm64-v8a`。
+- Android x86_64 debug APK 仅作测试包,已安装到 MuMu 模拟器并启动;系统包信息显示 versionName `0.6.7`、ABI `x86_64`。该包不上传公开 Release。
+- 发布资产重新计算 SHA256,公开仓说明与 Release notes 已脱敏复核。
+
+### SHA256
+- `Creation-SSH_0.6.7_portable-Windows-x64.zip`: `B80BC866177D5D9C82034E21BEB41C6B5100A6A0BD62039A5E7D31F8C8A0983F`
+- `Creation-SSH_0.6.7_x64_en-US.msi`: `4EE2AF5FFA7CDEF55A5C44144D12B5B6CE30C0D5C28FC1BB06DD803AA4CC84E1`
+- `Creation-SSH_0.6.7_x64-setup.exe`: `0447447C4DFFB35DFF48925134368B197AF8B7954033293567CE59A17C2B6D1E`
+- `C-SSH_0.6.7_android-arm64.aab`: `0DE4EA9BF5D6B021E90CD8E9C889E73D6DF3E64CF775606B14247E0E4487153E`
+- `C-SSH_0.6.7_android-arm64.apk`: `4EA626D63E709F6B1BF0D1A014C951C76153AA2BB141243A250F550DC5BFB402`
+
 ## v0.6.6 - Agent 桥接兜底、并发保护与密钥主机
 
 ### 下载

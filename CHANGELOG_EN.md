@@ -4,6 +4,39 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.7 - AI Assistant Pop-out Fix and Real Release Verification
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.7_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.7_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.7_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.7_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.7_android-arm64.aab`
+
+### Added
+- Added a hard pre-release functional verification gate: before a public Release, new tag, or installer upload, the final desktop app and mobile test package must be run and the changed features must be exercised for real.
+- Extended the desktop AI window regression check to require the Windows-safe async Tauri command pattern for dynamic WebView creation.
+
+### Fixed
+- Fixed the desktop AI assistant pop-out opening as a blank white window in the Windows release build; window creation now uses Tauri's recommended async command pattern.
+- Fixed corrupted or incorrect labels around the AI pop-out button, history entry, and agent performance presets in some locales.
+- Fixed AI child windows lingering after the main window exits by closing `ai-*` windows when the main window closes.
+
+### Verified
+- Desktop `npm run test:ai-window` passed, covering the AI pop-out URL, `ai-*` permissions, async command requirement, history label, and localized strings.
+- Rust `cargo fmt --check`, desktop Tauri workspace `cargo fmt --check`, and `cargo check` passed; desktop `npm run build` and `npm run tauri build` passed.
+- The final Windows executable was run again and the AI assistant pop-out rendered normally, confirmed during the live release check.
+- Android arm64 release APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, versionName `0.6.7`, versionCode `6007`, and ABI `arm64-v8a` only.
+- Android x86_64 debug APK was installed and launched on the MuMu emulator for testing only; package info reports versionName `0.6.7` and ABI `x86_64`. This package is not uploaded to the public Release.
+- SHA256 hashes were recalculated for all public assets, and public repository text plus release notes were checked for sanitized content.
+
+### SHA256
+- `Creation-SSH_0.6.7_portable-Windows-x64.zip`: `B80BC866177D5D9C82034E21BEB41C6B5100A6A0BD62039A5E7D31F8C8A0983F`
+- `Creation-SSH_0.6.7_x64_en-US.msi`: `4EE2AF5FFA7CDEF55A5C44144D12B5B6CE30C0D5C28FC1BB06DD803AA4CC84E1`
+- `Creation-SSH_0.6.7_x64-setup.exe`: `0447447C4DFFB35DFF48925134368B197AF8B7954033293567CE59A17C2B6D1E`
+- `C-SSH_0.6.7_android-arm64.aab`: `0DE4EA9BF5D6B021E90CD8E9C889E73D6DF3E64CF775606B14247E0E4487153E`
+- `C-SSH_0.6.7_android-arm64.apk`: `4EA626D63E709F6B1BF0D1A014C951C76153AA2BB141243A250F550DC5BFB402`
+
 ## v0.6.6 - Agent Bridge Fallback, Concurrency Guard, and Key-Based Hosts
 
 ### Downloads

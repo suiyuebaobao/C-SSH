@@ -216,21 +216,20 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.6`.
+**Current latest version**: `v0.6.7`.
 
-- **Windows**: download `Creation-SSH_0.6.6_x64-setup.exe` (recommended) or `Creation-SSH_0.6.6_x64_en-US.msi`.
-- **Portable Windows**: download `Creation-SSH_0.6.6_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
-- **Android**: download and install `C-SSH_0.6.6_android-arm64.apk`.
+- **Windows**: download `Creation-SSH_0.6.7_x64-setup.exe` (recommended) or `Creation-SSH_0.6.7_x64_en-US.msi`.
+- **Portable Windows**: download `Creation-SSH_0.6.7_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
+- **Android**: download and install `C-SSH_0.6.7_android-arm64.apk`.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
 
-## v0.6.6 Highlights
+## v0.6.7 Highlights
 
-- The agent now has a `stdio-bridge` transport fallback, so CentOS 7.9 and other systems that reject `direct-streamlocal` can still use agent-backed features.
-- Short agent requests now use Stable / Balanced / Fast / Ultra performance presets and temporarily auto-downgrade after transport failures to reduce high-concurrency crashes.
-- The desktop AI assistant can pop out into an independent window, laying the groundwork for operating multiple AI assistant windows side by side.
-- Host creation now supports OpenSSH private-key authentication; passwords and keys continue to stay only in the local encrypted vault.
-- Windows, Android, agent, public asset names, and app metadata are synchronized to `0.6.6` and verified with signatures, version checks, ABI inspection, and SHA256 hashes.
+- Fixed the desktop AI assistant pop-out window showing a blank white window in the Windows release build.
+- Fixed corrupted or incorrect multilingual labels around the AI pop-out, history entry, and agent performance presets.
+- Added a hard release rule requiring real functional verification on the final packages before publishing.
+- Windows, Android, agent, public asset names, and app metadata are synchronized to `0.6.7` and verified with signatures, version checks, emulator installation, ABI inspection, and SHA256 hashes.
 
 ## Releases And Changelog
 
