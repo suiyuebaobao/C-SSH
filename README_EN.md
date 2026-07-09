@@ -134,13 +134,21 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.4`.
+**Current latest version**: `v0.6.5`.
 
-- **Windows**: download `Creation-SSH_0.6.4_x64-setup.exe` (recommended) or `Creation-SSH_0.6.4_x64_en-US.msi`.
-- **Portable Windows**: download `Creation-SSH_0.6.4_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
-- **Android**: download and install `C-SSH_0.6.4_android-arm64.apk`.
+- **Windows**: download `Creation-SSH_0.6.5_x64-setup.exe` (recommended) or `Creation-SSH_0.6.5_x64_en-US.msi`.
+- **Portable Windows**: download `Creation-SSH_0.6.5_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
+- **Android**: download and install `C-SSH_0.6.5_android-arm64.apk`.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
+
+## v0.6.5 Highlights
+
+- The AI assistant history now lives in a compact top workspace bar, freeing space that used to be occupied by the side panel.
+- Desktop and mobile AI layouts were aligned around the new workspace model, preparing the UI for multiple AI assistant windows in later releases.
+- Mobile AI input continues to avoid the Android soft keyboard so the text being edited stays visible.
+- AI attachments now block sensitive filenames by default, including `.env`, private keys, and key/certificate files.
+- Windows, Android, agent, public asset names, and app metadata are synchronized to `0.6.5` and verified with signatures, version checks, ABI inspection, and SHA256 hashes.
 
 ## Releases And Changelog
 

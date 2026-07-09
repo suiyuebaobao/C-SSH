@@ -4,6 +4,42 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.5 - AI Workspace, History Entry, and Sensitive Attachment Blocking
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.5_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.5_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.5_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.5_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.5_android-arm64.aab`
+
+### Added
+- Added a compact top workspace bar to the desktop AI assistant, moving history from the permanent side panel into a top popover and freeing the main chat area.
+- Added the same top history entry to the mobile AI assistant for narrow screens and prepared a shared workspace structure for future multi-AI-window work.
+- Added desktop/mobile AI workspace static regression scripts covering the top history entry, mobile keyboard anchoring, and sensitive attachment blocking.
+- Continued enforcing versioned public asset names; Windows, Android, agent, and public documentation are synchronized to `0.6.5`.
+
+### Fixed
+- Fixed the desktop AI history panel occupying main layout width all the time; it now opens only when needed from the top workspace bar.
+- Fixed the mobile AI input area being obscured by the soft keyboard by anchoring the composer to the visible bottom area.
+- Fixed invalid history-session actions when no server is selected by adding disabled states and keyboard dismissal handling.
+- Fixed attachment filtering relying too heavily on MIME/extension allowlists; filenames such as `.env`, private keys, and key/certificate files are now blocked before type checks.
+
+### Verified
+- Desktop `npm run test:ai-workspace`, `npm run test:locale-system`, and `npm run build` passed.
+- Mobile `npm run test:ai-workspace`, `npm run test:ai-keyboard`, `npm run test:locale-system`, and `npm run build` passed.
+- The x86_64 musl agent release was built with `cargo zigbuild -p agent --target x86_64-unknown-linux-musl --release`; the build log reports `agent v0.6.5`.
+- Desktop `npx tauri build` was rerun after the agent 0.6.5 build and produced Windows setup/MSI; the Windows executable and setup metadata report `0.6.5`.
+- Android arm64 release APK/AAB were rebuilt after the agent 0.6.5 build; the APK passed `apksigner verify --verbose --print-certs` and `aapt dump badging`, with package `com.creationssh.mobile`, versionName `0.6.5`, versionCode `6005`, and ABI `arm64-v8a` only. The AAB was inspected and only contains the `arm64-v8a` native lib.
+- Source/docs and public release text passed sanitized scans for private keys, tokens, real credentials, and non-example IPs.
+
+### SHA256
+- `Creation-SSH_0.6.5_portable-Windows-x64.zip`: `96150F4C5128A33FFE558289FB2261BADF31A73B4508E1243783952C2401B36A`
+- `Creation-SSH_0.6.5_x64_en-US.msi`: `47E0817CC3F69E8ADA7B9F364FCDE14B876E99E3425856D2D5C00FEBB808C153`
+- `Creation-SSH_0.6.5_x64-setup.exe`: `FD532382E110769DCC3DA40362A6102008822005F4FD67E5ED215D21A88C889A`
+- `C-SSH_0.6.5_android-arm64.aab`: `C217DA6561ED0DE2A79E684B6C95B6111F74CB96AE784B40379658C543217EBB`
+- `C-SSH_0.6.5_android-arm64.apk`: `4F279E03184F0942C276F4B915129844856FAEDFFB5A72B9522E608540238F79`
+
 ## v0.6.4 - AI Run Recovery, System Language, and Mobile Input Fixes
 
 ### Downloads

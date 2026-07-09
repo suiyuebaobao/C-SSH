@@ -4,6 +4,42 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.5 - AI 工作区、历史入口与敏感附件拦截
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.5_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.5_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH_0.6.5_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.5_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.5_android-arm64.aab`
+
+### 新增
+- 桌面端 AI 助手新增顶部工作区栏,将历史记录入口从固定侧栏移到顶部弹层,释放主对话区空间。
+- 移动端 AI 助手同步新增顶部历史入口,更适合窄屏使用,也为后续多 AI 窗口能力预留统一工作区骨架。
+- 新增桌面/移动 AI 工作区静态回归脚本,覆盖顶部历史入口、移动端键盘锚点与敏感附件拦截规则。
+- 公开发布资产继续强制全量带版本号,本次 Windows、Android、agent 与公开说明全部同步到 `0.6.5`。
+
+### 修复
+- 修复 AI 历史侧栏长期占用桌面主界面宽度的问题,现在默认只保留顶部入口,需要时再展开历史列表。
+- 修复移动端 AI 输入区在软键盘打开时容易被遮挡、看不清正在输入内容的问题,输入区改为底部键盘锚定布局。
+- 修复历史弹层/底部历史页在未选择服务器时仍可能触发无效会话操作的问题,增加禁用态与键盘关闭处理。
+- 修复 AI 附件上传过于依赖 MIME/扩展名白名单的问题,现在会先按文件名拒绝 `.env`、私钥、证书密钥等敏感文件。
+
+### 验证
+- 桌面 `npm run test:ai-workspace`、`npm run test:locale-system`、`npm run build` 通过。
+- 移动端 `npm run test:ai-workspace`、`npm run test:ai-keyboard`、`npm run test:locale-system`、`npm run build` 通过。
+- agent x86_64 musl release 通过 `cargo zigbuild -p agent --target x86_64-unknown-linux-musl --release` 构建,日志显示 `agent v0.6.5`。
+- 桌面 `npx tauri build` 在 agent 0.6.5 之后重新执行,生成 Windows setup/MSI;Windows 可执行文件与 setup 属性显示 `0.6.5`。
+- Android arm64 release APK/AAB 在 agent 0.6.5 之后重新执行 clean build;APK 通过 `apksigner verify --verbose --print-certs` 与 `aapt dump badging`,包名 `com.creationssh.mobile`,versionName `0.6.5`,versionCode `6005`,ABI 仅 `arm64-v8a`;AAB 只包含 `arm64-v8a` native lib。
+- 发布前对私有源码/文档与公开仓文档执行脱敏扫描,未发现私钥、token、真实凭据或非示例 IP。
+
+### SHA256
+- `Creation-SSH_0.6.5_portable-Windows-x64.zip`: `96150F4C5128A33FFE558289FB2261BADF31A73B4508E1243783952C2401B36A`
+- `Creation-SSH_0.6.5_x64_en-US.msi`: `47E0817CC3F69E8ADA7B9F364FCDE14B876E99E3425856D2D5C00FEBB808C153`
+- `Creation-SSH_0.6.5_x64-setup.exe`: `FD532382E110769DCC3DA40362A6102008822005F4FD67E5ED215D21A88C889A`
+- `C-SSH_0.6.5_android-arm64.aab`: `C217DA6561ED0DE2A79E684B6C95B6111F74CB96AE784B40379658C543217EBB`
+- `C-SSH_0.6.5_android-arm64.apk`: `4F279E03184F0942C276F4B915129844856FAEDFFB5A72B9522E608540238F79`
+
 ## v0.6.4 - AI 运行恢复、系统语言与移动端输入修复
 
 ### 下载
