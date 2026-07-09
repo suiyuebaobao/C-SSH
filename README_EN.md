@@ -10,7 +10,7 @@
 [![Download Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](../../releases/latest)
 [![Global](https://img.shields.io/badge/Global-Worldwide-2ea44f)](../../releases/latest)
 [![Free Forever](https://img.shields.io/badge/Free-Forever-ff69b4)](../../releases/latest)
-[![Open Source Soon](https://img.shields.io/badge/Open%20Source-Soon-orange)](../../releases/latest)
+[![Open Source Plan](https://img.shields.io/badge/Open%20Source-after%20iOS%20and%20macOS%20stable%20releases-orange)](../../releases/latest)
 
 </div>
 
@@ -193,7 +193,8 @@ The Me page includes language, update checks, version information, login passwor
 | Windows | Supported | Desktop client, setup.exe / MSI / portable zip |
 | Android | Supported | Mobile companion, arm64 APK |
 | Server agent (Linux) | Supported | x86_64 / ARM64 static musl binary |
-| iOS | In development | Client work in progress |
+| macOS | Planned | Open-source plan starts after both iOS and macOS stable releases |
+| iOS | In development | Open-source plan starts after the stable iOS and macOS releases |
 
 ---
 
@@ -207,7 +208,7 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 ## Open-Source Commitment
 
-**The project will become fully open-source once it reaches 500 GitHub stars or once the iOS client is complete, whichever happens first.** We want to bring a genuinely useful native SSH operations tool to the community and maintain it openly for the long term.
+**The project will be open-sourced after the stable iOS and macOS releases are published.** We want to bring a genuinely useful native SSH operations tool to the community and maintain it openly for the long term.
 
 ---
 
@@ -247,7 +248,7 @@ All example configurations use placeholders such as `example.com`; replace them 
 <br/><sub>Scan to join the QQ group (AI Innovation Community) - Group No. 1041937161</sub>
 </div>
 
-Questions, feedback, or want to nudge us on iOS / open-source progress? Come say hi.
+Questions, feedback, or want to follow iOS / macOS / open-source progress? Come say hi.
 
 ---
 
