@@ -10,7 +10,7 @@
 [![Download Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](../../releases/latest)
 [![Global](https://img.shields.io/badge/Global-Worldwide-2ea44f)](../../releases/latest)
 [![Free Forever](https://img.shields.io/badge/Free-Forever-ff69b4)](../../releases/latest)
-[![Open Source Plan](https://img.shields.io/badge/Open%20Source-after%20iOS%20and%20macOS%20stable%20releases-orange)](../../releases/latest)
+[![Open Source](https://img.shields.io/badge/Open%20Source-after%20iOS%20and%20macOS%20stable%20releases-orange)](../../releases/latest)
 
 </div>
 
@@ -193,8 +193,8 @@ The Me page includes language, update checks, version information, login passwor
 | Windows | Supported | Desktop client, setup.exe / MSI / portable zip |
 | Android | Supported | Mobile companion, arm64 APK |
 | Server agent (Linux) | Supported | x86_64 / ARM64 static musl binary |
-| macOS | Planned | Open-source plan starts after both iOS and macOS stable releases |
-| iOS | In development | Open-source plan starts after the stable iOS and macOS releases |
+| macOS | Planned | Open source after the stable iOS and macOS releases |
+| iOS | In development | Open source after the stable iOS and macOS releases |
 
 ---
 
@@ -206,7 +206,7 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 ---
 
-## Open-Source Commitment
+## Open Source
 
 **The project will be open-sourced after the stable iOS and macOS releases are published.** We want to bring a genuinely useful native SSH operations tool to the community and maintain it openly for the long term.
 
@@ -216,20 +216,38 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.7`.
+**Current latest version**: `v0.6.8`.
 
-- **Windows**: download `Creation-SSH_0.6.7_x64-setup.exe` (recommended) or `Creation-SSH_0.6.7_x64_en-US.msi`.
-- **Portable Windows**: download `Creation-SSH_0.6.7_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
-- **Android**: download and install `C-SSH_0.6.7_android-arm64.apk`.
+- **Windows**: download `Creation-SSH_0.6.8_x64-setup.exe` (recommended) or `Creation-SSH_0.6.8_x64_en-US.msi`.
+- **Portable Windows**: download `Creation-SSH_0.6.8_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
+- **Android**: download and install `C-SSH_0.6.8_android-arm64.apk`.
+- **Android AAB**: the release asset is `C-SSH_0.6.8_android-arm64.aab`.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
 
-## v0.6.7 Highlights
+## v0.6.8 Highlights
 
-- Fixed the desktop AI assistant pop-out window showing a blank white window in the Windows release build.
-- Fixed corrupted or incorrect multilingual labels around the AI pop-out, history entry, and agent performance presets.
-- Added a hard release rule requiring real functional verification on the final packages before publishing.
-- Windows, Android, agent, public asset names, and app metadata are synchronized to `0.6.7` and verified with signatures, version checks, emulator installation, ABI inspection, and SHA256 hashes.
+- Desktop supports multiple independent AI windows. Desktop and mobile share history access, while permission mode, execution profile, tool-loop limit, custom AI context window, and context preferences persist in local SQLite.
+- Stable, Balanced, Fast, and Ultra modes cap AI and other short agent requests at 1/2/4/8 concurrent operations. SSH, channel, or streamlocal transport errors temporarily auto-downgrade the affected host to one concurrent request.
+- Older OpenSSH environments such as CentOS can fall back to the stdio bridge automatically. Newly added key-based hosts prefer keys from the local encrypted vault and retain password-authentication fallback.
+- Monitoring adds cross-host summaries, 6-second automatic collection, and a collapsible sidebar. Global layouts and command-snippet execution/result containers adapt to narrow desktop windows and mobile portrait screens.
+- Android fixes the soft keyboard covering the AI composer and the AI-response card overflow tracked in Issue #16, and implements the light-mode request from Issue #18. Language and theme can both follow the system.
+- Upload and download completion now strengthens integrity handling for chunked and resumable transfers so incomplete results are not reported as successful.
+- Windows, Android, all five fixed public asset names, and the Linux agent are synchronized to `0.6.8`; the agent handshake also reports `0.6.8`. iOS and macOS are not part of this release.
+
+## v0.6.8 Verification Status
+
+- The production Windows desktop build completed and was launched on a real machine for the affected feature checks.
+- Real Ubuntu and CentOS paths verified agent communication and compatibility fallback. DeepSeek AI conversation and tool-loop E2E passed.
+- The Android production build and static AndroidX SplashScreen C gate passed. A real Launcher cold start on the MuMu x86_64 emulator was verified frame by frame: the system C, frontend wordmark, large C, and main screen connect continuously without a solid-color gap or clipping.
+
+## v0.6.8 SHA256
+
+- `Creation-SSH_0.6.8_x64-setup.exe`: `87FC035CF668A3DCC1F0DB9DC9F9DFD0762BFC4673B23E135253D6227B4C1A40`
+- `Creation-SSH_0.6.8_x64_en-US.msi`: `B4F8611C3AF885378C2A908E61387381005138BC45CCBED0FC038DC08758CBE9`
+- `Creation-SSH_0.6.8_portable-Windows-x64.zip`: `47629E99884378CBCD65CB0AD004C7AF6441492AA741F341F50F63C447842DB5`
+- `C-SSH_0.6.8_android-arm64.apk`: `1EE2636F5004C4204FD48F58953819DC67D95F35C464FC420A102E243CE40753`
+- `C-SSH_0.6.8_android-arm64.aab`: `B009C9739C3AE4CE42339639BDA45676D9C4DB1D3D7926244B28D27DAD2E889A`
 
 ## Releases And Changelog
 

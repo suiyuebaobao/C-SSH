@@ -4,6 +4,45 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.8 - AI Workspaces, Monitoring Summaries, and Adaptive UI
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.8_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.8_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.8_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.8_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.8_android-arm64.aab`
+
+### Added
+- Unified history, host, permission, execution-profile, tool-loop, and context controls across the desktop and mobile AI workspaces. Desktop supports multiple independent AI pop-out windows for parallel host and task workflows.
+- Persisted AI history, permission mode, execution profile, tool-loop limit, custom AI context window, and context preferences in local SQLite so user choices survive page changes and app restarts.
+- Added Stable, Balanced, Fast, and Ultra presets for AI and other short agent requests, with 1/2/4/8 concurrency limits. SSH, channel, or streamlocal transport errors temporarily auto-downgrade the affected host to one concurrent request.
+- Added cross-host monitoring summaries, 6-second automatic collection, and a collapsible detail sidebar for continuous checks and narrow layouts.
+- Added Android system-language and system-theme following, including the mobile light-mode request from GitHub Issue #18.
+- Synchronized Windows, Android, all five fixed public asset names, and the Linux agent to `0.6.8`; the agent handshake reports `0.6.8`. iOS and macOS are not part of this release.
+
+### Fixed
+- Fixed desktop and mobile AI workspaces losing history access, permissions, execution profiles, tool-loop limits, or context preferences after navigation, restart, or multi-window use.
+- Fixed high-concurrency AI tool calls amplifying transport failures in short agent requests by enforcing shared concurrency protection and automatic downgrade recovery.
+- Fixed agent-backed features becoming unavailable when older OpenSSH environments such as CentOS reject direct streamlocal; the client now falls back to the stdio bridge automatically.
+- Fixed credential reuse and authentication fallback after adding a key-based host: the local encrypted-vault key is preferred, with saved-password or explicit password fallback when needed.
+- Fixed global layout issues across narrow desktop windows, mobile portrait screens, and dynamic content; sidebars, toolbars, sheets, command-snippet execution/result containers, and primary work areas now adapt to available space.
+- Fixed the Android soft keyboard covering the AI composer and the AI-response content overflowing its card boundary as tracked in GitHub Issue #16.
+- Fixed Android system language and theme not refreshing consistently across some lifecycle and reopen paths, with clearer feedback when following the system.
+- Fixed upload/download integrity handling at the completion of chunked and resumable transfers so incomplete results are not reported as successful.
+
+### Verified
+- The production Windows desktop build completed and was launched on a real machine for the affected feature checks.
+- Real Ubuntu and CentOS paths verified agent communication and compatibility fallback. DeepSeek AI conversation and tool-loop E2E passed.
+- The Android production build and static AndroidX SplashScreen C gate passed. A real Launcher cold start on the MuMu x86_64 emulator was verified frame by frame: the system C, frontend wordmark, large C, and main screen connect continuously without a solid-color gap or clipping.
+
+### SHA256
+- `Creation-SSH_0.6.8_x64-setup.exe`: `87FC035CF668A3DCC1F0DB9DC9F9DFD0762BFC4673B23E135253D6227B4C1A40`
+- `Creation-SSH_0.6.8_x64_en-US.msi`: `B4F8611C3AF885378C2A908E61387381005138BC45CCBED0FC038DC08758CBE9`
+- `Creation-SSH_0.6.8_portable-Windows-x64.zip`: `47629E99884378CBCD65CB0AD004C7AF6441492AA741F341F50F63C447842DB5`
+- `C-SSH_0.6.8_android-arm64.apk`: `1EE2636F5004C4204FD48F58953819DC67D95F35C464FC420A102E243CE40753`
+- `C-SSH_0.6.8_android-arm64.aab`: `B009C9739C3AE4CE42339639BDA45676D9C4DB1D3D7926244B28D27DAD2E889A`
+
 ## v0.6.7 - AI Assistant Pop-out Fix and Real Release Verification
 
 ### Downloads

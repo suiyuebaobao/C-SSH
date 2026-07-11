@@ -4,6 +4,45 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.8 - AI 工作台、监控摘要与全局自适应体验
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.8_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.8_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH_0.6.8_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.8_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.8_android-arm64.aab`
+
+### 新增
+- 桌面端支持多个独立 AI 弹窗;桌面端与移动端统一历史、主机、权限、执行档、工具循环和上下文入口,便于并行处理不同主机与任务。
+- AI 历史、权限模式、执行档、工具循环上限、自定义 AI 上下文窗口和上下文偏好持久化到本地 SQLite,重开页面或应用后继续沿用用户选择。
+- AI 与其他短 agent 请求提供低/中/高/超级性能档位,对应 1/2/4/8 并发;检测到 SSH、channel 或 streamlocal 传输错误后,会按主机临时自动降级到 1 并发。
+- 主机监控入口新增跨主机状态摘要,详情页支持 6 秒自动采集与可折叠侧栏,更适合持续巡检和窄屏操作。
+- Android 支持跟随系统语言和主题,并落实 GitHub Issue #18 提出的移动端浅色模式需求。
+- Windows、Android、五个公开资产固定名称与 Linux agent 版本统一为 `0.6.8`;agent 握手报告 `0.6.8`。iOS 和 macOS 不在本次发布范围内。
+
+### 修复
+- 修复桌面端与移动端 AI 工作台在页面切换、应用重启或多窗口使用后可能丢失历史入口、权限、执行档、工具循环或上下文偏好的问题。
+- 修复高并发 AI 工具调用可能放大 agent 短请求传输故障的问题,统一并发保护并加入自动降级恢复路径。
+- 修复 CentOS 等旧 OpenSSH 环境拒绝 direct streamlocal 后 agent 能力不可用的问题,客户端会自动使用 stdio bridge 兜底。
+- 修复新增密钥主机后的凭据复用与认证回退路径:优先使用本地加密保险库中的密钥,需要时可回退到已保存密码或明确提示输入密码。
+- 修复全局布局在桌面窄窗口、移动竖屏和动态内容下的适配问题;侧栏、工具栏、弹层、命令片段执行/结果容器与主要工作区会自适应可用空间。
+- 修复 Android 软键盘遮挡 AI 输入区,以及 GitHub Issue #16 中 AI 回复内容越出卡片轮廓的问题。
+- 修复 Android 系统语言与主题在部分生命周期或重开场景下未及时同步的问题,并完善跟随系统的切换反馈。
+- 修复文件上传/下载在分块和断点续传完成阶段的完整性处理,避免不完整结果被标记为成功。
+
+### 验证
+- Windows 正式桌面版已完成构建、实机启动与本次相关功能验证。
+- Ubuntu 与 CentOS 真实链路已验证 agent 通信及兼容兜底;DeepSeek AI 对话与工具循环 E2E 已通过。
+- Android 正式构建与 AndroidX SplashScreen 静态 C 自动门禁已通过;MuMu x86_64 模拟器已从 Launcher 真实冷启动逐帧验证,系统 C、前端文字、大 C 与主界面连续衔接,无纯色空档或裁切。
+
+### SHA256
+- `Creation-SSH_0.6.8_x64-setup.exe`: `87FC035CF668A3DCC1F0DB9DC9F9DFD0762BFC4673B23E135253D6227B4C1A40`
+- `Creation-SSH_0.6.8_x64_en-US.msi`: `B4F8611C3AF885378C2A908E61387381005138BC45CCBED0FC038DC08758CBE9`
+- `Creation-SSH_0.6.8_portable-Windows-x64.zip`: `47629E99884378CBCD65CB0AD004C7AF6441492AA741F341F50F63C447842DB5`
+- `C-SSH_0.6.8_android-arm64.apk`: `1EE2636F5004C4204FD48F58953819DC67D95F35C464FC420A102E243CE40753`
+- `C-SSH_0.6.8_android-arm64.aab`: `B009C9739C3AE4CE42339639BDA45676D9C4DB1D3D7926244B28D27DAD2E889A`
+
 ## v0.6.7 - AI 助手弹窗修复与发布前真实验证
 
 ### 下载
