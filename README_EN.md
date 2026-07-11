@@ -239,6 +239,7 @@ All example configurations use placeholders such as `example.com`; replace them 
 - The full Rust workspace tests, production frontend builds for Windows/Linux/Android, version consistency, and release-boundary checks passed.
 - The production Windows app was verified to refresh first-round metrics while remaining on the Hosts page.
 - The Android x86_64 `0.6.9` test package passed signature inspection, installed, and launched on MuMu. The test package is not uploaded to the Release.
+- The production Android arm64 APK/AAB build completed. The APK reports `versionName=0.6.9`, `versionCode=6009`, `minSdk=24`, and `targetSdk=36`, contains only `arm64-v8a`, and passes APK v2 signature verification; the AAB also contains arm64 native libraries only.
 
 ## v0.6.9 SHA256
 

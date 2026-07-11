@@ -243,6 +243,7 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 - 根 Rust workspace 全量测试、Windows/Linux/Android 前端生产构建、版本一致性与发布边界检查通过。
 - Windows 正式程序已真实验证停留在 Hosts 原页时首轮指标自动刷新。
 - Android x86_64 `0.6.9` 测试包已完成签名检查、安装并在 MuMu 模拟器启动;该测试包不上传 Release。
+- Android arm64 正式 APK/AAB 已完成构建;APK 为 `versionName=0.6.9`、`versionCode=6009`、`minSdk=24`、`targetSdk=36`,ABI 仅 `arm64-v8a` 且 APK v2 签名通过,AAB 仅包含 arm64 原生库。
 
 ### v0.6.9 SHA256
 

@@ -28,6 +28,7 @@
 - 根 Rust workspace 全量测试和 Windows/Linux/Android 前端生产构建通过。
 - Windows 正式程序已真实验证停留在 Hosts 原页时首轮指标自动刷新。
 - Android x86_64 `0.6.9` 测试包通过签名/版本/ABI 检查,已安装并在 MuMu 模拟器启动;该测试包不上传 Release。
+- Android arm64 正式 APK/AAB 构建通过;APK 版本为 `0.6.9 (6009)`,SDK `24–36`,ABI 仅 `arm64-v8a` 且 v2 签名通过,AAB 也仅含 arm64 原生库。
 
 ### SHA256
 - `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`

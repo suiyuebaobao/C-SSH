@@ -28,6 +28,7 @@ Download complete installers from [GitHub Releases](../../releases). Each releas
 - The full Rust workspace tests and production frontend builds for Windows, Linux, and Android passed.
 - The production Windows app was verified to refresh first-round metrics without leaving the Hosts page.
 - The Android x86_64 `0.6.9` test package passed signature/version/ABI checks, installed, and launched on MuMu. It is not uploaded to the Release.
+- The production Android arm64 APK/AAB build passed. The APK is `0.6.9 (6009)`, targets SDK `24–36`, contains only `arm64-v8a`, and passes v2 signature verification; the AAB also contains arm64 native libraries only.
 
 ### SHA256
 - `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`
