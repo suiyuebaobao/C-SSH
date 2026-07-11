@@ -218,40 +218,39 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 前往 [**Releases**](../../releases/latest) 获取最新安装包:
 
-**当前最新版本**: `v0.6.8`。
+**当前最新版本**: `v0.6.9`。
 
-- **Windows**:下载 `Creation-SSH_0.6.8_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.8_x64_en-US.msi` 安装。
-- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.8_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
+- **Windows**:下载 `Creation-SSH_0.6.9_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.9_x64_en-US.msi` 安装。
+- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.9_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
   - 首次运行若出现 SmartScreen 提示,点击「更多信息 → 仍要运行」即可。
-- **Android**:下载 `C-SSH_0.6.8_android-arm64.apk` 安装。
+- **Android**:下载 `C-SSH_0.6.9_android-arm64.apk` 安装。
   - 首次安装需在系统设置中允许「安装未知来源应用」。
-- **Android AAB**:发布资产为 `C-SSH_0.6.8_android-arm64.aab`。
+- **Android AAB**:发布资产为 `C-SSH_0.6.9_android-arm64.aab`。
+- **Linux 桌面版**:本次暂不发布安装包,后续完成独立验证后再提供。
 
 > 示例配置一律使用 `example.com` 等占位地址,请替换为你自己的服务器信息。
 
-### v0.6.8 更新重点
+### v0.6.9 更新重点
 
-- 桌面端支持多个独立 AI 窗口;桌面端与移动端统一历史入口,并将权限模式、执行档、工具循环上限、自定义 AI 上下文窗口与上下文偏好持久化到本地 SQLite。
-- AI 与其他短 agent 请求提供低/中/高/超级四档性能模式,并发上限分别为 1/2/4/8;检测到 SSH、channel 或 streamlocal 传输错误后,受影响主机会临时自动降级到 1 并发。
-- CentOS 等旧 OpenSSH 环境可通过 stdio bridge 自动兜底 agent 通道;新增密钥主机时优先复用本地加密保险库中的密钥,并保留密码认证回退。
-- 主机监控新增跨主机摘要、6 秒自动采集和可折叠侧栏;全局布局与命令片段执行/结果容器会根据桌面窄窗口和移动竖屏自适应。
-- Android 修复软键盘遮挡 AI 输入区与 Issue #16 的 AI 回复越出卡片问题,并落实 Issue #18 的浅色模式需求;语言和主题均可跟随系统。
-- 文件上传/下载补强分块与断点续传完成时的完整性核对,避免不完整传输被标记为成功。
-- Windows、Android、五个公开资产固定名称与 Linux agent 版本统一为 `0.6.8`,agent 握手同样报告 `0.6.8`。iOS 和 macOS 不在本次发布范围内。
+- Windows、Linux 与 Android 的后台主机采集支持 `1–10` 跨主机并发,默认 `4`;采集间隔最低可设为 `1` 秒。
+- 修复首次采集已写入本地缓存但主机页面仍显示旧数据的问题,无需切换页面或等待兜底轮询。
+- Windows/Linux 的 Hosts 与 MonitorList 统一事件刷新、重叠请求合并和迟到响应保护。
+- 采集间隔、并发与保留期改为 SQLite 原子保存和一致快照读取;Android 设置页可直接调整并持久化三项参数。
+- Windows、Android、agent 与全部正式资产版本统一为 `0.6.9`。Linux 桌面安装包本次暂缓发布。
 
-### v0.6.8 验证状态
+### v0.6.9 验证状态
 
-- Windows 正式桌面版已完成构建、实机启动与本次相关功能验证。
-- Ubuntu 与 CentOS 真实链路已验证 agent 通信及兼容兜底;DeepSeek AI 对话与工具循环 E2E 已通过。
-- Android 正式构建与 AndroidX SplashScreen 静态 C 自动门禁已通过;MuMu x86_64 模拟器已从 Launcher 真实冷启动逐帧验证,系统 C、前端文字、大 C 与主界面连续衔接,无纯色空档或裁切。
+- 根 Rust workspace 全量测试、Windows/Linux/Android 前端生产构建、版本一致性与发布边界检查通过。
+- Windows 正式程序已真实验证停留在 Hosts 原页时首轮指标自动刷新。
+- Android x86_64 `0.6.9` 测试包已完成签名检查、安装并在 MuMu 模拟器启动;该测试包不上传 Release。
 
-### v0.6.8 SHA256
+### v0.6.9 SHA256
 
-- `Creation-SSH_0.6.8_x64-setup.exe`: `87FC035CF668A3DCC1F0DB9DC9F9DFD0762BFC4673B23E135253D6227B4C1A40`
-- `Creation-SSH_0.6.8_x64_en-US.msi`: `B4F8611C3AF885378C2A908E61387381005138BC45CCBED0FC038DC08758CBE9`
-- `Creation-SSH_0.6.8_portable-Windows-x64.zip`: `47629E99884378CBCD65CB0AD004C7AF6441492AA741F341F50F63C447842DB5`
-- `C-SSH_0.6.8_android-arm64.apk`: `1EE2636F5004C4204FD48F58953819DC67D95F35C464FC420A102E243CE40753`
-- `C-SSH_0.6.8_android-arm64.aab`: `B009C9739C3AE4CE42339639BDA45676D9C4DB1D3D7926244B28D27DAD2E889A`
+- `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`
+- `Creation-SSH_0.6.9_x64_en-US.msi`: `D9F4A11D8562093F5859530448EC4CD2CA317022391E1D504EB04B161661BF87`
+- `Creation-SSH_0.6.9_portable-Windows-x64.zip`: `9B49B7D69F64E9FFC3386BA663962FFA7B06F8DEFCF14E8340795951713E0E09`
+- `C-SSH_0.6.9_android-arm64.apk`: `4245852EAEB217AAC0F00F7731D30FDD011759D2F5BCB9811E49E383DFD9437F`
+- `C-SSH_0.6.9_android-arm64.aab`: `FF5488C3547D1E42F83A6B5185BEDEF1BF03C370264CE1CDDCC4785158AB07DA`
 
 ## 🧾 更新列表
 

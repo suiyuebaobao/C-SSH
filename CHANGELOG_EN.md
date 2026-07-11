@@ -4,6 +4,38 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.9 - Configurable Host Collection and First-Refresh Fix
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.9_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.9_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.9_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.9_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.9_android-arm64.aab`
+- Linux desktop installers are deferred from this release.
+
+### Added
+- Background collection on Windows, Linux, and Android supports `1–10` cross-host workers, default `4`; the collection interval ranges from `1–3600` seconds, default `6`.
+- Android now exposes interval, cross-host concurrency, and local retention settings, all persisted in local SQLite.
+- The independent Linux client project and build gates are in place, but Linux installers are not included in this public Release.
+
+### Fixed
+- Fixed first-round metrics being stored in SQLite while the Hosts page continued to show stale values; the current page now refreshes as soon as the full round is committed.
+- Unified Windows/Linux Hosts and MonitorList event/fallback scheduling, coalescing overlapping refreshes and preventing late responses from replacing newer data.
+- Fixed collection settings being observed as mixed old/new values by storing all three atomically and reading them as one consistent snapshot.
+
+### Verified
+- The full Rust workspace tests and production frontend builds for Windows, Linux, and Android passed.
+- The production Windows app was verified to refresh first-round metrics without leaving the Hosts page.
+- The Android x86_64 `0.6.9` test package passed signature/version/ABI checks, installed, and launched on MuMu. It is not uploaded to the Release.
+
+### SHA256
+- `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`
+- `Creation-SSH_0.6.9_x64_en-US.msi`: `D9F4A11D8562093F5859530448EC4CD2CA317022391E1D504EB04B161661BF87`
+- `Creation-SSH_0.6.9_portable-Windows-x64.zip`: `9B49B7D69F64E9FFC3386BA663962FFA7B06F8DEFCF14E8340795951713E0E09`
+- `C-SSH_0.6.9_android-arm64.apk`: `4245852EAEB217AAC0F00F7731D30FDD011759D2F5BCB9811E49E383DFD9437F`
+- `C-SSH_0.6.9_android-arm64.aab`: `FF5488C3547D1E42F83A6B5185BEDEF1BF03C370264CE1CDDCC4785158AB07DA`
+
 ## v0.6.8 - AI Workspaces, Monitoring Summaries, and Adaptive UI
 
 ### Downloads

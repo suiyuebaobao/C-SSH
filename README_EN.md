@@ -216,38 +216,37 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.8`.
+**Current latest version**: `v0.6.9`.
 
-- **Windows**: download `Creation-SSH_0.6.8_x64-setup.exe` (recommended) or `Creation-SSH_0.6.8_x64_en-US.msi`.
-- **Portable Windows**: download `Creation-SSH_0.6.8_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
-- **Android**: download and install `C-SSH_0.6.8_android-arm64.apk`.
-- **Android AAB**: the release asset is `C-SSH_0.6.8_android-arm64.aab`.
+- **Windows**: download `Creation-SSH_0.6.9_x64-setup.exe` (recommended) or `Creation-SSH_0.6.9_x64_en-US.msi`.
+- **Portable Windows**: download `Creation-SSH_0.6.9_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
+- **Android**: download and install `C-SSH_0.6.9_android-arm64.apk`.
+- **Android AAB**: the release asset is `C-SSH_0.6.9_android-arm64.aab`.
+- **Linux desktop**: installers are deferred from this release pending independent verification.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
 
-## v0.6.8 Highlights
+## v0.6.9 Highlights
 
-- Desktop supports multiple independent AI windows. Desktop and mobile share history access, while permission mode, execution profile, tool-loop limit, custom AI context window, and context preferences persist in local SQLite.
-- Stable, Balanced, Fast, and Ultra modes cap AI and other short agent requests at 1/2/4/8 concurrent operations. SSH, channel, or streamlocal transport errors temporarily auto-downgrade the affected host to one concurrent request.
-- Older OpenSSH environments such as CentOS can fall back to the stdio bridge automatically. Newly added key-based hosts prefer keys from the local encrypted vault and retain password-authentication fallback.
-- Monitoring adds cross-host summaries, 6-second automatic collection, and a collapsible sidebar. Global layouts and command-snippet execution/result containers adapt to narrow desktop windows and mobile portrait screens.
-- Android fixes the soft keyboard covering the AI composer and the AI-response card overflow tracked in Issue #16, and implements the light-mode request from Issue #18. Language and theme can both follow the system.
-- Upload and download completion now strengthens integrity handling for chunked and resumable transfers so incomplete results are not reported as successful.
-- Windows, Android, all five fixed public asset names, and the Linux agent are synchronized to `0.6.8`; the agent handshake also reports `0.6.8`. iOS and macOS are not part of this release.
+- Background host collection on Windows, Linux, and Android now supports `1–10` cross-host workers, default `4`, with a minimum collection interval of `1` second.
+- Fixed first-round metrics being stored locally while the Hosts page kept showing stale data until navigation or fallback polling.
+- Windows/Linux Hosts and MonitorList now share event refresh, overlapping-request coalescing, and stale-response protection.
+- Interval, concurrency, and retention are atomically stored and consistently read from SQLite. Android exposes all three settings and persists them across restarts.
+- Windows, Android, the agent, and all production assets are synchronized to `0.6.9`. Linux desktop installers are deferred from this release.
 
-## v0.6.8 Verification Status
+## v0.6.9 Verification Status
 
-- The production Windows desktop build completed and was launched on a real machine for the affected feature checks.
-- Real Ubuntu and CentOS paths verified agent communication and compatibility fallback. DeepSeek AI conversation and tool-loop E2E passed.
-- The Android production build and static AndroidX SplashScreen C gate passed. A real Launcher cold start on the MuMu x86_64 emulator was verified frame by frame: the system C, frontend wordmark, large C, and main screen connect continuously without a solid-color gap or clipping.
+- The full Rust workspace tests, production frontend builds for Windows/Linux/Android, version consistency, and release-boundary checks passed.
+- The production Windows app was verified to refresh first-round metrics while remaining on the Hosts page.
+- The Android x86_64 `0.6.9` test package passed signature inspection, installed, and launched on MuMu. The test package is not uploaded to the Release.
 
-## v0.6.8 SHA256
+## v0.6.9 SHA256
 
-- `Creation-SSH_0.6.8_x64-setup.exe`: `87FC035CF668A3DCC1F0DB9DC9F9DFD0762BFC4673B23E135253D6227B4C1A40`
-- `Creation-SSH_0.6.8_x64_en-US.msi`: `B4F8611C3AF885378C2A908E61387381005138BC45CCBED0FC038DC08758CBE9`
-- `Creation-SSH_0.6.8_portable-Windows-x64.zip`: `47629E99884378CBCD65CB0AD004C7AF6441492AA741F341F50F63C447842DB5`
-- `C-SSH_0.6.8_android-arm64.apk`: `1EE2636F5004C4204FD48F58953819DC67D95F35C464FC420A102E243CE40753`
-- `C-SSH_0.6.8_android-arm64.aab`: `B009C9739C3AE4CE42339639BDA45676D9C4DB1D3D7926244B28D27DAD2E889A`
+- `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`
+- `Creation-SSH_0.6.9_x64_en-US.msi`: `D9F4A11D8562093F5859530448EC4CD2CA317022391E1D504EB04B161661BF87`
+- `Creation-SSH_0.6.9_portable-Windows-x64.zip`: `9B49B7D69F64E9FFC3386BA663962FFA7B06F8DEFCF14E8340795951713E0E09`
+- `C-SSH_0.6.9_android-arm64.apk`: `4245852EAEB217AAC0F00F7731D30FDD011759D2F5BCB9811E49E383DFD9437F`
+- `C-SSH_0.6.9_android-arm64.aab`: `FF5488C3547D1E42F83A6B5185BEDEF1BF03C370264CE1CDDCC4785158AB07DA`
 
 ## Releases And Changelog
 

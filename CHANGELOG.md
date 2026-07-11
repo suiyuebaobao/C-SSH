@@ -4,6 +4,38 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.9 - 可配置主机采集与首次刷新修复
+
+### 下载
+- Windows 安装版: `Creation-SSH_0.6.9_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.9_x64_en-US.msi`
+- Windows 便携版: `Creation-SSH_0.6.9_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.9_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.9_android-arm64.aab`
+- Linux 桌面安装包本次暂缓发布。
+
+### 新增
+- Windows、Linux 与 Android 后台采集支持 `1–10` 跨主机并发,默认 `4`;采集间隔范围 `1–3600` 秒,默认 `6` 秒。
+- Android 设置页新增采集间隔、跨主机并发和本地保留期设置,三项均持久化到本地 SQLite。
+- 独立 Linux 客户端工程与构建门禁已落地,但安装包本次不进入公开 Release。
+
+### 修复
+- 修复首次采集已写入 SQLite、Hosts 页面却仍显示旧指标的问题,当前页面会在整轮写库完成后立即刷新。
+- 统一 Windows/Linux Hosts 与 MonitorList 的事件和兜底轮询调度,合并重叠刷新并阻止迟到响应覆盖新结果。
+- 修复采集设置可能混合新旧值的问题,三项设置改为单事务原子保存和单查询一致快照读取。
+
+### 验证
+- 根 Rust workspace 全量测试和 Windows/Linux/Android 前端生产构建通过。
+- Windows 正式程序已真实验证停留在 Hosts 原页时首轮指标自动刷新。
+- Android x86_64 `0.6.9` 测试包通过签名/版本/ABI 检查,已安装并在 MuMu 模拟器启动;该测试包不上传 Release。
+
+### SHA256
+- `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`
+- `Creation-SSH_0.6.9_x64_en-US.msi`: `D9F4A11D8562093F5859530448EC4CD2CA317022391E1D504EB04B161661BF87`
+- `Creation-SSH_0.6.9_portable-Windows-x64.zip`: `9B49B7D69F64E9FFC3386BA663962FFA7B06F8DEFCF14E8340795951713E0E09`
+- `C-SSH_0.6.9_android-arm64.apk`: `4245852EAEB217AAC0F00F7731D30FDD011759D2F5BCB9811E49E383DFD9437F`
+- `C-SSH_0.6.9_android-arm64.aab`: `FF5488C3547D1E42F83A6B5185BEDEF1BF03C370264CE1CDDCC4785158AB07DA`
+
 ## v0.6.8 - AI 工作台、监控摘要与全局自适应体验
 
 ### 下载
