@@ -27,24 +27,25 @@ Download complete installers from [GitHub Releases](../../releases). Each releas
 - Existing units preserve their enable state, fresh-unit cleanup failures no longer report success, and `KillMode=process` is verified so agent updates do not terminate persistent tmux workloads.
 - Readiness and strict-version handshake failures use two-phase rollback; backups and locks are cleared only after the previous agent is restored and returns a valid protocol response.
 - Process ownership now uses exact `/proc/<pid>/exe` matching for CentOS 7.9 compatibility. Linux packaging also compares the gzip payload with the raw agent by bytes, architecture, version, and SHA256.
+- Refreshed the Windows/Linux desktop packages in place on 2026-07-12: AI host and model selectors no longer show nested native control chrome and now share one outer border, focus ring, and right-aligned chevron. The version remains `0.6.10`, and Android assets are unchanged.
 
 ### Verified
 - Full Rust workspace tests, Clippy with `-D warnings`, formatting, platform-boundary, version-consistency, and gzip-payload gates passed.
 - CentOS 7.9 and Ubuntu 24 passed real deployment, handshake, and `MetricsSnapshot`; a real 0.6.9 agent on Ubuntu was rejected and automatically restored to 0.6.10.
 - Fault injection covered readiness failure, an effective-ExecStart drop-in, a disabled unit, active/stale locks, tmux survival, and zero residual deployment files.
-- The final Windows portable package launched with a working main window, Tauri runtime, SQLite, and `list_servers`; task processes and isolated data were cleaned afterward.
+- The refreshed Windows portable package launched with a working main window, Tauri runtime, isolated SQLite, main AI page, and standalone AI window; task processes and isolated data were cleaned afterward.
 - The final Android x86_64 test package was freshly installed on MuMu and verified agent 0.6.10 deployment, user-systemd, persistent terminal, monitoring, navigation, and force-stop recovery. It is not uploaded.
 - Android arm64 APK/AAB report `versionName=0.6.10`, SDK 24/36, and arm64-only native code; APK v2 and AAB JAR signatures passed.
-- Final Linux AppImage/deb launched in a real Ubuntu 24 GUI session; SQLite integrity was `ok`, metrics grew by 4/5 rows, permissions were `0700/0700/0600`, and no task residue remained.
+- The refreshed Linux AppImage/deb launched in a real Ubuntu 24 desktop session. Both passed process-lifetime, agent-linked Collector, SQLite `integrity_check=ok`, `+4` metrics, `0700/0700/0600` permissions, and zero-residue checks. Wayland did not expose a reliable `xdotool` visible-window delta, so that probe is not claimed as passed.
 
 ### SHA256
-- `Creation-SSH_0.6.10_x64-setup.exe`: `756D5DFD3EF6A05D4C0D6DB2F5F616FF2B5B260597EF992307F97667750882B2`
-- `Creation-SSH_0.6.10_x64_en-US.msi`: `0B1AD3FABACF83BE0A7C4FD563B933BD77F806BC74D8D812FE8BD88506576ACA`
-- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `0DB9581B850D1A3632E093CE7B1F2151831201C1684F5404BD5C2A2FD5F84D34`
+- `Creation-SSH_0.6.10_x64-setup.exe`: `5EA8FC3CD3CE08DA004B062DF28DFA4F86F656275338D84C963C114FD193E82E`
+- `Creation-SSH_0.6.10_x64_en-US.msi`: `F1E41543BE522BAF6940073450873A99B2FD709243BD3C6F20673FB4EF57C750`
+- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `DCC71D79C8EE681E1F79A7D53AEAADED251A97CC8AD3C511178692994AA21A66`
 - `C-SSH_0.6.10_android-arm64.apk`: `5D347EDC629D09A6C683BF7B82E0F06DC75DA87EFBB43E73DF7663749C100E5C`
 - `C-SSH_0.6.10_android-arm64.aab`: `B45101EBBB40BAF66BEC2237BACE4E32AE2B82696A51F91C5F843CD846522E84`
-- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `49723F687178C0E857E2809357264B422B127D507D149C42329A385522AFABEA`
-- `Creation-SSH_0.6.10_linux-amd64.deb`: `8229DDCF64982049C2C3A67317D99FCECAAE045D31B2EAB54A79181634DA20A7`
+- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `3E7B299DBD639AB27EC16CC7E5BA34540FD8C696FF9C96CAD58D26D37E67FE55`
+- `Creation-SSH_0.6.10_linux-amd64.deb`: `2A1FEE0CB982ED886131D1416613B4A99A8D8B92C86E6EF2F28AB68099F11179`
 
 ## v0.6.9 - Configurable Host Collection and First-Refresh Fix
 

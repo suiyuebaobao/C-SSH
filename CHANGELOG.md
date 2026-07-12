@@ -27,24 +27,25 @@
 - 既有 unit 保持原 enable 状态；fresh unit 清理失败不再伪报成功。迁移先复核 `KillMode=process`，agent 更新不会连带结束持久化 tmux。
 - readiness 与严格版本握手失败均执行两阶段回滚；旧 agent 真正恢复并返回有效协议响应后才清除备份和锁。
 - 进程归属改为遍历 `/proc/<pid>/exe` 精确匹配，兼容 CentOS 7.9；Linux gzip payload 与裸 agent 逐字节、架构、版本、SHA256 全量核对，阻止陈旧 agent 入包。
+- 2026-07-12 同版本刷新 Windows/Linux 桌面包:AI 助手主机与模型选择框不再显示外框内嵌原生小框,统一由外层绘制边框、焦点环和右侧箭头；版本保持 `0.6.10`,Android 资产不变。
 
 ### 验证
 - 根 Rust workspace 全量测试、Clippy `-D warnings`、格式、平台边界、版本一致性与 gzip payload 门禁全部通过。
 - CentOS 7.9 与 Ubuntu 24 完成真实部署、握手与 `MetricsSnapshot`；Ubuntu 真实 0.6.9 被拒绝后自动恢复 0.6.10。
 - 故障注入覆盖 readiness 失败、有效 ExecStart drop-in、disabled unit、活跃/陈旧锁、tmux 存活与零残留。
-- 最终 Windows 便携包真实启动，主窗口/Tauri/SQLite 与 `list_servers` 正常，退出后任务进程和隔离数据清理完成。
+- 刷新后的 Windows 正式便携包真实启动，主窗口、Tauri、隔离 SQLite、AI 主页面与独立 AI 窗口均正常，退出后任务进程和隔离数据清理完成。
 - 最终 Android x86_64 测试包在 MuMu 整卸安装并真实部署 agent 0.6.10，验证 user-systemd、持久化终端、监控、页面切换与强停重启恢复；该测试包不上传。
 - Android arm64 APK/AAB 为 `versionName=0.6.10`、SDK 24/36、仅 arm64；APK v2 与 AAB JAR 签名验证通过。
-- 最终 Linux AppImage/deb 在 Ubuntu 24 真 GUI 下启动，SQLite integrity 为 `ok`，指标分别增长 4/5 条，权限为 `0700/0700/0600`，零任务残留。
+- 刷新后的 Linux AppImage/deb 在 Ubuntu 24 真实桌面会话启动，两者均通过进程存活、agent 结构化 Collector、SQLite `integrity_check=ok`、指标 `+4`、`0700/0700/0600` 权限与零残留验证；Wayland 下未把不可靠的 `xdotool` 可见窗口集合差虚报为通过。
 
 ### SHA256
-- `Creation-SSH_0.6.10_x64-setup.exe`: `756D5DFD3EF6A05D4C0D6DB2F5F616FF2B5B260597EF992307F97667750882B2`
-- `Creation-SSH_0.6.10_x64_en-US.msi`: `0B1AD3FABACF83BE0A7C4FD563B933BD77F806BC74D8D812FE8BD88506576ACA`
-- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `0DB9581B850D1A3632E093CE7B1F2151831201C1684F5404BD5C2A2FD5F84D34`
+- `Creation-SSH_0.6.10_x64-setup.exe`: `5EA8FC3CD3CE08DA004B062DF28DFA4F86F656275338D84C963C114FD193E82E`
+- `Creation-SSH_0.6.10_x64_en-US.msi`: `F1E41543BE522BAF6940073450873A99B2FD709243BD3C6F20673FB4EF57C750`
+- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `DCC71D79C8EE681E1F79A7D53AEAADED251A97CC8AD3C511178692994AA21A66`
 - `C-SSH_0.6.10_android-arm64.apk`: `5D347EDC629D09A6C683BF7B82E0F06DC75DA87EFBB43E73DF7663749C100E5C`
 - `C-SSH_0.6.10_android-arm64.aab`: `B45101EBBB40BAF66BEC2237BACE4E32AE2B82696A51F91C5F843CD846522E84`
-- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `49723F687178C0E857E2809357264B422B127D507D149C42329A385522AFABEA`
-- `Creation-SSH_0.6.10_linux-amd64.deb`: `8229DDCF64982049C2C3A67317D99FCECAAE045D31B2EAB54A79181634DA20A7`
+- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `3E7B299DBD639AB27EC16CC7E5BA34540FD8C696FF9C96CAD58D26D37E67FE55`
+- `Creation-SSH_0.6.10_linux-amd64.deb`: `2A1FEE0CB982ED886131D1416613B4A99A8D8B92C86E6EF2F28AB68099F11179`
 
 ## v0.6.9 - 可配置主机采集与首次刷新修复
 

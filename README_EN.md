@@ -234,24 +234,25 @@ All example configurations use placeholders such as `example.com`; replace them 
 - All four clients share one agent deployment transaction with unique staging/backups, byte and SHA256 checks, a cross-client lock, and two-phase readiness/handshake rollback.
 - systemd validates the fixed `FragmentPath`, raw/effective `ExecStart`, and active process before stop, preserves the enable state, and protects persistent tmux workloads.
 - Linux packaging compares the gzip payload byte-for-byte with the raw agent, supports CentOS 7.9, and blocks stale agents from production packages.
+- The Windows/Linux desktop packages were refreshed in place on 2026-07-12: AI host and model selectors now suppress the nested native control chrome and use one outer border, focus ring, and right-aligned chevron. The application version remains `0.6.10`, and Android assets are unchanged.
 
 ## v0.6.10 Verification Status
 
 - Full workspace tests, Clippy, formatting, platform boundaries, version consistency, and Linux payload gates passed.
 - CentOS 7.9/Ubuntu 24 passed real deployment, monitoring, old-version/fault rollback, drop-in, disabled-unit, active/stale-lock, and tmux-survival checks.
-- The final Windows portable package launched and verified Tauri, SQLite, and `list_servers`; task processes and isolated data were cleaned afterward.
+- The refreshed Windows portable package launched and verified the main window, Tauri, isolated SQLite, the main AI page, and the standalone AI window; task processes and isolated data were cleaned afterward.
 - The final Android x86_64 test package was freshly installed on MuMu and verified agent 0.6.10, user-systemd, persistent terminal, monitoring, and force-stop recovery. It is not uploaded.
-- Android arm64 version, SDK, ABI, and signatures passed. Linux AppImage/deb passed real Ubuntu 24 GUI checks for SQLite integrity, metric growth, `0700/0700/0600` permissions, and zero residue.
+- Android arm64 version, SDK, ABI, and signatures passed. The refreshed Linux AppImage/deb launched in a real Ubuntu 24 desktop session and both passed process-lifetime, agent-linked Collector, SQLite integrity, `+4` metrics, `0700/0700/0600` permissions, and zero-residue checks. Wayland did not expose a reliable `xdotool` window-set delta, so that probe is not claimed as passed.
 
 ## v0.6.10 SHA256
 
-- `Creation-SSH_0.6.10_x64-setup.exe`: `756D5DFD3EF6A05D4C0D6DB2F5F616FF2B5B260597EF992307F97667750882B2`
-- `Creation-SSH_0.6.10_x64_en-US.msi`: `0B1AD3FABACF83BE0A7C4FD563B933BD77F806BC74D8D812FE8BD88506576ACA`
-- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `0DB9581B850D1A3632E093CE7B1F2151831201C1684F5404BD5C2A2FD5F84D34`
+- `Creation-SSH_0.6.10_x64-setup.exe`: `5EA8FC3CD3CE08DA004B062DF28DFA4F86F656275338D84C963C114FD193E82E`
+- `Creation-SSH_0.6.10_x64_en-US.msi`: `F1E41543BE522BAF6940073450873A99B2FD709243BD3C6F20673FB4EF57C750`
+- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `DCC71D79C8EE681E1F79A7D53AEAADED251A97CC8AD3C511178692994AA21A66`
 - `C-SSH_0.6.10_android-arm64.apk`: `5D347EDC629D09A6C683BF7B82E0F06DC75DA87EFBB43E73DF7663749C100E5C`
 - `C-SSH_0.6.10_android-arm64.aab`: `B45101EBBB40BAF66BEC2237BACE4E32AE2B82696A51F91C5F843CD846522E84`
-- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `49723F687178C0E857E2809357264B422B127D507D149C42329A385522AFABEA`
-- `Creation-SSH_0.6.10_linux-amd64.deb`: `8229DDCF64982049C2C3A67317D99FCECAAE045D31B2EAB54A79181634DA20A7`
+- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `3E7B299DBD639AB27EC16CC7E5BA34540FD8C696FF9C96CAD58D26D37E67FE55`
+- `Creation-SSH_0.6.10_linux-amd64.deb`: `2A1FEE0CB982ED886131D1416613B4A99A8D8B92C86E6EF2F28AB68099F11179`
 
 ## Releases And Changelog
 
