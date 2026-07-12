@@ -192,6 +192,7 @@ The Me page includes language, update checks, version information, login passwor
 | --- | --- | --- |
 | Windows | Supported | Desktop client, setup.exe / MSI / portable zip |
 | Android | Supported | Mobile companion, arm64 APK |
+| Linux desktop | Supported | Independent AppImage / deb |
 | Server agent (Linux) | Supported | x86_64 / ARM64 static musl binary |
 | macOS | Planned | Open source after the stable iOS and macOS releases |
 | iOS | In development | Open source after the stable iOS and macOS releases |
@@ -216,38 +217,41 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current latest version**: `v0.6.9`.
+**Current latest version**: `v0.6.10`.
 
-- **Windows**: download `Creation-SSH_0.6.9_x64-setup.exe` (recommended) or `Creation-SSH_0.6.9_x64_en-US.msi`.
-- **Portable Windows**: download `Creation-SSH_0.6.9_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
-- **Android**: download and install `C-SSH_0.6.9_android-arm64.apk`.
-- **Android AAB**: the release asset is `C-SSH_0.6.9_android-arm64.aab`.
-- **Linux desktop**: installers are deferred from this release pending independent verification.
+- **Windows**: download `Creation-SSH_0.6.10_x64-setup.exe` (recommended) or `Creation-SSH_0.6.10_x64_en-US.msi`.
+- **Portable Windows**: download `Creation-SSH_0.6.10_portable-Windows-x64.zip`, unzip it, and run `Creation-SSH.exe`. Keep the bundled `resources` folder next to the executable.
+- **Android**: download and install `C-SSH_0.6.10_android-arm64.apk`.
+- **Android AAB**: the release asset is `C-SSH_0.6.10_android-arm64.aab`.
+- **Linux desktop**: download `Creation-SSH_0.6.10_linux-x86_64.AppImage` or `Creation-SSH_0.6.10_linux-amd64.deb`.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
 
-## v0.6.9 Highlights
+## v0.6.10 Highlights
 
-- Background host collection on Windows, Linux, and Android now supports `1–10` cross-host workers, default `4`, with a minimum collection interval of `1` second.
-- Fixed first-round metrics being stored locally while the Hosts page kept showing stale data until navigation or fallback polling.
-- Windows/Linux Hosts and MonitorList now share event refresh, overlapping-request coalescing, and stale-response protection.
-- Interval, concurrency, and retention are atomically stored and consistently read from SQLite. Android exposes all three settings and persists them across restarts.
-- Windows, Android, the agent, and all production assets are synchronized to `0.6.9`. Linux desktop installers are deferred from this release.
+- Added the first production Linux desktop AppImage and deb; Windows, Android, Linux, and agent versions are synchronized to `0.6.10`.
+- Fixed split cross-platform SQLite roots. Unix default and explicit data roots now enforce `0700` directories and `0600` SQLite files.
+- All four clients share one agent deployment transaction with unique staging/backups, byte and SHA256 checks, a cross-client lock, and two-phase readiness/handshake rollback.
+- systemd validates the fixed `FragmentPath`, raw/effective `ExecStart`, and active process before stop, preserves the enable state, and protects persistent tmux workloads.
+- Linux packaging compares the gzip payload byte-for-byte with the raw agent, supports CentOS 7.9, and blocks stale agents from production packages.
 
-## v0.6.9 Verification Status
+## v0.6.10 Verification Status
 
-- The full Rust workspace tests, production frontend builds for Windows/Linux/Android, version consistency, and release-boundary checks passed.
-- The production Windows app was verified to refresh first-round metrics while remaining on the Hosts page.
-- The Android x86_64 `0.6.9` test package passed signature inspection, installed, and launched on MuMu. The test package is not uploaded to the Release.
-- The production Android arm64 APK/AAB build completed. The APK reports `versionName=0.6.9`, `versionCode=6009`, `minSdk=24`, and `targetSdk=36`, contains only `arm64-v8a`, and passes APK v2 signature verification; the AAB also contains arm64 native libraries only.
+- Full workspace tests, Clippy, formatting, platform boundaries, version consistency, and Linux payload gates passed.
+- CentOS 7.9/Ubuntu 24 passed real deployment, monitoring, old-version/fault rollback, drop-in, disabled-unit, active/stale-lock, and tmux-survival checks.
+- The final Windows portable package launched and verified Tauri, SQLite, and `list_servers`; task processes and isolated data were cleaned afterward.
+- The final Android x86_64 test package was freshly installed on MuMu and verified agent 0.6.10, user-systemd, persistent terminal, monitoring, and force-stop recovery. It is not uploaded.
+- Android arm64 version, SDK, ABI, and signatures passed. Linux AppImage/deb passed real Ubuntu 24 GUI checks for SQLite integrity, metric growth, `0700/0700/0600` permissions, and zero residue.
 
-## v0.6.9 SHA256
+## v0.6.10 SHA256
 
-- `Creation-SSH_0.6.9_x64-setup.exe`: `6ECF9CBB4A06440CE735C4EDD70F43F770DBBF774AEEC70FE74914D1FC19B3F1`
-- `Creation-SSH_0.6.9_x64_en-US.msi`: `D9F4A11D8562093F5859530448EC4CD2CA317022391E1D504EB04B161661BF87`
-- `Creation-SSH_0.6.9_portable-Windows-x64.zip`: `9B49B7D69F64E9FFC3386BA663962FFA7B06F8DEFCF14E8340795951713E0E09`
-- `C-SSH_0.6.9_android-arm64.apk`: `4245852EAEB217AAC0F00F7731D30FDD011759D2F5BCB9811E49E383DFD9437F`
-- `C-SSH_0.6.9_android-arm64.aab`: `FF5488C3547D1E42F83A6B5185BEDEF1BF03C370264CE1CDDCC4785158AB07DA`
+- `Creation-SSH_0.6.10_x64-setup.exe`: `756D5DFD3EF6A05D4C0D6DB2F5F616FF2B5B260597EF992307F97667750882B2`
+- `Creation-SSH_0.6.10_x64_en-US.msi`: `0B1AD3FABACF83BE0A7C4FD563B933BD77F806BC74D8D812FE8BD88506576ACA`
+- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `0DB9581B850D1A3632E093CE7B1F2151831201C1684F5404BD5C2A2FD5F84D34`
+- `C-SSH_0.6.10_android-arm64.apk`: `5D347EDC629D09A6C683BF7B82E0F06DC75DA87EFBB43E73DF7663749C100E5C`
+- `C-SSH_0.6.10_android-arm64.aab`: `B45101EBBB40BAF66BEC2237BACE4E32AE2B82696A51F91C5F843CD846522E84`
+- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `49723F687178C0E857E2809357264B422B127D507D149C42329A385522AFABEA`
+- `Creation-SSH_0.6.10_linux-amd64.deb`: `8229DDCF64982049C2C3A67317D99FCECAAE045D31B2EAB54A79181634DA20A7`
 
 ## Releases And Changelog
 

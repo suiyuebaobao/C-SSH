@@ -4,6 +4,48 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.10 - Production Linux Desktop and Transactional Agent Deployment
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.10_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.10_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.10_portable-Windows-x64.zip`
+- Android arm64: `C-SSH_0.6.10_android-arm64.apk`
+- Android AAB: `C-SSH_0.6.10_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.10_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.10_linux-amd64.deb`
+
+### Added
+- Added the first production Linux desktop AppImage and deb, built and verified from the independent `linux/` project.
+- CLI, Windows, Android, and Linux now share one agent deployment transaction with unique staging/backup paths and byte-length plus SHA256 verification before replacement.
+- Added a cross-client remote deployment lock. Existing locks are never taken over automatically: active locks report busy and stale locks require explicit repair.
+
+### Fixed
+- Fixed split SQLite roots that could show a host in the list while agent repair could not find it. Hosts, credentials, SSH/repair, monitoring, and AI now use the same data root.
+- Unix default and explicit `CS_DATA_DIR` roots enforce `0700` on data/key directories and `0600` on SQLite, failing closed when permissions cannot be tightened.
+- systemd deployment validates the fixed `FragmentPath`, raw and effective `ExecStart`, and the active executable before stop/replacement, rejecting foreign same-name units and drop-in overrides.
+- Existing units preserve their enable state, fresh-unit cleanup failures no longer report success, and `KillMode=process` is verified so agent updates do not terminate persistent tmux workloads.
+- Readiness and strict-version handshake failures use two-phase rollback; backups and locks are cleared only after the previous agent is restored and returns a valid protocol response.
+- Process ownership now uses exact `/proc/<pid>/exe` matching for CentOS 7.9 compatibility. Linux packaging also compares the gzip payload with the raw agent by bytes, architecture, version, and SHA256.
+
+### Verified
+- Full Rust workspace tests, Clippy with `-D warnings`, formatting, platform-boundary, version-consistency, and gzip-payload gates passed.
+- CentOS 7.9 and Ubuntu 24 passed real deployment, handshake, and `MetricsSnapshot`; a real 0.6.9 agent on Ubuntu was rejected and automatically restored to 0.6.10.
+- Fault injection covered readiness failure, an effective-ExecStart drop-in, a disabled unit, active/stale locks, tmux survival, and zero residual deployment files.
+- The final Windows portable package launched with a working main window, Tauri runtime, SQLite, and `list_servers`; task processes and isolated data were cleaned afterward.
+- The final Android x86_64 test package was freshly installed on MuMu and verified agent 0.6.10 deployment, user-systemd, persistent terminal, monitoring, navigation, and force-stop recovery. It is not uploaded.
+- Android arm64 APK/AAB report `versionName=0.6.10`, SDK 24/36, and arm64-only native code; APK v2 and AAB JAR signatures passed.
+- Final Linux AppImage/deb launched in a real Ubuntu 24 GUI session; SQLite integrity was `ok`, metrics grew by 4/5 rows, permissions were `0700/0700/0600`, and no task residue remained.
+
+### SHA256
+- `Creation-SSH_0.6.10_x64-setup.exe`: `756D5DFD3EF6A05D4C0D6DB2F5F616FF2B5B260597EF992307F97667750882B2`
+- `Creation-SSH_0.6.10_x64_en-US.msi`: `0B1AD3FABACF83BE0A7C4FD563B933BD77F806BC74D8D812FE8BD88506576ACA`
+- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `0DB9581B850D1A3632E093CE7B1F2151831201C1684F5404BD5C2A2FD5F84D34`
+- `C-SSH_0.6.10_android-arm64.apk`: `5D347EDC629D09A6C683BF7B82E0F06DC75DA87EFBB43E73DF7663749C100E5C`
+- `C-SSH_0.6.10_android-arm64.aab`: `B45101EBBB40BAF66BEC2237BACE4E32AE2B82696A51F91C5F843CD846522E84`
+- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `49723F687178C0E857E2809357264B422B127D507D149C42329A385522AFABEA`
+- `Creation-SSH_0.6.10_linux-amd64.deb`: `8229DDCF64982049C2C3A67317D99FCECAAE045D31B2EAB54A79181634DA20A7`
+
 ## v0.6.9 - Configurable Host Collection and First-Refresh Fix
 
 ### Downloads
