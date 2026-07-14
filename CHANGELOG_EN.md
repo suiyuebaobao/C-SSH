@@ -4,7 +4,9 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
-## v0.6.11 - Cross-Platform Connection Reuse, Mobile Terminal, and Safe Recovery
+## v0.6.11 - Cross-Platform Connection Reuse, Mobile Terminal, and Safe Recovery (Prerelease)
+
+> Real Ubuntu uninstall verification found that tmux may leave its socket pathname after a controlled shutdown, so complete product-data cleanup stops under the safety policy. This version has been moved to prerelease; the correction will ship under a new version without replacing these assets.
 
 ### Downloads
 - Windows installer: `Creation-SSH_0.6.11_x64-setup.exe`

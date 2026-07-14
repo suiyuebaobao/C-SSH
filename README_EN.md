@@ -217,11 +217,13 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current published version**: `v0.6.11`.
+**Current stable version**: `v0.6.10`. `v0.6.11` has been moved to prerelease and is not recommended as a stable install.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
 
-## v0.6.11
+## v0.6.11 (Prerelease)
+
+> Real Ubuntu uninstall verification found that tmux may leave its socket pathname after a controlled shutdown, causing the current safety policy to stop before product-data cleanup. This build remains fail-closed and does not delete unknown resources, but a complete uninstall may not finish. The correction will ship under a new version without replacing these assets.
 
 ### Downloads
 
@@ -278,7 +280,7 @@ All example configurations use placeholders such as `example.com`; replace them 
 
 ## Releases And Changelog
 
-- Download the latest installers and read the full release notes in [GitHub Releases](../../releases/latest).
+- See the prerelease assets and full notes in the [v0.6.11 Release](../../releases/tag/v0.6.11); stable installers remain under [Releases latest](../../releases/latest).
 - Historical changes are tracked in [CHANGELOG_EN.md](CHANGELOG_EN.md).
 - Release notes are bilingual and include Downloads, Added, Fixed, Verified, and SHA256 sections.
 
