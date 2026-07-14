@@ -219,50 +219,70 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 前往 [**Releases**](../../releases/latest) 获取最新安装包:
 
-**当前最新版本**: `v0.6.10`。
+**当前已发布版本**: `v0.6.11`。
 
-- **Windows**:下载 `Creation-SSH_0.6.10_x64-setup.exe`(推荐)或 `Creation-SSH_0.6.10_x64_en-US.msi` 安装。
-- **免安装便携版(推荐,无需安装)**:下载 `Creation-SSH_0.6.10_portable-Windows-x64.zip`,解压即运行,零安装;内含 agent 与静态 tmux 资源,请保持整个文件夹在一起。
-  - 首次运行若出现 SmartScreen 提示,点击「更多信息 → 仍要运行」即可。
-- **Android**:下载 `C-SSH_0.6.10_android-arm64.apk` 安装。
-  - 首次安装需在系统设置中允许「安装未知来源应用」。
-- **Android AAB**:发布资产为 `C-SSH_0.6.10_android-arm64.aab`。
-- **Linux 桌面版**:下载 `Creation-SSH_0.6.10_linux-x86_64.AppImage` 或 `Creation-SSH_0.6.10_linux-amd64.deb`。
+> 示例配置一律使用 `example.com` 等占位地址，请替换为你自己的服务器信息。
 
-> 示例配置一律使用 `example.com` 等占位地址,请替换为你自己的服务器信息。
+## v0.6.11
 
-### v0.6.10 更新重点
+### 下载
 
-- 首次发布独立 Linux 桌面正式版 AppImage 与 deb；Windows、Android、Linux 与 agent 版本统一为 `0.6.10`。
-- 修复跨平台 SQLite 数据根分裂；Unix 默认或显式数据根均强制目录 `0700`、SQLite `0600`。
-- 四端统一 agent 部署事务：唯一暂存/备份、上传字节与 SHA256 校验、跨客户端锁，以及 readiness/严格握手两阶段回滚。
-- systemd 在 stop 前校验固定 `FragmentPath`、原始/有效 `ExecStart` 与活动进程，保持原 enable 状态并保护持久化 tmux。
-- Linux 打包逐字节核对 gzip payload 与裸 agent，兼容 CentOS 7.9 并阻止陈旧 agent 入包。
-- 2026-07-12 同版本刷新 Windows/Linux 桌面包:AI 助手主机与模型选择框取消内层原生控件外观,外层统一边框、焦点环和右侧箭头；应用版本保持 `0.6.10`,Android 资产不变。
+- Windows 安装版：`Creation-SSH_0.6.11_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.11_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.11_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.11_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.11_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.11_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.11_linux-amd64.deb`
 
-### v0.6.10 验证状态
+### 新增
 
-- 根 workspace 全量测试、Clippy、格式、平台边界、版本一致性与 Linux payload 门禁通过。
-- CentOS 7.9/Ubuntu 24 真实部署、监控、旧版/故障回滚、drop-in、disabled unit、活跃/陈旧锁与 tmux 存活矩阵通过。
-- 刷新后的 Windows 正式便携包真实启动并验证主窗口、Tauri、隔离 SQLite、AI 主页面与独立 AI 窗口；退出后任务进程和隔离数据清理完成。
-- 最终 Android x86_64 测试包在 MuMu 整卸安装并验证 agent 0.6.10、user-systemd、持久化终端、监控和强停重启恢复；该包不上传。
-- Android arm64 APK/AAB 版本、SDK、ABI 与签名通过；刷新后的 Linux AppImage/deb 在 Ubuntu 24 真实桌面会话启动，两者均验证进程存活、agent 结构化 Collector、SQLite 完整性、指标 `+4`、`0700/0700/0600` 权限与零残留。Wayland 下未把不可靠的 `xdotool` 窗口集合差虚报为通过。
+- Windows、Linux 和 Android 统一复用同一主机已经认证的 SSH transport。监控、文件、AI、系统管理和终端可在各自通道中并行工作，减少重复登录与等待；单项操作结束不会打断其他正在运行的功能。
+- Windows/Linux 桌面端与 Android 可同时连接同一台主机并独立工作；一端退出后，另一端的监控和请求继续运行，持久化终端仍可重连恢复。
+- Android 终端采用紧凑双行工具栏，在同一顶部区域显示主机、目标 IP、连接状态、持久化/普通终端切换、窗口选择和常用操作，为终端画布保留更多空间。
+- Android 同时支持可断线恢复的持久化终端和关闭即结束的普通终端；持久化窗口默认使用不重复的 `terminal-N` 名称，支持安全重命名并整理旧重复名称。
+- Android 终端新增自适应、固定 `80x24` 与自定义尺寸，字体可调范围为 `1-24px`；固定/自定义模式支持横纵浏览，尺寸、字体与滚动偏好会在重启后恢复。
+- Android 终端新增按需快捷键覆盖层，提供 Esc、Tab、Ctrl、方向键和 `-`，不再常驻挤占终端空间；复制优先使用选区，无选区时复制当前可见内容，并写入系统剪贴板。
+- Windows 与 Linux 下载文件或目录时使用系统“另存为”，Android 使用 Storage Access Framework（SAF）系统文档选择器选择保存位置；取消不会先连接或下载，已选目标继续保留断点续传与完整性校验。
+- SSH 连接新增分阶段 8 秒失败边界与明确提示：DNS 解析、TCP 连接、SSH 握手和认证分别计时，失败或超时后立即返回，不再因切换凭据重复等待。
+- 未显式输入密码且库存私钥被服务器明确拒绝时，可在同一 SSH 会话内尝试本地加密保险库中的库存密码；认证成功后继续修复公钥登录，减少重复输入。
 
-### v0.6.10 SHA256
+### 修复
 
-- `Creation-SSH_0.6.10_x64-setup.exe`: `5EA8FC3CD3CE08DA004B062DF28DFA4F86F656275338D84C963C114FD193E82E`
-- `Creation-SSH_0.6.10_x64_en-US.msi`: `F1E41543BE522BAF6940073450873A99B2FD709243BD3C6F20673FB4EF57C750`
-- `Creation-SSH_0.6.10_portable-Windows-x64.zip`: `DCC71D79C8EE681E1F79A7D53AEAADED251A97CC8AD3C511178692994AA21A66`
-- `C-SSH_0.6.10_android-arm64.apk`: `5D347EDC629D09A6C683BF7B82E0F06DC75DA87EFBB43E73DF7663749C100E5C`
-- `C-SSH_0.6.10_android-arm64.aab`: `B45101EBBB40BAF66BEC2237BACE4E32AE2B82696A51F91C5F843CD846522E84`
-- `Creation-SSH_0.6.10_linux-x86_64.AppImage`: `3E7B299DBD639AB27EC16CC7E5BA34540FD8C696FF9C96CAD58D26D37E67FE55`
-- `Creation-SSH_0.6.10_linux-amd64.deb`: `2A1FEE0CB982ED886131D1416613B4A99A8D8B92C86E6EF2F28AB68099F11179`
+- 修复全新本地数据库首次启动时，多个页面或后台任务同时初始化可能出现“database is locked”的问题；AI、文件、监控、主机与偏好数据现在可稳定从同一个 SQLite 数据库打开和恢复。
+- 修复已安装但未运行的 firewalld 被误报为查询失败的问题；客户端现在明确显示“未运行”，保持端口操作禁用，也不会擅自启动或安装防火墙。
+- 单个功能通道失败不再连带断开仍然健康的共享 SSH transport；只有确认连接已中断时才重新连接，可能已经送达的修改操作不会自动重复执行。
+- 主机密钥信任记录读取、解析或保存失败时改为安全停止：不把异常当作“首次连接”继续，不交付当前会话，也不转入其他凭据尝试。
+- 删除主机或重装前会先确认相关服务、进程、持久化会话、数据和公钥确属 C-SSH；任何资源无法确认时立即停止并保留现状，不会误删其他服务、会话或密钥。
+- 已确认属于 C-SSH 的旧版残留现在可以安全恢复到可重装状态；远端清理未完整成功时保留本地主机和凭据供重试，外部或未知资源始终保持不变。
+
+### 验证
+
+- Windows、Linux、Android 的共享连接复用、跨客户端同连、单端退出后另一端继续工作，以及 AI、文件、监控和两种终端的真实流程均已通过验证。
+- Android 紧凑工具栏、主机 IP、持久化/普通终端、唯一窗口名、`1-24px` 字体、尺寸、滚动、复制、快捷键覆盖层及重启恢复均已通过验证。
+- Windows/Linux 系统“另存为”、Android SAF 系统文档选择器、取消路径、断点续传和下载完整性校验均已通过验证。
+- 全新 SQLite 首次并发打开、SSH 各阶段 8 秒失败提示与同会话凭据恢复均已通过验证。
+- 主机密钥异常与安全删除的停止保护、外部资源保持不变，以及已确认旧版残留的重装恢复均已通过验证。
+- 根 workspace 门禁与 Windows、Android、Linux 三端构建测试均已通过；CentOS 上已安装但未运行的 firewalld 正确返回 `NotRunning`。
+- Windows 正式程序已完成独立启动、关闭、SQLite 与 `0.6.11` 版本检查。
+- Android x86_64 测试包已在 MuMu 中真实进入终端、文件、监控和 AI 流程且无崩溃；arm64 APK/AAB 的包名、版本、ABI 与签名检查均已通过。
+- Linux deb/AppImage 已在授权虚拟机中完成真实安装、启动、关闭与 SQLite 检查；两种包的 payload 一致，内置 agent 版本为 `0.6.11`。
+
+### SHA256
+
+- `Creation-SSH_0.6.11_x64-setup.exe`: `bf03f3805c28cdaf6d545e6b5bfac3d2ed0ec44265f591569c78be35fceb8c5b`
+- `Creation-SSH_0.6.11_x64_en-US.msi`: `647b4b8978433385950b34578588366657206f2746eb38355f2102f01295a911`
+- `Creation-SSH_0.6.11_portable-Windows-x64.zip`: `f319942c1710e794a78792b84dcc1e0a1178efb4b2b0d1dab1f205a832aa8b61`
+- `C-SSH_0.6.11_android-arm64.apk`: `92246daa0cbcd0283e238bc02d729f497a94407c6c4efc384de7fd3787a061ab`
+- `C-SSH_0.6.11_android-arm64.aab`: `3e3394bde08a9c8c96fcea6cc1660475ff509dec1d2ca588fa6032b0eaeee063`
+- `Creation-SSH_0.6.11_linux-x86_64.AppImage`: `2567e21b8498b6593d26d899728ad086302647acfbcb5948bbc8766358669fcb`
+- `Creation-SSH_0.6.11_linux-amd64.deb`: `cd10a93610caf3153c8ff7f711db84c2cf60576fb6dfce7187bfbfdac36b076f`
 
 ## 🧾 更新列表
 
 - 最新安装包与完整发布说明见 [GitHub Releases](../../releases/latest)。
 - 历史更新记录见 [CHANGELOG.md](CHANGELOG.md)。
-- Release 说明保持中英双语,包含「新增 / 修复 / 验证 / 下载」。
+- Release 说明保持中英双语，包含「下载 / 新增 / 修复 / 验证 / SHA256」。
 
 ## 💬 联系 · 交流群
 

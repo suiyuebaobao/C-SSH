@@ -4,6 +4,59 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.11 - Cross-Platform Connection Reuse, Mobile Terminal, and Safe Recovery
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.11_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.11_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.11_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.11_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.11_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.11_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.11_linux-amd64.deb`
+
+### Added
+- Windows, Linux, and Android now reuse an authenticated SSH transport for the same host. Monitoring, files, AI, system management, and terminals can work in parallel on separate channels, reducing repeated logins and waits without one completed operation interrupting the others.
+- The Windows/Linux desktop clients and Android can stay connected to the same host and work independently. After one client exits, monitoring and requests on the other continue, and persistent terminals remain available for reconnection.
+- The Android terminal now uses a compact two-row toolbar that keeps the host, target IP address, connection status, persistent/standard terminal switch, window selector, and common actions in one top area, leaving more room for the terminal canvas.
+- Android now supports both reconnectable persistent terminals and standard terminals that end when closed. Persistent windows receive unique `terminal-N` names by default, with safe renaming and normalization of older duplicate names.
+- Android terminal display controls now include fit, fixed `80x24`, and custom sizes, plus a `1-24px` font range. Fixed/custom modes support two-dimensional canvas browsing, and size, font, and scrolling preferences are restored after restart.
+- Android adds an on-demand shortcut overlay for Esc, Tab, Ctrl, arrow keys, and `-` without permanently shrinking the terminal. Copy uses the selection first, falls back to visible terminal content, and writes to the system clipboard.
+- Android now offers system, light, and dark themes. System mode follows the device theme automatically, and the preference is stored in local SQLite and restored after restart.
+- Windows and Linux use the system Save As dialog for file or directory downloads, while Android uses the Storage Access Framework (SAF) system document picker. Canceling does not start a connection or download; chosen destinations retain resume support and integrity verification.
+- SSH connections now have clear staged 8-second failure boundaries for DNS resolution, TCP connection, SSH handshake, and authentication. A failed or timed-out stage returns immediately instead of repeating the wait with another credential.
+- When no password is entered explicitly and the stored private key is explicitly rejected, the client can try the encrypted-vault password within the same SSH session. After authentication succeeds, it continues public-key repair to reduce future password prompts.
+
+### Fixed
+- Fixed fresh local databases sometimes reporting `database is locked` when multiple pages or background tasks initialized at once. AI, files, monitoring, host data, and preferences can now open and recover reliably from the same SQLite database.
+- Fixed installed-but-stopped firewalld being reported as a query failure. The client now shows it as not running, keeps port actions disabled, and never starts or installs the firewall on its own.
+- Fixed offline hosts retaining an old green status. Online state now comes from the current real connection result, while historical metrics are shown only as stale data.
+- A failure in one feature channel no longer disconnects a healthy shared SSH transport. Reconnection occurs only after the connection is confirmed lost, and mutating operations that may already have arrived are not replayed automatically.
+- Host-key trust now stops safely when its record cannot be read, parsed, or saved. The error is not treated as a first connection, the current session is not delivered, and no other credential path is attempted.
+- Before deleting a host or reinstalling, C-SSH verifies that the related service, process, persistent session, data, and public key belong to C-SSH. If any resource cannot be verified, it stops and preserves the current state instead of touching another service, session, or key.
+- Dangerous systemd directives are audited with legal whitespace syntax, while an unprovable leftover tmux socket is preserved with an explicit repair error instead of being deleted automatically.
+- Older leftovers that are confirmed to belong to C-SSH can now be recovered safely into a reinstallable state. Local host and credential records remain available for retry when remote cleanup is incomplete, while foreign or unknown resources always remain unchanged.
+
+### Verified
+- Shared connection reuse on Windows, Linux, and Android; simultaneous cross-client access; continued operation after one client exits; and real AI, file, monitoring, and both terminal workflows all passed verification.
+- The Android compact toolbar, host IP, persistent/standard terminals, unique window names, `1-24px` fonts, sizing, scrolling, copying, shortcut overlay, and restart restoration all passed verification.
+- Windows/Linux system Save As, the Android SAF system document picker, cancellation paths, resumed downloads, and download integrity checks all passed verification.
+- Concurrent first open of a fresh SQLite database, staged 8-second SSH failure messages, and same-session credential recovery all passed verification.
+- Safe stopping for host-key errors and deletion, preservation of foreign resources, and reinstall recovery for confirmed older leftovers all passed verification.
+- The root workspace gates and Windows, Android, and Linux build tests passed; installed-but-stopped firewalld on CentOS correctly returned `NotRunning`.
+- The production Windows app passed independent launch, shutdown, SQLite, and `0.6.11` version checks.
+- The Android x86_64 test build entered real terminal, file, monitoring, and AI flows in MuMu without crashing; the arm64 APK/AAB passed package-name, version, ABI, and signature checks.
+- The Linux deb/AppImage passed real installation, launch, shutdown, and SQLite checks in the authorized VM; both packages have identical payloads and bundle agent `0.6.11`.
+
+### SHA256
+- `Creation-SSH_0.6.11_x64-setup.exe`: `bf03f3805c28cdaf6d545e6b5bfac3d2ed0ec44265f591569c78be35fceb8c5b`
+- `Creation-SSH_0.6.11_x64_en-US.msi`: `647b4b8978433385950b34578588366657206f2746eb38355f2102f01295a911`
+- `Creation-SSH_0.6.11_portable-Windows-x64.zip`: `f319942c1710e794a78792b84dcc1e0a1178efb4b2b0d1dab1f205a832aa8b61`
+- `C-SSH_0.6.11_android-arm64.apk`: `92246daa0cbcd0283e238bc02d729f497a94407c6c4efc384de7fd3787a061ab`
+- `C-SSH_0.6.11_android-arm64.aab`: `3e3394bde08a9c8c96fcea6cc1660475ff509dec1d2ca588fa6032b0eaeee063`
+- `Creation-SSH_0.6.11_linux-x86_64.AppImage`: `2567e21b8498b6593d26d899728ad086302647acfbcb5948bbc8766358669fcb`
+- `Creation-SSH_0.6.11_linux-amd64.deb`: `cd10a93610caf3153c8ff7f711db84c2cf60576fb6dfce7187bfbfdac36b076f`
+
 ## v0.6.10 - Production Linux Desktop and Transactional Agent Deployment
 
 ### Downloads
