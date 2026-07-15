@@ -217,9 +217,52 @@ The product is **free forever**: no subscription, no paid tier, and no locked fe
 
 Grab the latest build from [**Releases**](../../releases/latest):
 
-**Current stable version**: `v0.6.10`. `v0.6.11` has been moved to prerelease and is not recommended as a stable install.
+**Current stable version**: `v0.6.12`. `v0.6.11` remains available only as prerelease history and is not recommended.
 
 All example configurations use placeholders such as `example.com`; replace them with your own server details.
+
+## v0.6.12
+
+### Downloads
+
+- Windows installer: `Creation-SSH_0.6.12_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.12_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.12_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.12_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.12_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.12_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.12_linux-amd64.deb`
+
+### Added
+
+- Windows, Linux, and Android reuse one authenticated SSH transport per host. Monitoring, files, AI, system management, and terminals use independent channels, while multiple clients can work concurrently.
+- The Android terminal now has a compact two-row toolbar with host, IP, connection state, persistent/standard mode, and unique window names, plus `1-24px` fonts, fit/fixed/custom sizing, two-dimensional scrolling, and an on-demand shortcut panel.
+- Windows/Linux downloads use the system Save As dialog, while Android uses the SAF document picker. Canceling starts no connection or download, and selected destinations retain resume and integrity checks.
+- Android supports system, light, and dark themes plus automatic system-language selection. Terminal display, AI permission/execution profiles, and monitoring settings persist in SQLite.
+
+### Fixed
+
+- Fixed the `v0.6.11` Ubuntu uninstall case where tmux exited but left its socket pathname, stopping safe product-data cleanup. This release quarantines and removes only identity-continuous, proven-owned sockets; stale sockets, transaction residues, path replacement, or identity drift still stop safely.
+- Fixed stale green status for offline hosts, occasional fresh-SQLite initialization locks, one failed feature channel disconnecting a healthy transport, and installed-but-stopped firewalld being reported as a query error.
+- DNS, TCP, SSH handshake, and authentication now each have an 8-second hard deadline. Failures that changing credentials cannot fix return immediately without repeating a full dial.
+- Fixed Windows shutdown leaving the hidden login window alive. Closing the main window now closes every other application window before terminating the process.
+
+### Verified
+
+- The full root workspace, 132 focused `client-core` tests, Clippy, formatting, and shell-syntax gates passed.
+- Ubuntu no-mock cleanup returned `TMUX_CLEANUP_OK` and `DATA_CLEANUP_OK` with no product root left. Stale, transaction-residue, and path-replacement cases preserved the original objects, and external resources were unchanged.
+- Windows, Android, and Linux production assets passed version, package identity, signature/ABI/payload, real-launch, and SHA256 checks. The Android x86_64 test build exercised hosts, terminals, files, monitoring, AI, and settings in MuMu.
+- Linux AppImage/deb were exercised in isolated display and system-keyring sessions against a real server and real AI key, covering metrics, system, files, processes, AI, reconnect after invalidation, and persistent-terminal reopen.
+
+### SHA256
+
+- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
+- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
+- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
+- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
+- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
+- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
+- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`
 
 ## v0.6.11 (Prerelease)
 
@@ -280,7 +323,7 @@ All example configurations use placeholders such as `example.com`; replace them 
 
 ## Releases And Changelog
 
-- See the prerelease assets and full notes in the [v0.6.11 Release](../../releases/tag/v0.6.11); stable installers remain under [Releases latest](../../releases/latest).
+- See the latest stable assets and full notes in the [v0.6.12 Release](../../releases/tag/v0.6.12); the `v0.6.11` prerelease assets remain available as history.
 - Historical changes are tracked in [CHANGELOG_EN.md](CHANGELOG_EN.md).
 - Release notes are bilingual and include Downloads, Added, Fixed, Verified, and SHA256 sections.
 

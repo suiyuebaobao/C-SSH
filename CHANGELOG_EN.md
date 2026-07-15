@@ -4,6 +4,43 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.12 - Safe Uninstall Completion and Cross-Platform Polish
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.12_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.12_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.12_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.12_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.12_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.12_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.12_linux-amd64.deb`
+
+### Added
+- Windows, Linux, and Android reuse one authenticated SSH transport per host. Monitoring, files, AI, system management, and terminals run through independent channels, while multiple clients can connect concurrently.
+- The Android terminal adds a compact two-row toolbar, host IP, unique window names, `1-24px` fonts, fit/fixed/custom sizing, two-dimensional scrolling, copying, and an on-demand shortcut panel.
+- Windows/Linux use the system Save As dialog, while Android uses the SAF document picker, so users select download destinations on all three platforms.
+- Android adds system/light/dark themes and automatic system-language selection. Terminal, AI, and monitoring preferences persist in SQLite.
+
+### Fixed
+- Fixed the real Ubuntu `v0.6.11` uninstall case where a leftover tmux socket pathname blocked product-data cleanup. Only identity-continuous, proven-owned objects are quarantined and removed; any ownership anomaly remains fail-closed.
+- Fixed stale green offline status, fresh-SQLite initialization locks, one failed channel disconnecting a healthy transport, stopped firewalld being reported as an error, and Windows shutdown leaving the hidden login window alive.
+- DNS, TCP, handshake, and authentication each have an 8-second hard deadline, avoiding full redials for failures that credentials cannot repair.
+
+### Verified
+- The full root workspace, 132 focused `client-core` tests, Clippy, formatting, and shell-syntax gates passed.
+- Ubuntu no-mock covered normal quarantine/guard cleanup, initial stale sockets, transaction residues, path replacement, and unchanged external resources.
+- Windows, Android, and Linux production assets passed version, package identity, signature/ABI/payload, real launch, shutdown, and SHA256 checks. The Android x86_64 test build exercised the relevant pages in MuMu.
+- Linux AppImage/deb were exercised in isolated display and system-keyring sessions against a real server and real AI key, covering metrics, system, files, processes, AI, reconnect after invalidation, and persistent-terminal reopen.
+
+### SHA256
+- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
+- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
+- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
+- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
+- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
+- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
+- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`
+
 ## v0.6.11 - Cross-Platform Connection Reuse, Mobile Terminal, and Safe Recovery (Prerelease)
 
 > Real Ubuntu uninstall verification found that tmux may leave its socket pathname after a controlled shutdown, so complete product-data cleanup stops under the safety policy. This version has been moved to prerelease; the correction will ship under a new version without replacing these assets.

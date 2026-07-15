@@ -219,9 +219,52 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 前往 [**Releases**](../../releases/latest) 获取最新安装包:
 
-**当前稳定版本**: `v0.6.10`。`v0.6.11` 已降为预发布，不建议作为稳定版安装。
+**当前稳定版本**: `v0.6.12`。`v0.6.11` 保留为预发布历史版本，不建议安装。
 
 > 示例配置一律使用 `example.com` 等占位地址，请替换为你自己的服务器信息。
+
+## v0.6.12
+
+### 下载
+
+- Windows 安装版：`Creation-SSH_0.6.12_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.12_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.12_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.12_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.12_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.12_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.12_linux-amd64.deb`
+
+### 新增
+
+- Windows、Linux、Android 对同一主机复用已认证 SSH transport；监控、文件、AI、系统管理和终端使用独立 channel，多客户端可同时工作。
+- Android 终端换成紧凑双行工具栏，显示主机、IP、连接状态、持久化/普通模式和唯一窗口名；支持 `1-24px` 字体、自适应/固定/自定义尺寸、横纵滚动与按需快捷键面板。
+- Windows/Linux 下载使用系统“另存为”，Android 使用 SAF 系统文档选择器；取消不会先连接或下载，选定目标继续保留断点续传和完整性校验。
+- Android 支持系统、浅色、深色主题与系统语言自动选择；终端显示、AI 权限/执行档和监控设置均通过 SQLite 持久化。
+
+### 修复
+
+- 修复 `v0.6.11` 在真实 Ubuntu 卸载时 tmux server 已退出但 socket 路径残留，导致安全删除停在数据清理前的问题。当前版本只隔离并删除身份连续、已证明归属的 socket；stale、事务残留、原路径替换或身份漂移仍安全停止。
+- 修复离线主机仍显示旧绿色状态、全新 SQLite 并发初始化偶发锁库、单功能 channel 失败误断健康 transport，以及已安装但未运行的 firewalld 被误报为查询失败。
+- SSH 的 DNS、TCP、握手和认证阶段分别使用 8 秒硬截止，不可通过更换凭据修复的失败立即返回，不再重复完整拨号。
+- 修复 Windows 主窗口关闭后隐藏登录窗仍持有事件循环的问题；主窗口退出会先关闭全部其它本产品窗口，再结束应用进程。
+
+### 验证
+
+- 根 workspace 全量测试、`client-core` 132 项定向测试、Clippy、格式与 Shell 语法门禁通过。
+- Ubuntu no-mock 正常卸载返回 `TMUX_CLEANUP_OK`、`DATA_CLEANUP_OK` 且产品根归零；stale、事务残留与原路径替换均保留原对象，外部资源不变。
+- Windows、Android 与 Linux 正式资产均完成版本、包身份、签名/ABI/payload、真实启动与 SHA256 复核；Android x86_64 测试包已在 MuMu 实操主机、终端、文件、监控、AI 与设置页面。
+- Linux AppImage/deb 已在隔离图形与系统密钥环会话中，以真实服务器和真实 AI Key 验证监控、系统、文件、进程、AI、失效重连和持久化终端重开。
+
+### SHA256
+
+- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
+- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
+- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
+- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
+- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
+- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
+- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`
 
 ## v0.6.11（预发布）
 
@@ -282,7 +325,7 @@ Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、
 
 ## 🧾 更新列表
 
-- 本预发布资产与完整说明见 [v0.6.11 Release](../../releases/tag/v0.6.11)；稳定安装包仍见 [Releases latest](../../releases/latest)。
+- 最新稳定资产与完整说明见 [v0.6.12 Release](../../releases/tag/v0.6.12)；`v0.6.11` 预发布历史资产继续保留。
 - 历史更新记录见 [CHANGELOG.md](CHANGELOG.md)。
 - Release 说明保持中英双语，包含「下载 / 新增 / 修复 / 验证 / SHA256」。
 

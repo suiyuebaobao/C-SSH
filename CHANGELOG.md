@@ -4,6 +4,43 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.12 - 安全卸载收口与三端体验完善
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.12_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.12_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.12_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.12_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.12_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.12_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.12_linux-amd64.deb`
+
+### 新增
+- Windows、Linux、Android 复用同一主机已认证 SSH transport；监控、文件、AI、系统管理与终端通过独立 channel 并行，多客户端可同时连接。
+- Android 终端采用紧凑双行工具栏，补齐主机 IP、唯一窗口名、`1-24px` 字体、自适应/固定/自定义尺寸、横纵滚动、复制与按需快捷键面板。
+- Windows/Linux 使用系统“另存为”，Android 使用 SAF 文档选择器；三端均由用户选择下载目的地。
+- Android 新增系统/浅色/深色主题和系统语言自动选择，终端、AI、监控偏好通过 SQLite 持久化。
+
+### 修复
+- 修复 `v0.6.11` 真实 Ubuntu 卸载后 tmux socket 路径残留阻断数据清理的问题；只隔离并删除身份连续、已证明归属的对象，任何身份异常继续 fail-closed。
+- 修复离线主机旧绿色状态、全新 SQLite 并发初始化锁库、单 channel 失败误断健康 transport、停止状态 firewalld 误报，以及 Windows 主窗关闭后隐藏登录窗残留。
+- SSH 的 DNS、TCP、握手、认证阶段分别使用 8 秒硬截止，不再为不可恢复错误重复完整拨号。
+
+### 验证
+- 根 workspace 全量测试、`client-core` 132 项定向测试、Clippy、格式与 Shell 语法通过。
+- Ubuntu no-mock 覆盖正常 quarantine/guard 清理、初始 stale、事务残留、原路径替换与外部资源不变。
+- Windows、Android、Linux 正式资产完成版本、包身份、签名/ABI/payload、真实启动、关闭与 SHA256 复核；Android x86_64 测试包在 MuMu 完成页面实操。
+- Linux AppImage/deb 在隔离图形与系统密钥环会话中，以真实服务器和真实 AI Key 完成监控、系统、文件、进程、AI、失效重连和持久化终端重开。
+
+### SHA256
+- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
+- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
+- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
+- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
+- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
+- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
+- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`
+
 ## v0.6.11 - 跨端连接复用、移动终端与安全恢复（预发布）
 
 > Ubuntu 真实卸载验证发现 tmux 受控退出后可能残留 socket 路径，完整产品数据清理会按安全策略停止。该版本已降为预发布；修复使用新版本发布，不覆盖本版本资产。
