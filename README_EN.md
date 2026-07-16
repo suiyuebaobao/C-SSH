@@ -67,13 +67,45 @@ See the [v0.6.13 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.
 
 These screenshots come from real Android workflows and were reviewed for redaction before publication.
 
+#### Host Management
+
 <div align="center">
-<img width="180" src="screenshots/mobile-hosts.png" alt="Android host list" />
-<img width="180" src="screenshots/mobile-terminal.png" alt="Android persistent terminal" />
-<img width="180" src="screenshots/mobile-files.png" alt="Android file manager" />
-<img width="180" src="screenshots/mobile-monitor.png" alt="Android live monitoring" />
-<img width="180" src="screenshots/mobile-ai.png" alt="Android AI real response" />
+<img width="360" src="screenshots/mobile-hosts.png" alt="Android host management" />
 </div>
+
+View host connectivity and agent deployment status in one place, and add new hosts when needed. Select a host to continue to terminal, files, monitoring, AI, and other workflows.
+
+#### Persistent And Standard Terminals
+
+<div align="center">
+<img width="360" src="screenshots/mobile-terminal.png" alt="Android persistent and standard terminals" />
+</div>
+
+Switch between reconnectable tmux sessions and standard SSH terminals while managing the active window. Persistent sessions can be reattached so command-line work can continue on mobile.
+
+#### File Manager
+
+<div align="center">
+<img width="360" src="screenshots/mobile-files.png" alt="Android file manager" />
+</div>
+
+Browse remote directories, create files or folders, toggle hidden files, and refresh the listing. Android's system file picker chooses download destinations, while each item provides additional management actions.
+
+#### Live Monitoring
+
+<div align="center">
+<img width="360" src="screenshots/mobile-monitor.png" alt="Android live monitoring" />
+</div>
+
+Monitor CPU, memory, load, network, disk usage, disk I/O, and top processes in real time. The page also shows monitoring health and uptime for quick mobile checks.
+
+#### AI Assistant
+
+<div align="center">
+<img width="360" src="screenshots/mobile-ai.png" alt="Android AI assistant real response" />
+</div>
+
+Select a target host, model, and permission profile before chatting with the AI, with controls for context, history, and settings. The screenshot shows a real read-only response, while tool execution remains governed by permissions and confirmation.
 
 ### Windows And Linux Desktop
 
@@ -93,14 +125,81 @@ Windows exposes the complete desktop navigation below. An independent Linux desk
 | Access grants | Review the local vault, SSH keys, one-time grants, and AI audit records |
 | Settings | AI provider, language, appearance, local login, monitoring collection, and update checks |
 
+### Real Desktop Screenshots (v0.6.13)
+
+Windows and Linux share the same desktop experience. The screenshots below come from the production desktop candidate and were redacted before publication.
+
+#### Host Management
+
 <div align="center">
-<img width="400" src="screenshots/hosts.png" alt="Desktop host management" />
-<img width="400" src="screenshots/terminal.png" alt="Desktop terminal" />
-<img width="400" src="screenshots/monitor-list.png" alt="Desktop monitoring overview" />
-<img width="400" src="screenshots/monitor.png" alt="Desktop monitoring" />
-<img width="400" src="screenshots/files.png" alt="Desktop file manager" />
-<img width="400" src="screenshots/ai.png" alt="Desktop AI assistant" />
+<img width="920" src="screenshots/hosts.png" alt="Desktop host management" />
 </div>
+
+Manage SSH hosts through groups, favorites, and search while reviewing agent deployment status. Each host row also surfaces the OS, CPU, memory, disk, load, uptime, and monitoring health.
+
+#### Persistent And Standard Terminals
+
+<div align="center">
+<img width="920" src="screenshots/terminal.png" alt="Desktop persistent and standard terminals" />
+</div>
+
+Select a host and switch between persistent tmux sessions and a standard SSH PTY. Standard terminals keep their live state across menu navigation, while persistent windows can be reattached after disconnects or device changes.
+
+#### Multi-host Monitoring Overview
+
+<div align="center">
+<img width="920" src="screenshots/monitor-list.png" alt="Desktop multi-host monitoring overview" />
+</div>
+
+Compare CPU, memory, and live status across hosts while controlling active collection. Select any host to open its detailed monitoring view.
+
+#### Per-host Monitoring Details
+
+<div align="center">
+<img width="920" src="screenshots/monitor.png" alt="Desktop per-host monitoring details" />
+</div>
+
+Inspect CPU, memory, disk, swap, load, network, and disk I/O for one host. Trend charts show recent changes, while top-process data helps identify resource usage.
+
+#### File Manager
+
+<div align="center">
+<img width="920" src="screenshots/files.png" alt="Desktop file manager" />
+</div>
+
+Browse and search remote directories, show hidden files, and create, upload, download, edit, or refresh items. The listing includes sizes, modification times, and per-item actions.
+
+#### AI Assistant
+
+<div align="center">
+<img width="920" src="screenshots/ai.png" alt="Desktop AI assistant" />
+</div>
+
+Select a host, model, and permission profile so the AI can read authorized metrics and system information and return a result. The page also provides history, context settings, and a separate AI window.
+
+#### Command Snippets
+
+<div align="center">
+<img width="920" src="screenshots/snippets.png" alt="Desktop command snippets" />
+</div>
+
+Save frequently used commands as named, tagged snippets instead of typing them repeatedly. Select multiple hosts to execute a snippet once and review results by host.
+
+#### Access Grants
+
+<div align="center">
+<img width="920" src="screenshots/grants.png" alt="Desktop access grants" />
+</div>
+
+Create an independent temporary SSH access key for a selected host, with the private key shown only when the grant is created. Revoke the grant at any time without sharing the host's long-term credentials.
+
+#### Settings
+
+<div align="center">
+<img width="920" src="screenshots/settings.png" alt="Desktop settings" />
+</div>
+
+Configure system-language following, local login and vault protection, AI providers, appearance, and monitoring collection in one place. The About view exposes the current version and update check, while persistent settings stay local.
 
 ## Security Boundaries
 
@@ -120,3 +219,11 @@ Creation-SSH is currently free forever, with no subscription, paid tier, or feat
 
 - WeChat: `suiyue_creation`
 - QQ Group (AI Innovation Community): [Join here](https://qm.qq.com/q/OWYQ9hwFWy)
+
+### QQ Group: AI Innovation Community
+
+<div align="center">
+<img width="300" src="screenshots/qq-group-qr.png" alt="QQ group QR code - AI Innovation Community" />
+</div>
+
+Scan the QR code or use the link above to join, Group No. `1041937161`. The group is for product experience, issue feedback, and future release discussions.
