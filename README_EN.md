@@ -4,345 +4,119 @@
 
 # Creation-SSH (C-SSH)
 
-### A new cross-platform SSH operations experience: native client, server-side tmux persistence, always-on monitoring, and a built-in AI assistant
+### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Download Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](../../releases/latest)
-[![Download Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](../../releases/latest)
-[![Global](https://img.shields.io/badge/Global-Worldwide-2ea44f)](../../releases/latest)
-[![Free Forever](https://img.shields.io/badge/Free-Forever-ff69b4)](../../releases/latest)
-[![Open Source](https://img.shields.io/badge/Open%20Source-after%20iOS%20and%20macOS%20stable%20releases-orange)](../../releases/latest)
-
-</div>
-
----
-
-## What Is It
-
-Creation-SSH is not another web ops panel, and it is not just a plain SSH terminal. It combines the native feel of tools like Xshell, structured capabilities from an always-on server-side agent, and tmux-grade persistent terminal sessions.
-
-In one line: **native client + structured resident agent + persistent sessions**, a modern three-in-one SSH operations tool.
-
----
-
-## Desktop Page Guide
-
-> Screenshots below use sanitized demo data such as `example.com`; they do not include real servers or credentials.
-
-<div align="center">
-
-### Host Management
-<img width="820" src="screenshots/hosts.png" alt="Host management" />
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
+[![Stable](https://img.shields.io/badge/stable-v0.6.13-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
 
 </div>
 
-The home page manages SSH hosts, groups, favorites, search, agent deployment, and repair. Host creation supports password or OpenSSH private-key authentication, and credentials stay in the local encrypted vault.
+Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-<div align="center">
+Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.13`**. `v0.6.11` remains available only as prerelease history and is not recommended.
 
-### AI Assistant
-<img width="820" src="screenshots/ai.png" alt="AI assistant" />
+## v0.6.13 Highlights
 
-</div>
+- Windows/Linux host rows use a compact responsive metric grid with the real OS, CPU, memory, disk, load, uptime, and Normal/Paused/Failed states.
+- Windows, Linux, and Android now retain standard and persistent terminal connections, screen state, and input across menu navigation, without duplicate prompts after reattachment.
+- Repairing an agent immediately performs one real metrics collection; an optional system-information failure no longer discards valid dynamic metrics.
+- Unreachable hosts can remove their local record after a clear remote-residue warning, while reachable hosts retain strict ownership auditing and safe cleanup.
+- The Windows/Linux AI assistant disables input and sending for clearly offline hosts, and the Windows splash screen is centered against the full window.
 
-The AI assistant works with host context: it can read metrics, inspect logs, edit files, and run commands under explicit permission modes. The top workspace keeps history, host selection, permissions, context usage, and performance presets close at hand; the desktop app also supports an independent AI pop-out window.
+## Android First
 
-<div align="center">
-
-### Terminal
-<img width="820" src="screenshots/terminal.png" alt="Dual-mode terminal" />
-
-</div>
-
-In **persistent mode**, the agent drives tmux directly. After a disconnect, reboot, or device switch, reconnecting restores the full screen through `capture-pane`, so running tasks stay alive. **Direct mode** is a native PTY fallback that works even without the agent.
-
-<div align="center">
-
-### Monitoring Overview
-<img width="820" src="screenshots/monitor-list.png" alt="Monitoring overview" />
-
-</div>
-
-The monitoring overview shows health across all hosts before you drill into one machine. It is designed for quick daily checks: online state, load, warnings, and recent cached status are visible without opening a terminal.
-
-<div align="center">
-
-### Monitoring Detail
-<img width="820" src="screenshots/monitor.png" alt="Monitoring" />
-
-</div>
-
-The resident agent continuously samples CPU, memory, disk, network, disk I/O, and top processes. Live cards show current state, while historical data is stored in redb for time-range review.
-
-<div align="center">
-
-### File Manager
-<img width="820" src="screenshots/files.png" alt="File manager" />
-
-</div>
-
-Browse remote files graphically with create, read, update, delete, online editing, permission viewing, chunked transfers, and resumable upload/download. File operations are provided by the agent in a structured way instead of being stitched together from shell commands.
-
-<div align="center">
-
-### Port Forwarding
-<img width="820" src="screenshots/ports.png" alt="Port forwarding" />
-
-</div>
-
-Port forwarding uses SSH local forwarding to expose remote internal services safely on your machine. Local listeners bind to `127.0.0.1` by default to avoid accidental LAN exposure, and saved forwards can be rebuilt, stopped, or removed.
-
-<div align="center">
-
-### Command Snippets
-<img width="820" src="screenshots/snippets.png" alt="Command snippets" />
-
-</div>
-
-Command snippets turn repeated operations into a local command library. Select multiple hosts, run a snippet, and review grouped results per host.
-
-<div align="center">
-
-### System Management
-<img width="820" src="screenshots/sysmgmt.png" alt="System management" />
-
-</div>
-
-System management covers read-only system facts, process control, firewall ports, and SSH password changes. Destructive actions require confirmation and run as the SSH login user without extra privilege escalation.
-
-<div align="center">
-
-### App Center
-<img width="820" src="screenshots/appcenter.png" alt="App Center" />
-
-</div>
-
-Install Docker itself in one click, deploy common containerized apps such as Nginx and Redis, and manage Docker containers, images, and systemd services. Destructive actions require confirmation and run as the SSH login user.
-
-<div align="center">
-
-### Access Grants
-<img width="820" src="screenshots/grants.png" alt="Access grants" />
-
-</div>
-
-Access grants centralize the local vault, generated SSH keys, one-time authorization, and AI audit records. Credentials stay on the local device and are never uploaded.
-
-<div align="center">
-
-### Settings
-<img width="820" src="screenshots/settings.png" alt="Settings" />
-
-</div>
-
-Settings collect AI provider configuration, custom context windows, tool-loop limits, system-language following, login password, desktop transparency, monitoring collection, and GitHub update checks.
-
----
-
-## Mobile Page Guide (Android)
-
-Desktop power in your pocket. The same persistent tmux sessions, monitoring, file management, and built-in AI assistant are available from Android.
-
-<div align="center">
-<img width="180" src="screenshots/mobile-login.png" alt="Mobile login" />
-<img width="180" src="screenshots/mobile-hosts.png" alt="Mobile hosts" />
-<img width="180" src="screenshots/mobile-terminal.png" alt="Mobile terminal" />
-<img width="180" src="screenshots/mobile-files.png" alt="Mobile files" />
-<img width="180" src="screenshots/mobile-monitor.png" alt="Mobile monitoring" />
-<img width="180" src="screenshots/mobile-ai.png" alt="Mobile AI assistant" />
-<img width="180" src="screenshots/mobile-sysmgmt.png" alt="Mobile system management" />
-<img width="180" src="screenshots/mobile-me.png" alt="Mobile Me" />
-</div>
-
-### Mobile Hosts
-The hosts page uses cards for server management, including creation, editing, deletion, agent deployment, and quick jumps into terminal, monitoring, and system management.
-
-### Mobile Terminal
-The terminal page keeps both persistent tmux and direct PTY modes, with mobile shortcut keys for Ctrl, Esc, Tab, and arrows.
-
-### Mobile Files
-The files page supports directory browsing, editing, downloading into the app sandbox, creating, renaming, deleting, and toggling hidden files.
-
-### Mobile Monitoring
-The monitoring page subscribes to live metrics and shows CPU, memory, disk, network, and top process state on a phone-sized layout.
-
-### Mobile AI Assistant
-The AI page keeps host selection, permissions, context, history, and configuration in mobile sheets. The input area avoids the soft keyboard so typed text stays visible.
-
-### Mobile System Management
-System management opens as an inner page from the host actions and covers system facts, firewall ports, process termination, and SSH password changes.
-
-### Me / Login Gate
-The Me page includes language, update checks, version information, login password, and local security settings. If a login password is configured, the app starts at the local login gate to unlock the vault.
-
-## Why C-SSH
-
-- **Native client experience**: full-stack Rust + Tauri 2, fast startup, low resource use, and a desktop-first workflow.
-- **Sessions that survive disconnects**: the agent drives tmux directly, so reconnecting restores long-running work.
-- **Structured resident agent**: monitoring, files, apps, and system management are delivered by a server-side agent, not by fragile client-side shell stitching.
-- **Built-in AI with two API families**: OpenAI-compatible APIs and Anthropic, with five permission tiers and execution confirmation.
-- **Local encrypted credentials**: private keys and passwords stay in the local encrypted vault and are never uploaded.
-- **Global by design**: the interface ships with 9 languages.
-- **Desktop and mobile**: Windows desktop plus Android companion.
-
----
-
-## Supported Platforms
-
-| Platform | Status | Notes |
-| --- | --- | --- |
-| Windows | Supported | Desktop client, setup.exe / MSI / portable zip |
-| Android | Supported | Mobile companion, arm64 APK |
-| Linux desktop | Supported | Independent AppImage / deb |
-| Server agent (Linux) | Supported | x86_64 / ARM64 static musl binary |
-| macOS | Planned | Open source after the stable iOS and macOS releases |
-| iOS | In development | Open source after the stable iOS and macOS releases |
-
----
-
-## Global And Free Forever
-
-Creation-SSH is built for users worldwide, with 9 built-in languages: Simplified Chinese, Traditional Chinese, English, Spanish, French, German, Portuguese, Russian, and Korean.
-
-The product is **free forever**: no subscription, no paid tier, and no locked features.
-
----
-
-## Open Source
-
-**The project will be open-sourced after the stable iOS and macOS releases are published.** We want to bring a genuinely useful native SSH operations tool to the community and maintain it openly for the long term.
-
----
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.13` ships as arm64 APK/AAB and passed real in-app workflow verification. Public Releases do not include the x86_64 emulator test build.
 
 ## Download
 
-Grab the latest build from [**Releases**](../../releases/latest):
+| Platform | Recommended download | Other production assets |
+| --- | --- | --- |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.aab) for store distribution |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_linux-amd64.deb) |
 
-**Current stable version**: `v0.6.12`. `v0.6.11` remains available only as prerelease history and is not recommended.
+See the [v0.6.13 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
-All example configurations use placeholders such as `example.com`; replace them with your own server details.
+## Delivered Platforms
 
-## v0.6.12
+| Platform | Delivered in `v0.6.13` |
+| --- | --- |
+| Android | Host management, agent deployment entry, persistent/standard terminals, files, live monitoring, AI, system management, local login gate, and Me settings |
+| Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
+| Linux desktop | Independent AppImage/deb; public verification covers persistent-terminal reopen, monitoring, system/processes, files, AI, and reconnect after invalidation |
+| Linux agent | x86_64 static musl binary deployed by the client over SSH; no extra public agent port is required |
+| iOS / macOS | **Not released** and not part of the `v0.6.13` delivery |
 
-### Downloads
+## Main Pages
 
-- Windows installer: `Creation-SSH_0.6.12_x64-setup.exe`
-- Windows MSI: `Creation-SSH_0.6.12_x64_en-US.msi`
-- Windows portable: `Creation-SSH_0.6.12_portable-Windows-x64.zip`
-- Android arm64 APK: `C-SSH_0.6.12_android-arm64.apk`
-- Android arm64 AAB: `C-SSH_0.6.12_android-arm64.aab`
-- Linux AppImage: `Creation-SSH_0.6.12_linux-x86_64.AppImage`
-- Linux deb: `Creation-SSH_0.6.12_linux-amd64.deb`
+### Android
 
-### Added
+| Page | What it does |
+| --- | --- |
+| Hosts | Add, edit, and remove hosts; deploy/repair the agent; enter terminal, monitoring, and system management |
+| Terminal | Switch between reconnectable tmux sessions and standard SSH PTY; manage windows, font, sizing, scrolling, copy, and mobile shortcut keys |
+| Files | Browse, edit, create, rename, and delete remote files; choose download destinations through Android SAF with resume and integrity checks |
+| Monitoring | View CPU, memory, disk, network, disk I/O, and top processes; background multi-host collection settings persist in local SQLite |
+| AI assistant | Select host, model, permission profile, history, and context; tool execution is governed by permissions and confirmation |
+| System management | Inspect system facts, processes, and firewall ports; confirm actions such as process termination and SSH password changes |
+| Me / login gate | Manage language, theme, version, updates, and local security; a configured login password unlocks the local vault at startup |
 
-- Windows, Linux, and Android reuse one authenticated SSH transport per host. Monitoring, files, AI, system management, and terminals use independent channels, while multiple clients can work concurrently.
-- The Android terminal now has a compact two-row toolbar with host, IP, connection state, persistent/standard mode, and unique window names, plus `1-24px` fonts, fit/fixed/custom sizing, two-dimensional scrolling, and an on-demand shortcut panel.
-- Windows/Linux downloads use the system Save As dialog, while Android uses the SAF document picker. Canceling starts no connection or download, and selected destinations retain resume and integrity checks.
-- Android supports system, light, and dark themes plus automatic system-language selection. Terminal display, AI permission/execution profiles, and monitoring settings persist in SQLite.
+### Real Android Screenshots (v0.6.13)
 
-### Fixed
-
-- Fixed the `v0.6.11` Ubuntu uninstall case where tmux exited but left its socket pathname, stopping safe product-data cleanup. This release quarantines and removes only identity-continuous, proven-owned sockets; stale sockets, transaction residues, path replacement, or identity drift still stop safely.
-- Fixed stale green status for offline hosts, occasional fresh-SQLite initialization locks, one failed feature channel disconnecting a healthy transport, and installed-but-stopped firewalld being reported as a query error.
-- DNS, TCP, SSH handshake, and authentication now each have an 8-second hard deadline. Failures that changing credentials cannot fix return immediately without repeating a full dial.
-- Fixed Windows shutdown leaving the hidden login window alive. Closing the main window now closes every other application window before terminating the process.
-
-### Verified
-
-- The full root workspace, 132 focused `client-core` tests, Clippy, formatting, and shell-syntax gates passed.
-- Ubuntu no-mock cleanup returned `TMUX_CLEANUP_OK` and `DATA_CLEANUP_OK` with no product root left. Stale, transaction-residue, and path-replacement cases preserved the original objects, and external resources were unchanged.
-- Windows, Android, and Linux production assets passed version, package identity, signature/ABI/payload, real-launch, and SHA256 checks. The Android x86_64 test build exercised hosts, terminals, files, monitoring, AI, and settings in MuMu.
-- Linux AppImage/deb were exercised in isolated display and system-keyring sessions against a real server and real AI key, covering metrics, system, files, processes, AI, reconnect after invalidation, and persistent-terminal reopen.
-
-### SHA256
-
-- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
-- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
-- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
-- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
-- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
-- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
-- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`
-
-## v0.6.11 (Prerelease)
-
-> Real Ubuntu uninstall verification found that tmux may leave its socket pathname after a controlled shutdown, causing the current safety policy to stop before product-data cleanup. This build remains fail-closed and does not delete unknown resources, but a complete uninstall may not finish. The correction will ship under a new version without replacing these assets.
-
-### Downloads
-
-- Windows installer: `Creation-SSH_0.6.11_x64-setup.exe`
-- Windows MSI: `Creation-SSH_0.6.11_x64_en-US.msi`
-- Windows portable: `Creation-SSH_0.6.11_portable-Windows-x64.zip`
-- Android arm64 APK: `C-SSH_0.6.11_android-arm64.apk`
-- Android arm64 AAB: `C-SSH_0.6.11_android-arm64.aab`
-- Linux AppImage: `Creation-SSH_0.6.11_linux-x86_64.AppImage`
-- Linux deb: `Creation-SSH_0.6.11_linux-amd64.deb`
-
-### Added
-
-- Windows, Linux, and Android now reuse an authenticated SSH transport for the same host. Monitoring, files, AI, system management, and terminals can work in parallel on separate channels, reducing repeated logins and waits without one completed operation interrupting the others.
-- The Windows/Linux desktop clients and Android can stay connected to the same host and work independently. After one client exits, monitoring and requests on the other continue, and persistent terminals remain available for reconnection.
-- The Android terminal now uses a compact two-row toolbar that keeps the host, target IP address, connection status, persistent/standard terminal switch, window selector, and common actions in one top area, leaving more room for the terminal canvas.
-- Android now supports both reconnectable persistent terminals and standard terminals that end when closed. Persistent windows receive unique `terminal-N` names by default, with safe renaming and normalization of older duplicate names.
-- Android terminal display controls now include fit, fixed `80x24`, and custom sizes, plus a `1-24px` font range. Fixed/custom modes support two-dimensional canvas browsing, and size, font, and scrolling preferences are restored after restart.
-- Android adds an on-demand shortcut overlay for Esc, Tab, Ctrl, arrow keys, and `-` without permanently shrinking the terminal. Copy uses the selection first, falls back to visible terminal content, and writes to the system clipboard.
-- Windows and Linux use the system Save As dialog for file or directory downloads, while Android uses the Storage Access Framework (SAF) system document picker. Canceling does not start a connection or download; chosen destinations retain resume support and integrity verification.
-- SSH connections now have clear staged 8-second failure boundaries for DNS resolution, TCP connection, SSH handshake, and authentication. A failed or timed-out stage returns immediately instead of repeating the wait with another credential.
-- When no password is entered explicitly and the stored private key is explicitly rejected, the client can try the encrypted-vault password within the same SSH session. After authentication succeeds, it continues public-key repair to reduce future password prompts.
-
-### Fixed
-
-- Fixed fresh local databases sometimes reporting `database is locked` when multiple pages or background tasks initialized at once. AI, files, monitoring, host data, and preferences can now open and recover reliably from the same SQLite database.
-- Fixed installed-but-stopped firewalld being reported as a query failure. The client now shows it as not running, keeps port actions disabled, and never starts or installs the firewall on its own.
-- A failure in one feature channel no longer disconnects a healthy shared SSH transport. Reconnection occurs only after the connection is confirmed lost, and mutating operations that may already have arrived are not replayed automatically.
-- Host-key trust now stops safely when its record cannot be read, parsed, or saved. The error is not treated as a first connection, the current session is not delivered, and no other credential path is attempted.
-- Before deleting a host or reinstalling, C-SSH verifies that the related service, process, persistent session, data, and public key belong to C-SSH. If any resource cannot be verified, it stops and preserves the current state instead of touching another service, session, or key.
-- Older leftovers that are confirmed to belong to C-SSH can now be recovered safely into a reinstallable state. Local host and credential records remain available for retry when remote cleanup is incomplete, while foreign or unknown resources always remain unchanged.
-
-### Verified
-
-- Shared connection reuse on Windows, Linux, and Android; simultaneous cross-client access; continued operation after one client exits; and real AI, file, monitoring, and both terminal workflows all passed verification.
-- The Android compact toolbar, host IP, persistent/standard terminals, unique window names, `1-24px` fonts, sizing, scrolling, copying, shortcut overlay, and restart restoration all passed verification.
-- Windows/Linux system Save As, the Android SAF system document picker, cancellation paths, resumed downloads, and download integrity checks all passed verification.
-- Concurrent first open of a fresh SQLite database, staged 8-second SSH failure messages, and same-session credential recovery all passed verification.
-- Safe stopping for host-key errors and deletion, preservation of foreign resources, and reinstall recovery for confirmed older leftovers all passed verification.
-- The root workspace gates and Windows, Android, and Linux build tests passed; installed-but-stopped firewalld on CentOS correctly returned `NotRunning`.
-- The production Windows app passed independent launch, shutdown, SQLite, and `0.6.11` version checks.
-- The Android x86_64 test build entered real terminal, file, monitoring, and AI flows in MuMu without crashing; the arm64 APK/AAB passed package-name, version, ABI, and signature checks.
-- The Linux deb/AppImage passed real installation, launch, shutdown, and SQLite checks in the authorized VM; both packages have identical payloads and bundle agent `0.6.11`.
-
-### SHA256
-
-- `Creation-SSH_0.6.11_x64-setup.exe`: `bf03f3805c28cdaf6d545e6b5bfac3d2ed0ec44265f591569c78be35fceb8c5b`
-- `Creation-SSH_0.6.11_x64_en-US.msi`: `647b4b8978433385950b34578588366657206f2746eb38355f2102f01295a911`
-- `Creation-SSH_0.6.11_portable-Windows-x64.zip`: `f319942c1710e794a78792b84dcc1e0a1178efb4b2b0d1dab1f205a832aa8b61`
-- `C-SSH_0.6.11_android-arm64.apk`: `92246daa0cbcd0283e238bc02d729f497a94407c6c4efc384de7fd3787a061ab`
-- `C-SSH_0.6.11_android-arm64.aab`: `3e3394bde08a9c8c96fcea6cc1660475ff509dec1d2ca588fa6032b0eaeee063`
-- `Creation-SSH_0.6.11_linux-x86_64.AppImage`: `2567e21b8498b6593d26d899728ad086302647acfbcb5948bbc8766358669fcb`
-- `Creation-SSH_0.6.11_linux-amd64.deb`: `cd10a93610caf3153c8ff7f711db84c2cf60576fb6dfce7187bfbfdac36b076f`
-
-## Releases And Changelog
-
-- See the latest stable assets and full notes in the [v0.6.12 Release](../../releases/tag/v0.6.12); the `v0.6.11` prerelease assets remain available as history.
-- Historical changes are tracked in [CHANGELOG_EN.md](CHANGELOG_EN.md).
-- Release notes are bilingual and include Downloads, Added, Fixed, Verified, and SHA256 sections.
-
-## Contact And Community
-
-- WeChat: **`suiyue_creation`**
-- QQ Group (AI Innovation Community): **[Join here](https://qm.qq.com/q/OWYQ9hwFWy)**
+These screenshots come from real Android workflows and were reviewed for redaction before publication.
 
 <div align="center">
-<img src="screenshots/qq-group-qr.png" width="260" alt="QQ group QR - AI Innovation Community" />
-<br/><sub>Scan to join the QQ group (AI Innovation Community) - Group No. 1041937161</sub>
+<img width="180" src="screenshots/mobile-hosts.png" alt="Android host list" />
+<img width="180" src="screenshots/mobile-terminal.png" alt="Android persistent terminal" />
+<img width="180" src="screenshots/mobile-files.png" alt="Android file manager" />
+<img width="180" src="screenshots/mobile-monitor.png" alt="Android live monitoring" />
+<img width="180" src="screenshots/mobile-ai.png" alt="Android AI real response" />
 </div>
 
-Questions, feedback, or want to follow iOS / macOS / open-source progress? Come say hi.
+### Windows And Linux Desktop
 
----
+Windows exposes the complete desktop navigation below. An independent Linux desktop client is delivered; the public `v0.6.13` verification explicitly covers host connectivity, terminals, monitoring, files, AI, and system/process workflows.
+
+| Page | What it does |
+| --- | --- |
+| Hosts | Groups, favorites, search, credential selection, plus agent deployment, repair, and status |
+| AI assistant | Uses explicitly authorized host context for metrics, logs, files, and tools; desktop supports a separate AI window |
+| Terminal | Dual tmux-persistent and standard SSH PTY modes, including persistent-window recovery after disconnects or device changes |
+| Monitoring | Fleet health overview, per-host live details, and historical time-range queries |
+| Files | Remote file management, online editing, chunked transfer, resume, and integrity verification |
+| Port forwarding | SSH local forwarding, bound to `127.0.0.1` by default, with saved start/stop controls |
+| Command snippets | Save common commands, run them across selected hosts, and group results by host |
+| System management | System facts, processes, firewall ports, and SSH password management |
+| App Center | Install Docker, deploy apps such as Nginx/Redis, and manage containers, images, and systemd services |
+| Access grants | Review the local vault, SSH keys, one-time grants, and AI audit records |
+| Settings | AI provider, language, appearance, local login, monitoring collection, and update checks |
 
 <div align="center">
-
-This repository is used only for public project introduction, screenshots, and release distribution. The source code is not hosted here yet and will be opened according to the commitment above.
-
+<img width="400" src="screenshots/hosts.png" alt="Desktop host management" />
+<img width="400" src="screenshots/terminal.png" alt="Desktop terminal" />
+<img width="400" src="screenshots/monitor-list.png" alt="Desktop monitoring overview" />
+<img width="400" src="screenshots/monitor.png" alt="Desktop monitoring" />
+<img width="400" src="screenshots/files.png" alt="Desktop file manager" />
+<img width="400" src="screenshots/ai.png" alt="Desktop AI assistant" />
 </div>
+
+## Security Boundaries
+
+- Private keys and passwords stay in the current device's local encrypted vault. They are not uploaded to servers or a C-SSH cloud; C-SSH does not provide a hosted credential service.
+- The agent is reached through an SSH tunnel and listens only on a server-local Unix socket. It exposes no extra public port and runs as the current SSH login identity without self-elevation.
+- Host-key anomalies stop the connection, destructive actions require explicit confirmation, and services, sessions, sockets, data, or public keys that cannot be proven to belong to C-SSH are not removed automatically.
+- Port forwarding binds to `127.0.0.1` by default. Users who choose another listen address are responsible for evaluating LAN exposure.
+- AI tools are controlled by permission profiles and execution confirmation. When a third-party AI provider is used, selected conversations and context are processed under that provider's terms.
+
+## Free, Languages, And Open-Source Plan
+
+Creation-SSH is currently free forever, with no subscription, paid tier, or feature lock. The interface includes Simplified Chinese, Traditional Chinese, English, Spanish, French, German, Portuguese, Russian, and Korean.
+
+**The current release is not open source.** This repository contains the public product introduction, screenshots, and Release assets only. The plan is to open-source the project after the official iOS and macOS releases. That is a roadmap statement, not a claim that source is available now or a commitment to a specific date.
+
+## Contact
+
+- WeChat: `suiyue_creation`
+- QQ Group (AI Innovation Community): [Join here](https://qm.qq.com/q/OWYQ9hwFWy)

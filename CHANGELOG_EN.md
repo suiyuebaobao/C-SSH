@@ -4,6 +4,43 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.13 - Host Monitoring Recovery and Client Resilience
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.13_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.13_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.13_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.13_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.13_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.13_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.13_linux-amd64.deb`
+
+### Added
+- Windows/Linux host rows now use a compact responsive metric grid with the real OS, CPU, memory, disk, load, uptime, and Normal/Paused/Failed states.
+- Latest metrics and OS details are stored in shared SQLite schema 4. Android writes the same metric-cache fields, and deletion remains exclusive with background collection on all three clients.
+
+### Fixed
+- Fixed menu navigation recreating terminal pages on Windows, Linux, and Android. Standard PTY and persistent tmux sessions now retain connection, screen, and input state without duplicate prompts after reattachment.
+- Fixed monitoring remaining in Failed after valid metrics arrived. Optional system-information failures no longer discard valid dynamic metrics, and repairing an agent immediately runs one real collection before updating status.
+- Fixed unreachable hosts being impossible to remove locally. An SSH bootstrap failure skips remote destructive steps with a residue warning, while ownership failures after connection remain fail-closed.
+- The Windows/Linux AI assistant disables input, attachments, and sending for a clearly offline selected host, then restores them after switching to an available host.
+- Fixed the Windows splash screen being offset by the application-shell layout while preserving the existing animation timing.
+
+### Verified
+- The isolated Windows candidate, authorized Ubuntu VM, and Android x86_64 MuMu test build completed real standard/persistent terminal navigation, continued-input, explicit-disconnect, and duplicate-prompt checks.
+- The Windows candidate completed a real `failed→fresh` recovery, OS-column, no-horizontal-overflow, launch, and clean-exit check.
+- Android arm64 production assets passed version/package/ABI/signature checks, and the x86_64 test build exercised affected pages in MuMu.
+- Linux AppImage/deb were built locally in the authorized Ubuntu VM and passed install, launch, shutdown, and host-monitoring checks in isolated display and keyring sessions.
+
+### SHA256
+- `Creation-SSH_0.6.13_x64-setup.exe`: `161795BA3CB74E144A3423E50CB3C03D857A4AB448C7AEF7C2046BA0E78D03C1`
+- `Creation-SSH_0.6.13_x64_en-US.msi`: `DD62A6C7EC1BAF2CC1ABF8C3F18BFC37424239709247990F78D99E0B94599EF6`
+- `Creation-SSH_0.6.13_portable-Windows-x64.zip`: `FEA9D83918138EDD04A1FF839BB92A14A7CD2BFA321AA9187EAF7FB331387057`
+- `C-SSH_0.6.13_android-arm64.apk`: `FE2BA564552B072D0997FC0C9DB00391098C802E4E867CB3E99EEA75C2D5FE5D`
+- `C-SSH_0.6.13_android-arm64.aab`: `802CA928A94A2F09B8267B7E43BE9F945CA7463627A5B4EF2D8748F87C84D2A4`
+- `Creation-SSH_0.6.13_linux-x86_64.AppImage`: `EB56DB36524B4D6781DC5721824A29B70D89108DAAAE47A61A954757BD52D397`
+- `Creation-SSH_0.6.13_linux-amd64.deb`: `FC01CA9EFC001345253C140ED0164D25BE2962F7915BC1275D915D6E616F08CA`
+
 ## v0.6.12 - Safe Uninstall Completion and Cross-Platform Polish
 
 ### Downloads

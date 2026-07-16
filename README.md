@@ -4,351 +4,119 @@
 
 # Creation-SSH（C-SSH）
 
-### 跨平台 SSH 运维新体验 —— 原生客户端 × 服务端 tmux 持久化 × 常驻监控 × 内置 AI 助手
+### 手机上也能接着运维：持久化终端、常驻监控、文件管理与 AI 助手
 
-[![下载 Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](../../releases/latest)
-[![下载 Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](../../releases/latest)
-[![支持全球](https://img.shields.io/badge/支持全球-Global-2ea44f)](../../releases/latest)
-[![永久免费](https://img.shields.io/badge/永久免费-Free%20Forever-ff69b4)](../../releases/latest)
-[![开源](https://img.shields.io/badge/开源-iOS和macOS正式版发布后-success)](../../releases/latest)
-
-</div>
-
----
-
-## 这是什么
-
-Creation-SSH 不是又一个网页运维面板,也不是普通的 SSH 终端。它把 **Xshell 级的原生客户端体验**、**服务端常驻 agent 的结构化能力**、**tmux 级的会话持久化**三者合一:客户端体验流畅原生,重活由服务器上的常驻 agent 结构化承担,终端会话即使断网、关机、换设备也永不丢失。
-
-一句话:**原生客户端 × 常驻结构化 agent × 持久化会话**,三合一的现代 SSH 运维工具。
-
----
-
-## 桌面端页面导览
-
-> 以下截图使用 `example.com` 等脱敏演示数据,不包含真实服务器或凭据。
-
-<div align="center">
-
-### 主机管理
-<img width="820" src="screenshots/hosts.png" alt="主机管理" />
+[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
+[![Linux](https://img.shields.io/badge/下载-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
+[![Stable](https://img.shields.io/badge/stable-v0.6.13-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
 
 </div>
 
-首页集中管理 SSH 主机、分组、收藏、搜索、agent 部署与修复。新增主机支持密码或 OpenSSH 私钥,凭据只进入本地加密保险库;部署过程会展示连接、上传、启动、握手等步骤。
+Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 与 Linux 桌面端负责更完整的日常运维工作流。
 
-<div align="center">
+核心能力由 Linux 服务器上的常驻 agent 结构化提供，普通终端和端口映射仍保留纯 SSH 路径。当前公开稳定版为 **`v0.6.13`**；`v0.6.11` 是已保留的预发布历史版本，不建议安装。
 
-### AI 助手
-<img width="820" src="screenshots/ai.png" alt="AI 助手" />
+## v0.6.13 更新重点
 
-</div>
+- Windows/Linux 主机列表使用紧凑自适应指标网格，显示真实系统、CPU、内存、磁盘、负载、运行时长和正常/暂停/失败三态。
+- Windows、Linux 与 Android 切换菜单后继续保留普通终端和持久化终端的连接、画面与输入状态，重新附加不再出现重复提示符。
+- 修复 agent 成功后立即执行一次真实监控采集；附加系统信息失败不再丢弃已成功取得的动态指标。
+- 不可达主机允许在明确警告远端残留后删除本地记录；可用主机仍执行严格归属审计与安全清理。
+- Windows/Linux 的 AI 助手会禁用明确离线主机的输入与发送，Windows 开屏重新按完整窗口居中。
 
-AI 助手可以带着主机上下文读监控、看日志、改文件、跑命令。顶部工作区收纳历史、主机、权限、上下文和性能档位;桌面端支持独立弹窗,方便同时操作多个 AI 助手窗口。
+## 先看 Android
 
-<div align="center">
+同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.6.13` 已交付 arm64 APK/AAB，并完成真实应用流程验证；公开 Release 不提供 x86_64 模拟器测试包。
 
-### 终端
-<img width="820" src="screenshots/terminal.png" alt="双模式终端" />
+## 下载
 
-</div>
-
-**持久化模式**由 agent 直驱 tmux,断线、关机、换设备后重连,通过 `capture-pane` 恢复完整屏幕内容,正在跑的任务一行不丢;**直连模式**为纯原生 PTY,未装 agent 也能当普通终端用。两种模式随手切换,兼顾护城河与兜底。
-
-<div align="center">
-
-### 监控入口
-<img width="820" src="screenshots/monitor-list.png" alt="监控入口" />
-
-</div>
-
-监控入口先展示所有主机健康概览,可以快速发现离线、异常负载和待处理主机,再进入单机详情。适合日常巡检,不用逐台打开终端敲命令。
-
-<div align="center">
-
-### 监控详情
-<img width="820" src="screenshots/monitor.png" alt="常驻监控" />
-
-</div>
-
-常驻 agent 持续采集 CPU、内存、磁盘、网络、磁盘 IO、Top 进程六大维度,实时六卡呈现,历史数据落 redb 时序库,可回溯任意时间范围。无需自己搭监控栈,连上即用。
-
-<div align="center">
-
-### 文件管理
-<img width="820" src="screenshots/files.png" alt="文件管理器" />
-
-</div>
-
-图形化浏览远端文件系统,支持增删改查、在线编辑、权限查看;上传下载分块传输、断点续传,大文件也稳。由 agent 结构化提供文件能力,不靠客户端拼 shell。
-
-<div align="center">
-
-### 端口映射
-<img width="820" src="screenshots/ports.png" alt="端口映射" />
-
-</div>
-
-端口映射基于 SSH 本地转发,把远端内网服务安全映射到本机。默认绑定 `127.0.0.1`,避免误暴露到局域网;已保存的映射可以重建、停止和移除。
-
-<div align="center">
-
-### 命令片段
-<img width="820" src="screenshots/snippets.png" alt="命令片段" />
-
-</div>
-
-命令片段把常用运维命令整理成库,可勾选多台主机批量执行,结果按主机分组展示。适合巡检、快速排障和重复性操作。
-
-<div align="center">
-
-### 系统管理
-<img width="820" src="screenshots/sysmgmt.png" alt="系统管理" />
-
-</div>
-
-系统管理提供只读系统信息、进程管理、防火墙端口和 SSH 密码修改。终止进程、改密等高风险动作需要二次确认,并以 SSH 登录身份执行,不额外提权。
-
-<div align="center">
-
-### 应用中心
-<img width="820" src="screenshots/appcenter.png" alt="应用中心" />
-
-</div>
-
-内置应用商城:一键安装 Docker 本身,一键部署 Nginx、Redis 等常用容器应用;结构化管理 Docker 容器与镜像、systemd 服务(启停、查日志)。破坏性操作二次确认,以 SSH 登录身份执行。
-
-<div align="center">
-
-### 访问授权
-<img width="820" src="screenshots/grants.png" alt="访问授权" />
-
-</div>
-
-访问授权集中管理本地保险库、已建 SSH key、一次性授权与 AI 审计记录。凭据永远只留在本机,不会上传服务器或云端。
-
-<div align="center">
-
-### 设置
-<img width="820" src="screenshots/settings.png" alt="设置" />
-
-</div>
-
-设置页集中配置 AI provider、上下文窗口、工具循环次数、语言跟随系统、登录密码、外观透明度、监控采集节奏和 GitHub 更新检测。
-
----
-
-## 移动端页面导览(Android)
-
-桌面端能力装进口袋。同一套 tmux 持久化会话、常驻监控、文件管理与 AI 助手,随时随地在手机上继续运维。
-
-<div align="center">
-<img width="180" src="screenshots/mobile-login.png" alt="移动端登录" />
-<img width="180" src="screenshots/mobile-hosts.png" alt="移动端主机" />
-<img width="180" src="screenshots/mobile-terminal.png" alt="移动端终端" />
-<img width="180" src="screenshots/mobile-files.png" alt="移动端文件" />
-<img width="180" src="screenshots/mobile-monitor.png" alt="移动端监控" />
-<img width="180" src="screenshots/mobile-ai.png" alt="移动端 AI 助手" />
-<img width="180" src="screenshots/mobile-sysmgmt.png" alt="移动端系统管理" />
-<img width="180" src="screenshots/mobile-me.png" alt="移动端我的" />
-</div>
-
-### 移动端主机
-主机页用卡片管理服务器,支持新增、编辑、删除、部署 agent,也可以从卡片直接跳转终端、监控、系统管理。
-
-### 移动端终端
-终端页同样支持持久化 tmux 与普通 PTY 双模式,并提供 Ctrl、Esc、Tab、方向键等移动快捷键栏。
-
-### 移动端文件
-文件页支持目录浏览、在线编辑、下载到 App 私有目录、新建、重命名、删除和隐藏文件切换。
-
-### 移动端监控
-监控页可订阅实时指标流,用手机查看 CPU、内存、磁盘、网络和 Top 进程。
-
-### 移动端 AI 助手
-AI 页保留主机选择、权限模式、上下文、历史和配置入口;软键盘打开时输入区自动避让,不会挡住正在输入的内容。
-
-### 移动端系统管理
-系统管理作为内页从主机入口进入,覆盖系统信息、防火墙端口、杀进程和改 SSH 密码。
-
-### 我的 / 登录门
-“我的”页包含语言、检查更新、版本、登录密码和本地安全设置。设置过登录密码后,启动时会先进入本地登录门解锁保险库。
-
-## 核心优点 · Why C-SSH
-
-- **原生客户端体验** —— 全栈 Rust + Tauri 2,启动快、占用低,不是套壳网页面板,操作如 Xshell 般顺手。
-- **持久化不丢会话** —— agent 直驱 tmux,断网/关机/换设备重连即恢复,长任务永不中断。
-- **常驻结构化 agent** —— 监控、文件、应用、系统管理都由服务端常驻 agent 结构化提供,高效、可复用,而非在客户端裸拼 shell。
-- **内置 AI 双接口** —— 同时支持 OpenAI 兼容与 Anthropic,五档权限 + 执行确认,能力强又安全可控。
-- **凭据本地加密、零上传** —— 私钥与密码仅存本地加密保险库,绝不上传服务器或任何云端。
-- **多语言全球化** —— 界面内置 9 种语言,面向全球用户。
-- **跨桌面与移动** —— Windows 桌面 + Android 移动伴侣,一套体验随身带走。
-
----
-
-## 支持平台
-
-| 平台 | 状态 | 说明 |
+| 平台 | 推荐下载 | 其他正式资产 |
 | --- | --- | --- |
-| Windows | ✅ 已支持 | 桌面客户端(setup.exe / msi) |
-| Android | ✅ 已支持 | 移动伴侣(arm64 APK) |
-| Linux 桌面 | ✅ 已支持 | 独立 AppImage / deb |
-| 服务端 agent（Linux） | ✅ 已支持 | x86_64 / ARM64,musl 静态二进制,单文件部署 |
-| macOS | 🚧 计划中 | iOS 和 macOS 正式版发布后开源 |
-| iOS | 🚧 开发中 | iOS 和 macOS 正式版发布后开源 |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.aab)，用于应用商店分发 |
+| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_linux-amd64.deb) |
 
----
+版本说明和 SHA256 见 [v0.6.13 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 🌍 支持全球 · 💛 永久免费
+## 已交付平台
 
-Creation-SSH **面向全球用户**,界面内置 **9 种语言**(简体中文、繁體中文、English、Español、Français、Deutsch、Português、Русский、한국어),无论你在哪里都能顺畅使用。
+| 平台 | `v0.6.13` 已交付范围 |
+| --- | --- |
+| Android | 主机管理、agent 部署入口、持久化/普通终端、文件、实时监控、AI、系统管理、本地登录门与“我的”设置 |
+| Windows | 完整桌面工作流；提供 EXE、MSI 与便携 ZIP |
+| Linux 桌面 | 独立 AppImage/deb；公开验证覆盖持久化终端重开、监控、系统/进程、文件、AI 与失效重连 |
+| Linux agent | x86_64 musl 静态二进制，由客户端经 SSH 部署；服务器不需要开放额外 agent 端口 |
+| iOS / macOS | **尚未发布**，不属于 `v0.6.13` 已交付范围 |
 
-本产品**永久免费**,不设订阅、不卖会员、不锁功能。💛
+## 主要页面
 
----
+### Android
 
-## 🔓 开源
+| 页面 | 能做什么 |
+| --- | --- |
+| 主机 | 新增、编辑和删除主机，部署/修复 agent，进入终端、监控和系统管理 |
+| 终端 | 在可重连的 tmux 持久化终端与普通 SSH PTY 间切换；支持窗口、字体、尺寸、滚动、复制和移动快捷键 |
+| 文件 | 浏览、编辑、新建、重命名和删除远端文件；通过 Android SAF 选择下载位置，保留断点续传与完整性校验 |
+| 监控 | 查看 CPU、内存、磁盘、网络、磁盘 I/O 和 Top 进程；后台跨主机采集设置保存在本地 SQLite |
+| AI 助手 | 选择主机、模型与权限档，查看历史和上下文；工具执行受权限与确认控制 |
+| 系统管理 | 查看系统信息、进程和防火墙端口，执行杀进程与修改 SSH 密码等需确认操作 |
+| 我的 / 登录门 | 语言、主题、版本、更新与本地安全设置；设置登录密码后先解锁本地保险库 |
 
-**iOS 和 macOS 正式版发布后,项目将进行开源。** 我们希望把一款真正好用的原生 SSH 运维工具带给社区,并以开源方式长期维护、接受贡献。
+### Android 真实截图（v0.6.13）
 
-> 想关注开源进度,可以 Star 本仓库或加入交流群。
-
----
-
-## 📥 下载
-
-前往 [**Releases**](../../releases/latest) 获取最新安装包:
-
-**当前稳定版本**: `v0.6.12`。`v0.6.11` 保留为预发布历史版本，不建议安装。
-
-> 示例配置一律使用 `example.com` 等占位地址，请替换为你自己的服务器信息。
-
-## v0.6.12
-
-### 下载
-
-- Windows 安装版：`Creation-SSH_0.6.12_x64-setup.exe`
-- Windows MSI：`Creation-SSH_0.6.12_x64_en-US.msi`
-- Windows 便携版：`Creation-SSH_0.6.12_portable-Windows-x64.zip`
-- Android arm64 APK：`C-SSH_0.6.12_android-arm64.apk`
-- Android arm64 AAB：`C-SSH_0.6.12_android-arm64.aab`
-- Linux AppImage：`Creation-SSH_0.6.12_linux-x86_64.AppImage`
-- Linux deb：`Creation-SSH_0.6.12_linux-amd64.deb`
-
-### 新增
-
-- Windows、Linux、Android 对同一主机复用已认证 SSH transport；监控、文件、AI、系统管理和终端使用独立 channel，多客户端可同时工作。
-- Android 终端换成紧凑双行工具栏，显示主机、IP、连接状态、持久化/普通模式和唯一窗口名；支持 `1-24px` 字体、自适应/固定/自定义尺寸、横纵滚动与按需快捷键面板。
-- Windows/Linux 下载使用系统“另存为”，Android 使用 SAF 系统文档选择器；取消不会先连接或下载，选定目标继续保留断点续传和完整性校验。
-- Android 支持系统、浅色、深色主题与系统语言自动选择；终端显示、AI 权限/执行档和监控设置均通过 SQLite 持久化。
-
-### 修复
-
-- 修复 `v0.6.11` 在真实 Ubuntu 卸载时 tmux server 已退出但 socket 路径残留，导致安全删除停在数据清理前的问题。当前版本只隔离并删除身份连续、已证明归属的 socket；stale、事务残留、原路径替换或身份漂移仍安全停止。
-- 修复离线主机仍显示旧绿色状态、全新 SQLite 并发初始化偶发锁库、单功能 channel 失败误断健康 transport，以及已安装但未运行的 firewalld 被误报为查询失败。
-- SSH 的 DNS、TCP、握手和认证阶段分别使用 8 秒硬截止，不可通过更换凭据修复的失败立即返回，不再重复完整拨号。
-- 修复 Windows 主窗口关闭后隐藏登录窗仍持有事件循环的问题；主窗口退出会先关闭全部其它本产品窗口，再结束应用进程。
-
-### 验证
-
-- 根 workspace 全量测试、`client-core` 132 项定向测试、Clippy、格式与 Shell 语法门禁通过。
-- Ubuntu no-mock 正常卸载返回 `TMUX_CLEANUP_OK`、`DATA_CLEANUP_OK` 且产品根归零；stale、事务残留与原路径替换均保留原对象，外部资源不变。
-- Windows、Android 与 Linux 正式资产均完成版本、包身份、签名/ABI/payload、真实启动与 SHA256 复核；Android x86_64 测试包已在 MuMu 实操主机、终端、文件、监控、AI 与设置页面。
-- Linux AppImage/deb 已在隔离图形与系统密钥环会话中，以真实服务器和真实 AI Key 验证监控、系统、文件、进程、AI、失效重连和持久化终端重开。
-
-### SHA256
-
-- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
-- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
-- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
-- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
-- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
-- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
-- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`
-
-## v0.6.11（预发布）
-
-> Ubuntu 真实卸载验证发现，tmux 受控退出后可能保留 socket 路径，当前安全策略会停止后续产品数据清理。该版本保持 fail-closed，不会误删未知资源，但完整卸载可能无法完成；修复将使用新版本发布，不覆盖本 Release 资产。
-
-### 下载
-
-- Windows 安装版：`Creation-SSH_0.6.11_x64-setup.exe`
-- Windows MSI：`Creation-SSH_0.6.11_x64_en-US.msi`
-- Windows 便携版：`Creation-SSH_0.6.11_portable-Windows-x64.zip`
-- Android arm64 APK：`C-SSH_0.6.11_android-arm64.apk`
-- Android arm64 AAB：`C-SSH_0.6.11_android-arm64.aab`
-- Linux AppImage：`Creation-SSH_0.6.11_linux-x86_64.AppImage`
-- Linux deb：`Creation-SSH_0.6.11_linux-amd64.deb`
-
-### 新增
-
-- Windows、Linux 和 Android 统一复用同一主机已经认证的 SSH transport。监控、文件、AI、系统管理和终端可在各自通道中并行工作，减少重复登录与等待；单项操作结束不会打断其他正在运行的功能。
-- Windows/Linux 桌面端与 Android 可同时连接同一台主机并独立工作；一端退出后，另一端的监控和请求继续运行，持久化终端仍可重连恢复。
-- Android 终端采用紧凑双行工具栏，在同一顶部区域显示主机、目标 IP、连接状态、持久化/普通终端切换、窗口选择和常用操作，为终端画布保留更多空间。
-- Android 同时支持可断线恢复的持久化终端和关闭即结束的普通终端；持久化窗口默认使用不重复的 `terminal-N` 名称，支持安全重命名并整理旧重复名称。
-- Android 终端新增自适应、固定 `80x24` 与自定义尺寸，字体可调范围为 `1-24px`；固定/自定义模式支持横纵浏览，尺寸、字体与滚动偏好会在重启后恢复。
-- Android 终端新增按需快捷键覆盖层，提供 Esc、Tab、Ctrl、方向键和 `-`，不再常驻挤占终端空间；复制优先使用选区，无选区时复制当前可见内容，并写入系统剪贴板。
-- Windows 与 Linux 下载文件或目录时使用系统“另存为”，Android 使用 Storage Access Framework（SAF）系统文档选择器选择保存位置；取消不会先连接或下载，已选目标继续保留断点续传与完整性校验。
-- SSH 连接新增分阶段 8 秒失败边界与明确提示：DNS 解析、TCP 连接、SSH 握手和认证分别计时，失败或超时后立即返回，不再因切换凭据重复等待。
-- 未显式输入密码且库存私钥被服务器明确拒绝时，可在同一 SSH 会话内尝试本地加密保险库中的库存密码；认证成功后继续修复公钥登录，减少重复输入。
-
-### 修复
-
-- 修复全新本地数据库首次启动时，多个页面或后台任务同时初始化可能出现“database is locked”的问题；AI、文件、监控、主机与偏好数据现在可稳定从同一个 SQLite 数据库打开和恢复。
-- 修复已安装但未运行的 firewalld 被误报为查询失败的问题；客户端现在明确显示“未运行”，保持端口操作禁用，也不会擅自启动或安装防火墙。
-- 单个功能通道失败不再连带断开仍然健康的共享 SSH transport；只有确认连接已中断时才重新连接，可能已经送达的修改操作不会自动重复执行。
-- 主机密钥信任记录读取、解析或保存失败时改为安全停止：不把异常当作“首次连接”继续，不交付当前会话，也不转入其他凭据尝试。
-- 删除主机或重装前会先确认相关服务、进程、持久化会话、数据和公钥确属 C-SSH；任何资源无法确认时立即停止并保留现状，不会误删其他服务、会话或密钥。
-- 已确认属于 C-SSH 的旧版残留现在可以安全恢复到可重装状态；远端清理未完整成功时保留本地主机和凭据供重试，外部或未知资源始终保持不变。
-
-### 验证
-
-- Windows、Linux、Android 的共享连接复用、跨客户端同连、单端退出后另一端继续工作，以及 AI、文件、监控和两种终端的真实流程均已通过验证。
-- Android 紧凑工具栏、主机 IP、持久化/普通终端、唯一窗口名、`1-24px` 字体、尺寸、滚动、复制、快捷键覆盖层及重启恢复均已通过验证。
-- Windows/Linux 系统“另存为”、Android SAF 系统文档选择器、取消路径、断点续传和下载完整性校验均已通过验证。
-- 全新 SQLite 首次并发打开、SSH 各阶段 8 秒失败提示与同会话凭据恢复均已通过验证。
-- 主机密钥异常与安全删除的停止保护、外部资源保持不变，以及已确认旧版残留的重装恢复均已通过验证。
-- 根 workspace 门禁与 Windows、Android、Linux 三端构建测试均已通过；CentOS 上已安装但未运行的 firewalld 正确返回 `NotRunning`。
-- Windows 正式程序已完成独立启动、关闭、SQLite 与 `0.6.11` 版本检查。
-- Android x86_64 测试包已在 MuMu 中真实进入终端、文件、监控和 AI 流程且无崩溃；arm64 APK/AAB 的包名、版本、ABI 与签名检查均已通过。
-- Linux deb/AppImage 已在授权虚拟机中完成真实安装、启动、关闭与 SQLite 检查；两种包的 payload 一致，内置 agent 版本为 `0.6.11`。
-
-### SHA256
-
-- `Creation-SSH_0.6.11_x64-setup.exe`: `bf03f3805c28cdaf6d545e6b5bfac3d2ed0ec44265f591569c78be35fceb8c5b`
-- `Creation-SSH_0.6.11_x64_en-US.msi`: `647b4b8978433385950b34578588366657206f2746eb38355f2102f01295a911`
-- `Creation-SSH_0.6.11_portable-Windows-x64.zip`: `f319942c1710e794a78792b84dcc1e0a1178efb4b2b0d1dab1f205a832aa8b61`
-- `C-SSH_0.6.11_android-arm64.apk`: `92246daa0cbcd0283e238bc02d729f497a94407c6c4efc384de7fd3787a061ab`
-- `C-SSH_0.6.11_android-arm64.aab`: `3e3394bde08a9c8c96fcea6cc1660475ff509dec1d2ca588fa6032b0eaeee063`
-- `Creation-SSH_0.6.11_linux-x86_64.AppImage`: `2567e21b8498b6593d26d899728ad086302647acfbcb5948bbc8766358669fcb`
-- `Creation-SSH_0.6.11_linux-amd64.deb`: `cd10a93610caf3153c8ff7f711db84c2cf60576fb6dfce7187bfbfdac36b076f`
-
-## 🧾 更新列表
-
-- 最新稳定资产与完整说明见 [v0.6.12 Release](../../releases/tag/v0.6.12)；`v0.6.11` 预发布历史资产继续保留。
-- 历史更新记录见 [CHANGELOG.md](CHANGELOG.md)。
-- Release 说明保持中英双语，包含「下载 / 新增 / 修复 / 验证 / SHA256」。
-
-## 💬 联系 · 交流群
-
-- 微信:**`suiyue_creation`**
-- QQ 群【AI 创新社区】:**[点击加入](https://qm.qq.com/q/OWYQ9hwFWy)**
+以下截图来自 Android 真实运行流程，并已在公开前完成脱敏核对。
 
 <div align="center">
-<img src="screenshots/qq-group-qr.png" width="260" alt="QQ 群二维码 · AI创新社区" />
-<br/><sub>扫码加入 QQ 群【AI 创新社区】· 群号 1041937161</sub>
+<img width="180" src="screenshots/mobile-hosts.png" alt="Android 主机列表" />
+<img width="180" src="screenshots/mobile-terminal.png" alt="Android 持久化终端" />
+<img width="180" src="screenshots/mobile-files.png" alt="Android 文件管理" />
+<img width="180" src="screenshots/mobile-monitor.png" alt="Android 实时监控" />
+<img width="180" src="screenshots/mobile-ai.png" alt="Android AI 真实响应" />
 </div>
 
+### Windows 与 Linux 桌面
 
-有问题、建议、想了解 iOS / macOS / 开源进度,欢迎来撩~
+Windows 提供下列完整桌面入口。Linux 已交付独立桌面客户端；`v0.6.13` 公开验证明确覆盖主机连接、终端、监控、文件、AI 和系统/进程核心链路。
 
----
-
-
----
+| 页面 | 能做什么 |
+| --- | --- |
+| 主机管理 | 分组、收藏、搜索、凭据选择，以及 agent 部署、修复和状态查看 |
+| AI 助手 | 结合已授权的主机上下文读取指标、日志和文件并执行工具；桌面支持独立 AI 窗口 |
+| 终端 | tmux 持久化终端与普通 SSH PTY 双模式，断线或换设备后可恢复持久化窗口 |
+| 监控 | 跨主机健康概览、单机实时详情和历史范围查询 |
+| 文件 | 远端文件管理、在线编辑、分块传输、断点续传和完整性校验 |
+| 端口映射 | SSH 本地转发；默认监听 `127.0.0.1`，可保存、启动和停止映射 |
+| 命令片段 | 保存常用命令并对多台主机执行，结果按主机分组 |
+| 系统管理 | 系统信息、进程、防火墙端口和 SSH 密码管理 |
+| 应用中心 | 安装 Docker，部署 Nginx/Redis 等应用，管理容器、镜像与 systemd 服务 |
+| 访问授权 | 查看本地保险库、SSH key、一次性授权和 AI 审计记录 |
+| 设置 | AI provider、语言、外观、本地登录、监控采集与更新检查 |
 
 <div align="center">
-
-本仓库仅用于项目简介、截图与安装包分发推广,源代码暂不在此仓(iOS 和 macOS 正式版发布后开源)。
-
+<img width="400" src="screenshots/hosts.png" alt="桌面主机管理" />
+<img width="400" src="screenshots/terminal.png" alt="桌面终端" />
+<img width="400" src="screenshots/monitor-list.png" alt="桌面监控入口" />
+<img width="400" src="screenshots/monitor.png" alt="桌面监控" />
+<img width="400" src="screenshots/files.png" alt="桌面文件管理" />
+<img width="400" src="screenshots/ai.png" alt="桌面 AI 助手" />
 </div>
+
+## 安全边界
+
+- 私钥和密码只保存在当前设备的本地加密保险库，不上传服务器或 C-SSH 云端；本项目没有托管凭据云服务。
+- agent 通过 SSH 隧道访问并只监听服务器本机 Unix socket，不额外暴露公网端口；agent 以当前 SSH 登录身份执行，不自行提权。
+- 主机密钥异常会停止连接，破坏性操作需要明确确认；无法证明属于 C-SSH 的服务、会话、socket、数据或公钥不会自动删除。
+- 端口映射默认绑定 `127.0.0.1`。如手动改为其他监听地址，局域网暴露风险由用户自行评估。
+- AI 工具受权限档和执行确认约束；使用第三方 AI provider 时，用户选定的对话与上下文会按该 provider 的服务条款处理。
+
+## 免费、语言与开源计划
+
+Creation-SSH 当前永久免费，不设订阅、会员或付费功能锁；界面内置简体中文、繁體中文、English、Español、Français、Deutsch、Português、Русский、한국어。
+
+**当前版本尚未开源。** 本仓库只用于项目介绍、截图与 Release 资产分发。计划是在 iOS 与 macOS 正式版发布后公开源代码；这是后续计划，不代表当前仓库已包含源码，也不承诺具体日期。
+
+## 联系
+
+- 微信：`suiyue_creation`
+- QQ 群【AI 创新社区】：[点击加入](https://qm.qq.com/q/OWYQ9hwFWy)

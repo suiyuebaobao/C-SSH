@@ -4,6 +4,43 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.13 - 主机监控恢复与客户端韧性
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.13_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.13_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.13_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.13_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.13_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.13_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.13_linux-amd64.deb`
+
+### 新增
+- Windows/Linux 主机列表改为紧凑自适应指标网格，展示真实系统、CPU、内存、磁盘、负载、运行时长与正常/暂停/失败三种可见状态。
+- 最新指标与系统描述写入共享 SQLite schema 4；Android 同步指标缓存字段，三端删除继续与后台采集互斥。
+
+### 修复
+- 修复 Windows、Linux 与 Android 切换菜单会销毁终端现场的问题；普通 PTY 和持久化 tmux 会话现在跨菜单保留连接、画面与输入状态，重新附加不再产生重复提示符。
+- 修复监控数据已经成功拉取但状态仍停在“失败”的问题；附加系统信息失败不再丢弃有效动态指标，修复 agent 后立即执行一次真实采集并按结果刷新。
+- 修复不可达主机无法删除本地记录的问题；SSH bootstrap 失败时明确跳过远端破坏动作并警告可能残留，已连接后的归属审计仍严格停止。
+- Windows/Linux AI 助手对明确离线的当前主机禁用输入、附件与发送；切换到可用主机后恢复。
+- 修复 Windows 开屏受应用壳布局影响而偏移的问题，动画继续保持原时序并按完整窗口居中。
+
+### 验证
+- Windows 隔离候选、授权 Ubuntu 虚拟机和 Android x86_64 MuMu 测试包均完成普通/持久化终端菜单往返、继续输入、主动断开保持及无重复提示符的真实验证。
+- Windows 候选完成真实 `failed→fresh`、系统列、无横向溢出、启动与退出验证。
+- Android arm64 正式资产完成版本/包名/ABI/签名检查，x86_64 测试包在 MuMu 完成受影响页面实操。
+- Linux AppImage/deb 在授权 Ubuntu 虚拟机本地构建，并在隔离图形与密钥环会话中完成安装、启动、关闭及本轮主机监控验证。
+
+### SHA256
+- `Creation-SSH_0.6.13_x64-setup.exe`: `161795BA3CB74E144A3423E50CB3C03D857A4AB448C7AEF7C2046BA0E78D03C1`
+- `Creation-SSH_0.6.13_x64_en-US.msi`: `DD62A6C7EC1BAF2CC1ABF8C3F18BFC37424239709247990F78D99E0B94599EF6`
+- `Creation-SSH_0.6.13_portable-Windows-x64.zip`: `FEA9D83918138EDD04A1FF839BB92A14A7CD2BFA321AA9187EAF7FB331387057`
+- `C-SSH_0.6.13_android-arm64.apk`: `FE2BA564552B072D0997FC0C9DB00391098C802E4E867CB3E99EEA75C2D5FE5D`
+- `C-SSH_0.6.13_android-arm64.aab`: `802CA928A94A2F09B8267B7E43BE9F945CA7463627A5B4EF2D8748F87C84D2A4`
+- `Creation-SSH_0.6.13_linux-x86_64.AppImage`: `EB56DB36524B4D6781DC5721824A29B70D89108DAAAE47A61A954757BD52D397`
+- `Creation-SSH_0.6.13_linux-amd64.deb`: `FC01CA9EFC001345253C140ED0164D25BE2962F7915BC1275D915D6E616F08CA`
+
 ## v0.6.12 - 安全卸载收口与三端体验完善
 
 ### 下载
