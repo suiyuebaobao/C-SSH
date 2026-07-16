@@ -4,6 +4,42 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.14 - 三端主机硬删除与生命周期隔离
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.14_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.14_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.14_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.14_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.14_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.14_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.14_linux-amd64.deb`
+
+### 新增
+- Windows、Linux 与 Android 统一使用主机硬删除语义：删除会结束该主机在当前设备上的本地生命周期，而不是只移除列表项。
+- 本地数据库升级到 schema 5，主机与关联状态通过 `ON DELETE CASCADE` 收口，并在迁移中执行一次匿名孤儿记录清理。
+
+### 修复
+- 删除主机时同步清除本地主机记录、绑定凭据、历史会话、终端窗口持久化、监控缓存及其他可归属状态，避免残留数据继续影响客户端。
+- 后续新增主机始终创建全新生命周期；即使复用已删除主机的 ID 或网络地址，也不会继承旧凭据、会话、窗口或指标数据。
+- 不可达主机仅在远端清理尚未开始时允许执行本地硬删除；一旦流程涉及远端服务、会话、socket、数据或公钥，归属或完整性无法确认时即 fail-closed。
+- schema 5 迁移一次性清理无法归属到任何主机的匿名孤儿记录，避免历史残留继续游离于生命周期之外。
+- 修复 Windows/Linux 主窗口关闭后进程仍在后台残留的问题；`CloseRequested` 与 `Destroyed` 统一进入幂等退出流程。
+
+### 验证
+- 公开资料已完成版本号、资产命名、中英双语功能口径、逐图说明、QQ群入口保留与脱敏检查。
+- Windows/Linux 正式候选均要求主窗口与调试连接消失后，程序进程自然归零；强制结束进程不计为通过。
+- 尚未执行的破坏性真实服务器深度删除 E2E 未列为通过项；本条目不声称该项已经验证。
+
+### SHA256
+- `Creation-SSH_0.6.14_x64-setup.exe`: `3332E724EAD76EE32ABFB047DBDBB77C8C372D8D8CAC5A5CF37A315A69F2C1A3`
+- `Creation-SSH_0.6.14_x64_en-US.msi`: `B74A9FCA806D83AD09B8FA117D14730A53BFFB67CA842C98A618014D80D42A02`
+- `Creation-SSH_0.6.14_portable-Windows-x64.zip`: `04E326D51D380188C9EFA2232448F67CFBC7ED3769E5D1F51C8F78830E7BC7C0`
+- `C-SSH_0.6.14_android-arm64.apk`: `349BF316DB92FCB84E4143B9F9C6FE967B82A55BC2828652B09DA39EC601C458`
+- `C-SSH_0.6.14_android-arm64.aab`: `E656672C08F5E1D3E9D0C17E5B18CEFB0AD4ABF3A5D8697E231D00B22A8828B2`
+- `Creation-SSH_0.6.14_linux-x86_64.AppImage`: `CB09DF5ED82FC9E084145177ED18702959BA33300C7CED71EC407154B5FC863A`
+- `Creation-SSH_0.6.14_linux-amd64.deb`: `48DDA463DAF7ED99F77018C1E3AD1B1515B5D731044B381137F1E38413793F15`
+
 ## v0.6.13 - 主机监控恢复与客户端韧性
 
 ### 下载

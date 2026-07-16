@@ -6,48 +6,49 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
-[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
-[![Stable](https://img.shields.io/badge/stable-v0.6.13-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
+[![Stable](https://img.shields.io/badge/stable-v0.6.14-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.13`**. `v0.6.11` remains available only as prerelease history and is not recommended.
+Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.14`**. `v0.6.11` remains available only as prerelease history and is not recommended.
 
-## v0.6.13 Highlights
+## v0.6.14 Highlights
 
-- Windows/Linux host rows use a compact responsive metric grid with the real OS, CPU, memory, disk, load, uptime, and Normal/Paused/Failed states.
-- Windows, Linux, and Android now retain standard and persistent terminal connections, screen state, and input across menu navigation, without duplicate prompts after reattachment.
-- Repairing an agent immediately performs one real metrics collection; an optional system-information failure no longer discards valid dynamic metrics.
-- Unreachable hosts can remove their local record after a clear remote-residue warning, while reachable hosts retain strict ownership auditing and safe cleanup.
-- The Windows/Linux AI assistant disables input and sending for clearly offline hosts, and the Windows splash screen is centered against the full window.
+- Windows, Linux, and Android now share one host hard-delete contract: confirmation removes more than a list row and ends that host's lifecycle on the current device.
+- Hard deletion clears the host record, bound credentials, session history, terminal-window persistence, monitoring cache, and other attributable local state.
+- Any host added afterward starts a new lifecycle. Reusing the former host ID or network address does not restore data from the deleted host.
+- An unreachable host permits local-only hard deletion only before remote cleanup begins. Once remote services, sessions, sockets, data, or keys are involved, any ownership or completeness uncertainty fails closed.
+- Local storage moves to schema 5, using `ON DELETE CASCADE` for related state and a one-time migration cleanup for anonymous orphan records that cannot be attributed to a host.
+- Fixed a Windows/Linux issue where closing the main window could leave the process running; close requests and window destruction now enter one idempotent exit path.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.13` ships as arm64 APK/AAB and passed real in-app workflow verification. Public Releases do not include the x86_64 emulator test build.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.14` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/C-SSH_0.6.13_android-arm64.aab) for store distribution |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.13/Creation-SSH_0.6.13_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.aab) for store distribution |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_linux-amd64.deb) |
 
-See the [v0.6.13 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.13) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.6.14 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.6.13` |
+| Platform | Delivered in `v0.6.14` |
 | --- | --- |
 | Android | Host management, agent deployment entry, persistent/standard terminals, files, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| Linux desktop | Independent AppImage/deb; public verification covers persistent-terminal reopen, monitoring, system/processes, files, AI, and reconnect after invalidation |
+| Linux desktop | Independent AppImage/deb with persistent terminals, monitoring, system/process, file, AI, and reconnect workflows |
 | Linux agent | x86_64 static musl binary deployed by the client over SSH; no extra public agent port is required |
-| iOS / macOS | **Not released** and not part of the `v0.6.13` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.6.14` delivery |
 
 ## Main Pages
 
@@ -55,7 +56,7 @@ See the [v0.6.13 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.
 
 | Page | What it does |
 | --- | --- |
-| Hosts | Add, edit, and remove hosts; deploy/repair the agent; enter terminal, monitoring, and system management |
+| Hosts | Add, edit, and hard-delete hosts; clear attributable local state on deletion; deploy/repair the agent; enter terminal, monitoring, and system management |
 | Terminal | Switch between reconnectable tmux sessions and standard SSH PTY; manage windows, font, sizing, scrolling, copy, and mobile shortcut keys |
 | Files | Browse, edit, create, rename, and delete remote files; choose download destinations through Android SAF with resume and integrity checks |
 | Monitoring | View CPU, memory, disk, network, disk I/O, and top processes; background multi-host collection settings persist in local SQLite |
@@ -63,9 +64,9 @@ See the [v0.6.13 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.
 | System management | Inspect system facts, processes, and firewall ports; confirm actions such as process termination and SSH password changes |
 | Me / login gate | Manage language, theme, version, updates, and local security; a configured login password unlocks the local vault at startup |
 
-### Real Android Screenshots (v0.6.13)
+### Android Product Screenshots
 
-These screenshots come from real Android workflows and were reviewed for redaction before publication.
+Each screenshot below is paired with one clear feature description and was reviewed for redaction before publication.
 
 #### Host Management
 
@@ -73,7 +74,7 @@ These screenshots come from real Android workflows and were reviewed for redacti
 <img width="360" src="screenshots/mobile-hosts.png" alt="Android host management" />
 </div>
 
-View host connectivity and agent deployment status in one place, and add new hosts when needed. Select a host to continue to terminal, files, monitoring, AI, and other workflows.
+View connectivity and agent deployment status in one place, then add, edit, or hard-delete hosts. Hard deletion ends the host's local lifecycle, so adding the same ID or address later still creates a new host without inherited data.
 
 #### Persistent And Standard Terminals
 
@@ -109,7 +110,7 @@ Select a target host, model, and permission profile before chatting with the AI,
 
 ### Windows And Linux Desktop
 
-Windows exposes the complete desktop navigation below. An independent Linux desktop client is delivered; the public `v0.6.13` verification explicitly covers host connectivity, terminals, monitoring, files, AI, and system/process workflows.
+Windows exposes the complete desktop navigation below, and Linux has its own desktop client. Both use the same host hard-delete and lifecycle-isolation contract.
 
 | Page | What it does |
 | --- | --- |
@@ -125,9 +126,9 @@ Windows exposes the complete desktop navigation below. An independent Linux desk
 | Access grants | Review the local vault, SSH keys, one-time grants, and AI audit records |
 | Settings | AI provider, language, appearance, local login, monitoring collection, and update checks |
 
-### Real Desktop Screenshots (v0.6.13)
+### Desktop Product Screenshots
 
-Windows and Linux share the same desktop experience. The screenshots below come from the production desktop candidate and were redacted before publication.
+Windows and Linux share the same desktop experience. Each screenshot below is paired with one feature description and has been reviewed for redaction.
 
 #### Host Management
 
@@ -135,7 +136,7 @@ Windows and Linux share the same desktop experience. The screenshots below come 
 <img width="920" src="screenshots/hosts.png" alt="Desktop host management" />
 </div>
 
-Manage SSH hosts through groups, favorites, and search while reviewing agent deployment status. Each host row also surfaces the OS, CPU, memory, disk, load, uptime, and monitoring health.
+Manage SSH hosts through groups, favorites, and search while reviewing agent status and live metrics. Deletion clears attributable credentials, session history, window persistence, and monitoring cache instead of allowing a later host to inherit old state.
 
 #### Persistent And Standard Terminals
 
@@ -205,7 +206,7 @@ Configure system-language following, local login and vault protection, AI provid
 
 - Private keys and passwords stay in the current device's local encrypted vault. They are not uploaded to servers or a C-SSH cloud; C-SSH does not provide a hosted credential service.
 - The agent is reached through an SSH tunnel and listens only on a server-local Unix socket. It exposes no extra public port and runs as the current SSH login identity without self-elevation.
-- Host-key anomalies stop the connection, destructive actions require explicit confirmation, and services, sessions, sockets, data, or public keys that cannot be proven to belong to C-SSH are not removed automatically.
+- Host-key anomalies stop the connection, and destructive actions require explicit confirmation. An unreachable host allows local-only deletion only before remote cleanup begins; once remote state is involved, uncertain ownership or incomplete cleanup fails closed.
 - Port forwarding binds to `127.0.0.1` by default. Users who choose another listen address are responsible for evaluating LAN exposure.
 - AI tools are controlled by permission profiles and execution confirmation. When a third-party AI provider is used, selected conversations and context are processed under that provider's terms.
 

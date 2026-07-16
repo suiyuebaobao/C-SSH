@@ -4,6 +4,42 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.14 - Cross-Platform Host Hard Deletion and Lifecycle Isolation
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.14_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.14_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.14_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.14_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.14_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.14_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.14_linux-amd64.deb`
+
+### Added
+- Windows, Linux, and Android now share one host hard-delete contract: deleting a host ends its local lifecycle on the current device instead of only removing a list row.
+- Local storage moves to schema 5, using `ON DELETE CASCADE` for host-related state and a one-time migration cleanup for anonymous orphan records.
+
+### Fixed
+- Deleting a host now clears the local host record, bound credentials, session history, terminal-window persistence, monitoring cache, and other attributable state.
+- Every host added later starts a new lifecycle. Reusing a deleted host's ID or network address does not restore old credentials, sessions, windows, or metrics.
+- An unreachable host permits local-only hard deletion only before remote cleanup starts. Once remote services, sessions, sockets, data, or public keys are involved, uncertain ownership or incomplete cleanup fails closed.
+- The schema 5 migration removes anonymous orphan records that cannot be attributed to any host, preventing historical state from remaining outside a host lifecycle.
+- Fixed a Windows/Linux issue where closing the main window could leave the process running; `CloseRequested` and `Destroyed` now enter one idempotent exit path.
+
+### Verified
+- Public materials passed version, asset-name, bilingual feature-parity, screenshot-description, preserved QQ entry, and redaction checks.
+- Windows/Linux production candidates must naturally reach zero application processes after the main window and debug connection disappear; a forced process kill does not count as a pass.
+- Destructive real-server deep-delete E2E has not been executed and is not claimed as passed in this entry.
+
+### SHA256
+- `Creation-SSH_0.6.14_x64-setup.exe`: `3332E724EAD76EE32ABFB047DBDBB77C8C372D8D8CAC5A5CF37A315A69F2C1A3`
+- `Creation-SSH_0.6.14_x64_en-US.msi`: `B74A9FCA806D83AD09B8FA117D14730A53BFFB67CA842C98A618014D80D42A02`
+- `Creation-SSH_0.6.14_portable-Windows-x64.zip`: `04E326D51D380188C9EFA2232448F67CFBC7ED3769E5D1F51C8F78830E7BC7C0`
+- `C-SSH_0.6.14_android-arm64.apk`: `349BF316DB92FCB84E4143B9F9C6FE967B82A55BC2828652B09DA39EC601C458`
+- `C-SSH_0.6.14_android-arm64.aab`: `E656672C08F5E1D3E9D0C17E5B18CEFB0AD4ABF3A5D8697E231D00B22A8828B2`
+- `Creation-SSH_0.6.14_linux-x86_64.AppImage`: `CB09DF5ED82FC9E084145177ED18702959BA33300C7CED71EC407154B5FC863A`
+- `Creation-SSH_0.6.14_linux-amd64.deb`: `48DDA463DAF7ED99F77018C1E3AD1B1515B5D731044B381137F1E38413793F15`
+
 ## v0.6.13 - Host Monitoring Recovery and Client Resilience
 
 ### Downloads
