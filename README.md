@@ -6,49 +6,49 @@
 
 ### 手机上也能接着运维：持久化终端、常驻监控、文件管理与 AI 助手
 
-[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
-[![Linux](https://img.shields.io/badge/下载-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
-[![Stable](https://img.shields.io/badge/stable-v0.6.14-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
+[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
+[![Linux](https://img.shields.io/badge/下载-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
+[![Stable](https://img.shields.io/badge/stable-v0.6.15-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
 
 </div>
 
 Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 与 Linux 桌面端负责更完整的日常运维工作流。
 
-核心能力由 Linux 服务器上的常驻 agent 结构化提供，普通终端和端口映射仍保留纯 SSH 路径。当前公开稳定版为 **`v0.6.14`**；`v0.6.11` 是已保留的预发布历史版本，不建议安装。
+核心能力由 Linux 服务器上的常驻 agent 结构化提供，普通终端和端口映射仍保留纯 SSH 路径。当前公开稳定版为 **`v0.6.15`**；`v0.6.11` 是已保留的预发布历史版本，不建议安装。
 
-## v0.6.14 更新重点
+## v0.6.15 更新重点
 
-- Windows、Linux 与 Android 统一采用“主机硬删除”：确认删除后，不只移除列表项，还结束该主机在当前设备上的生命周期。
-- 硬删除会清除该主机的本地记录、绑定凭据、历史会话、终端窗口持久化、监控缓存及其他可归属的关联状态。
-- 之后新增的主机始终开始全新生命周期；即使复用原主机 ID 或网络地址，也不会继承已删除主机的数据。
-- 不可达主机仅在尚未进入远端清理时允许执行本地硬删除；一旦涉及远端服务、会话、socket、数据或公钥，任何归属或完整性不确定都会 fail-closed。
-- 本地数据库升级到 schema 5，以 `ON DELETE CASCADE` 收口关联状态删除，并在迁移时一次性清理无法归属到主机的匿名孤儿记录。
-- 修复 Windows/Linux 主窗口关闭后后台进程仍残留的问题；关闭请求与窗口销毁现在统一进入一次性退出流程。
+- Windows 与 Linux 的 11 个主要工作区统一为紧凑单层布局，顶部空间得到有效利用，小窗口和高 DPI 下也保持清晰。
+- AI 助手合并历史、当前会话与新建入口，限制主机和模型选择器宽度，并修复菜单切换后的残留控件与灰色遮挡。
+- Android 文件管理新增系统文件选择器单文件上传，沿用分块传输、SHA256 完整性校验与当前目录目标冻结。
+- Android 主机操作新增安装 agent 与更新/修复 agent，优先复用本地保险库凭据。
+- Android AI、文件和监控页面进一步紧凑化：会话入口合并、深层路径折叠、主机状态单行显示，并为进程名称释放更多空间。
+- Windows、Android 与 Linux 均从同一 `0.6.15` 冻结源码构建，正式资产统一携带版本号。
 
 ## 先看 Android
 
-同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.6.14` 的正式公开资产为 arm64 APK/AAB；公开 Release 不提供 x86_64 模拟器测试包。
+同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.6.15` 的正式公开资产为 arm64 APK/AAB；公开 Release 不提供 x86_64 模拟器测试包。
 
 ## 下载
 
 | 平台 | 推荐下载 | 其他正式资产 |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.aab)，用于应用商店分发 |
-| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.aab)，用于应用商店分发 |
+| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_linux-amd64.deb) |
 
-版本说明和 SHA256 见 [v0.6.14 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
+版本说明和 SHA256 见 [v0.6.15 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 已交付平台
 
-| 平台 | `v0.6.14` 已交付范围 |
+| 平台 | `v0.6.15` 已交付范围 |
 | --- | --- |
-| Android | 主机管理、agent 部署入口、持久化/普通终端、文件、实时监控、AI、系统管理、本地登录门与“我的”设置 |
+| Android | 主机管理、agent 安装与更新/修复、持久化/普通终端、文件上传下载、实时监控、AI、系统管理、本地登录门与“我的”设置 |
 | Windows | 完整桌面工作流；提供 EXE、MSI 与便携 ZIP |
 | Linux 桌面 | 独立 AppImage/deb；提供持久化终端、监控、系统/进程、文件、AI 与失效重连工作流 |
 | Linux agent | x86_64 musl 静态二进制，由客户端经 SSH 部署；服务器不需要开放额外 agent 端口 |
-| iOS / macOS | **尚未发布**，不属于 `v0.6.14` 已交付范围 |
+| iOS / macOS | **尚未发布**，不属于 `v0.6.15` 已交付范围 |
 
 ## 主要页面
 
@@ -58,7 +58,7 @@ Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控
 | --- | --- |
 | 主机 | 新增、编辑和硬删除主机；硬删除清除本机关联状态，部署/修复 agent，进入终端、监控和系统管理 |
 | 终端 | 在可重连的 tmux 持久化终端与普通 SSH PTY 间切换；支持窗口、字体、尺寸、滚动、复制和移动快捷键 |
-| 文件 | 浏览、编辑、新建、重命名和删除远端文件；通过 Android SAF 选择下载位置，保留断点续传与完整性校验 |
+| 文件 | 浏览、编辑、新建、重命名和删除远端文件；通过 Android SAF 选择单个文件上传或选择下载位置，保留分块传输、断点续传与完整性校验 |
 | 监控 | 查看 CPU、内存、磁盘、网络、磁盘 I/O 和 Top 进程；后台跨主机采集设置保存在本地 SQLite |
 | AI 助手 | 选择主机、模型与权限档，查看历史和上下文；工具执行受权限与确认控制 |
 | 系统管理 | 查看系统信息、进程和防火墙端口，执行杀进程与修改 SSH 密码等需确认操作 |
@@ -74,7 +74,7 @@ Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控
 <img width="360" src="screenshots/mobile-hosts.png" alt="Android 主机管理" />
 </div>
 
-集中查看主机连接状态和 agent 部署信息，也可以新增、编辑或硬删除主机。硬删除会结束该主机的本地生命周期；之后即使使用相同 ID 或地址重新添加，也会作为全新主机开始。
+集中查看主机连接状态和 agent 部署信息，也可以安装、更新/修复 agent，或新增、编辑和硬删除主机。硬删除会结束该主机的本地生命周期；之后即使使用相同 ID 或地址重新添加，也会作为全新主机开始。
 
 #### 持久化与普通终端
 
@@ -90,7 +90,7 @@ Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控
 <img width="360" src="screenshots/mobile-files.png" alt="Android 文件管理" />
 </div>
 
-浏览远端目录，新建文件或文件夹，切换隐藏文件显示并刷新列表。下载时通过 Android 系统文件选择器决定保存位置，文件条目也提供进一步管理操作。
+使用紧凑两行工具栏浏览远端目录、折叠深层路径、新建文件或文件夹并切换隐藏文件。上传通过 Android 系统文件选择器选取单个本地文件，下载同样由用户选择保存位置。
 
 #### 实时监控
 

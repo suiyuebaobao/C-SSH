@@ -6,49 +6,49 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
-[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
-[![Stable](https://img.shields.io/badge/stable-v0.6.14-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
+[![Stable](https://img.shields.io/badge/stable-v0.6.15-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.14`**. `v0.6.11` remains available only as prerelease history and is not recommended.
+Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.15`**. `v0.6.11` remains available only as prerelease history and is not recommended.
 
-## v0.6.14 Highlights
+## v0.6.15 Highlights
 
-- Windows, Linux, and Android now share one host hard-delete contract: confirmation removes more than a list row and ends that host's lifecycle on the current device.
-- Hard deletion clears the host record, bound credentials, session history, terminal-window persistence, monitoring cache, and other attributable local state.
-- Any host added afterward starts a new lifecycle. Reusing the former host ID or network address does not restore data from the deleted host.
-- An unreachable host permits local-only hard deletion only before remote cleanup begins. Once remote services, sessions, sockets, data, or keys are involved, any ownership or completeness uncertainty fails closed.
-- Local storage moves to schema 5, using `ON DELETE CASCADE` for related state and a one-time migration cleanup for anonymous orphan records that cannot be attributed to a host.
-- Fixed a Windows/Linux issue where closing the main window could leave the process running; close requests and window destruction now enter one idempotent exit path.
+- Windows and Linux now share compact single-layer layouts across all eleven primary workspaces, using the top area efficiently at small sizes and high DPI.
+- The AI assistant consolidates history, current-session, and new-session controls, caps host and model selector widths, and fixes stale controls and dim overlays after navigation.
+- Android Files adds single-file upload through the system document picker with chunked transfer, SHA256 integrity verification, and a frozen destination directory.
+- Android host actions now include Install Agent and Update / Repair Agent while preferring credentials already stored in the local vault.
+- Android AI, Files, and Monitoring are more compact, with consolidated session controls, collapsed deep paths, one-line host status, and more room for process names.
+- Windows, Android, and Linux production assets are built from the same frozen `0.6.15` source and all include the version in their filenames.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.14` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.15` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/C-SSH_0.6.14_android-arm64.aab) for store distribution |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.14/Creation-SSH_0.6.14_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.aab) for store distribution |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_linux-amd64.deb) |
 
-See the [v0.6.14 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.14) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.6.15 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.6.14` |
+| Platform | Delivered in `v0.6.15` |
 | --- | --- |
-| Android | Host management, agent deployment entry, persistent/standard terminals, files, live monitoring, AI, system management, local login gate, and Me settings |
+| Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
 | Linux desktop | Independent AppImage/deb with persistent terminals, monitoring, system/process, file, AI, and reconnect workflows |
 | Linux agent | x86_64 static musl binary deployed by the client over SSH; no extra public agent port is required |
-| iOS / macOS | **Not released** and not part of the `v0.6.14` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.6.15` delivery |
 
 ## Main Pages
 
@@ -56,9 +56,9 @@ See the [v0.6.14 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.
 
 | Page | What it does |
 | --- | --- |
-| Hosts | Add, edit, and hard-delete hosts; clear attributable local state on deletion; deploy/repair the agent; enter terminal, monitoring, and system management |
+| Hosts | Add, edit, and hard-delete hosts; clear attributable local state on deletion; install or update/repair the agent; enter terminal, monitoring, and system management |
 | Terminal | Switch between reconnectable tmux sessions and standard SSH PTY; manage windows, font, sizing, scrolling, copy, and mobile shortcut keys |
-| Files | Browse, edit, create, rename, and delete remote files; choose download destinations through Android SAF with resume and integrity checks |
+| Files | Browse, edit, create, rename, and delete remote files; use Android SAF for single-file upload or download destinations with chunking, resume, and integrity checks |
 | Monitoring | View CPU, memory, disk, network, disk I/O, and top processes; background multi-host collection settings persist in local SQLite |
 | AI assistant | Select host, model, permission profile, history, and context; tool execution is governed by permissions and confirmation |
 | System management | Inspect system facts, processes, and firewall ports; confirm actions such as process termination and SSH password changes |
@@ -74,7 +74,7 @@ Each screenshot below is paired with one clear feature description and was revie
 <img width="360" src="screenshots/mobile-hosts.png" alt="Android host management" />
 </div>
 
-View connectivity and agent deployment status in one place, then add, edit, or hard-delete hosts. Hard deletion ends the host's local lifecycle, so adding the same ID or address later still creates a new host without inherited data.
+View connectivity and agent deployment status in one place, install or update/repair the agent, then add, edit, or hard-delete hosts. Hard deletion ends the host's local lifecycle, so adding the same ID or address later still creates a new host without inherited data.
 
 #### Persistent And Standard Terminals
 
@@ -90,7 +90,7 @@ Switch between reconnectable tmux sessions and standard SSH terminals while mana
 <img width="360" src="screenshots/mobile-files.png" alt="Android file manager" />
 </div>
 
-Browse remote directories, create files or folders, toggle hidden files, and refresh the listing. Android's system file picker chooses download destinations, while each item provides additional management actions.
+Use the compact two-row toolbar to browse remote directories, collapse deep paths, create files or folders, and toggle hidden items. Android's system picker selects one local file for upload and also chooses download destinations.
 
 #### Live Monitoring
 

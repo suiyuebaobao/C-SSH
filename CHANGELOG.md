@@ -4,6 +4,42 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.15 - 三端紧凑工作台与移动文件上传
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.15_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.15_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.15_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.15_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.15_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.15_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.15_linux-amd64.deb`
+
+### 新增
+- Android 文件管理新增系统文件选择器单文件上传，复用分块传输、SHA256 完整性校验与当前远端目录目标冻结。
+- Android 主机操作新增安装 agent 与更新/修复 agent，优先复用本地保险库凭据。
+
+### 修复
+- Windows 与 Linux 的主机、AI、终端、监控、文件、端口映射、命令片段、系统管理、应用中心、访问授权和设置统一为紧凑单层布局。
+- 修复 AI 与文件缓存页面切换菜单后向共享顶栏残留或叠加控件的问题。
+- AI 主机和模型选择器限制宽度并自动省略长名称；历史、当前会话和新建入口合并。
+- 修复访问授权页面隐藏标签形成灰色遮挡区域的问题。
+- Android AI 删除重复会话栏；文件页压缩为两行工具栏并折叠深层路径；监控页合并主机与状态并为进程名称释放空间。
+
+### 验证
+- Windows 候选完成紧凑工作台菜单往返、小窗口/高 DPI 布局与主窗口自然退出验证。
+- Android x86_64 MuMu、Linux 原生界面及七份正式资产的最终证据见本版本 Release。
+- 公开资料通过版本号、资产名、中英双语一致性、QQ群入口保留与脱敏检查。
+
+### SHA256
+- `Creation-SSH_0.6.15_x64-setup.exe`: `B9662AC58E7F0525CE055B0385F2B4ED1A4E8474C00F40BE5152899E8FAD13B1`
+- `Creation-SSH_0.6.15_x64_en-US.msi`: `D3DE26B5EC4B23878DF5BE54D461CCE616F97E27B301B9034FA72DC99EB70963`
+- `Creation-SSH_0.6.15_portable-Windows-x64.zip`: `7E37E8A2AE82A14C49C704B10FA06E609F9291900F2B1E362C5E0380A9010BED`
+- `C-SSH_0.6.15_android-arm64.apk`: `FDEDB8CFBF075B9B903466601131DB5399C4452EA2BD50C1DAE0D40CA1AC6405`
+- `C-SSH_0.6.15_android-arm64.aab`: `BACE56E90AF31E736927D5CF201AB880492F056E9A6C35ED07ED2EB95F88B874`
+- `Creation-SSH_0.6.15_linux-x86_64.AppImage`: `F126E940FAE4F86DEB5367AFDC27EE31976485DE250DCF53D44DB272E5E5269A`
+- `Creation-SSH_0.6.15_linux-amd64.deb`: `13A8968DA2FDB468D5775B58C610AF98A99C293E3FCAAFF837D7F5F9987781C7`
+
 ## v0.6.14 - 三端主机硬删除与生命周期隔离
 
 ### 下载

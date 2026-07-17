@@ -4,6 +4,42 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.15 - Compact Cross-Platform Workspaces and Mobile File Upload
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.15_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.15_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.15_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.15_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.15_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.15_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.15_linux-amd64.deb`
+
+### Added
+- Android Files adds single-file upload through the system document picker with chunked transfer, SHA256 integrity verification, and a frozen remote destination.
+- Android host actions add Install Agent and Update / Repair Agent while preferring credentials already stored in the local vault.
+
+### Fixed
+- Windows and Linux now use compact single-layer layouts across Hosts, AI, Terminal, Monitoring, Files, Port Forwarding, Snippets, System Management, App Center, Access Grants, and Settings.
+- Fixed cached AI and Files pages leaving stale or duplicated controls in the shared top bar after navigation.
+- AI host and model selectors now cap their width and truncate long names; history, current-session, and new-session controls are consolidated.
+- Fixed hidden accessibility labels creating a large dim overlay on the Access Grants page.
+- Android AI removes the duplicate session row; Files uses a compact two-row toolbar with collapsed deep paths; Monitoring combines host and status controls and gives process names more room.
+
+### Verified
+- The Windows candidate passed compact-workspace navigation, small-window/high-DPI layout, and natural main-window exit validation.
+- Final Android x86_64 MuMu, native Linux UI, and seven-asset evidence are recorded in this version's Release.
+- Public materials passed version, asset-name, bilingual parity, preserved QQ entry, and redaction checks.
+
+### SHA256
+- `Creation-SSH_0.6.15_x64-setup.exe`: `B9662AC58E7F0525CE055B0385F2B4ED1A4E8474C00F40BE5152899E8FAD13B1`
+- `Creation-SSH_0.6.15_x64_en-US.msi`: `D3DE26B5EC4B23878DF5BE54D461CCE616F97E27B301B9034FA72DC99EB70963`
+- `Creation-SSH_0.6.15_portable-Windows-x64.zip`: `7E37E8A2AE82A14C49C704B10FA06E609F9291900F2B1E362C5E0380A9010BED`
+- `C-SSH_0.6.15_android-arm64.apk`: `FDEDB8CFBF075B9B903466601131DB5399C4452EA2BD50C1DAE0D40CA1AC6405`
+- `C-SSH_0.6.15_android-arm64.aab`: `BACE56E90AF31E736927D5CF201AB880492F056E9A6C35ED07ED2EB95F88B874`
+- `Creation-SSH_0.6.15_linux-x86_64.AppImage`: `F126E940FAE4F86DEB5367AFDC27EE31976485DE250DCF53D44DB272E5E5269A`
+- `Creation-SSH_0.6.15_linux-amd64.deb`: `13A8968DA2FDB468D5775B58C610AF98A99C293E3FCAAFF837D7F5F9987781C7`
+
 ## v0.6.14 - Cross-Platform Host Hard Deletion and Lifecycle Isolation
 
 ### Downloads
