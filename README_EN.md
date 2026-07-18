@@ -6,49 +6,50 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
-[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
-[![Stable](https://img.shields.io/badge/stable-v0.6.15-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/C-SSH_0.6.16_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16)
+[![Stable](https://img.shields.io/badge/stable-v0.6.16-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.15`**. `v0.6.11` remains available only as prerelease history and is not recommended.
+Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.16`**. `v0.6.11` remains available only as prerelease history and is not recommended.
 
-## v0.6.15 Highlights
+## v0.6.16 Highlights
 
-- Windows and Linux now share compact single-layer layouts across all eleven primary workspaces, using the top area efficiently at small sizes and high DPI.
-- The AI assistant consolidates history, current-session, and new-session controls, caps host and model selector widths, and fixes stale controls and dim overlays after navigation.
-- Android Files adds single-file upload through the system document picker with chunked transfer, SHA256 integrity verification, and a frozen destination directory.
-- Android host actions now include Install Agent and Update / Repair Agent while preferring credentials already stored in the local vault.
-- Android AI, Files, and Monitoring are more compact, with consolidated session controls, collapsed deep paths, one-line host status, and more room for process names.
-- Windows, Android, and Linux production assets are built from the same frozen `0.6.15` source and all include the version in their filenames.
+- Windows and Linux retain compact single-layer layouts across all eleven primary workspaces. Host rows stay on one line at 960px and above, terminal controls move into the top bar, and the layout still contracts for small windows and high DPI.
+- Desktop Terminal adds a separate-window action so multiple terminal windows can be used in parallel. Connection state moves into the host selector, Connect and Disconnect follow the current state, and the tmux window list no longer presents the server-side active flag as the current selection.
+- Android Terminal, Files, Monitoring, and AI retain compact mobile interactions: mobile terminal shortcuts, collapsed deep file paths with SAF upload, consolidated host status, and merged AI session controls.
+- Android file upload continues to use chunked transfer, SHA256 integrity verification, and a frozen remote destination. Host actions include Install Agent and Update / Repair Agent while preferring credentials in the local vault.
+- Windows, Linux, and Android deployment resources now include two independent pairs: `x86_64 agent + x86_64 static tmux` and `aarch64 agent + aarch64 static tmux`. After authenticated SSH, the client runs read-only `uname -m` and uploads only the matching pair.
+- The aarch64 resources and automatic-selection foundation are implemented. Real ARM-server no-mock execution is still pending, so this release does not claim complete ARM64 server support.
+- All three clients retain host hard deletion and lifecycle isolation: deletion clears attributable local credentials, sessions, windows, and monitoring state, and re-adding the same ID or address starts a new lifecycle.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.15` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.16` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/C-SSH_0.6.15_android-arm64.aab) for store distribution |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.15/Creation-SSH_0.6.15_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/C-SSH_0.6.16_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/C-SSH_0.6.16_android-arm64.aab) for store distribution |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_linux-amd64.deb) |
 
-See the [v0.6.15 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.15) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.6.16 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.6.15` |
+| Platform | Delivered in `v0.6.16` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
 | Linux desktop | Independent AppImage/deb with persistent terminals, monitoring, system/process, file, AI, and reconnect workflows |
-| Linux agent | x86_64 static musl binary deployed by the client over SSH; no extra public agent port is required |
-| iOS / macOS | **Not released** and not part of the `v0.6.15` delivery |
+| Linux agent deployment resources | Independent `x86_64` and `aarch64` agent/static-tmux pairs selected after authenticated `uname -m`; real aarch64 no-mock validation is pending, so complete ARM64 support is not claimed |
+| iOS / macOS | **Not released** and not part of the `v0.6.16` delivery |
 
 ## Main Pages
 
@@ -116,7 +117,7 @@ Windows exposes the complete desktop navigation below, and Linux has its own des
 | --- | --- |
 | Hosts | Groups, favorites, search, credential selection, plus agent deployment, repair, and status |
 | AI assistant | Uses explicitly authorized host context for metrics, logs, files, and tools; desktop supports a separate AI window |
-| Terminal | Dual tmux-persistent and standard SSH PTY modes, including persistent-window recovery after disconnects or device changes |
+| Terminal | Dual tmux-persistent and standard SSH PTY modes, including persistent-window recovery after disconnects or device changes, plus multiple separate terminal windows for parallel work |
 | Monitoring | Fleet health overview, per-host live details, and historical time-range queries |
 | Files | Remote file management, online editing, chunked transfer, resume, and integrity verification |
 | Port forwarding | SSH local forwarding, bound to `127.0.0.1` by default, with saved start/stop controls |
@@ -144,7 +145,7 @@ Manage SSH hosts through groups, favorites, and search while reviewing agent sta
 <img width="920" src="screenshots/terminal.png" alt="Desktop persistent and standard terminals" />
 </div>
 
-Select a host and switch between persistent tmux sessions and a standard SSH PTY. Standard terminals keep their live state across menu navigation, while persistent windows can be reattached after disconnects or device changes.
+Select a host and switch between persistent tmux sessions and a standard SSH PTY. Standard terminals keep their live state across menu navigation, while persistent windows can be reattached after disconnects or device changes; a separate-window action supports parallel terminal work.
 
 #### Multi-host Monitoring Overview
 

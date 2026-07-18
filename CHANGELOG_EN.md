@@ -4,6 +4,41 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.16 - Dual-Architecture Auto-Deployment and Separate Desktop Terminals
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.16_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.16_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.16_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.16_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.16_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.16_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.16_linux-amd64.deb`
+
+### Added
+- Windows and Linux Terminal add a separate-window action. Each use creates another terminal window for parallel work across hosts, standard SSH PTYs, or persistent tmux windows.
+- Windows, Linux, and Android packages include two independent deployment pairs: `x86_64 agent + x86_64 static tmux` and `aarch64 agent + aarch64 static tmux`. After authenticated SSH, the client runs read-only `uname -m` and selects and uploads only the matching pair. Unsupported architectures or an incomplete pair fail before any remote write.
+- SQLite moves to schema 6 and records the most recently detected architecture from authenticated SSH. Every deployment still performs real detection instead of trusting the local record.
+
+### Fixed
+- Desktop Terminal moves the connection-state indicator into the host selector, shows only Connect or Disconnect for the current state, and removes the duplicate status bar. The tmux window selector no longer shows the server-side active marker that could be mistaken for the current selection.
+- Windows/Linux host rows switch to two lines only below 960px, retaining a compact single row at common desktop widths without hiding system or monitoring metrics.
+
+### Verified
+- `cargo fmt --check`, strict clippy, `cargo test --workspace`, all 18 targeted `client-core` agent-deployment tests, and the Windows/Linux layout guards passed.
+- The production Windows app and Linux AppImage passed background real-GUI smoke and natural-exit checks. The Android x86_64 test build opened the real UI in MuMu, while the arm64 APK/AAB passed version, ABI, and signature checks.
+- The aarch64 static tmux build was verified, and the aarch64 agent/tmux pairing and automatic-selection foundation are implemented.
+- Real ARM-server no-mock execution is still pending, so this entry does not claim complete ARM64 server support.
+
+### SHA256
+- `82d185867b6f7e51739accc8ad69c2ef87702f4a00e1c7684d665317c94e9c50`  `Creation-SSH_0.6.16_x64-setup.exe`
+- `694826c1efa5ea26cc7005cd6388b31868aa4b872b62950a385e2d6cd796ce7d`  `Creation-SSH_0.6.16_x64_en-US.msi`
+- `183f878b4dddb30f2812776ad377603cde0a45ebdad24a6a2798fdb05a852a21`  `Creation-SSH_0.6.16_portable-Windows-x64.zip`
+- `5b5557134e6deb64fd52b4ba1b169ffef62c94ab254783da834f5dd01cf0906e`  `Creation-SSH_0.6.16_linux-x86_64.AppImage`
+- `a0c0a8137b86d38111593e49c91e72ae4c50010c7c303a0a3bb8cb1e34c833de`  `Creation-SSH_0.6.16_linux-amd64.deb`
+- `df88e0e7a078bb5831015ae24e96cdac4e617ace727bc17dda2d00791aafe1ce`  `C-SSH_0.6.16_android-arm64.apk`
+- `806459e61dd0de96b01c4318bc2e2a34cc44e732b3aac8c89ff757693a1f1c33`  `C-SSH_0.6.16_android-arm64.aab`
+
 ## v0.6.15 - Compact Cross-Platform Workspaces and Mobile File Upload
 
 ### Downloads

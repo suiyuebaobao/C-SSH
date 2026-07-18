@@ -4,6 +4,41 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.16 - 双架构自动部署与桌面终端独立窗口
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.16_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.16_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.16_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.16_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.16_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.16_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.16_linux-amd64.deb`
+
+### 新增
+- Windows 与 Linux 终端新增独立窗口入口；每次打开都会创建新的终端窗口，可并行操作不同主机、普通 SSH PTY 或 tmux 持久化窗口。
+- Windows、Linux 与 Android 的部署包加入 `x86_64 agent + x86_64 静态 tmux` 和 `aarch64 agent + aarch64 静态 tmux` 两套独立配对资源。客户端通过已认证 SSH 只读执行 `uname -m`，仅选择并上传匹配的一对；架构不支持或任一配对资源缺失时，会在远端写入前停止。
+- SQLite 升级到 schema 6，记录最近一次经认证 SSH 探测到的主机架构；每次部署仍重新执行真实探测，不会把本地记录当作部署依据。
+
+### 修复
+- 桌面终端把连接状态点并入主机选择器，按当前状态只显示连接或断开动作，并移除重复状态栏；tmux 窗口下拉不再显示容易被误解为当前选择的服务端“活动”标记。
+- Windows/Linux 主机行只在窄于 960px 时切换双行布局，常用桌面宽度下保持单行紧凑展示，同时保留全部系统与监控指标。
+
+### 验证
+- `cargo fmt --check`、严格 clippy、`cargo test --workspace`、`client-core` 的 18 项 agent 部署定向测试与 Windows/Linux 布局守卫已通过。
+- Windows 正式程序与 Linux AppImage 均完成后台真实 GUI 冒烟和自然关闭验证；Android x86_64 测试包已在 MuMu 真实进入界面，arm64 APK/AAB 已完成版本、ABI 与签名复核。
+- aarch64 静态 tmux 构建已经验证；aarch64 agent/tmux 配对与自动选择基础已经实现。
+- 真实 ARM 服务器 no-mock 运行尚未完成，因此本条目不宣称完整 ARM64 服务器支持。
+
+### SHA256
+- `82d185867b6f7e51739accc8ad69c2ef87702f4a00e1c7684d665317c94e9c50`  `Creation-SSH_0.6.16_x64-setup.exe`
+- `694826c1efa5ea26cc7005cd6388b31868aa4b872b62950a385e2d6cd796ce7d`  `Creation-SSH_0.6.16_x64_en-US.msi`
+- `183f878b4dddb30f2812776ad377603cde0a45ebdad24a6a2798fdb05a852a21`  `Creation-SSH_0.6.16_portable-Windows-x64.zip`
+- `5b5557134e6deb64fd52b4ba1b169ffef62c94ab254783da834f5dd01cf0906e`  `Creation-SSH_0.6.16_linux-x86_64.AppImage`
+- `a0c0a8137b86d38111593e49c91e72ae4c50010c7c303a0a3bb8cb1e34c833de`  `Creation-SSH_0.6.16_linux-amd64.deb`
+- `df88e0e7a078bb5831015ae24e96cdac4e617ace727bc17dda2d00791aafe1ce`  `C-SSH_0.6.16_android-arm64.apk`
+- `806459e61dd0de96b01c4318bc2e2a34cc44e732b3aac8c89ff757693a1f1c33`  `C-SSH_0.6.16_android-arm64.aab`
+
 ## v0.6.15 - 三端紧凑工作台与移动文件上传
 
 ### 下载
