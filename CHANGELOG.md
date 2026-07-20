@@ -4,6 +4,41 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.17 - 群发执行、终端快捷键与字体一致性
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.17_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.17_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.17_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.17_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.17_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.17_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.17_linux-amd64.deb`
+
+### 新增
+- 桌面端将“命令片段”收敛为四步“群发执行”：选择主机、输入命令或 UTF-8 `.sh` 文件、冻结确认、执行并查看结果。
+- 群发统一通过常驻 agent 的结构化 `RunCommand` 协议执行，单台主机失败不会阻断其它主机；结果按成功、失败、未知归类并使用 `hN` 脱敏别名。
+- AI 总结改为用户显式触发，输入统一经过脱敏导出边界。
+
+### 修复
+- 文件列表切换目录或搜索状态后只复位列表容器的纵向滚动，不滚动整页、不抢焦点、不改变横向位置。
+- Windows、Linux 与 Android 统一终端快捷键：`Ctrl+V` 走原生粘贴；有选区时 `Ctrl+C` 复制，无选区且终端获焦时发送 ETX。
+- 三端统一内置 Sarasa Fixed SC Regular/Bold，并等待字体加载后创建和适配终端，改善中文、框线与粗体显示一致性。
+
+### 验证
+- 根 workspace 格式、全目标测试、严格 clippy 与版本一致性门禁通过。
+- Windows 正式程序、Android x86_64 MuMu 测试包、arm64 APK/AAB 与 Linux AppImage/deb 的最终候选验证见本版本 Release。
+- aarch64 agent/tmux 配对资源完成交叉构建与静态校验；真实 ARM 服务器 no-mock 仍待完成，不宣称完整 ARM64 服务器支持。
+
+### SHA256
+- `6535b5586096141f1443bb04a274f9dfd48c9607d09df00a0d30b818d2e6deca`  `Creation-SSH_0.6.17_x64-setup.exe`
+- `6b54d10970b31b5e09893bb68354840aefa58b481302a3a1413efcf9d1669437`  `Creation-SSH_0.6.17_x64_en-US.msi`
+- `3ea83768e1de116813f077bd010a0ecc03925c0aadd6ba65db2692dd784d4a19`  `Creation-SSH_0.6.17_portable-Windows-x64.zip`
+- `ca02c611ba7cce293fb3be172f78f2cd94c2e062538c0d393446fef44e8acafb`  `Creation-SSH_0.6.17_linux-x86_64.AppImage`
+- `8d85ed30fadee203ba1574d76243b9cdaca01432c5f8ac3ef82f759cacfe241e`  `Creation-SSH_0.6.17_linux-amd64.deb`
+- `af22d2bf03cb1f79c6a5d8da3704483a8cd1d4c4358cd6207a77aad1e7a36829`  `C-SSH_0.6.17_android-arm64.apk`
+- `01e01a25641b6dcab018959c00efd6c66b1c76e84395941d4510cef6d2e13aa8`  `C-SSH_0.6.17_android-arm64.aab`
+
 ## v0.6.16 - 双架构自动部署与桌面终端独立窗口
 
 ### 下载

@@ -6,50 +6,49 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/C-SSH_0.6.16_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16)
-[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16)
-[![Stable](https://img.shields.io/badge/stable-v0.6.16-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/C-SSH_0.6.17_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.17)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.17)
+[![Stable](https://img.shields.io/badge/stable-v0.6.17-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.17)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.16`**. `v0.6.11` remains available only as prerelease history and is not recommended.
+Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.17`**. `v0.6.11` remains available only as prerelease history and is not recommended.
 
-## v0.6.16 Highlights
+## v0.6.17 Highlights
 
-- Windows and Linux retain compact single-layer layouts across all eleven primary workspaces. Host rows stay on one line at 960px and above, terminal controls move into the top bar, and the layout still contracts for small windows and high DPI.
-- Desktop Terminal adds a separate-window action so multiple terminal windows can be used in parallel. Connection state moves into the host selector, Connect and Disconnect follow the current state, and the tmux window list no longer presents the server-side active flag as the current selection.
-- Android Terminal, Files, Monitoring, and AI retain compact mobile interactions: mobile terminal shortcuts, collapsed deep file paths with SAF upload, consolidated host status, and merged AI session controls.
-- Android file upload continues to use chunked transfer, SHA256 integrity verification, and a frozen remote destination. Host actions include Install Agent and Update / Repair Agent while preferring credentials in the local vault.
-- Windows, Linux, and Android deployment resources now include two independent pairs: `x86_64 agent + x86_64 static tmux` and `aarch64 agent + aarch64 static tmux`. After authenticated SSH, the client runs read-only `uname -m` and uploads only the matching pair.
-- The aarch64 resources and automatic-selection foundation are implemented. Real ARM-server no-mock execution is still pending, so this release does not claim complete ARM64 server support.
-- All three clients retain host hard deletion and lifecycle isolation: deletion clears attributable local credentials, sessions, windows, and monitoring state, and re-adding the same ID or address starts a new lifecycle.
+- Desktop consolidates the former Command Snippets workspace into Broadcast Execution: select hosts, enter a command or UTF-8 `.sh` file, freeze the confirmation, execute, and review results.
+- Broadcast commands use the resident agent's structured `RunCommand` protocol instead of composing a raw SSH shell on the client. A failure on one host does not block the others.
+- Results use redacted `hN` aliases, grouped success/failure/unknown counts, and collapsed details. AI summarization runs only after an explicit click and receives a redacted export without host names, addresses, SSH users, or common secret fields.
+- Desktop Files now resets only the list container's vertical scroll after a directory or search change, without scrolling the page, stealing focus, or changing horizontal position.
+- Windows, Linux, and Android share the same terminal shortcut policy: `Ctrl+V` is handled by xterm/system paste; `Ctrl+C` copies a selection, or sends ETX when there is no selection and the terminal has focus.
+- All three clients bundle Sarasa Fixed SC Regular/Bold and wait for both weights before creating and fitting the terminal, improving Chinese text, box-drawing characters, and bold alignment.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.16` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.17` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/C-SSH_0.6.16_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/C-SSH_0.6.16_android-arm64.aab) for store distribution |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.16/Creation-SSH_0.6.16_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/C-SSH_0.6.17_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/C-SSH_0.6.17_android-arm64.aab) for store distribution |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/Creation-SSH_0.6.17_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/Creation-SSH_0.6.17_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/Creation-SSH_0.6.17_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/Creation-SSH_0.6.17_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.17/Creation-SSH_0.6.17_linux-amd64.deb) |
 
-See the [v0.6.16 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.6.17 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.17) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.6.16` |
+| Platform | Delivered in `v0.6.17` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
 | Linux desktop | Independent AppImage/deb with persistent terminals, monitoring, system/process, file, AI, and reconnect workflows |
 | Linux agent deployment resources | Independent `x86_64` and `aarch64` agent/static-tmux pairs selected after authenticated `uname -m`; real aarch64 no-mock validation is pending, so complete ARM64 support is not claimed |
-| iOS / macOS | **Not released** and not part of the `v0.6.16` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.6.17` delivery |
 
 ## Main Pages
 
@@ -121,7 +120,7 @@ Windows exposes the complete desktop navigation below, and Linux has its own des
 | Monitoring | Fleet health overview, per-host live details, and historical time-range queries |
 | Files | Remote file management, online editing, chunked transfer, resume, and integrity verification |
 | Port forwarding | SSH local forwarding, bound to `127.0.0.1` by default, with saved start/stop controls |
-| Command snippets | Save common commands, run them across selected hosts, and group results by host |
+| Broadcast execution | Select hosts, enter a command or UTF-8 `.sh` file, freeze confirmation, execute through the agent, and review per-host results |
 | System management | System facts, processes, firewall ports, and SSH password management |
 | App Center | Install Docker, deploy apps such as Nginx/Redis, and manage containers, images, and systemd services |
 | Access grants | Review the local vault, SSH keys, one-time grants, and AI audit records |
@@ -179,13 +178,9 @@ Browse and search remote directories, show hidden files, and create, upload, dow
 
 Select a host, model, and permission profile so the AI can read authorized metrics and system information and return a result. The page also provides history, context settings, and a separate AI window.
 
-#### Command Snippets
+#### Broadcast Execution
 
-<div align="center">
-<img width="920" src="screenshots/snippets.png" alt="Desktop command snippets" />
-</div>
-
-Save frequently used commands as named, tagged snippets instead of typing them repeatedly. Select multiple hosts to execute a snippet once and review results by host.
+Select one or more hosts, enter a command or UTF-8 `.sh` file, freeze the confirmation, and execute through the structured agent protocol. Per-host results remain isolated and use redacted aliases; AI summarization is always an explicit action.
 
 #### Access Grants
 

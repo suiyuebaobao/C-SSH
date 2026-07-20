@@ -4,6 +4,41 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.17 - Broadcast Execution, Terminal Shortcuts, and Font Consistency
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.17_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.17_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.17_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.17_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.17_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.17_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.17_linux-amd64.deb`
+
+### Added
+- Desktop consolidates Command Snippets into a four-step Broadcast Execution flow: select hosts, enter a command or UTF-8 `.sh` file, freeze confirmation, then execute and review results.
+- Broadcast execution uses the resident agent's structured `RunCommand` protocol. A failure on one host does not block others, and results use success/failure/unknown groups with redacted `hN` aliases.
+- AI summarization is now an explicit user action and receives only the redacted export boundary.
+
+### Fixed
+- Directory or search changes reset only the file-list container's vertical scroll, without scrolling the page, stealing focus, or changing horizontal position.
+- Windows, Linux, and Android share terminal shortcuts: `Ctrl+V` uses native paste; `Ctrl+C` copies a selection or sends ETX when no selection exists and the terminal has focus.
+- All three clients bundle Sarasa Fixed SC Regular/Bold and wait for font readiness before creating and fitting the terminal, improving Chinese, box-drawing, and bold consistency.
+
+### Verified
+- Root-workspace formatting, all-target tests, strict clippy, and version-consistency gates passed.
+- Final-candidate evidence for the production Windows app, Android x86_64 MuMu test build, arm64 APK/AAB, and Linux AppImage/deb is recorded in this version's Release.
+- The aarch64 agent/tmux pair passed cross-build and static validation. Real ARM-server no-mock execution is still pending, so complete ARM64 server support is not claimed.
+
+### SHA256
+- `6535b5586096141f1443bb04a274f9dfd48c9607d09df00a0d30b818d2e6deca`  `Creation-SSH_0.6.17_x64-setup.exe`
+- `6b54d10970b31b5e09893bb68354840aefa58b481302a3a1413efcf9d1669437`  `Creation-SSH_0.6.17_x64_en-US.msi`
+- `3ea83768e1de116813f077bd010a0ecc03925c0aadd6ba65db2692dd784d4a19`  `Creation-SSH_0.6.17_portable-Windows-x64.zip`
+- `ca02c611ba7cce293fb3be172f78f2cd94c2e062538c0d393446fef44e8acafb`  `Creation-SSH_0.6.17_linux-x86_64.AppImage`
+- `8d85ed30fadee203ba1574d76243b9cdaca01432c5f8ac3ef82f759cacfe241e`  `Creation-SSH_0.6.17_linux-amd64.deb`
+- `af22d2bf03cb1f79c6a5d8da3704483a8cd1d4c4358cd6207a77aad1e7a36829`  `C-SSH_0.6.17_android-arm64.apk`
+- `01e01a25641b6dcab018959c00efd6c66b1c76e84395941d4510cef6d2e13aa8`  `C-SSH_0.6.17_android-arm64.aab`
+
 ## v0.6.16 - Dual-Architecture Auto-Deployment and Separate Desktop Terminals
 
 ### Downloads
