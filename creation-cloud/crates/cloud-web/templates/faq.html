@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="faq-main">
+  <section class="page-intro page-intro-compact" aria-labelledby="faq-title">
+    <div class="container page-intro-inner">
+      <p class="eyebrow">{{ view.page.eyebrow }}</p>
+      <h1 id="faq-title">{{ view.page.heading }}</h1>
+      <p>{{ view.page.lead }}</p>
+    </div>
+  </section>
+  <section class="content-band faq-band">
+    <div class="container faq-layout">
+      {% for faq in view.page.faqs %}
+      <details class="faq-item">
+        <summary>{{ faq.question }}</summary>
+        <p>{{ faq.answer }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

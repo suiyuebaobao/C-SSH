@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="{{ view.shell.html_lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ view.page.meta_description }}">
+  <meta name="robots" content="{{ seo.robots }}">
+  <meta name="applicable-device" content="pc,mobile">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f4f1ec">
+  {% if let Some(verification) = seo.google_site_verification %}<meta name="google-site-verification" content="{{ verification }}">{% endif %}
+  {% if let Some(verification) = seo.baidu_site_verification %}<meta name="baidu-site-verification" content="{{ verification }}">{% endif %}
+  <title>{{ view.page.meta_title }}</title>
+  {% if let Some(canonical_url) = seo.canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+  {% if let Some(alternate_url) = seo.alternate_zh_url %}<link rel="alternate" hreflang="zh-CN" href="{{ alternate_url }}">{% endif %}
+  {% if let Some(alternate_url) = seo.alternate_en_url %}<link rel="alternate" hreflang="en" href="{{ alternate_url }}">{% endif %}
+  {% if let Some(alternate_url) = seo.alternate_default_url %}<link rel="alternate" hreflang="x-default" href="{{ alternate_url }}">{% endif %}
+  {% if let Some(title) = seo.open_graph_title %}<meta property="og:title" content="{{ title }}">{% endif %}
+  {% if let Some(description) = seo.open_graph_description %}<meta property="og:description" content="{{ description }}">{% endif %}
+  {% if let Some(url) = seo.open_graph_url %}<meta property="og:url" content="{{ url }}">{% endif %}
+  {% if seo.open_graph_title.is_some() %}<meta property="og:type" content="website"><meta property="og:site_name" content="Creation-SSH">{% endif %}
+  {% if let Some(locale) = seo.open_graph_locale %}<meta property="og:locale" content="{{ locale }}">{% endif %}
+  {% if let Some(locale) = seo.open_graph_alternate_locale %}<meta property="og:locale:alternate" content="{{ locale }}">{% endif %}
+  {% if seo.open_graph_title.is_some() %}<meta name="twitter:card" content="summary">{% endif %}
+  {% if let Some(title) = seo.open_graph_title %}<meta name="twitter:title" content="{{ title }}">{% endif %}
+  {% if let Some(description) = seo.open_graph_description %}<meta name="twitter:description" content="{{ description }}">{% endif %}
+  {% if let Some(json_ld) = seo.json_ld %}<script type="application/ld+json">{{ json_ld|safe }}</script>{% endif %}
+  <link rel="icon" type="image/png" href="/static/img/brand-c.png">
+  <link rel="stylesheet" href="/static/css/tokens.css?v=20260719-industrial">
+  <link rel="stylesheet" href="/static/css/layout.css?v=20260720-footer">
+  <link rel="stylesheet" href="/static/css/components.css?v=20260720-github">
+  <link rel="stylesheet" href="/static/css/github-link.css?v=20260720-github">
+  <link rel="stylesheet" href="/static/css/pages.css?v=20260719-industrial">
+  {% block styles %}{% endblock %}
+  <script src="/static/js/htmx.min.js?v=2.0.10" defer></script>
+  <script src="/static/js/site.js?v=20260720-github" defer></script>
+  {% block scripts %}{% endblock %}
+</head>
+<body hx-indicator="#page-progress">
+  <a class="skip-link" href="#main-content">{{ view.shell.skip_label }}</a>
+  <div class="page-progress" id="page-progress" aria-hidden="true"></div>
+  <header class="site-header" data-site-header>
+    <div class="container header-inner">
+      <a class="brand-link" href="{{ view.shell.home_href }}" aria-label="Creation-SSH">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-copy">
+          <strong>{{ view.shell.brand }}</strong>
+          <small>{{ view.shell.brand_note }}</small>
+        </span>
+      </a>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-navigation" data-menu-button>
+        {{ view.shell.menu_label }}
+      </button>
+      <div class="header-navigation" id="site-navigation" data-site-navigation>
+        <nav class="site-nav" aria-label="Primary">
+          {% for item in view.shell.navigation %}
+          <a class="site-nav-link" href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+          {% endfor %}
+        </nav>
+        <nav class="utility-nav" aria-label="{{ view.shell.utility_navigation_label }}">
+          <a class="github-repository" href="{{ view.shell.github_repository.href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false" aria-label="{{ view.shell.github_repository.aria_label }}" data-github-repository>
+            {{ view.shell.github_repository.label }}
+          </a>
+          <a class="utility-link" href="{{ view.shell.language_href }}" hreflang="{{ view.shell.alternate_lang }}" hx-boost="false">{{ view.shell.language_label }}</a>
+          <a class="utility-link" href="{{ view.shell.login_link.href }}"{% if view.shell.login_link.active %} aria-current="page"{% endif %}>{{ view.shell.login_link.label }}</a>
+          <a class="button button-compact button-primary" href="{{ view.shell.console_link.href }}"{% if view.shell.console_link.active %} aria-current="page"{% endif %}>{{ view.shell.console_link.label }}</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+  {% block main %}{% endblock %}
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <strong>{{ view.shell.brand }}</strong>
+          <p>{{ view.shell.footer_summary }}</p>
+          <p class="footer-motto" lang="zh-CN">“{{ view.shell.footer_motto }}”</p>
+        </div>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        {% for item in view.shell.footer_navigation %}
+        <a href="{{ item.href }}">{{ item.label }}</a>
+        {% endfor %}
+      </nav>
+      <p class="footer-note">{{ view.shell.footer_note }}</p>
+    </div>
+  </footer>
+</body>
+</html>

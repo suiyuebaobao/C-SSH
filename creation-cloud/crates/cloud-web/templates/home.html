@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/static/css/home-foundation.css?v=20260720-seo">
+  <link rel="stylesheet" href="/static/css/home-hero.css?v=20260720-seo">
+  <link rel="stylesheet" href="/static/css/home-sections.css?v=20260720-seo">
+  <link rel="stylesheet" href="/static/css/home-closing.css?v=20260720-seo">
+  <link rel="stylesheet" href="/static/css/home-qr.css?v=20260720-qr-managed">
+{% endblock %}
+
+{% block scripts %}
+  <script src="/static/js/home-qr.js?v=20260720-qr-managed" defer></script>
+{% endblock %}
+
+{% block main %}
+<main id="main-content" class="home-main">
+  <div class="home-status-strip" aria-label="Page status">
+    <div class="container home-status-inner">
+      <span>OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM</span>
+      <span>{{ home.status_note }}</span>
+    </div>
+  </div>
+
+  <section class="home-hero" aria-labelledby="home-hero-title">
+    <div class="container home-hero-grid">
+      <div class="hero-copy">
+        <span class="hero-ruler" aria-hidden="true"></span>
+        <p class="eyebrow">{{ view.page.eyebrow }}</p>
+        <h1 id="home-hero-title">{{ view.page.heading }}</h1>
+        <p class="hero-lead">{{ view.page.lead }}</p>
+        <div class="action-row">
+          {% for action in view.page.actions %}
+          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="hero-blueprint" aria-hidden="true">
+        <span class="blueprint-label">BRAND GEOMETRY / UNIT 01</span>
+        <span class="blueprint-axis blueprint-axis-x"></span>
+        <span class="blueprint-axis blueprint-axis-y"></span>
+        <span class="blueprint-target blueprint-target-start"></span>
+        <span class="blueprint-target blueprint-target-end"></span>
+        <span class="blueprint-c"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-platform-rail" aria-labelledby="home-platform-title">
+    <div class="container home-platform-grid">
+      <header class="home-platform-label">
+        <h2 id="home-platform-title">{{ home.platform_label }}</h2>
+        <i aria-hidden="true"></i>
+        <small>{{ home.platform_note }}</small>
+      </header>
+      {% for platform in home.platforms %}
+      <article class="home-platform-item{% if platform.planned %} home-platform-item-planned{% endif %}">
+        <span class="platform-led" aria-hidden="true"></span>
+        <strong>{{ platform.symbol }}</strong>
+        <h3>{{ platform.name }}</h3>
+        <p>{{ platform.detail }}</p>
+        <small>{{ platform.state }}</small>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% for section in home.sections %}
+  <section class="home-system-section home-system-section-{{ section.anchor }}" id="{{ section.anchor }}" aria-labelledby="home-section-{{ section.anchor }}">
+    <span class="home-section-side" aria-hidden="true">{{ section.side_label }}</span>
+    <div class="container">
+      <header class="home-section-heading">
+        <div>
+          <p class="home-section-code">{{ section.code }}</p>
+          <h2 id="home-section-{{ section.anchor }}">{{ section.title }}</h2>
+        </div>
+        <p>{{ section.lead }}</p>
+      </header>
+      <div class="home-system-grid home-layout-{{ section.layout }}">
+        {% for item in section.items %}
+        <article class="home-system-item home-tone-{{ item.tone }}">
+          <span class="home-item-index">0{{ loop.index }}</span>
+          <span class="home-item-badge">{{ item.badge }}</span>
+          <i class="home-item-port" aria-hidden="true"></i>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.body }}</p>
+          <small>{{ item.meta }}</small>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+
+  <section class="home-system-section home-faq-section" id="home-faq" aria-labelledby="home-faq-title">
+    <span class="home-section-side" aria-hidden="true">FAQ / DECISION QUESTIONS</span>
+    <div class="container">
+      <header class="home-section-heading">
+        <div>
+          <p class="home-section-code">{{ home.faq_code }}</p>
+          <h2 id="home-faq-title">{{ home.faq_heading }}</h2>
+        </div>
+        <p>{{ home.faq_lead }}</p>
+      </header>
+      <div class="home-faq-list">
+        {% for item in home.faqs %}
+        <details class="home-faq-item">
+          <summary><span>FAQ 0{{ loop.index }}</span>{{ item.question }}</summary>
+          <p>{{ item.answer }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="home-final-cta" aria-labelledby="home-final-title">
+    <div class="container home-final-panel">
+      <div>
+        <p class="home-section-code">{{ home.final_code }}</p>
+        <h2 id="home-final-title">{{ home.final_heading }}</h2>
+        <p>{{ home.final_lead }}</p>
+        <div class="action-row">
+          {% for action in view.page.actions %}
+          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <span class="home-final-c" aria-hidden="true"></span>
+    </div>
+  </section>
+</main>
+
+<div class="home-qr-widget" id="home-qr-window" data-home-qr-widget data-home-qr-expanded="false" data-home-qr-state="{% if home.qr_widget.has_image() %}ready{% else %}empty{% endif %}">
+  <div class="home-qr-stage">
+  <div class="home-qr-card">
+    <span class="home-qr-expand-mark" aria-hidden="true"></span>
+    <div class="home-qr-meta">
+      <span>{{ home.qr_widget.code }}</span>
+      <span class="home-qr-status" id="home-qr-status" data-ready-label="{{ home.qr_widget.ready_label }}" data-pending-label="{{ home.qr_widget.pending_label }}">
+        <i aria-hidden="true"></i>
+        <span data-home-qr-status-text>{% if home.qr_widget.has_image() %}{{ home.qr_widget.ready_label }}{% else %}{{ home.qr_widget.pending_label }}{% endif %}</span>
+      </span>
+    </div>
+    <div class="home-qr-frame">
+      {% match home.qr_widget.image_src() %}
+      {% when Some with (image_src) %}
+      <img class="home-qr-image" src="{{ image_src }}" alt="{{ home.qr_widget.image_alt }}" width="160" height="160">
+      {% when None %}
+      <div class="home-qr-placeholder" role="img" aria-label="{{ home.qr_widget.pending_label }}">
+        <span class="home-qr-finder home-qr-finder-top-left" aria-hidden="true"></span>
+        <span class="home-qr-finder home-qr-finder-top-right" aria-hidden="true"></span>
+        <span class="home-qr-finder home-qr-finder-bottom-left" aria-hidden="true"></span>
+        <span class="home-qr-waiting"><strong>QR</strong><small>WAITING</small></span>
+      </div>
+      {% endmatch %}
+      <span class="home-qr-scanline" aria-hidden="true"></span>
+    </div>
+    <strong class="home-qr-title" id="home-qr-title">{{ home.qr_widget.title }}</strong>
+    <small class="home-qr-note" id="home-qr-note">{{ home.qr_widget.note }}</small>
+  </div>
+  <button class="home-qr-trigger" type="button" data-home-qr-trigger data-open-label="{{ home.qr_widget.open_label }}" data-close-label="{{ home.qr_widget.close_label }}" aria-label="{{ home.qr_widget.open_label }}" aria-controls="home-qr-window" aria-expanded="false" aria-haspopup="dialog"></button>
+  </div>
+  <button class="home-qr-close" type="button" data-home-qr-close aria-label="{{ home.qr_widget.close_label }}" hidden>
+    <span aria-hidden="true">×</span>
+  </button>
+</div>
+{% endblock %}

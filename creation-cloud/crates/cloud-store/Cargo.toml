@@ -1,0 +1,13 @@
+[package]
+name = "cloud-store"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+cloud-domain.workspace = true
+sqlx.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="account-main">
+  <div class="container account-layout">
+    <section class="account-panel" aria-labelledby="account-title">
+      <header class="account-heading">
+        <p class="eyebrow">{{ view.page.eyebrow }}</p>
+        <h1 id="account-title">{{ view.page.heading }}</h1>
+        <p>{{ view.page.lead }}</p>
+      </header>
+      <form class="account-form" action="{{ view.page.form_action }}" method="post" hx-post="{{ view.page.form_action }}" hx-target="#auth-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
+        {% if let Some(next_path) = next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
+        {% for field in view.page.fields %}
+        <label class="field-label" for="field-{{ field.name }}">
+          <span>{{ field.label }}</span>
+          <input id="field-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" autocomplete="{{ field.autocomplete }}" placeholder="{{ field.placeholder }}"{% if field.required %} required{% endif %}>
+        </label>
+        {% endfor %}
+        <button class="button button-primary button-full" type="submit">{{ view.page.submit_label }}</button>
+        <div class="form-feedback" id="auth-feedback" aria-live="polite"></div>
+      </form>
+      <p class="form-note">{{ view.page.form_note }}</p>
+      <div class="account-alternative">
+        {% for action in view.page.actions %}
+        <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="workspace-main">
+  <div class="container workspace-layout">
+    <aside class="workspace-sidebar">
+      <p class="workspace-kicker" id="workspace-navigation-title">Creation Cloud</p>
+      <nav class="workspace-nav" aria-labelledby="workspace-navigation-title">
+        {% for item in view.page.local_navigation %}
+        <a href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+        {% endfor %}
+      </nav>
+    </aside>
+    <div class="workspace-content">
+      <header class="workspace-heading" aria-labelledby="workspace-title">
+        <p class="eyebrow">{{ view.page.eyebrow }}</p>
+        <h1 id="workspace-title">{{ view.page.heading }}</h1>
+        <p>{{ view.page.lead }}</p>
+      </header>
+      <section class="metric-grid workspace-metrics" aria-label="Summary">
+        {% for metric in view.page.metrics %}
+        <article class="metric-item">
+          <strong>{{ metric.value }}</strong>
+          <span>{{ metric.label }}</span>
+          <p>{{ metric.detail }}</p>
+        </article>
+        {% endfor %}
+      </section>
+      {% for section in view.page.sections %}
+      <section class="workspace-section" id="{{ section.anchor }}" aria-labelledby="workspace-section-{{ section.anchor }}">
+        <header class="section-heading section-heading-inline">
+          <h2 id="workspace-section-{{ section.anchor }}">{{ section.title }}</h2>
+          <p>{{ section.lead }}</p>
+        </header>
+        <div class="card-grid">
+          {% for item in section.items %}
+          <article class="content-card">
+            <span class="card-badge">{{ item.badge }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.body }}</p>
+            <small>{{ item.meta }}</small>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+{% endblock %}

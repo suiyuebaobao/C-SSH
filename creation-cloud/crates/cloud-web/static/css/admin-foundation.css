@@ -1,0 +1,174 @@
+/* 管理后台基础布局：保持工业制图语言并把控制面与营销页面清晰分层。 */
+.admin-workspace {
+  min-height: calc(100svh - var(--header-height));
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper);
+}
+
+.admin-frame {
+  display: grid;
+  min-height: calc(100svh - var(--header-height));
+  grid-template-columns: 226px minmax(0, 1fr);
+}
+
+.admin-sidebar {
+  position: relative;
+  padding: var(--space-6) var(--space-4) var(--space-7) 0;
+  border-right: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.admin-sidebar::before {
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 1px;
+  height: 48px;
+  background: var(--accent);
+  content: "";
+}
+
+.admin-sidebar-kicker {
+  margin: 0 0 var(--space-5);
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+}
+
+.admin-navigation {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.admin-navigation a {
+  min-height: 42px;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.admin-navigation a:hover,
+.admin-navigation a[aria-current="page"] {
+  border-color: var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+}
+
+.admin-navigation a[aria-current="page"] {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.admin-panel {
+  min-width: 0;
+  padding: var(--space-6) 0 var(--space-8) var(--space-7);
+}
+
+.admin-page-header {
+  display: flex;
+  gap: var(--space-5);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.admin-page-heading {
+  max-width: 780px;
+  min-width: 0;
+}
+
+.admin-page-heading h1 {
+  margin-bottom: var(--space-3);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.admin-page-heading > p:not(.eyebrow) {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.admin-session {
+  min-width: 210px;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+
+.admin-session span,
+.admin-session strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-session span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-session strong {
+  margin-top: 4px;
+  font-size: 0.82rem;
+}
+
+.admin-session .button {
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 960px) {
+  .admin-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    padding: var(--space-3) 0;
+    overflow: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .admin-sidebar::before,
+  .admin-sidebar-kicker {
+    display: none;
+  }
+
+  .admin-navigation {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .admin-navigation a {
+    flex: 0 0 auto;
+  }
+
+  .admin-navigation a[aria-current="page"] {
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+
+  .admin-panel {
+    padding: var(--space-5) 0 var(--space-7);
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-page-header {
+    display: grid;
+  }
+
+  .admin-session {
+    width: 100%;
+    min-width: 0;
+  }
+}

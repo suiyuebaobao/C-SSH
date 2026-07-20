@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/feedback.css?v=20260720-feedback">{% endblock %}
+{% block scripts %}<script src="/static/js/feedback.js?v=20260720-feedback" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="feedback-main" data-feedback-page data-locale="{% if is_en %}en{% else %}zh-CN{% endif %}">
+  <section class="feedback-hero" aria-labelledby="feedback-title">
+    <div class="container feedback-hero-grid">
+      <div class="feedback-heading">
+        <p class="eyebrow">{{ view.page.eyebrow }}</p>
+        <h1 id="feedback-title">{{ view.page.heading }}</h1>
+        <p>{{ view.page.lead }}</p>
+      </div>
+      <div class="feedback-channels" aria-label="{% if is_en %}Feedback channels{% else %}反馈渠道{% endif %}">
+        <article class="feedback-channel feedback-channel-site">
+          <span class="card-badge">01 / WEBSITE</span>
+          <h2>{% if is_en %}Website ticket{% else %}官网工单{% endif %}</h2>
+          <p>{% if is_en %}Sign in to submit a private ticket that enters the Creation Cloud admin workflow.{% else %}登录后提交私有工单，数据进入 Creation Cloud 管理后台处理。{% endif %}</p>
+          <a class="button button-secondary" href="#website-feedback">{% if is_en %}Use the website form{% else %}使用官网表单{% endif %}</a>
+        </article>
+        <article class="feedback-channel">
+          <span class="card-badge">02 / GITHUB</span>
+          <h2>GitHub Issues</h2>
+          <p>{% if is_en %}Use GitHub for reports that can be reproduced and discussed in public. A GitHub account is required.{% else %}适合可公开复现和讨论的问题；提交时需要登录 GitHub 账号。{% endif %}</p>
+          <a class="button button-primary" href="{{ github_issues_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">{% if is_en %}Create a GitHub Issue{% else %}新建 GitHub Issue{% endif %}</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-band feedback-form-band" id="website-feedback" aria-labelledby="website-feedback-title">
+    <div class="container feedback-form-layout">
+      <aside class="feedback-safety">
+        <p class="eyebrow">SAFE INPUT / TEXT ONLY</p>
+        <h2 id="website-feedback-title">{% if is_en %}Submit through the website{% else %}通过官网提交{% endif %}</h2>
+        <p>{% if is_en %}The form accepts text only. Never include passwords, private keys, tokens, cookies, real host addresses, or complete sensitive logs.{% else %}表单只接收文字。请勿填写密码、私钥、Token、Cookie、真实主机地址或完整敏感日志。{% endif %}</p>
+        <ul>
+          <li>{% if is_en %}State the actual platform and version.{% else %}填写实际平台与版本。{% endif %}</li>
+          <li>{% if is_en %}Give the shortest reproduction steps.{% else %}给出最短复现步骤。{% endif %}</li>
+          <li>{% if is_en %}Separate expected and actual results.{% else %}分开说明预期与实际结果。{% endif %}</li>
+          <li>{% if is_en %}Attachments are not accepted yet.{% else %}当前暂不接收附件。{% endif %}</li>
+        </ul>
+      </aside>
+
+      <div class="feedback-form-panel">
+        <div class="feedback-auth-state" data-feedback-auth-state role="status" aria-live="polite">
+          {% if is_en %}Checking your Creation Cloud session…{% else %}正在检查 Creation Cloud 登录状态…{% endif %}
+        </div>
+        <a class="button button-secondary feedback-login" href="{{ login_href }}" data-feedback-login>{% if is_en %}Sign in to submit{% else %}登录后提交{% endif %}</a>
+        <form class="feedback-form" data-feedback-form aria-disabled="true">
+          <div class="feedback-field-grid">
+            <label class="field-label" for="feedback-category"><span>{% if is_en %}Category{% else %}问题类别{% endif %}</span><select id="feedback-category" name="category" required disabled>
+              <option value="bug">{% if is_en %}Bug{% else %}故障{% endif %}</option><option value="feature">{% if is_en %}Feature request{% else %}功能建议{% endif %}</option><option value="docs">{% if is_en %}Documentation{% else %}文档问题{% endif %}</option><option value="compatibility">{% if is_en %}Compatibility{% else %}兼容性{% endif %}</option><option value="other">{% if is_en %}Other{% else %}其它{% endif %}</option>
+            </select></label>
+            <label class="field-label" for="feedback-platform"><span>{% if is_en %}Platform{% else %}涉及平台{% endif %}</span><select id="feedback-platform" name="platform" required disabled>
+              <option value="windows">Windows</option><option value="linux">Linux</option><option value="android">Android</option><option value="macos">macOS</option><option value="ios">iOS</option><option value="cloud">Creation Cloud</option><option value="agent">agent</option><option value="other">{% if is_en %}Other{% else %}其它{% endif %}</option>
+            </select></label>
+          </div>
+          <label class="field-label" for="feedback-version"><span>{% if is_en %}Application version (optional){% else %}应用版本（可选）{% endif %}</span><input id="feedback-version" name="app_version" maxlength="32" autocomplete="off" placeholder="0.6.15" disabled></label>
+          <label class="field-label" for="feedback-subject"><span>{% if is_en %}Title{% else %}标题{% endif %}</span><input id="feedback-subject" name="title" minlength="5" maxlength="120" required disabled></label>
+          <label class="field-label" for="feedback-description"><span>{% if is_en %}Description{% else %}问题描述{% endif %}</span><textarea id="feedback-description" name="description" minlength="20" maxlength="4000" rows="9" required disabled placeholder="{% if is_en %}Steps, expected result, and actual result. Use example.com or RFC 5737 addresses only.{% else %}请写复现步骤、预期结果和实际结果；地址只使用 example.com 或 RFC 5737 示例。{% endif %}"></textarea></label>
+          <label class="feedback-confirm" for="feedback-redacted"><input id="feedback-redacted" name="redaction_confirmed" type="checkbox" required disabled><span>{% if is_en %}I confirm this text contains no passwords, private keys, tokens, cookies, real host addresses, or complete sensitive logs.{% else %}我确认内容不含密码、私钥、Token、Cookie、真实主机地址或完整敏感日志。{% endif %}</span></label>
+          <button class="button button-primary" type="submit" data-feedback-submit disabled>{% if is_en %}Submit website ticket{% else %}提交官网工单{% endif %}</button>
+          <div class="feedback-result" data-feedback-result role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  {% for section in view.page.sections %}
+  <section class="content-band" id="{{ section.anchor }}" aria-labelledby="feedback-section-{{ section.anchor }}">
+    <div class="container section-layout"><header class="section-heading"><h2 id="feedback-section-{{ section.anchor }}">{{ section.title }}</h2><p>{{ section.lead }}</p></header><div class="card-grid">{% for item in section.items %}<article class="content-card"><span class="card-badge">{{ item.badge }}</span><h3>{{ item.title }}</h3><p>{{ item.body }}</p><small>{{ item.meta }}</small></article>{% endfor %}</div></div>
+  </section>
+  {% endfor %}
+</main>
+{% endblock %}

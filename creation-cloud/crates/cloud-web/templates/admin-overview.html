@@ -1,0 +1,43 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+{% if let Some(message) = load_error %}
+<section class="admin-section">
+  <div class="admin-feedback" data-tone="error" role="alert"><strong>{% if is_en %}Live data unavailable{% else %}实时数据不可用{% endif %}</strong><p>{{ message }}</p></div>
+</section>
+{% endif %}
+<section class="admin-section" aria-labelledby="health-heading">
+  <div class="admin-section-heading">
+    <div><h2 id="health-heading">{% if is_en %}Runtime readiness{% else %}运行就绪状态{% endif %}</h2><p>{% if is_en %}Live checks from PostgreSQL and both controlled storage paths.{% else %}实时检查 PostgreSQL 与两个受控存储链路。{% endif %}</p></div>
+    <span class="status-badge">{{ health.environment }}</span>
+  </div>
+  <div class="admin-integrity-list">
+    <div class="admin-integrity-item"><div><strong>live</strong><small>{% if is_en %}The server process is responding{% else %}服务进程正在响应{% endif %}</small></div><span class="status-badge">{% if health.live %}ok{% else %}unavailable{% endif %}</span></div>
+    <div class="admin-integrity-item"><div><strong>ready</strong><small>{% if is_en %}Database and controlled storage are all usable{% else %}数据库和受控存储均可用{% endif %}</small></div><span class="status-badge">{% if health.ready %}ok{% else %}unavailable{% endif %}</span></div>
+    <div class="admin-integrity-item"><div><strong>{% if is_en %}Dependencies{% else %}依赖状态{% endif %}</strong><small>database / downloads / site-media</small></div><span class="admin-mono">{% if health.database %}ok{% else %}fail{% endif %} / {% if health.downloads %}ok{% else %}fail{% endif %} / {% if health.site_media %}ok{% else %}fail{% endif %}</span></div>
+  </div>
+</section>
+{% if let Some(data) = overview %}
+<section class="admin-section" aria-labelledby="overview-heading">
+  <div class="admin-section-heading">
+    <div><h2 id="overview-heading">{% if is_en %}Live control-plane totals{% else %}控制面实时汇总{% endif %}</h2><p>{% if is_en %}Read directly from the management projections.{% else %}直接读取管理域投影视图。{% endif %}</p></div>
+  </div>
+  <div class="admin-metric-grid">
+    <article class="admin-metric"><strong>{{ data.users.total_users }}</strong><span>{% if is_en %}Users{% else %}用户{% endif %}</span><small>{{ data.users.active_users }} {% if is_en %}active{% else %}正常{% endif %} / {{ data.users.disabled_users }} {% if is_en %}disabled{% else %}停用{% endif %}</small></article>
+    <article class="admin-metric"><strong>{{ data.devices.total_devices }}</strong><span>{% if is_en %}Devices{% else %}设备{% endif %}</span><small>{{ data.devices.active_devices }} {% if is_en %}active{% else %}有效{% endif %} / {{ data.devices.revoked_devices }} {% if is_en %}revoked{% else %}已撤销{% endif %}</small></article>
+    <article class="admin-metric"><strong>{{ data.releases.total_releases }}</strong><span>{% if is_en %}Releases{% else %}版本{% endif %}</span><small>{{ data.releases.published_releases }} {% if is_en %}published{% else %}已发布{% endif %} / {{ data.releases.validating_releases }} {% if is_en %}validating{% else %}校验中{% endif %}</small></article>
+    {% if let Some(feedback_data) = feedback %}<article class="admin-metric"><strong>{{ feedback_data.total_feedback }}</strong><span>{% if is_en %}Feedback{% else %}问题反馈{% endif %}</span><small>{{ feedback_data.new_feedback }} {% if is_en %}new{% else %}新反馈{% endif %} / {{ feedback_data.in_progress_feedback }} {% if is_en %}in progress{% else %}处理中{% endif %}</small></article>{% endif %}
+    <article class="admin-metric"><strong>{{ data.audit.total_events }}</strong><span>{% if is_en %}Audit events{% else %}审计事件{% endif %}</span><small>{{ data.audit.successful_events }} {% if is_en %}successful{% else %}成功{% endif %} / {{ data.audit.failed_events }} {% if is_en %}failed{% else %}失败{% endif %}</small></article>
+  </div>
+</section>
+<section class="admin-section" aria-labelledby="integrity-heading">
+  <div class="admin-section-heading"><div><h2 id="integrity-heading">{% if is_en %}State breakdown{% else %}状态分布{% endif %}</h2><p>{% if is_en %}Counts are read from the current database projections.{% else %}统计直接读取当前数据库投影视图。{% endif %}</p></div></div>
+  <div class="admin-integrity-list">
+    <div class="admin-integrity-item"><div><strong>{% if is_en %}Administrator accounts{% else %}管理员账号{% endif %}</strong><small>{% if is_en %}Accounts currently carrying the admin role{% else %}当前拥有管理员角色的账号{% endif %}</small></div><span class="status-badge">{{ data.users.admin_users }}</span></div>
+    <div class="admin-integrity-item"><div><strong>{% if is_en %}Release workflow{% else %}版本工作流{% endif %}</strong><small>{% if is_en %}draft / validating / published / revoked / hidden{% else %}草稿 / 校验 / 发布 / 撤销 / 隐藏{% endif %}</small></div><span class="admin-mono">{{ data.releases.draft_releases }} / {{ data.releases.validating_releases }} / {{ data.releases.published_releases }} / {{ data.releases.revoked_releases }} / {{ data.releases.hidden_releases }}</span></div>
+    {% if let Some(feedback_data) = feedback %}<div class="admin-integrity-item"><div><strong>{% if is_en %}Feedback workflow{% else %}反馈工作流{% endif %}</strong><small>{% if is_en %}new / triaged / in progress / resolved / closed{% else %}新反馈 / 已分诊 / 处理中 / 已解决 / 已关闭{% endif %}</small></div><span class="admin-mono">{{ feedback_data.new_feedback }} / {{ feedback_data.triaged_feedback }} / {{ feedback_data.in_progress_feedback }} / {{ feedback_data.resolved_feedback }} / {{ feedback_data.closed_feedback }}</span></div>{% endif %}
+    <div class="admin-integrity-item"><div><strong>{% if is_en %}Latest audited write{% else %}最近审计写操作{% endif %}</strong><small>{% if is_en %}Server-generated timeline timestamp{% else %}服务端生成的时间线时间{% endif %}</small></div><span class="admin-mono">{% if let Some(at) = data.audit.latest_event_at %}{{ at }}{% else %}{% if is_en %}No events{% else %}暂无事件{% endif %}{% endif %}</span></div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

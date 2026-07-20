@@ -1,0 +1,162 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="feedback-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="feedback-heading">{% if is_en %}Feedback queue{% else %}反馈队列{% endif %}</h2>
+      <p>{% if is_en %}The queue contains metadata summaries only. Full plain text is loaded explicitly.{% else %}队列只包含元数据摘要，完整纯文本仅在显式加载后显示。{% endif %}</p>
+    </div>
+  </div>
+
+  <form class="admin-toolbar admin-feedback-toolbar" method="get" action="/admin/feedback">
+    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+    <label class="admin-field">
+      {% if is_en %}Status{% else %}状态{% endif %}
+      <select name="status">
+        <option value="">{% if is_en %}All statuses{% else %}全部状态{% endif %}</option>
+        <option value="new"{% if status_filter == "new" %} selected{% endif %}>new</option>
+        <option value="triaged"{% if status_filter == "triaged" %} selected{% endif %}>triaged</option>
+        <option value="in_progress"{% if status_filter == "in_progress" %} selected{% endif %}>in_progress</option>
+        <option value="resolved"{% if status_filter == "resolved" %} selected{% endif %}>resolved</option>
+        <option value="closed"{% if status_filter == "closed" %} selected{% endif %}>closed</option>
+      </select>
+    </label>
+    <label class="admin-field">
+      {% if is_en %}Rows per page{% else %}每页数量{% endif %}
+      <select name="size">
+        <option value="10"{% if page_size == 10 %} selected{% endif %}>10</option>
+        <option value="20"{% if page_size == 20 %} selected{% endif %}>20</option>
+        <option value="50"{% if page_size == 50 %} selected{% endif %}>50</option>
+        <option value="100"{% if page_size == 100 %} selected{% endif %}>100</option>
+      </select>
+    </label>
+    <button class="button button-primary" type="submit">{% if is_en %}Filter{% else %}筛选{% endif %}</button>
+  </form>
+
+  {% if let Some(message) = list_error %}
+  <div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>
+  {% endif %}
+
+  {% if rows.is_empty() && list_error.is_none() %}
+  <div class="admin-empty">
+    <strong>{% if is_en %}No matching feedback{% else %}暂无匹配反馈{% endif %}</strong>
+    <p>{% if is_en %}No feedback exists for the current status filter.{% else %}当前状态筛选下没有反馈记录。{% endif %}</p>
+  </div>
+  {% endif %}
+
+  {% if !rows.is_empty() %}
+  <div class="admin-table-wrap">
+    <table class="admin-table admin-feedback-table">
+      <thead><tr>
+        <th>{% if is_en %}Feedback UUID{% else %}反馈 UUID{% endif %}</th>
+        <th>{% if is_en %}Category / platform{% else %}类别 / 平台{% endif %}</th>
+        <th>{% if is_en %}Status{% else %}状态{% endif %}</th>
+        <th>{% if is_en %}Created{% else %}创建时间{% endif %}</th>
+        <th>{% if is_en %}Details{% else %}详情{% endif %}</th>
+      </tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          <td><span class="admin-mono">{{ row.id }}</span></td>
+          <td><span class="status-badge">{{ row.category }}</span> <span class="status-badge">{{ row.platform }}</span></td>
+          <td>
+            <span class="status-badge"{% if row.status_tone != "" %} data-tone="{{ row.status_tone }}"{% endif %}>{{ row.status }}</span>
+            {% if row.redacted %}<span class="status-badge" data-tone="danger">{% if is_en %}redacted{% else %}已脱敏{% endif %}</span>{% endif %}
+          </td>
+          <td class="admin-mono">{{ row.created_at }}</td>
+          <td>
+            <p class="admin-feedback-request-hint">{% if is_en %}Request ID is available only in the explicit detail view.{% else %}Request ID 仅在显式详情中显示。{% endif %}</p>
+            <a class="button button-secondary" href="{{ row.detail_href }}">{% if is_en %}Load details{% else %}加载详情{% endif %}</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if list_error.is_none() %}
+  <nav class="admin-pagination" aria-label="{% if is_en %}Feedback pagination{% else %}反馈分页{% endif %}">
+    {% if let Some(href) = previous_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Previous{% else %}上一页{% endif %}</a>{% endif %}
+    <span>{% if is_en %}Page{% else %}第{% endif %} {{ page_number }} · {{ total }} {% if is_en %}items{% else %}条反馈{% endif %}</span>
+    {% if let Some(href) = next_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Next{% else %}下一页{% endif %}</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+
+{% if let Some(message) = detail_error %}
+<section class="admin-section admin-feedback-detail" aria-labelledby="feedback-detail-error-heading">
+  <div class="admin-feedback" data-tone="error" role="alert">
+    <strong id="feedback-detail-error-heading">{% if is_en %}Details unavailable{% else %}详情不可用{% endif %}</strong>
+    <p>{{ message }}</p>
+    <a class="button button-secondary" href="{{ close_detail_href }}">{% if is_en %}Close details{% else %}关闭详情{% endif %}</a>
+  </div>
+</section>
+{% endif %}
+
+{% if let Some(detail) = detail %}
+<section class="admin-section admin-feedback-detail" aria-labelledby="feedback-detail-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="feedback-detail-heading">{% if is_en %}Explicit feedback detail{% else %}显式反馈详情{% endif %}</h2>
+      <p>{% if is_en %}Plain text below is escaped and never converted into links.{% else %}以下纯文本已转义，且绝不会自动转换为链接。{% endif %}</p>
+    </div>
+    <a class="button button-secondary" href="{{ close_detail_href }}">{% if is_en %}Close details{% else %}关闭详情{% endif %}</a>
+  </div>
+
+  <dl class="admin-feedback-metadata">
+    <div><dt>UUID</dt><dd class="admin-mono">{{ detail.id }}</dd></div>
+    <div><dt>{% if is_en %}Request ID{% else %}请求 ID{% endif %}</dt><dd class="admin-mono">{{ detail.request_id }}</dd></div>
+    <div><dt>{% if is_en %}Masked account{% else %}脱敏账号{% endif %}</dt><dd class="admin-mono">{{ detail.masked_account_id }}</dd></div>
+    <div><dt>{% if is_en %}Category / platform{% else %}类别 / 平台{% endif %}</dt><dd>{{ detail.category }} / {{ detail.platform }}</dd></div>
+    <div><dt>{% if is_en %}App version{% else %}应用版本{% endif %}</dt><dd class="admin-mono">{{ detail.app_version }}</dd></div>
+    <div><dt>{% if is_en %}Status / version{% else %}状态 / 版本{% endif %}</dt><dd>{{ detail.status }} / {{ detail.version }}</dd></div>
+    <div><dt>{% if is_en %}Created / updated{% else %}创建 / 更新时间{% endif %}</dt><dd class="admin-mono">{{ detail.created_at }}<br>{{ detail.updated_at }}</dd></div>
+  </dl>
+
+  <div class="admin-feedback-copy">
+    <section><h3>{% if is_en %}Title{% else %}标题{% endif %}</h3><pre class="admin-feedback-plain-text">{{ detail.title }}</pre></section>
+    <section><h3>{% if is_en %}Description{% else %}正文{% endif %}</h3><pre class="admin-feedback-plain-text">{{ detail.description }}</pre></section>
+  </div>
+
+  <div class="admin-feedback-actions-grid">
+    <section>
+      <h3>{% if is_en %}Update status{% else %}更新状态{% endif %}</h3>
+      {% if detail.next_statuses.is_empty() %}
+      <p>{% if is_en %}Closed feedback is terminal.{% else %}已关闭反馈不可继续迁移状态。{% endif %}</p>
+      {% else %}
+      <form class="admin-form-grid" hx-post="/admin/feedback/{{ detail.id }}/status" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        <input type="hidden" name="expected_version" value="{{ detail.version }}">
+        <input type="hidden" name="page" value="{{ detail.page }}">
+        <input type="hidden" name="size" value="{{ detail.size }}">
+        {% if detail.status_filter != "" %}<input type="hidden" name="status_filter" value="{{ detail.status_filter }}">{% endif %}
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <label class="admin-field">{% if is_en %}Next status{% else %}下一状态{% endif %}<select name="status" required>{% for option in detail.next_statuses %}<option value="{{ option.value }}">{% if is_en %}{{ option.label_en }}{% else %}{{ option.label_zh }}{% endif %}</option>{% endfor %}</select></label>
+        <button class="button button-primary" type="submit">{% if is_en %}Update status{% else %}更新状态{% endif %}</button>
+      </form>
+      {% endif %}
+    </section>
+
+    <section>
+      <h3>{% if is_en %}Irreversible safety redaction{% else %}不可逆安全脱敏{% endif %}</h3>
+      {% if detail.redacted %}
+      <p>{% if is_en %}Title and description were already irreversibly redacted.{% else %}标题与正文已经完成不可逆脱敏。{% endif %}</p>
+      <section><h3>{% if is_en %}Redaction reason{% else %}脱敏原因{% endif %}</h3><pre class="admin-feedback-plain-text">{{ detail.redaction_reason }}</pre></section>
+      {% else %}
+      <form class="admin-form-grid" hx-post="/admin/feedback/{{ detail.id }}/redact" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Irreversibly replace the title and description with the fixed redaction marker? This cannot be undone.{% else %}确认用固定脱敏标记不可逆替换标题和正文？此操作无法撤销。{% endif %}">
+        <input type="hidden" name="expected_version" value="{{ detail.version }}">
+        <input type="hidden" name="page" value="{{ detail.page }}">
+        <input type="hidden" name="size" value="{{ detail.size }}">
+        {% if detail.status_filter != "" %}<input type="hidden" name="status_filter" value="{{ detail.status_filter }}">{% endif %}
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <label class="admin-field">{% if is_en %}Reason{% else %}脱敏原因{% endif %}<input name="reason" minlength="5" maxlength="500" required autocomplete="off"></label>
+        <label class="admin-feedback-confirm"><input type="checkbox" name="confirmed" value="redact" required> <span>{% if is_en %}I understand this permanently destroys the submitted text.{% else %}我确认此操作会永久销毁已提交文本。{% endif %}</span></label>
+        <button class="button button-secondary" type="submit">{% if is_en %}Redact permanently{% else %}永久脱敏{% endif %}</button>
+      </form>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

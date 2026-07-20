@@ -1,0 +1,38 @@
+[package]
+name = "creation-cloud-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+cloud-admin.workspace = true
+cloud-auth.workspace = true
+cloud-config.workspace = true
+cloud-device.workspace = true
+cloud-domain.workspace = true
+cloud-download.workspace = true
+cloud-feedback.workspace = true
+cloud-model.workspace = true
+cloud-release.workspace = true
+cloud-site-media.workspace = true
+cloud-store.workspace = true
+cloud-sync.workspace = true
+cloud-user.workspace = true
+cloud-vault.workspace = true
+cloud-web.workspace = true
+serde.workspace = true
+tokio.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+sqlx.workspace = true
+tower.workspace = true
+
+[lints]
+workspace = true

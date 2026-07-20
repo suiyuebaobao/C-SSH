@@ -1,0 +1,75 @@
+[workspace]
+members = [
+    "apps/server",
+    "crates/cloud-admin",
+    "crates/cloud-auth",
+    "crates/cloud-config",
+    "crates/cloud-device",
+    "crates/cloud-domain",
+    "crates/cloud-download",
+    "crates/cloud-feedback",
+    "crates/cloud-model",
+    "crates/cloud-release",
+    "crates/cloud-site",
+    "crates/cloud-site-media",
+    "crates/cloud-store",
+    "crates/cloud-sync",
+    "crates/cloud-user",
+    "crates/cloud-vault",
+    "crates/cloud-web",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Proprietary"
+rust-version = "1.90"
+
+[workspace.dependencies]
+anyhow = "1.0.98"
+argon2 = "0.5.3"
+askama = "0.16.0"
+async-trait = "0.1.88"
+axum = { version = "0.8.9", features = ["form", "json", "macros", "multipart"] }
+base64 = "0.22.1"
+chrono = { version = "0.4.41", features = ["serde"] }
+cloud-admin = { path = "crates/cloud-admin" }
+cloud-auth = { path = "crates/cloud-auth" }
+cloud-config = { path = "crates/cloud-config" }
+cloud-device = { path = "crates/cloud-device" }
+cloud-domain = { path = "crates/cloud-domain" }
+cloud-download = { path = "crates/cloud-download" }
+cloud-feedback = { path = "crates/cloud-feedback" }
+cloud-model = { path = "crates/cloud-model" }
+cloud-release = { path = "crates/cloud-release" }
+cloud-site = { path = "crates/cloud-site" }
+cloud-site-media = { path = "crates/cloud-site-media" }
+cloud-store = { path = "crates/cloud-store" }
+cloud-sync = { path = "crates/cloud-sync" }
+cloud-user = { path = "crates/cloud-user" }
+cloud-vault = { path = "crates/cloud-vault" }
+cloud-web = { path = "crates/cloud-web" }
+hex = "0.4.3"
+http = "1.3.1"
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
+mime_guess = "2.0.5"
+rand = "0.9.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+sha2 = "0.10.9"
+sqlx = { version = "0.8.6", default-features = false, features = ["chrono", "json", "macros", "migrate", "postgres", "runtime-tokio-rustls", "uuid"] }
+subtle = "2.6.1"
+tempfile = "3.27.0"
+thiserror = "2.0.12"
+tokio = { version = "1.45.1", features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "signal", "sync"] }
+tokio-util = { version = "0.7.15", features = ["io"] }
+tower = "0.5.2"
+tower-http = { version = "0.6.6", features = ["compression-gzip", "fs", "request-id", "trace"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+url = "2.5.4"
+uuid = { version = "1.16.0", features = ["serde", "v4", "v7"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

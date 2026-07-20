@@ -1,0 +1,234 @@
+/* 管理后台通用组件：表格、筛选、状态、反馈和确认对话框。 */
+.admin-section {
+  margin-top: var(--space-6);
+}
+
+.admin-section-heading {
+  display: flex;
+  gap: var(--space-4);
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.admin-section-heading h2 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.admin-section-heading p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+}
+
+.admin-toolbar,
+.admin-form-grid {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.admin-toolbar {
+  grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(130px, 190px)) auto;
+  align-items: end;
+}
+
+.admin-field {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 720;
+}
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper-raised);
+  color: var(--ink);
+}
+
+.admin-field textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.admin-field input:focus-visible,
+.admin-field select:focus-visible,
+.admin-field textarea:focus-visible {
+  border-color: var(--accent);
+}
+
+.admin-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  border-right: 1px solid var(--line-faint);
+  border-bottom: 1px solid var(--line-faint);
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th:last-child,
+.admin-table td:last-child {
+  border-right: 0;
+}
+
+.admin-table th {
+  background: var(--paper-alt);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table code,
+.admin-mono {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.admin-actions .button {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 0.74rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  background: var(--paper-alt);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
+.status-badge[data-tone="success"] {
+  border-color: var(--success);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-badge[data-tone="warning"] {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.status-badge[data-tone="danger"] {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.admin-feedback,
+.admin-empty {
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+
+.admin-feedback[data-tone="error"] {
+  border-left: 3px solid var(--danger);
+  background: var(--danger-soft);
+}
+
+.admin-feedback[data-tone="success"] {
+  border-left: 3px solid var(--success);
+  background: var(--success-soft);
+}
+
+.admin-feedback:empty {
+  display: none;
+}
+
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: var(--space-3);
+}
+
+.admin-pagination span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.admin-confirm {
+  width: min(92vw, 460px);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: var(--paper-raised);
+  color: var(--ink);
+}
+
+.admin-confirm::backdrop {
+  background: rgb(16 17 18 / 52%);
+}
+
+.admin-confirm-body {
+  padding: var(--space-5);
+}
+
+.admin-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--line);
+  background: var(--paper-alt);
+}
+
+@media (max-width: 720px) {
+  .admin-toolbar,
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-section-heading {
+    display: grid;
+  }
+}

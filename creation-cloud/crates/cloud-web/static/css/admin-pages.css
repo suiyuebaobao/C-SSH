@@ -1,0 +1,210 @@
+/* 管理后台页面级布局：总览读数、双栏编辑和媒体预览。 */
+.admin-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+}
+
+.admin-metric {
+  min-width: 0;
+  padding: var(--space-4);
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.admin-metric strong,
+.admin-metric span,
+.admin-metric small {
+  display: block;
+}
+
+.admin-metric strong {
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-metric span {
+  margin-top: 4px;
+  font-weight: 760;
+}
+
+.admin-metric small {
+  margin-top: var(--space-2);
+  color: var(--ink-muted);
+}
+
+.admin-split {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+}
+
+.admin-integrity-list {
+  display: grid;
+  border-top: 1px solid var(--line-strong);
+}
+
+.admin-integrity-item {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-integrity-item strong,
+.admin-integrity-item small {
+  display: block;
+}
+
+.admin-integrity-item small {
+  margin-top: 3px;
+  color: var(--ink-muted);
+}
+
+.admin-media-preview {
+  display: grid;
+  gap: var(--space-4);
+  place-items: center;
+  min-height: 320px;
+  padding: var(--space-5);
+  border: 1px dashed var(--line);
+  background: var(--paper-raised);
+  text-align: center;
+}
+
+.admin-media-preview img {
+  width: min(100%, 280px);
+  height: auto;
+  border: 1px solid var(--line-strong);
+  image-rendering: auto;
+}
+
+.admin-audit-details {
+  margin: 0;
+  padding: var(--space-4);
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: var(--paper-alt);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+}
+
+.admin-feedback-toolbar {
+  grid-template-columns: minmax(180px, 1fr) minmax(140px, 180px) auto;
+}
+
+.admin-feedback-table {
+  min-width: 920px;
+}
+
+.admin-feedback-request-hint {
+  max-width: 25ch;
+  margin: 0 0 var(--space-2);
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+}
+
+.admin-feedback-detail {
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.admin-feedback-metadata {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.admin-feedback-metadata div {
+  min-width: 0;
+  padding: var(--space-3);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-feedback-metadata dt {
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.admin-feedback-metadata dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-feedback-copy,
+.admin-feedback-actions-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--space-4);
+}
+
+.admin-feedback-copy section,
+.admin-feedback-actions-grid > section {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  background: var(--paper-alt);
+}
+
+.admin-feedback-copy h3,
+.admin-feedback-actions-grid h3 {
+  margin-top: 0;
+}
+
+.admin-feedback-plain-text {
+  max-height: 360px;
+  margin: 0;
+  overflow: auto;
+  color: var(--ink);
+  font: inherit;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.admin-feedback-confirm {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.admin-feedback-confirm input {
+  margin-top: 3px;
+}
+
+@media (max-width: 1100px) {
+  .admin-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-split {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-feedback-metadata,
+  .admin-feedback-copy,
+  .admin-feedback-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,18 @@
+[package]
+name = "cloud-user"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+axum.workspace = true
+chrono.workspace = true
+cloud-domain.workspace = true
+cloud-store.workspace = true
+serde.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

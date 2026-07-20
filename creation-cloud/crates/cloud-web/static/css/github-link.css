@@ -1,0 +1,43 @@
+/* 页头 GitHub 入口：保持工程制图视觉，并在窄屏菜单中完整展开。 */
+.github-repository {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 38px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 760;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.github-repository:hover {
+  border-color: var(--accent);
+  background: var(--accent-ink);
+  color: #ffffff;
+}
+
+.github-repository:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1200px) {
+  .github-repository {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .github-repository {
+    transition-duration: 0.01ms;
+  }
+}

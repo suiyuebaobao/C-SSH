@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{# 教程总览页：提供六条可执行流程、验收条件与 agent 边界。 #}
+
+{% block styles %}
+  <link rel="stylesheet" href="/static/css/public-detail.css?v=20260720-seo">
+{% endblock %}
+
+{% block main %}
+<main id="main-content" class="detail-main tutorials-main">
+  <section class="page-intro detail-intro" aria-labelledby="tutorials-title">
+    <div class="container page-intro-inner">
+      <p class="eyebrow">{{ view.page.eyebrow }}</p>
+      <h1 id="tutorials-title">{{ view.page.heading }}</h1>
+      <p>{{ view.page.lead }}</p>
+      <div class="action-row">
+        {% for action in view.page.actions %}
+        <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <nav class="detail-index-band tutorial-index-band" aria-label="{{ view.page.tutorial_page.index_label }}">
+    <div class="container">
+      <p class="detail-index-label">{{ view.page.tutorial_page.index_label }}</p>
+      <div class="tutorial-index-grid">
+        {% for tutorial in view.page.tutorial_page.items %}
+        <a class="tutorial-index-link" href="#{{ tutorial.anchor }}">
+          <span>{{ tutorial.sequence }}</span>
+          <strong>{{ tutorial.title }}</strong>
+          <small>{{ tutorial.summary }}</small>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </nav>
+
+  {% for tutorial in view.page.tutorial_page.items %}
+  <article class="detail-band tutorial-detail" id="{{ tutorial.anchor }}" aria-labelledby="tutorial-{{ tutorial.anchor }}">
+    <div class="container tutorial-layout">
+      <header class="detail-heading tutorial-heading">
+        <span class="detail-sequence">{{ tutorial.sequence }}</span>
+        <h2 id="tutorial-{{ tutorial.anchor }}">{{ tutorial.title }}</h2>
+        <p>{{ tutorial.summary }}</p>
+      </header>
+      <section class="tutorial-prerequisites" aria-labelledby="prerequisites-{{ tutorial.anchor }}">
+        <h3 id="prerequisites-{{ tutorial.anchor }}">{{ view.page.tutorial_page.prerequisites_label }}</h3>
+        <ul class="detail-list">
+          {% for prerequisite in tutorial.prerequisites %}
+          <li>{{ prerequisite }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+      <section class="tutorial-procedure" aria-labelledby="steps-{{ tutorial.anchor }}">
+        <h3 id="steps-{{ tutorial.anchor }}">{{ view.page.tutorial_page.steps_label }}</h3>
+        <ol class="tutorial-steps">
+          {% for step in tutorial.steps %}
+          <li>
+            <span>{{ step.label }}</span>
+            <div>
+              <h4>{{ step.title }}</h4>
+              <p>{{ step.instruction }}</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+      </section>
+      <footer class="tutorial-outcome">
+        <section class="outcome-item outcome-verify">
+          <h3>{{ view.page.tutorial_page.verification_label }}</h3>
+          <p>{{ tutorial.verification }}</p>
+        </section>
+        <section class="outcome-item outcome-boundary">
+          <h3>{{ view.page.tutorial_page.agent_boundary_label }}</h3>
+          <p>{{ tutorial.agent_boundary }}</p>
+        </section>
+      </footer>
+    </div>
+  </article>
+  {% endfor %}
+</main>
+{% endblock %}

@@ -1,0 +1,27 @@
+[package]
+name = "cloud-download"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+axum.workspace = true
+chrono.workspace = true
+cloud-domain.workspace = true
+cloud-store.workspace = true
+mime_guess.workspace = true
+serde.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+tower = { workspace = true, features = ["util"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/static/css/admin-foundation.css?v=20260720-admin">
+  <link rel="stylesheet" href="/static/css/admin-components.css?v=20260720-admin">
+  <link rel="stylesheet" href="/static/css/admin-pages.css?v=20260720-admin">
+{% endblock %}
+
+{% block scripts %}
+  <script src="/static/js/admin.js?v=20260720-admin" defer></script>
+{% endblock %}
+
+{% block main %}
+<main id="main-content" class="admin-workspace" data-admin-shell data-csrf-token="{{ csrf_token }}">
+  <div class="container admin-frame">
+    <aside class="admin-sidebar" aria-label="{% if is_en %}Control plane navigation{% else %}控制面导航{% endif %}">
+      <p class="admin-sidebar-kicker">CONTROL PLANE / ADMIN</p>
+      <nav class="admin-navigation">
+        {% for item in view.page.local_navigation %}
+        <a href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+        {% endfor %}
+      </nav>
+    </aside>
+    <div class="admin-panel">
+      <header class="admin-page-header" aria-labelledby="admin-title">
+        <div class="admin-page-heading">
+          <p class="eyebrow">{{ view.page.eyebrow }}</p>
+          <h1 id="admin-title">{{ view.page.heading }}</h1>
+          <p>{{ view.page.lead }}</p>
+        </div>
+        {% if let Some(email) = session_email %}
+        <div class="admin-session">
+          <span>{% if is_en %}Signed in administrator{% else %}当前管理员{% endif %}</span>
+          <strong>{{ email }}</strong>
+          <button class="button button-secondary" type="button" data-admin-logout data-error-label="{% if is_en %}Unable to sign out.{% else %}退出失败，请稍后重试。{% endif %}">
+            {% if is_en %}Sign out{% else %}退出登录{% endif %}
+          </button>
+        </div>
+        {% endif %}
+      </header>
+      <div id="admin-global-feedback" class="admin-feedback" data-admin-global-feedback role="status" aria-live="polite"></div>
+      {% block admin_content %}
+      <div class="metric-grid workspace-metrics" aria-label="Summary">
+        {% for metric in view.page.metrics %}
+        <article class="metric-item">
+          <strong>{{ metric.value }}</strong>
+          <span>{{ metric.label }}</span>
+          <p>{{ metric.detail }}</p>
+        </article>
+        {% endfor %}
+      </div>
+      {% for section in view.page.sections %}
+      <section class="workspace-section" id="{{ section.anchor }}" aria-labelledby="admin-section-{{ section.anchor }}">
+        <header class="section-heading section-heading-inline">
+          <h2 id="admin-section-{{ section.anchor }}">{{ section.title }}</h2>
+          <p>{{ section.lead }}</p>
+        </header>
+        <div class="card-grid">
+          {% for item in section.items %}
+          <article class="content-card">
+            <span class="card-badge">{{ item.badge }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.body }}</p>
+            <small>{{ item.meta }}</small>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+      {% endblock %}
+    </div>
+  </div>
+  <dialog class="admin-confirm" data-admin-confirm-dialog>
+    <div class="admin-confirm-body">
+      <h2>{% if is_en %}Confirm action{% else %}确认操作{% endif %}</h2>
+      <p data-admin-confirm-message></p>
+    </div>
+    <div class="admin-confirm-actions">
+      <button class="button button-secondary" type="button" data-admin-confirm-cancel>{% if is_en %}Cancel{% else %}取消{% endif %}</button>
+      <button class="button button-primary" type="button" data-admin-confirm-accept>{% if is_en %}Confirm{% else %}确认{% endif %}</button>
+    </div>
+  </dialog>
+</main>
+{% endblock %}

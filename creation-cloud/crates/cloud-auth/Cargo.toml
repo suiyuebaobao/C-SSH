@@ -1,0 +1,25 @@
+[package]
+name = "cloud-auth"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+argon2.workspace = true
+axum.workspace = true
+chrono.workspace = true
+cloud-domain.workspace = true
+cloud-store.workspace = true
+hex.workspace = true
+rand.workspace = true
+serde.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+subtle.workspace = true
+tokio.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,33 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="current-media-heading">
+  <div class="admin-section-heading"><div><h2 id="current-media-heading">{% if is_en %}Current home QR{% else %}当前首页二维码{% endif %}</h2><p>{% if is_en %}The public page reads this same-origin published projection.{% else %}公开首页读取同一个同源发布投影。{% endif %}</p></div></div>
+  {% if let Some(media) = current %}
+  <div class="admin-split"><div class="admin-media-preview"><img src="{{ media.content_url }}" alt="{% if is_en %}{{ media.alt_en }}{% else %}{{ media.alt_zh }}{% endif %}"><p><strong>{% if is_en %}Published{% else %}已发布{% endif %}</strong><br><span class="admin-mono">{{ media.id }}</span><br>{{ media.dimensions }} · {{ media.published_at }}</p></div><div><p><strong>SHA256</strong><br><span class="admin-mono">{{ media.sha256 }}</span></p><p><strong>中文 alt</strong><br>{{ media.alt_zh }}</p><p><strong>English alt</strong><br>{{ media.alt_en }}</p></div></div>
+  {% else if load_error.is_none() %}
+  <div class="admin-empty"><strong>{% if is_en %}No QR is published{% else %}尚未发布二维码{% endif %}</strong><p>{% if is_en %}The public home page keeps its honest empty state until a draft is published.{% else %}发布草稿前，公开首页会保持真实空态。{% endif %}</p></div>
+  {% endif %}
+</section>
+
+<section class="admin-section" aria-labelledby="upload-media-heading">
+  <div class="admin-section-heading"><div><h2 id="upload-media-heading">{% if is_en %}Upload QR draft{% else %}上传二维码草稿{% endif %}</h2><p>{% if is_en %}PNG or JPEG, square, at most 2 MiB; the service re-encodes it to controlled PNG.{% else %}支持 PNG/JPEG、正方形、最大 2 MiB；服务会重编码为受控 PNG。{% endif %}</p></div></div>
+  <form class="admin-form-grid" enctype="multipart/form-data" hx-post="/admin/site{% if is_en %}?lang=en{% endif %}" hx-encoding="multipart/form-data" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+    <label class="admin-field">{% if is_en %}QR image{% else %}二维码图片{% endif %}<input type="file" name="file" accept="image/png,image/jpeg" required></label>
+    <label class="admin-field">中文替代文本<input name="alt_zh" required maxlength="300"></label><label class="admin-field">English alternative text<input name="alt_en" required maxlength="300"></label>
+    <button class="button button-primary" type="submit">{% if is_en %}Create draft{% else %}创建草稿{% endif %}</button>
+  </form>
+</section>
+
+<section class="admin-section" aria-labelledby="media-history-heading">
+  <div class="admin-section-heading"><div><h2 id="media-history-heading">{% if is_en %}Controlled history{% else %}受控历史{% endif %}</h2><p>{% if is_en %}Published and revoked records retain their immutable file identity.{% else %}已发布和已撤销记录保留不可变文件身份。{% endif %}</p></div></div>
+  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No media history{% else %}暂无媒体历史{% endif %}</strong><p>{% if is_en %}Upload a controlled draft above.{% else %}可在上方上传受控草稿。{% endif %}</p></div>{% endif %}
+  {% if !rows.is_empty() %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>{% if is_en %}Identity{% else %}身份{% endif %}</th><th>{% if is_en %}Alternative text{% else %}替代文本{% endif %}</th><th>{% if is_en %}File identity{% else %}文件身份{% endif %}</th><th>{% if is_en %}Actions{% else %}操作{% endif %}</th></tr></thead><tbody>
+    {% for row in rows %}<tr><td><span class="status-badge" data-tone="{% if row.state == "published" %}success{% else if row.state == "revoked" %}danger{% else %}warning{% endif %}">{{ row.state }}</span><br><span class="admin-mono">{{ row.id }}</span><br><span class="admin-mono">{{ row.created_at }}</span></td><td><form class="admin-form-grid" hx-post="/admin/site/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML"><label class="admin-field">中文 alt<input name="alt_zh" value="{{ row.alt_zh }}" required></label><label class="admin-field">English alt<input name="alt_en" value="{{ row.alt_en }}" required></label>{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Update alt text{% else %}更新替代文本{% endif %}</button></form></td><td>{{ row.content_type }} · {{ row.dimensions }} · {{ row.byte_size }} B<br><span class="admin-mono">{{ row.sha256 }}</span></td><td><div class="admin-actions">
+      {% if row.state == "draft" %}<form hx-post="/admin/site/{{ row.id }}/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this QR as the current home-page image?{% else %}确认将此二维码发布为当前首页图片？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button></form><form hx-post="/admin/site/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft and its controlled file?{% else %}确认删除此草稿及其受控文件？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Delete draft{% else %}删除草稿{% endif %}</button></form>{% endif %}
+      {% if row.state == "published" %}<form hx-post="/admin/site/{{ row.id }}/revoke" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke the currently published QR? The public page will return to an empty state unless another version is live.{% else %}确认撤销当前二维码？若无其他已发布版本，公开首页将回到空态。{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button></form>{% endif %}
+    </div></td></tr>{% endfor %}
+  </tbody></table></div>{% endif %}
+</section>
+{% endblock %}

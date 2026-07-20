@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="marketing-main">
+  <section class="page-intro" aria-labelledby="marketing-title">
+    <div class="container page-intro-inner">
+      <p class="eyebrow">{{ view.page.eyebrow }}</p>
+      <h1 id="marketing-title">{{ view.page.heading }}</h1>
+      <p>{{ view.page.lead }}</p>
+      <div class="action-row">
+        {% for action in view.page.actions %}
+        <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {% for section in view.page.sections %}
+  <section class="content-band marketing-content-band" id="{{ section.anchor }}" aria-labelledby="marketing-section-{{ section.anchor }}">
+    <div class="container section-layout">
+      <header class="section-heading">
+        <h2 id="marketing-section-{{ section.anchor }}">{{ section.title }}</h2>
+        <p>{{ section.lead }}</p>
+      </header>
+      <div class="card-grid">
+        {% for item in section.items %}
+        <article class="content-card">
+          <span class="card-badge">{{ item.badge }}</span>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.body }}</p>
+          <small>{{ item.meta }}</small>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+</main>
+{% endblock %}

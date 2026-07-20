@@ -1,0 +1,23 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="users-heading">
+  <div class="admin-section-heading"><div><h2 id="users-heading">{% if is_en %}Accounts{% else %}账号列表{% endif %}</h2><p>{% if is_en %}Only redacted identity and control-plane metadata are shown.{% else %}只显示脱敏身份与控制面元数据。{% endif %}</p></div></div>
+  <form class="admin-toolbar" method="get" action="/admin/users">
+    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+    <label class="admin-field">{% if is_en %}Exact email{% else %}精确邮箱{% endif %}<input name="email" type="email" value="{{ email_filter }}" autocomplete="off" placeholder="admin@example.com"></label>
+    <label class="admin-field">{% if is_en %}Role{% else %}角色{% endif %}<select name="role"><option value="">{% if is_en %}All roles{% else %}全部角色{% endif %}</option><option value="user"{% if role_filter == "user" %} selected{% endif %}>user</option><option value="admin"{% if role_filter == "admin" %} selected{% endif %}>admin</option></select></label>
+    <label class="admin-field">{% if is_en %}Status{% else %}状态{% endif %}<select name="status"><option value="">{% if is_en %}All statuses{% else %}全部状态{% endif %}</option><option value="active"{% if status_filter == "active" %} selected{% endif %}>active</option><option value="disabled"{% if status_filter == "disabled" %} selected{% endif %}>disabled</option></select></label>
+    <button class="button button-primary" type="submit">{% if is_en %}Filter{% else %}筛选{% endif %}</button>
+  </form>
+  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No matching accounts{% else %}没有匹配账号{% endif %}</strong><p>{% if is_en %}Adjust the filters to broaden the query.{% else %}请调整筛选条件。{% endif %}</p></div>{% endif %}
+  {% if !rows.is_empty() %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>{% if is_en %}Account{% else %}账号{% endif %}</th><th>{% if is_en %}Role / status{% else %}角色 / 状态{% endif %}</th><th>{% if is_en %}Devices{% else %}设备{% endif %}</th><th>{% if is_en %}Created{% else %}创建时间{% endif %}</th><th>{% if is_en %}Actions{% else %}操作{% endif %}</th></tr></thead><tbody>
+    {% for row in rows %}<tr><td><strong>{{ row.display_name }}</strong><br>{{ row.email }}<br><span class="admin-mono">{{ row.id }}</span></td><td><span class="status-badge">{{ row.role }}</span> <span class="status-badge" data-tone="{% if row.status == "active" %}success{% else %}danger{% endif %}">{{ row.status }}</span></td><td>{{ row.device_count }}</td><td class="admin-mono">{{ row.created_at }}</td><td><div class="admin-actions">
+      <form hx-post="/admin/users/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Change this account role? Current and last active administrators remain protected.{% else %}确认变更该账号角色？当前管理员与最后有效管理员仍受保护。{% endif %}"><input type="hidden" name="role" value="{% if row.role == "admin" %}user{% else %}admin{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if row.role == "admin" %}{% if is_en %}Set user{% else %}降为用户{% endif %}{% else %}{% if is_en %}Set admin{% else %}设为管理员{% endif %}{% endif %}</button></form>
+      <form hx-post="/admin/users/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Change this account status? Disabling an account clears its sessions.{% else %}确认变更该账号状态？停用账号会清理其会话。{% endif %}"><input type="hidden" name="status" value="{% if row.status == "active" %}disabled{% else %}active{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if row.status == "active" %}{% if is_en %}Disable{% else %}停用{% endif %}{% else %}{% if is_en %}Enable{% else %}启用{% endif %}{% endif %}</button></form>
+    </div></td></tr>{% endfor %}
+  </tbody></table></div>{% endif %}
+  {% if load_error.is_none() %}<nav class="admin-pagination" aria-label="{% if is_en %}User pagination{% else %}用户分页{% endif %}">{% if let Some(href) = previous_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Previous{% else %}上一页{% endif %}</a>{% endif %}<span>{% if is_en %}Page{% else %}第{% endif %} {{ page_number }} · {{ total }} {% if is_en %}accounts{% else %}个账号{% endif %}</span>{% if let Some(href) = next_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Next{% else %}下一页{% endif %}</a>{% endif %}</nav>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,349 @@
+/* 通用页面壳：覆盖营销页、账号、控制台、管理页和 FAQ，不承载首页专属视觉。 */
+.marketing-main,
+.faq-main,
+.account-main,
+.workspace-main,
+.admin-main {
+  background: var(--paper);
+}
+
+.page-intro {
+  padding-block: var(--space-8);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.page-intro-compact {
+  padding-block: var(--space-7);
+}
+
+.page-intro-inner {
+  position: relative;
+  max-width: 940px;
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--accent);
+  overflow-wrap: anywhere;
+}
+
+.page-intro-inner::after {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: -7px;
+  width: 12px;
+  background: repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 14px);
+  content: "";
+  opacity: 0.32;
+}
+
+.page-intro-inner h1 {
+  max-width: 820px;
+  font-size: clamp(2.35rem, 5vw, 3.5rem);
+}
+
+.page-intro-inner > p:not(.eyebrow) {
+  max-width: var(--text-width);
+  margin-bottom: 0;
+  color: var(--ink-soft);
+  font-size: 1.06rem;
+}
+
+.marketing-content-band {
+  border-top: 0;
+}
+
+.section-layout {
+  gap: var(--space-7);
+}
+
+.section-heading h2 {
+  color: var(--ink);
+}
+
+.section-heading p,
+.content-card p {
+  color: var(--ink-soft);
+}
+
+.account-main {
+  min-height: calc(100svh - var(--header-height));
+  padding-block: var(--space-7);
+}
+
+.account-layout {
+  display: grid;
+  min-height: calc(100svh - var(--header-height) - 96px);
+  place-items: center;
+}
+
+.account-panel {
+  position: relative;
+  width: min(100%, 500px);
+  padding: var(--space-7);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.account-panel::before,
+.account-panel::after {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  background: var(--accent);
+  content: "";
+}
+
+.account-panel::before {
+  top: -1px;
+  left: var(--space-4);
+}
+
+.account-panel::after {
+  right: var(--space-4);
+  bottom: -1px;
+}
+
+.account-heading h1 {
+  font-size: 2.2rem;
+}
+
+.account-heading > p:not(.eyebrow),
+.form-note {
+  color: var(--ink-muted);
+}
+
+.account-form {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.form-feedback {
+  padding: 10px 12px;
+  border-left: 3px solid var(--danger);
+  background: var(--danger-soft);
+  color: var(--ink);
+}
+
+.form-feedback:empty {
+  display: none;
+}
+
+.account-alternative {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+
+.workspace-main,
+.admin-main {
+  min-height: calc(100svh - var(--header-height));
+}
+
+.workspace-layout {
+  display: grid;
+  min-height: calc(100svh - var(--header-height));
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+.workspace-sidebar {
+  padding: var(--space-6) var(--space-4) var(--space-7) 0;
+  border-right: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.workspace-kicker {
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 760;
+  letter-spacing: 0.05em;
+}
+
+.workspace-nav {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.workspace-nav a {
+  padding: 10px 11px;
+  color: var(--ink-muted);
+}
+
+.workspace-nav a:hover,
+.workspace-nav a[aria-current="page"] {
+  border-color: var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+}
+
+.workspace-nav a[aria-current="page"] {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.workspace-content {
+  min-width: 0;
+  padding: var(--space-6) 0 var(--space-8) var(--space-7);
+}
+
+.workspace-heading {
+  max-width: 880px;
+  overflow-wrap: anywhere;
+}
+
+.workspace-heading h1 {
+  margin-bottom: var(--space-3);
+  font-size: 2.4rem;
+}
+
+.workspace-heading > p:not(.eyebrow) {
+  color: var(--ink-soft);
+}
+
+.workspace-metrics {
+  margin-top: var(--space-5);
+}
+
+.workspace-section {
+  margin-top: var(--space-7);
+}
+
+.section-heading-inline {
+  margin-bottom: var(--space-4);
+}
+
+.section-heading-inline h2 {
+  font-size: 1.35rem;
+}
+
+.admin-heading-band {
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.admin-heading {
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--accent);
+}
+
+.admin-content-band {
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.admin-content-band .workspace-metrics {
+  margin-top: 0;
+}
+
+.faq-band {
+  background: var(--paper);
+}
+
+.faq-layout {
+  max-width: 940px;
+}
+
+.faq-item summary {
+  position: relative;
+  padding-right: var(--space-8);
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  color: var(--accent-text);
+  content: "+";
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  transform: translateY(-50%);
+}
+
+.faq-item[open] {
+  background: var(--paper-alt);
+}
+
+.faq-item[open] summary::after {
+  content: "−";
+}
+
+@media (max-width: 960px) {
+  .workspace-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-sidebar {
+    padding: var(--space-3) 0;
+    overflow: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .workspace-kicker {
+    display: none;
+  }
+
+  .workspace-nav {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .workspace-nav a {
+    flex: 0 0 auto;
+  }
+
+  .workspace-nav a[aria-current="page"] {
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+
+  .workspace-content {
+    padding: var(--space-5) 0 var(--space-7);
+  }
+}
+
+@media (max-width: 720px) {
+  .page-intro,
+  .page-intro-compact {
+    padding-block: var(--space-6);
+  }
+
+  .page-intro-inner {
+    padding-left: var(--space-4);
+  }
+
+  .workspace-heading h1 {
+    font-size: 2.1rem;
+  }
+
+  .account-main {
+    padding-block: var(--space-5);
+  }
+
+  .account-layout {
+    min-height: calc(100svh - var(--header-height) - 48px);
+  }
+
+  .account-panel {
+    padding: var(--space-5);
+  }
+
+  .workspace-metrics {
+    margin-top: var(--space-4);
+  }
+
+  .workspace-section {
+    margin-top: var(--space-6);
+  }
+}
+
+@media (max-width: 420px) {
+  .account-heading h1 {
+    font-size: 1.9rem;
+  }
+}

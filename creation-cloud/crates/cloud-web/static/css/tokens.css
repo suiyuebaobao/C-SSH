@@ -1,0 +1,59 @@
+/* 全站视觉令牌：定义暖白纸面、工业结构线、状态色与响应式尺寸。 */
+:root {
+  color-scheme: light;
+  --font-sans: "Segoe UI Variable", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --paper: #f4f1ec;
+  --paper-alt: #ece8e1;
+  --paper-raised: #fffdf8;
+  --paper-deep: #e1ddd5;
+  --ink: #101112;
+  --ink-soft: #4e5354;
+  --ink-muted: #5f6364;
+
+  --line: #555a5b;
+  --line-strong: #171a1b;
+  --line-soft: #858a8b;
+  --line-faint: #cec9c0;
+
+  --accent: #f0440b;
+  --accent-hover: #bf3000;
+  --accent-text: #b72d00;
+  --accent-ink: #101112;
+  --accent-soft: #f7ddd2;
+
+  --success: #28613d;
+  --success-soft: #dce8df;
+  --warning: #765000;
+  --warning-soft: #eee2c6;
+  --danger: #9f3027;
+  --danger-soft: #f2dcd8;
+
+  --inverse: #101112;
+  --inverse-ink: #fffdf8;
+  --inverse-muted: #c8c5be;
+  --inverse-line: #777b7c;
+
+  --focus: #f0440b;
+  --focus-gap: #fffdf8;
+  --focus-ring: rgb(240 68 11 / 24%);
+
+  --radius-small: 0;
+  --radius-medium: 0;
+  --radius-large: 0;
+  --header-height: 64px;
+  --content-width: 1240px;
+  --home-content-width: 1320px;
+  --text-width: 760px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 80px;
+}

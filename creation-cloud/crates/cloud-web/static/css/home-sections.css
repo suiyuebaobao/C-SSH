@@ -1,0 +1,305 @@
+/* 首页内容段：负责系统流、能力、步骤、平台、安全、下载与云端模块。 */
+.home-system-grid {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+}
+
+.home-system-item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 210px;
+  flex-direction: column;
+  padding: var(--space-5);
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.home-item-index {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+}
+
+.home-item-badge {
+  display: block;
+  max-width: calc(100% - 42px);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.home-item-port {
+  display: block;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: var(--space-5) 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--paper-raised);
+}
+
+.home-system-item h3 {
+  margin: auto 0 var(--space-2);
+  font-size: 1.12rem;
+}
+
+.home-system-item p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1.68;
+}
+
+.home-system-item small {
+  display: block;
+  margin-top: var(--space-4);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.home-tone-dark {
+  background: var(--inverse);
+  color: var(--inverse-ink);
+}
+
+.home-tone-dark .home-item-index,
+.home-tone-dark .home-item-badge,
+.home-tone-dark p,
+.home-tone-dark small {
+  color: var(--inverse-muted);
+}
+
+.home-tone-dark h3 {
+  color: var(--inverse-ink);
+}
+
+.home-tone-dark .home-item-port {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.home-tone-accent {
+  background: var(--accent-soft);
+}
+
+.home-tone-accent .home-item-badge {
+  color: var(--accent-text);
+}
+
+.home-tone-accent .home-item-port {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.home-tone-planned {
+  color: var(--ink-muted);
+  outline: 1px dashed var(--line-soft);
+  outline-offset: -6px;
+}
+
+.home-tone-planned .home-item-port {
+  border-color: var(--line-soft);
+  background: transparent;
+}
+
+.home-layout-workflow {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.home-layout-workflow .home-system-item:nth-child(6) {
+  grid-column: span 2;
+}
+
+.home-layout-workflow .home-system-item:nth-child(7) {
+  grid-column: span 3;
+}
+
+.home-layout-workflow .home-system-item:nth-child(n + 6) {
+  min-height: 168px;
+}
+
+.home-layout-workflow .home-system-item:nth-child(n + 6) .home-item-port {
+  display: none;
+}
+
+.home-layout-capabilities {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.home-layout-capabilities .home-item-port {
+  width: 38px;
+  height: 3px;
+  margin: var(--space-6) 0 var(--space-5);
+  border: 0;
+  border-radius: 0;
+  background: var(--line-strong);
+}
+
+.home-layout-capabilities .home-tone-accent .home-item-port {
+  background: var(--accent);
+}
+
+.home-layout-steps {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.home-layout-steps .home-system-item {
+  min-height: 250px;
+}
+
+.home-layout-steps .home-item-index {
+  position: static;
+  order: -3;
+  margin-bottom: var(--space-4);
+  color: var(--ink);
+  font-size: 1.55rem;
+  font-weight: 850;
+}
+
+.home-layout-steps .home-item-badge {
+  order: -2;
+}
+
+.home-layout-steps .home-item-port {
+  order: -1;
+  width: 11px;
+  height: 11px;
+  margin: var(--space-5) 0;
+}
+
+.home-layout-platforms,
+.home-layout-downloads {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.home-layout-platforms .home-system-item,
+.home-layout-downloads .home-system-item {
+  min-height: 190px;
+}
+
+.home-layout-platforms .home-item-port,
+.home-layout-downloads .home-item-port,
+.home-layout-security .home-item-port {
+  display: none;
+}
+
+.home-layout-platforms .home-system-item h3,
+.home-layout-downloads .home-system-item h3,
+.home-layout-security .home-system-item h3 {
+  margin-top: var(--space-7);
+}
+
+.home-layout-security {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.home-layout-security .home-system-item {
+  min-height: 320px;
+}
+
+.home-layout-security .home-item-badge {
+  color: var(--accent-text);
+}
+
+.home-layout-security .home-tone-dark .home-item-badge {
+  color: var(--accent);
+}
+
+.home-layout-cloud {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.home-layout-cloud .home-system-item {
+  min-height: 180px;
+}
+
+.home-layout-cloud .home-item-port {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin: var(--space-5) 0 var(--space-4);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.home-layout-cloud .home-item-port::before,
+.home-layout-cloud .home-item-port::after {
+  position: absolute;
+  background: var(--accent);
+  content: "";
+}
+
+.home-layout-cloud .home-item-port::before {
+  top: 6px;
+  left: 0;
+  width: 14px;
+  height: 2px;
+}
+
+.home-layout-cloud .home-item-port::after {
+  top: 0;
+  left: 6px;
+  width: 2px;
+  height: 14px;
+}
+
+@media (max-width: 960px) {
+  .home-layout-workflow,
+  .home-layout-capabilities,
+  .home-layout-platforms,
+  .home-layout-downloads,
+  .home-layout-cloud {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-layout-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-layout-workflow .home-system-item:nth-child(6),
+  .home-layout-workflow .home-system-item:nth-child(7) {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-layout-workflow,
+  .home-layout-capabilities,
+  .home-layout-steps,
+  .home-layout-platforms,
+  .home-layout-security,
+  .home-layout-downloads,
+  .home-layout-cloud {
+    grid-template-columns: 1fr;
+  }
+
+  .home-system-item,
+  .home-layout-steps .home-system-item,
+  .home-layout-security .home-system-item {
+    min-height: 0;
+  }
+
+  .home-system-item h3,
+  .home-layout-platforms .home-system-item h3,
+  .home-layout-downloads .home-system-item h3,
+  .home-layout-security .home-system-item h3 {
+    margin-top: var(--space-5);
+  }
+}

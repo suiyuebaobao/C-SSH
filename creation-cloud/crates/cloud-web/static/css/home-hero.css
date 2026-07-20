@@ -1,0 +1,356 @@
+/* 首页首屏：负责强排版、制图品牌 C 与五平台状态轨。 */
+.home-hero {
+  position: relative;
+  min-height: 650px;
+  padding-block: clamp(64px, 8vw, 104px);
+  overflow: hidden;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper);
+}
+
+.home-hero-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  gap: clamp(40px, 6vw, 80px);
+  align-items: center;
+}
+
+.hero-copy {
+  position: relative;
+  min-width: 0;
+  max-width: 720px;
+  padding-left: 56px;
+}
+
+.hero-ruler {
+  position: absolute;
+  top: -28px;
+  bottom: -28px;
+  left: 0;
+  width: 22px;
+  border-left: 1px solid var(--line-strong);
+  background: repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 18px);
+  opacity: 0.72;
+}
+
+.hero-ruler::after {
+  position: absolute;
+  bottom: 0;
+  left: -19px;
+  color: var(--ink-muted);
+  content: "SYSTEM / ARCHITECTURE";
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  transform: rotate(180deg);
+  writing-mode: vertical-rl;
+}
+
+.hero-copy h1 {
+  max-width: 690px;
+  margin: var(--space-4) 0 var(--space-5);
+  font-size: clamp(3rem, 6.2vw, 5rem);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.hero-lead {
+  max-width: 650px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  line-height: 1.75;
+}
+
+.home-hero .action-row {
+  margin-top: var(--space-6);
+}
+
+.hero-blueprint {
+  position: relative;
+  display: grid;
+  width: min(100%, 500px);
+  aspect-ratio: 1;
+  margin-left: auto;
+  place-items: center;
+  border: 1px dashed var(--line-soft);
+  background: var(--paper-raised);
+}
+
+.blueprint-label {
+  position: absolute;
+  z-index: 3;
+  top: 15px;
+  left: 16px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+}
+
+.blueprint-axis {
+  position: absolute;
+  z-index: 1;
+  background: var(--line-soft);
+  opacity: 0.7;
+}
+
+.blueprint-axis-x {
+  top: 50%;
+  left: -30px;
+  width: calc(100% + 60px);
+  height: 1px;
+}
+
+.blueprint-axis-y {
+  top: -30px;
+  left: 50%;
+  width: 1px;
+  height: calc(100% + 60px);
+}
+
+.blueprint-c {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 66%;
+  aspect-ratio: 1;
+  border: clamp(24px, 3vw, 36px) solid var(--ink);
+  border-right-color: transparent;
+  border-radius: 50%;
+}
+
+.blueprint-c::after {
+  position: absolute;
+  inset: 18px;
+  border: 2px solid var(--line);
+  border-right-color: transparent;
+  border-radius: 50%;
+  content: "";
+}
+
+.blueprint-target {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--paper-raised);
+}
+
+.blueprint-target::before,
+.blueprint-target::after {
+  position: absolute;
+  background: var(--accent);
+  content: "";
+}
+
+.blueprint-target::before {
+  top: 8px;
+  left: -8px;
+  width: 34px;
+  height: 2px;
+}
+
+.blueprint-target::after {
+  top: -8px;
+  left: 8px;
+  width: 2px;
+  height: 34px;
+}
+
+.blueprint-target-start {
+  left: -12px;
+}
+
+.blueprint-target-end {
+  right: -12px;
+  border-color: var(--line-strong);
+}
+
+.blueprint-target-end::before,
+.blueprint-target-end::after {
+  background: var(--line-strong);
+}
+
+.home-platform-rail {
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.home-platform-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 128px repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.home-platform-label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 740;
+  letter-spacing: 0.06em;
+}
+
+.home-platform-label i {
+  width: 20px;
+  height: 2px;
+  margin-block: 14px;
+  background: var(--accent);
+}
+
+.home-platform-label h2 {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.home-platform-label small {
+  color: var(--ink-muted);
+}
+
+.home-platform-item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 142px;
+  flex-direction: column;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.home-platform-item > strong {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.home-platform-item h3 {
+  margin: auto 0 var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  letter-spacing: 0.04em;
+}
+
+.home-platform-item p,
+.home-platform-item small {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.home-platform-item small {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.platform-led {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.home-platform-item-planned {
+  border-style: dashed;
+  border-color: var(--line-soft);
+  color: var(--ink-muted);
+}
+
+.home-platform-item-planned .platform-led {
+  border: 1px solid var(--line-soft);
+  background: transparent;
+}
+
+@media (max-width: 960px) {
+  .home-hero {
+    min-height: 0;
+  }
+
+  .home-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-blueprint {
+    width: min(72vw, 430px);
+    margin-inline: auto;
+  }
+
+  .home-platform-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-platform-label {
+    grid-column: 1 / -1;
+    min-height: 72px;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-hero {
+    padding-block: var(--space-7);
+  }
+
+  .hero-copy {
+    padding-left: 40px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2.75rem, 13vw, 4rem);
+  }
+
+  .hero-blueprint {
+    width: min(82vw, 340px);
+  }
+
+  .home-platform-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-copy {
+    padding-left: 30px;
+  }
+
+  .hero-ruler::after {
+    display: none;
+  }
+
+  .hero-blueprint {
+    width: min(80vw, 280px);
+  }
+
+  .blueprint-axis-x {
+    left: -12px;
+    width: calc(100% + 24px);
+  }
+
+  .blueprint-axis-y {
+    top: -12px;
+    height: calc(100% + 24px);
+  }
+
+  .home-platform-grid {
+    grid-template-columns: 1fr;
+  }
+}

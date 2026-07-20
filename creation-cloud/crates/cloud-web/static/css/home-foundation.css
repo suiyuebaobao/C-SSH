@@ -1,0 +1,159 @@
+/* 首页基础：负责宽纸面、状态条、编号章节与公共响应式骨架。 */
+.home-main {
+  background: var(--paper);
+}
+
+.home-main .container {
+  width: min(calc(100% - 48px), var(--home-content-width));
+}
+
+.home-status-strip {
+  min-height: 42px;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.home-status-inner {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.home-status-inner span:last-child {
+  color: var(--accent-text);
+  text-align: right;
+}
+
+.home-system-section {
+  position: relative;
+  padding-block: clamp(64px, 8vw, 96px);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper);
+}
+
+.home-system-section-capabilities,
+.home-system-section-platforms,
+.home-system-section-downloads,
+.home-faq-section {
+  background: var(--paper-alt);
+}
+
+.home-section-side {
+  position: absolute;
+  top: clamp(64px, 8vw, 96px);
+  left: max(6px, calc((100vw - var(--home-content-width)) / 2 - 34px));
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(180deg);
+  writing-mode: vertical-rl;
+}
+
+.home-section-heading {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: end;
+  margin-bottom: clamp(32px, 5vw, 48px);
+}
+
+.home-section-heading > div,
+.home-section-heading > p {
+  min-width: 0;
+}
+
+.home-section-code {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 var(--space-3);
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.home-section-code::before {
+  width: 18px;
+  height: 2px;
+  flex: 0 0 auto;
+  background: var(--accent);
+  content: "";
+}
+
+.home-section-heading h2 {
+  max-width: 620px;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.home-section-heading > p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+@media (max-width: 960px) {
+  .home-main .container {
+    width: min(calc(100% - 40px), var(--home-content-width));
+  }
+
+  .home-section-side {
+    display: none;
+  }
+
+  .home-section-heading {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+}
+
+@media (max-width: 720px) {
+  .home-main .container {
+    width: min(calc(100% - 28px), var(--home-content-width));
+  }
+
+  .home-status-inner {
+    display: grid;
+    justify-content: stretch;
+    padding-block: 9px;
+  }
+
+  .home-status-inner span:last-child {
+    text-align: left;
+  }
+
+  .home-system-section {
+    padding-block: var(--space-7);
+  }
+
+  .home-section-heading {
+    margin-bottom: var(--space-6);
+  }
+}
+
+@media (max-width: 420px) {
+  .home-main .container {
+    width: min(calc(100% - 20px), var(--home-content-width));
+  }
+
+  .home-section-heading h2 {
+    font-size: 1.85rem;
+  }
+}

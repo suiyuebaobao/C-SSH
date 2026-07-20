@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{# 文档中心：用同页真实锚点承载入门、能力边界与安全停止条件。 #}
+
+{% block styles %}
+  <link rel="stylesheet" href="/static/css/documentation.css?v=20260720-docs2">
+{% endblock %}
+
+{% block scripts %}
+  <script src="/static/js/documentation-search.js?v=20260720-docs" defer></script>
+{% endblock %}
+
+{% block main %}
+<main id="main-content" class="documentation-main">
+  <section class="docs-hero" aria-labelledby="docs-title">
+    <div class="container docs-hero-grid">
+      <div class="docs-hero-copy">
+        <p class="eyebrow">{{ view.page.eyebrow }}</p>
+        <h1 id="docs-title">{{ view.page.heading }}</h1>
+        <p class="docs-hero-lead">{{ view.page.lead }}</p>
+        <div class="action-row">
+          {% for action in view.page.actions %}
+          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <a class="docs-release-plate" href="{{ documentation.release_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">
+        <span>{{ documentation.release_label }}</span>
+        <strong>{{ documentation.release_version }}</strong>
+        <small>{{ documentation.release_date }}</small>
+      </a>
+    </div>
+  </section>
+
+  <section class="docs-safety" aria-labelledby="docs-safety-title">
+    <div class="container docs-safety-grid">
+      <p>{{ documentation.status.label }}</p>
+      <div>
+        <h2 id="docs-safety-title">{{ documentation.status.title }}</h2>
+        <p>{{ documentation.status.body }}</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="container docs-workspace">
+    <aside class="docs-sidebar" aria-label="{{ documentation.index_label }}">
+      <div class="docs-index" data-doc-index>
+        <div class="docs-index-head">
+          <strong>{{ documentation.index_label }}</strong>
+          <output data-doc-result aria-live="polite"></output>
+        </div>
+        <label class="docs-search-label">
+          <span>{{ documentation.search_label }}</span>
+          <input type="search" placeholder="{{ documentation.search_placeholder }}" autocomplete="off" data-doc-search>
+        </label>
+        <p class="docs-search-help">{{ documentation.search_help }}</p>
+        <nav class="docs-tree" aria-label="{{ documentation.index_label }}">
+          {% for group in documentation.groups %}
+          <section class="docs-tree-group" data-doc-group>
+            <h2>{{ group.title }}</h2>
+            {% for link in group.links %}
+            <a href="#{{ link.anchor }}" data-doc-link data-doc-title="{{ link.title }}"><span>{{ link.code }}</span>{{ link.title }}</a>
+            {% endfor %}
+          </section>
+          {% endfor %}
+        </nav>
+        <p class="docs-search-empty" data-doc-empty hidden>{{ documentation.search_empty }}</p>
+      </div>
+    </aside>
+
+    <article class="docs-article">
+      <details class="docs-mobile-index">
+        <summary>{{ documentation.mobile_index_label }}</summary>
+        <div class="docs-index" data-doc-index>
+          <div class="docs-index-head">
+            <strong>{{ documentation.index_label }}</strong>
+            <output data-doc-result aria-live="polite"></output>
+          </div>
+          <label class="docs-search-label">
+            <span>{{ documentation.search_label }}</span>
+            <input type="search" placeholder="{{ documentation.search_placeholder }}" autocomplete="off" data-doc-search>
+          </label>
+          <p class="docs-search-help">{{ documentation.search_help }}</p>
+          <nav class="docs-tree" aria-label="{{ documentation.index_label }}">
+            {% for group in documentation.groups %}
+            <section class="docs-tree-group" data-doc-group>
+              <h2>{{ group.title }}</h2>
+              {% for link in group.links %}
+              <a href="#{{ link.anchor }}" data-doc-link data-doc-title="{{ link.title }}"><span>{{ link.code }}</span>{{ link.title }}</a>
+              {% endfor %}
+            </section>
+            {% endfor %}
+          </nav>
+          <p class="docs-search-empty" data-doc-empty hidden>{{ documentation.search_empty }}</p>
+        </div>
+      </details>
+
+      <section class="docs-section docs-platform-section" id="platform-matrix" aria-labelledby="docs-platform-title">
+        <header class="docs-section-heading">
+          <p>{{ documentation.platform_code }}</p>
+          <h2 id="docs-platform-title">{{ documentation.platform_title }}</h2>
+          <p>{{ documentation.platform_lead }}</p>
+        </header>
+        <div class="docs-platform-grid">
+          {% for platform in documentation.platforms %}
+          <article class="docs-platform{% if platform.planned %} docs-platform-planned{% endif %}">
+            <div class="docs-platform-head"><span aria-hidden="true">{{ platform.symbol }}</span><div><small>{{ platform.role }}</small><h3>{{ platform.name }}</h3></div></div>
+            <strong class="docs-platform-state">{{ platform.state }}</strong>
+            {% if !platform.planned %}<p class="docs-platform-assets">{{ platform.assets }}</p>{% endif %}
+            <p>{{ platform.detail }}</p>
+            {% if !platform.planned %}<a href="{{ platform.release_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">{{ documentation.release_action_label }} ↗</a>{% endif %}
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% for section in documentation.sections %}
+      <section class="docs-section" id="{{ section.anchor }}" aria-labelledby="docs-section-{{ section.anchor }}">
+        <header class="docs-section-heading">
+          <p>{{ section.code }}</p>
+          <h2 id="docs-section-{{ section.anchor }}">{{ section.title }}</h2>
+          <p>{{ section.lead }}</p>
+        </header>
+        <div class="docs-step-list">
+          {% for item in section.items %}
+          <article class="docs-step{% if item.caution %} docs-step-caution{% endif %}">
+            <span>{{ item.badge }}</span>
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.body }}</p>
+              {% if item.has_command %}<pre><code>{{ item.command }}</code></pre>{% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% if loop.index == 3 %}
+      <section class="docs-section docs-product-view" aria-labelledby="docs-product-title">
+        <header class="docs-section-heading">
+          <p>{{ documentation.screenshot.code }}</p>
+          <h2 id="docs-product-title">{{ documentation.screenshot.title }}</h2>
+          <p>{{ documentation.screenshot.lead }}</p>
+        </header>
+        <figure>
+          <img src="{{ documentation.screenshot.src }}" alt="{{ documentation.screenshot.alt }}" width="{{ documentation.screenshot.width }}" height="{{ documentation.screenshot.height }}" loading="lazy" decoding="async">
+          <figcaption>{{ documentation.screenshot.caption }}</figcaption>
+        </figure>
+      </section>
+      {% endif %}
+      {% endfor %}
+
+      <section class="docs-final" aria-labelledby="docs-final-title">
+        <p>{{ documentation.final_code }}</p>
+        <h2 id="docs-final-title">{{ documentation.final_title }}</h2>
+        <p>{{ documentation.final_body }}</p>
+        <div class="action-row">
+          {% for action in view.page.actions %}
+          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+          {% endfor %}
+        </div>
+      </section>
+    </article>
+  </div>
+</main>
+{% endblock %}

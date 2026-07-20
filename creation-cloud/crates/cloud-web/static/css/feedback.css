@@ -1,0 +1,174 @@
+/* 问题反馈页：组织双渠道说明、登录态表单与安全输入提示。 */
+.feedback-main {
+  min-width: 0;
+}
+
+.feedback-hero {
+  padding-block: clamp(68px, 8vw, 128px);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.feedback-hero-grid,
+.feedback-form-layout {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.1fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.feedback-heading h1 {
+  max-width: 760px;
+  margin-block: var(--space-3) var(--space-4);
+  font-size: clamp(3.25rem, 6.8vw, 7rem);
+  letter-spacing: -0.065em;
+  line-height: 0.94;
+}
+
+html[lang="en"] .feedback-heading h1 {
+  font-size: clamp(2.8rem, 5.4vw, 5.6rem);
+  line-height: 0.98;
+}
+
+.feedback-heading > p:last-child,
+.feedback-channel p,
+.feedback-safety p,
+.feedback-safety li {
+  color: var(--ink-soft);
+}
+
+.feedback-channels {
+  display: grid;
+  border: 1px solid var(--line-strong);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.feedback-channel {
+  display: flex;
+  min-width: 0;
+  min-height: 310px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(24px, 3vw, 42px);
+  background: var(--paper-raised);
+}
+
+.feedback-channel + .feedback-channel {
+  border-left: 1px solid var(--line-strong);
+}
+
+.feedback-channel-site {
+  box-shadow: inset 0 4px 0 var(--accent);
+}
+
+.feedback-channel h2 {
+  margin-block: var(--space-4) var(--space-3);
+  font-size: clamp(1.55rem, 2.5vw, 2.4rem);
+}
+
+.feedback-channel p {
+  flex: 1;
+}
+
+.feedback-form-band {
+  background: var(--paper);
+}
+
+.feedback-form-layout {
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+}
+
+.feedback-safety ul {
+  display: grid;
+  gap: 10px;
+  padding-left: 1.25rem;
+}
+
+.feedback-form-panel {
+  min-width: 0;
+  padding: clamp(22px, 3vw, 38px);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.feedback-auth-state,
+.feedback-result {
+  min-height: 24px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.feedback-auth-state[data-state="ready"],
+.feedback-result[data-tone="success"] {
+  color: var(--success, #17633a);
+}
+
+.feedback-auth-state[data-state="signed-out"],
+.feedback-result[data-tone="error"] {
+  color: var(--accent-text);
+}
+
+.feedback-login {
+  margin-top: var(--space-3);
+}
+
+.feedback-login[hidden] {
+  display: none;
+}
+
+.feedback-form {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.feedback-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.feedback-form textarea {
+  resize: vertical;
+}
+
+.feedback-confirm {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.feedback-confirm input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+@media (max-width: 1080px) {
+  .feedback-hero-grid,
+  .feedback-form-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .feedback-channels,
+  .feedback-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-channel {
+    min-height: 0;
+  }
+
+  .feedback-channel + .feedback-channel {
+    border-top: 1px solid var(--line-strong);
+    border-left: 0;
+  }
+}

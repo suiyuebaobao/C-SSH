@@ -1,0 +1,28 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="audit-heading">
+  <div class="admin-section-heading"><div><h2 id="audit-heading">{% if is_en %}Immutable event timeline{% else %}不可变事件时间线{% endif %}</h2><p>{% if is_en %}Server-generated actor, resource, outcome, and redacted request context.{% else %}服务端生成的操作者、资源、结果与脱敏请求上下文。{% endif %}</p></div></div>
+  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}
+  <div class="admin-empty"><strong>{% if is_en %}No audit events{% else %}暂无审计事件{% endif %}</strong><p>{% if is_en %}Administrative writes will appear here after the server records them.{% else %}服务端记录管理写操作后会显示在这里。{% endif %}</p></div>
+  {% else if !rows.is_empty() %}
+  <div class="admin-table-wrap">
+    <table class="admin-table"><thead><tr><th>{% if is_en %}Time / outcome{% else %}时间 / 结果{% endif %}</th><th>{% if is_en %}Action{% else %}动作{% endif %}</th><th>{% if is_en %}Actor{% else %}操作者{% endif %}</th><th>{% if is_en %}Resource{% else %}资源{% endif %}</th><th>{% if is_en %}Request / details{% else %}请求 / 详情{% endif %}</th></tr></thead>
+      <tbody>{% for row in rows %}<tr>
+        <td><span class="status-badge" data-tone="{% if row.outcome == "success" %}success{% else %}danger{% endif %}">{{ row.outcome }}</span><br><span class="admin-mono">{{ row.created_at }}</span><br><span class="admin-mono">{{ row.id }}</span></td>
+        <td><strong>{{ row.action }}</strong></td>
+        <td><span class="admin-mono">{{ row.actor }}</span></td>
+        <td><strong>{{ row.resource_kind }}</strong><br><span class="admin-mono">{{ row.resource_id }}</span></td>
+        <td><span class="admin-mono">{{ row.request_id }}</span><details><summary>{% if is_en %}View details{% else %}查看详情{% endif %}</summary><pre class="admin-audit-details">{{ row.details }}</pre></details></td>
+      </tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% if load_error.is_none() %}<nav class="admin-pagination" aria-label="{% if is_en %}Audit pagination{% else %}审计分页{% endif %}">
+    {% if let Some(href) = previous_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Previous{% else %}上一页{% endif %}</a>{% endif %}
+    <span>{% if is_en %}Page{% else %}第{% endif %} {{ page_number }} · {{ total }} {% if is_en %}events{% else %}条事件{% endif %}</span>
+    {% if let Some(href) = next_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Next{% else %}下一页{% endif %}</a>{% endif %}
+  </nav>{% endif %}
+</section>
+{% endblock %}
