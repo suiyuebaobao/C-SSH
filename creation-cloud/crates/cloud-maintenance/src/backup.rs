@@ -23,7 +23,7 @@ pub struct BackupManifest {
     pub schema_version: u32,
     pub completed_at: DateTime<Utc>,
     pub database: BackupFileDeclaration,
-    pub release_metadata: BackupFileDeclaration,
+    pub release_bundle: BackupFileDeclaration,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -31,6 +31,7 @@ pub struct BackupManifest {
 pub struct BackupFileDeclaration {
     pub file_name: String,
     pub byte_size: u64,
+    pub sha256: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -63,16 +64,16 @@ pub async fn check_latest_backup(
         Ok(manifest) => manifest,
         Err(observation) => return BackupCheck::observed(observation),
     };
-    if manifest.schema_version != 1 || manifest.completed_at > now {
+    if manifest.schema_version != 2 || manifest.completed_at > now {
         return BackupCheck::observed(ObservationCode::Invalid);
     }
-    if manifest.database.file_name == manifest.release_metadata.file_name
+    if manifest.database.file_name == manifest.release_bundle.file_name
         || manifest.database.file_name == MANIFEST_NAME
-        || manifest.release_metadata.file_name == MANIFEST_NAME
+        || manifest.release_bundle.file_name == MANIFEST_NAME
     {
         return BackupCheck::observed(ObservationCode::Invalid);
     }
-    for declaration in [&manifest.database, &manifest.release_metadata] {
+    for declaration in [&manifest.database, &manifest.release_bundle] {
         if let Err(observation) = validate_declared_file(&root, declaration).await {
             return BackupCheck {
                 observation,
@@ -161,7 +162,10 @@ async fn validate_declared_file(
     root: &Path,
     declaration: &BackupFileDeclaration,
 ) -> Result<(), ObservationCode> {
-    if !valid_direct_file_name(&declaration.file_name) || declaration.byte_size == 0 {
+    if !valid_direct_file_name(&declaration.file_name)
+        || declaration.byte_size == 0
+        || !valid_sha256(&declaration.sha256)
+    {
         return Err(ObservationCode::Invalid);
     }
     let path = root.join(&declaration.file_name);
@@ -204,6 +208,13 @@ fn valid_direct_file_name(value: &str) -> bool {
         && value
             .bytes()
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
+}
+
+fn valid_sha256(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
 }
 
 fn classify_io(error: &std::io::Error) -> ObservationCode {
