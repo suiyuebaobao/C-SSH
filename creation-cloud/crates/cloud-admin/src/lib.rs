@@ -19,6 +19,7 @@ pub use model::{
 };
 pub use router::{router, router_without_overview};
 pub use service::{Service, promote_registered_admin};
+pub use use_case::set_registered_admin_login;
 
 #[cfg(test)]
 mod tests;

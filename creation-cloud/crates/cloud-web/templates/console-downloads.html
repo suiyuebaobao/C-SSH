@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Published compatible releases{% else %}已发布兼容版本{% endif %}</h2><span class="console-status">{{ releases.len() }}</span></div>
+        {% if releases.is_empty() %}<p class="console-empty">{% if is_en %}No published release is available.{% else %}当前没有已发布版本。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for release in releases %}
+          <article class="console-record">
+            <div class="console-record-heading"><div><strong>{{ release.version }} · {{ release.channel }}</strong><small>{{ release.published_at }}</small></div><span class="console-status">published</span></div>
+            <p>{% if is_en %}{{ release.title_en }}{% else %}{{ release.title_zh }}{% endif %}</p>
+            <div class="console-assets">
+              {% for asset in release.assets %}
+              <div class="console-asset">
+                <strong>{{ asset.platform }} / {{ asset.architecture }} / {{ asset.package_kind }}</strong>
+                <small>{{ asset.file_name }} · {{ asset.byte_size }} B</small>
+                <code>SHA256 {{ asset.sha256 }}</code>
+                <div class="console-source-list">
+                  {% for source in asset.sources %}
+                  <a class="button button-secondary" href="/api/v1/downloads/account/assets/{{ asset.id }}/sources/{{ source.id }}">{{ source.provider_name }} · {{ source.source_kind.as_str() }}</a>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Account download history{% else %}账号下载历史{% endif %}</h2><span class="console-status">{{ history_total }}</span></div>
+        {% if history.is_empty() %}<p class="console-empty">{% if is_en %}No account-attributed downloads yet.{% else %}当前没有归属于此账号的下载记录。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for item in history %}
+          <article class="console-record console-record-compact">
+            <div><strong>{{ item.version }} · {{ item.platform }} / {{ item.architecture }}</strong><small>{{ item.file_name }} · {{ item.provider_name }} · {{ item.occurred_at }}</small></div>
+            <span class="console-status">{{ item.package_kind }}</span>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

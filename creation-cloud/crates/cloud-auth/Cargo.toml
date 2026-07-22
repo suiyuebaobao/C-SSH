@@ -21,5 +21,9 @@ tokio.workspace = true
 url.workspace = true
 uuid.workspace = true
 
+[dev-dependencies]
+serde_json.workspace = true
+tower.workspace = true
+
 [lints]
 workspace = true

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <section class="console-metrics" aria-label="{% if is_en %}Sync summary{% else %}同步摘要{% endif %}">
+        <article><strong>{{ summary.current_revision }}</strong><span>Revision</span></article>
+        <article><strong>{{ summary.active_record_count }}</strong><span>{% if is_en %}Active records{% else %}有效记录{% endif %}</span></article>
+        <article><strong>{{ summary.tombstone_count }}</strong><span>Tombstones</span></article>
+        <article><strong>{{ summary.unresolved_conflict_count }}</strong><span>{% if is_en %}Open conflicts{% else %}未解决冲突{% endif %}</span></article>
+      </section>
+      <p class="console-boundary">{% if is_en %}This account-level view is read-only. It never returns preference values or attempted conflict bodies and does not replace device-bound sync authorization.{% else %}这是账号级只读视图，不返回偏好值或冲突尝试正文，也不会替代正式同步的设备绑定授权。{% endif %}</p>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Recent record metadata{% else %}最近记录元数据{% endif %}</h2><span class="console-status">{{ summary.recent_records.len() }}</span></div>
+        {% if summary.recent_records.is_empty() %}<p class="console-empty">{% if is_en %}No sync records.{% else %}暂无同步记录。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for record in summary.recent_records %}
+          <article class="console-record console-record-compact"><div><strong>{{ record.namespace }}/{{ record.key }}</strong><small>revision {{ record.revision }} · {% if is_en %}source device{% else %}来源设备{% endif %} {% if let Some(device_id) = record.source_device_id %}{{ device_id }}{% else %}legacy{% endif %} · {{ record.updated_at }}</small></div><span class="console-status">{% if record.deleted %}tombstone{% else %}active{% endif %}</span></article>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Open conflict metadata{% else %}未解决冲突元数据{% endif %}</h2><span class="console-status">{{ summary.recent_conflicts.len() }}</span></div>
+        {% if summary.recent_conflicts.is_empty() %}<p class="console-empty">{% if is_en %}No unresolved conflicts.{% else %}没有未解决冲突。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for conflict in summary.recent_conflicts %}
+          <article class="console-record console-record-compact"><div><strong>{{ conflict.id }}</strong><small>base {{ conflict.base_revision }} → current {{ conflict.current_revision }} · {% if is_en %}source device{% else %}来源设备{% endif %} {% if let Some(device_id) = conflict.source_device_id %}{{ device_id }}{% else %}legacy{% endif %} · {{ conflict.created_at }}</small></div><span class="console-status console-status-warning">conflict</span></article>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

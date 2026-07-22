@@ -157,8 +157,6 @@
 }
 
 .detail-list-section h3,
-.tutorial-prerequisites h3,
-.tutorial-procedure > h3,
 .boundary-item h3,
 .outcome-item h3 {
   margin-bottom: var(--space-3);
@@ -247,155 +245,18 @@
   border-left-color: var(--success);
 }
 
-.tutorial-index-grid {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--line-strong);
-  border-left: 1px solid var(--line-strong);
-}
-
-.tutorial-index-link {
-  display: grid;
-  min-width: 0;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border-right: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
-  background: var(--paper-raised);
-  color: var(--ink);
-  text-decoration: none;
-  transition: background-color 140ms ease, color 140ms ease;
-}
-
-.tutorial-index-link:hover,
-.tutorial-index-link:focus-visible {
-  background: var(--accent-soft);
-}
-
-.tutorial-index-link span {
-  color: var(--accent-text);
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  font-weight: 760;
-}
-
-.tutorial-index-link strong {
-  font-size: 1rem;
-  overflow-wrap: anywhere;
-}
-
-.tutorial-index-link small {
-  color: var(--ink-muted);
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-
-.tutorial-layout {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.65fr);
-  grid-template-areas:
-    "heading procedure"
-    "prerequisites procedure"
-    "outcome outcome";
-  gap: var(--space-6) var(--space-8);
-  align-items: start;
-}
-
-.tutorial-heading {
-  grid-area: heading;
-}
-
-.tutorial-prerequisites {
-  min-width: 0;
-  grid-area: prerequisites;
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--line-strong);
-}
-
-.tutorial-procedure {
-  min-width: 0;
-  grid-area: procedure;
-}
-
-.tutorial-steps {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line-strong);
-  list-style: none;
-}
-
-.tutorial-steps li {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: 76px minmax(0, 1fr);
-  gap: var(--space-4);
-  padding-block: var(--space-4);
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.tutorial-steps li > span {
-  color: var(--accent-text);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 760;
-}
-
-.tutorial-steps h4 {
-  margin: 0 0 var(--space-2);
-  color: var(--ink);
-  font-size: 0.96rem;
-}
-
-.tutorial-steps p {
-  margin: 0;
-  color: var(--ink-soft);
-  overflow-wrap: anywhere;
-}
-
-.tutorial-outcome {
-  display: grid;
-  min-width: 0;
-  grid-area: outcome;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--line-strong);
-}
-
-.outcome-boundary {
-  border-left-color: var(--warning);
-}
-
 @media (max-width: 960px) {
-  .detail-index-grid,
-  .tutorial-index-grid {
+  .detail-index-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .detail-layout,
-  .tutorial-layout {
+  .detail-layout {
     grid-template-columns: 1fr;
     gap: var(--space-6);
   }
 
-  .tutorial-layout {
-    grid-template-areas:
-      "heading"
-      "prerequisites"
-      "procedure"
-      "outcome";
-  }
-
   .detail-heading {
     max-width: var(--text-width);
-  }
-
-  .tutorial-prerequisites {
-    padding-top: 0;
-    border-top: 0;
   }
 }
 
@@ -405,10 +266,8 @@
   }
 
   .detail-index-grid,
-  .tutorial-index-grid,
   .feature-body,
-  .boundary-grid,
-  .tutorial-outcome {
+  .boundary-grid {
     grid-template-columns: 1fr;
   }
 
@@ -418,10 +277,5 @@
 
   .detail-heading h2 {
     font-size: 1.65rem;
-  }
-
-  .tutorial-steps li {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
   }
 }

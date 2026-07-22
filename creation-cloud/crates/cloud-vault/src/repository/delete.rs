@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::DeleteVaultOutcome;
 
-use super::storage;
+use super::{delete_error, storage};
 
 type DeleteRow = (Uuid, i64, DateTime<Utc>);
 
@@ -27,7 +27,7 @@ pub(crate) async fn delete(
     .bind(expected_revision)
     .fetch_optional(pool)
     .await
-    .map_err(storage("无法删除密文信封"))?;
+    .map_err(delete_error)?;
     if let Some(row) = row {
         return Ok(DeleteVaultOutcome {
             id: row.0,

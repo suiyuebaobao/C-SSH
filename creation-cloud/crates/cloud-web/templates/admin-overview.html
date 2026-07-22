@@ -17,6 +17,14 @@
     <div class="admin-integrity-item"><div><strong>{% if is_en %}Dependencies{% else %}依赖状态{% endif %}</strong><small>database / downloads / site-media</small></div><span class="admin-mono">{% if health.database %}ok{% else %}fail{% endif %} / {% if health.downloads %}ok{% else %}fail{% endif %} / {% if health.site_media %}ok{% else %}fail{% endif %}</span></div>
   </div>
 </section>
+<section class="admin-section" aria-labelledby="maintenance-heading" data-maintenance-panel data-maintenance-endpoint="/api/v1/admin/maintenance">
+  <div class="admin-section-heading">
+    <div><h2 id="maintenance-heading">{% if is_en %}Maintenance supervisor{% else %}维护任务状态{% endif %}</h2><p>{% if is_en %}Latest persisted attempt, success, observation, and failure streak for all five low-frequency tasks.{% else %}读取五项低频任务持久化的最近尝试、最近成功、观察结果与连续失败。{% endif %}</p></div>
+    <button class="button button-secondary" type="button" data-maintenance-refresh>{% if is_en %}Refresh status{% else %}刷新状态{% endif %}</button>
+  </div>
+  <div class="admin-feedback" data-maintenance-feedback role="status" aria-live="polite">{% if is_en %}Loading maintenance status…{% else %}正在读取维护状态…{% endif %}</div>
+  <div class="admin-maintenance-grid" data-maintenance-list></div>
+</section>
 {% if let Some(data) = overview %}
 <section class="admin-section" aria-labelledby="overview-heading">
   <div class="admin-section-heading">

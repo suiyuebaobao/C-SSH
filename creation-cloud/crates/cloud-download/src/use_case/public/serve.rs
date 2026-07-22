@@ -12,6 +12,7 @@ use axum::{
     },
     response::{IntoResponse, Redirect},
 };
+use cloud_domain::AuthenticatedSession;
 use cloud_domain::{AppError, AppResult};
 use tokio::{
     fs,
@@ -29,8 +30,31 @@ impl Service {
         source_id: Uuid,
         range_header: Option<&str>,
     ) -> AppResult<Response<Body>> {
+        self.serve_download_for_account(None, asset_id, source_id, range_header)
+            .await
+    }
+
+    pub async fn serve_account_download(
+        &self,
+        session: &AuthenticatedSession,
+        asset_id: Uuid,
+        source_id: Uuid,
+        range_header: Option<&str>,
+    ) -> AppResult<Response<Body>> {
+        self.serve_download_for_account(Some(session.account_id), asset_id, source_id, range_header)
+            .await
+    }
+
+    async fn serve_download_for_account(
+        &self,
+        account_id: Option<Uuid>,
+        asset_id: Uuid,
+        source_id: Uuid,
+        range_header: Option<&str>,
+    ) -> AppResult<Response<Body>> {
         let asset_id = validation::valid_id(asset_id, "资产标识")?;
         let source_id = validation::valid_id(source_id, "来源标识")?;
+        let _permit = self.limiter.acquire(source_id)?;
         let target = repository::public::target::execute(&self.pool, asset_id, source_id).await?;
 
         let response = match SourceKind::try_from(target.source_kind.as_str())? {
@@ -57,8 +81,13 @@ impl Service {
                 .await?
             }
         };
-        repository::public::record_event::execute(&self.pool, target.asset_id, target.source_id)
-            .await?;
+        repository::public::record_event::execute(
+            &self.pool,
+            target.asset_id,
+            target.source_id,
+            account_id,
+        )
+        .await?;
         Ok(response)
     }
 }

@@ -1,8 +1,11 @@
 //! 提供账号认证、Cookie 会话和跨业务路由复用的鉴权中间件。
 
 mod cookie;
+mod credential_limiter;
 mod handler;
+mod login_limiter;
 mod middleware;
+mod model;
 mod password;
 mod repository;
 mod service;
@@ -12,7 +15,9 @@ mod use_case;
 mod validation;
 
 use axum::{
-    Router, middleware as axum_middleware,
+    Router,
+    extract::DefaultBodyLimit,
+    middleware as axum_middleware,
     routing::{get, post},
 };
 
@@ -41,6 +46,7 @@ pub fn router(service: Service) -> Router {
         .route("/login", post(handler::login::handle))
         .merge(protected)
         .with_state(service)
+        .layer(DefaultBodyLimit::max(4 * 1024))
 }
 
 /// 构建浏览器表单专用路由，成功后跳转到用户中心。
@@ -50,6 +56,7 @@ pub fn form_router(service: Service) -> Router {
         .route("/register", post(handler::form_register::handle))
         .route("/login", post(handler::form_login::handle))
         .with_state(service)
+        .layer(DefaultBodyLimit::max(4 * 1024))
 }
 
 #[cfg(test)]

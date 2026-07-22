@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{# 文档中心：用同页真实锚点承载入门、能力边界与安全停止条件。 #}
+{# 文档中心：把发布说明、实操指南和参考内容收敛到唯一知识入口。 #}
 
 {% block styles %}
-  <link rel="stylesheet" href="/static/css/documentation.css?v=20260720-docs2">
+  <link rel="stylesheet" href="/static/css/documentation.css?v=20260720-docs3">
+  <link rel="stylesheet" href="/static/css/documentation-guides.css?v=20260720-guides1">
 {% endblock %}
 
 {% block scripts %}
@@ -11,36 +12,6 @@
 
 {% block main %}
 <main id="main-content" class="documentation-main">
-  <section class="docs-hero" aria-labelledby="docs-title">
-    <div class="container docs-hero-grid">
-      <div class="docs-hero-copy">
-        <p class="eyebrow">{{ view.page.eyebrow }}</p>
-        <h1 id="docs-title">{{ view.page.heading }}</h1>
-        <p class="docs-hero-lead">{{ view.page.lead }}</p>
-        <div class="action-row">
-          {% for action in view.page.actions %}
-          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
-          {% endfor %}
-        </div>
-      </div>
-      <a class="docs-release-plate" href="{{ documentation.release_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">
-        <span>{{ documentation.release_label }}</span>
-        <strong>{{ documentation.release_version }}</strong>
-        <small>{{ documentation.release_date }}</small>
-      </a>
-    </div>
-  </section>
-
-  <section class="docs-safety" aria-labelledby="docs-safety-title">
-    <div class="container docs-safety-grid">
-      <p>{{ documentation.status.label }}</p>
-      <div>
-        <h2 id="docs-safety-title">{{ documentation.status.title }}</h2>
-        <p>{{ documentation.status.body }}</p>
-      </div>
-    </div>
-  </section>
-
   <div class="container docs-workspace">
     <aside class="docs-sidebar" aria-label="{{ documentation.index_label }}">
       <div class="docs-index" data-doc-index>
@@ -94,6 +65,33 @@
         </div>
       </details>
 
+      <header class="docs-page-header" aria-labelledby="docs-title">
+        <p class="eyebrow">{{ view.page.eyebrow }}</p>
+        <h1 id="docs-title">{{ view.page.heading }}</h1>
+        <p class="docs-page-lead">{{ view.page.lead }}</p>
+        <div class="docs-page-meta">
+          <span>{{ documentation.release_label }}</span>
+          <strong>{{ documentation.release_version }}</strong>
+          <time>{{ documentation.release_date }}</time>
+          <a href="{{ documentation.release_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">{{ documentation.release_action_label }} ↗</a>
+        </div>
+        <div class="action-row">
+          {% for action in view.page.actions %}
+          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+          {% endfor %}
+        </div>
+      </header>
+
+      <section class="docs-safety docs-safety-inline" aria-labelledby="docs-safety-title">
+        <div class="docs-safety-grid">
+          <p>{{ documentation.status.label }}</p>
+          <div>
+            <h2 id="docs-safety-title">{{ documentation.status.title }}</h2>
+            <p>{{ documentation.status.body }}</p>
+          </div>
+        </div>
+      </section>
+
       <section class="docs-section docs-platform-section" id="platform-matrix" aria-labelledby="docs-platform-title">
         <header class="docs-section-heading">
           <p>{{ documentation.platform_code }}</p>
@@ -133,6 +131,44 @@
           {% endfor %}
         </div>
       </section>
+
+      {% if loop.index == 1 %}
+      <header class="docs-guides-header">
+        <p>02–07 / TASK GUIDES</p>
+        <h2>{{ documentation.tutorials.index_label }}</h2>
+      </header>
+      {% for tutorial in documentation.tutorials.items %}
+      <section class="docs-section docs-guide" id="{{ tutorial.anchor }}" aria-labelledby="guide-{{ tutorial.anchor }}">
+        <header class="docs-guide-heading">
+          <span>{{ tutorial.sequence }}</span>
+          <div>
+            <h2 id="guide-{{ tutorial.anchor }}">{{ tutorial.title }}</h2>
+            <p>{{ tutorial.summary }}</p>
+          </div>
+        </header>
+        <div class="docs-guide-body">
+          <aside class="docs-guide-prerequisites">
+            <h3>{{ documentation.tutorials.prerequisites_label }}</h3>
+            <ul>
+              {% for prerequisite in tutorial.prerequisites %}
+              <li>{{ prerequisite }}</li>
+              {% endfor %}
+            </ul>
+          </aside>
+          <section class="docs-guide-procedure" aria-labelledby="steps-{{ tutorial.anchor }}">
+            <h3 id="steps-{{ tutorial.anchor }}">{{ documentation.tutorials.steps_label }}</h3>
+            <ol>
+              {% for step in tutorial.steps %}
+              <li class="docs-guide-step"><span>{{ step.label }}</span><div><h4>{{ step.title }}</h4><p>{{ step.instruction }}</p></div></li>
+              {% endfor %}
+            </ol>
+          </section>
+        </div>
+        <footer class="docs-guide-outcome">
+          <section><h3>{{ documentation.tutorials.verification_label }}</h3><p>{{ tutorial.verification }}</p></section>
+          <section><h3>{{ documentation.tutorials.agent_boundary_label }}</h3><p>{{ tutorial.agent_boundary }}</p></section>
+        </footer>
+      </section>
       {% if loop.index == 3 %}
       <section class="docs-section docs-product-view" aria-labelledby="docs-product-title">
         <header class="docs-section-heading">
@@ -145,6 +181,8 @@
           <figcaption>{{ documentation.screenshot.caption }}</figcaption>
         </figure>
       </section>
+      {% endif %}
+      {% endfor %}
       {% endif %}
       {% endfor %}
 

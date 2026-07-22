@@ -12,7 +12,6 @@ pub(super) fn view(page: PageId) -> SiteView {
         shell: shell(page),
         page: match page {
             PageId::Home => super::en_home::page_content(),
-            PageId::Tutorials => super::en_tutorials::page_content(),
             PageId::Documentation => super::en_documentation::page_content(),
             PageId::Security => super::en_public::security(),
             PageId::Downloads => super::en_public::downloads(),
@@ -22,10 +21,12 @@ pub(super) fn view(page: PageId) -> SiteView {
             PageId::Login => super::en_account::login(),
             PageId::Register => super::en_account::register(),
             PageId::Console => super::en_workspace::console_overview(),
+            PageId::Profile => super::en_workspace::profile(),
             PageId::Devices => super::en_workspace::devices(),
             PageId::Sync => super::en_workspace::sync(),
             PageId::Models => super::en_workspace::models(),
             PageId::Vault => super::en_workspace::vault(),
+            PageId::ConsoleDownloads => super::en_workspace::downloads(),
             PageId::Admin => super::en_workspace::admin(),
             PageId::AdminUsers => super::en_workspace::admin_users(),
             PageId::AdminDevices => super::en_workspace::admin_devices(),
@@ -42,7 +43,13 @@ fn shell(current: PageId) -> SiteShell {
     let mut console_link = nav("Console", PageId::Console, current);
     console_link.active = matches!(
         current,
-        PageId::Console | PageId::Devices | PageId::Sync | PageId::Models | PageId::Vault
+        PageId::Console
+            | PageId::Profile
+            | PageId::Devices
+            | PageId::Sync
+            | PageId::Models
+            | PageId::Vault
+            | PageId::ConsoleDownloads
     );
     let mut login_link = nav("Sign in", PageId::Login, current);
     login_link.active = matches!(current, PageId::Login | PageId::Register);
@@ -58,7 +65,6 @@ fn shell(current: PageId) -> SiteShell {
             nav("Home", PageId::Home, current),
             nav("Docs", PageId::Documentation, current),
             nav("Changelog", PageId::Changelog, current),
-            nav("Tutorials", PageId::Tutorials, current),
             nav("Security", PageId::Security, current),
             nav("Downloads", PageId::Downloads, current),
             nav("FAQ", PageId::Faq, current),

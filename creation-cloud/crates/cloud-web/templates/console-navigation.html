@@ -1,0 +1,8 @@
+<aside class="console-sidebar">
+  <p class="console-kicker" id="console-navigation-title">Creation Cloud</p>
+  <nav class="console-navigation" aria-labelledby="console-navigation-title">
+    {% for item in view.page.local_navigation %}
+    <a href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+    {% endfor %}
+  </nav>
+</aside>

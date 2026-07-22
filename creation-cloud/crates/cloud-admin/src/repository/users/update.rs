@@ -22,6 +22,10 @@ pub(crate) const APPLY_UPDATE_SQL: &str = r#"
         UPDATE accounts
         SET role = COALESCE($2, role),
             status = COALESCE($3, status),
+            admin_login_name = CASE
+                WHEN COALESCE($2, role) = 'user' THEN NULL
+                ELSE admin_login_name
+            END,
             updated_at = now()
         WHERE id = $1
         RETURNING id, email, role, status, created_at, updated_at
@@ -35,8 +39,6 @@ pub(crate) const APPLY_UPDATE_SQL: &str = r#"
     FROM updated
     LEFT JOIN user_profiles ON user_profiles.account_id = updated.id
 "#;
-pub(crate) const DELETE_SESSIONS_SQL: &str = "DELETE FROM sessions WHERE account_id = $1";
-
 pub(crate) async fn lock_active_admins(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> AppResult<Vec<Uuid>> {
@@ -71,16 +73,4 @@ pub(crate) async fn apply(
         .await
         .map_err(map_write_error)?;
     AdminUser::try_from(row)
-}
-
-pub(crate) async fn delete_sessions(
-    transaction: &mut Transaction<'_, Postgres>,
-    account_id: Uuid,
-) -> AppResult<()> {
-    sqlx::query(DELETE_SESSIONS_SQL)
-        .bind(account_id)
-        .execute(&mut **transaction)
-        .await
-        .map_err(map_write_error)?;
-    Ok(())
 }

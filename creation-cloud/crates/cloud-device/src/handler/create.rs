@@ -11,6 +11,11 @@ pub(crate) async fn handle(
     Extension(session): Extension<AuthenticatedSession>,
     Json(command): Json<CreateDevice>,
 ) -> AppResult<(StatusCode, Json<Device>)> {
-    let device = service.create(&session, command).await?;
-    Ok((StatusCode::CREATED, Json(device)))
+    let outcome = service.create(&session, command).await?;
+    let status = if outcome.created {
+        StatusCode::CREATED
+    } else {
+        StatusCode::OK
+    };
+    Ok((status, Json(outcome.device)))
 }

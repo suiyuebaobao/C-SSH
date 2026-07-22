@@ -8,8 +8,19 @@ use axum::{
 
 use crate::{
     Service,
-    handler::{public, source, upload},
+    handler::{account, public, source, upload},
 };
+
+#[must_use = "路由必须挂载到已注入认证会话的服务端才会生效"]
+pub fn account_router(service: Service) -> Router {
+    Router::new()
+        .route("/history", get(account::history::handle))
+        .route(
+            "/account/assets/{asset_id}/sources/{source_id}",
+            get(account::download::handle),
+        )
+        .with_state(service)
+}
 
 #[must_use = "路由必须挂载到服务端才会生效"]
 pub fn management_router(service: Service) -> Router {

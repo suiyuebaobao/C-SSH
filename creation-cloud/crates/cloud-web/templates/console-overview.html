@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <section class="console-metrics" aria-label="{% if is_en %}Account summary{% else %}账号摘要{% endif %}">
+        <article><strong>{{ device_total }}</strong><span>{% if is_en %}Devices{% else %}设备{% endif %}</span></article>
+        <article><strong>{{ sync.current_revision }}</strong><span>Revision</span></article>
+        <article><strong>{{ model_total }}</strong><span>{% if is_en %}Models{% else %}模型{% endif %}</span></article>
+        <article><strong>{{ vault_total }}</strong><span>{% if is_en %}Vault envelopes{% else %}密文信封{% endif %}</span></article>
+      </section>
+      <section class="console-section">
+        <div class="console-section-heading">
+          <h2>{% if is_en %}Current account{% else %}当前账号{% endif %}</h2>
+          <span class="console-status">{{ profile.locale }}</span>
+        </div>
+        <dl class="console-definition-grid">
+          <div><dt>{% if is_en %}Display name{% else %}显示名称{% endif %}</dt><dd>{{ profile.display_name }}</dd></div>
+          <div><dt>{% if is_en %}Published releases{% else %}已发布版本{% endif %}</dt><dd>{{ release_total }}</dd></div>
+          <div><dt>{% if is_en %}Active sync records{% else %}有效同步记录{% endif %}</dt><dd>{{ sync.active_record_count }}</dd></div>
+          <div><dt>{% if is_en %}Open conflicts{% else %}未解决冲突{% endif %}</dt><dd>{{ sync.unresolved_conflict_count }}</dd></div>
+        </dl>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

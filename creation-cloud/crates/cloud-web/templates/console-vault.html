@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Ciphertext envelopes{% else %}密文信封{% endif %}</h2><span class="console-status">{{ total }}</span></div>
+        <p class="console-boundary">{% if is_en %}The page receives only envelope and wrapper identity, versions, cipher suite, and bounded KDF metadata. Ciphertext, wrapped keys, nonce, salt, passwords, and plaintext never enter the template.{% else %}页面只接收信封与包装记录的标识、版本、算法和有界 KDF 元数据；密文、包装密钥、nonce、salt、密码与明文均不会进入模板。{% endif %}</p>
+        {% if envelopes.is_empty() %}<p class="console-empty">{% if is_en %}No active ciphertext envelopes.{% else %}当前没有有效密文信封。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for envelope in envelopes %}
+          <article class="console-record">
+            <div class="console-record-heading"><div><strong>{{ envelope.envelope_key }}</strong><small>{{ envelope.id }}</small></div><span class="console-status">revision {{ envelope.revision }}</span></div>
+            <dl class="console-definition-grid">
+              <div><dt>Schema</dt><dd>{{ envelope.schema_version }}</dd></div>
+              <div><dt>{% if is_en %}Key version{% else %}密钥版本{% endif %}</dt><dd>{{ envelope.key_version }}</dd></div>
+              <div><dt>{% if is_en %}Cipher suite{% else %}加密套件{% endif %}</dt><dd>{{ envelope.cipher_suite }}</dd></div>
+              <div><dt>KDF</dt><dd>{{ envelope.kdf_algorithm }}</dd></div>
+              <div><dt>Memory</dt><dd>{{ envelope.memory_kib }} KiB</dd></div>
+              <div><dt>{% if is_en %}Iterations / lanes{% else %}迭代 / 并行度{% endif %}</dt><dd>{{ envelope.iterations }} / {{ envelope.parallelism }}</dd></div>
+              <div><dt>{% if is_en %}Updated{% else %}更新时间{% endif %}</dt><dd>{{ envelope.updated_at }}</dd></div>
+            </dl>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Master-key wrappers{% else %}主密钥包装记录{% endif %}</h2><span class="console-status">{{ wrapper_total }}</span></div>
+        {% if wrappers.is_empty() %}<p class="console-empty">{% if is_en %}No active master-key wrappers.{% else %}当前没有有效主密钥包装记录。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for wrapper in wrappers %}
+          <article class="console-record">
+            <div class="console-record-heading"><div><strong>{{ wrapper.wrapper_key }}</strong><small>{{ wrapper.id }}</small></div><span class="console-status">revision {{ wrapper.revision }}</span></div>
+            <dl class="console-definition-grid">
+              <div><dt>Schema</dt><dd>{{ wrapper.schema_version }}</dd></div>
+              <div><dt>{% if is_en %}Key version{% else %}密钥版本{% endif %}</dt><dd>{{ wrapper.key_version }}</dd></div>
+              <div><dt>{% if is_en %}Cipher suite{% else %}加密套件{% endif %}</dt><dd>{{ wrapper.cipher_suite }}</dd></div>
+              <div><dt>KDF</dt><dd>{{ wrapper.kdf_algorithm }}</dd></div>
+              <div><dt>Memory</dt><dd>{{ wrapper.memory_kib }} KiB</dd></div>
+              <div><dt>{% if is_en %}Iterations / lanes{% else %}迭代 / 并行度{% endif %}</dt><dd>{{ wrapper.iterations }} / {{ wrapper.parallelism }}</dd></div>
+              <div><dt>{% if is_en %}Updated{% else %}更新时间{% endif %}</dt><dd>{{ wrapper.updated_at }}</dd></div>
+            </dl>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

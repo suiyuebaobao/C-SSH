@@ -19,7 +19,13 @@ pub(super) fn login() -> PageContent {
         "Sign in",
         "Your account password is only for sign-in; the vault password always remains separate.",
         vec![
-            FormField::new("email", "Email", "email", "email", "name@example.com"),
+            FormField::new(
+                "identifier",
+                "Email or admin username",
+                "text",
+                "username",
+                "name@example.com / ops-admin",
+            ),
             FormField::new(
                 "password",
                 "Password",

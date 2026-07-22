@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <p class="console-boundary">{% if is_en %}Only non-sensitive model metadata is accepted. API keys, tokens, passwords, and credential-bearing URLs are rejected by the model domain.{% else %}这里只接收非敏感模型元数据；模型域会拒绝 API Key、Token、密码和携带凭据的 URL。{% endif %}</p>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Add model profile{% else %}新增模型配置{% endif %}</h2><span class="console-status">{{ total }}</span></div>
+        <form class="console-form console-form-grid" action="/console/models" method="post" hx-post="/console/models" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+          <label><span>{% if is_en %}Display name{% else %}显示名称{% endif %}</span><input name="name" maxlength="100" required></label>
+          <label><span>Provider</span><input name="provider" maxlength="64" pattern="[A-Za-z0-9._-]+" required></label>
+          <label><span>Model ID</span><input name="model_name" maxlength="128" required></label>
+          <label><span>Base URL</span><input type="url" name="base_url" maxlength="512" placeholder="https://api.example.com"></label>
+          <label><span>{% if is_en %}Context length{% else %}上下文长度{% endif %}</span><input type="number" name="context_length" min="256" max="2000000" value="32768" required></label>
+          <label><span>{% if is_en %}Order{% else %}排序{% endif %}</span><input type="number" name="sort_order" value="0" required></label>
+          <label class="console-check"><input type="checkbox" name="enabled" checked><span>{% if is_en %}Enabled{% else %}启用{% endif %}</span></label>
+          <label class="console-check"><input type="checkbox" name="is_default"><span>{% if is_en %}Default{% else %}设为默认{% endif %}</span></label>
+          <button class="button button-primary" type="submit">{% if is_en %}Create model{% else %}创建模型{% endif %}</button>
+        </form>
+      </section>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Model profiles{% else %}模型配置{% endif %}</h2><span class="console-status">{{ total }}</span></div>
+        {% if models.is_empty() %}<p class="console-empty">{% if is_en %}No model profiles.{% else %}当前没有模型配置。{% endif %}</p>{% endif %}
+        <div class="console-list">
+          {% for model in models %}
+          <article class="console-record">
+            <div class="console-record-heading">
+              <div><strong>{{ model.name }}</strong><small>{{ model.provider }} / {{ model.model_name }}</small></div>
+              <span class="console-status{% if !model.enabled %} console-status-muted{% endif %}">{% if model.is_default %}{% if is_en %}Default{% else %}默认{% endif %}{% else if model.enabled %}{% if is_en %}Enabled{% else %}启用{% endif %}{% else %}{% if is_en %}Disabled{% else %}停用{% endif %}{% endif %}</span>
+            </div>
+            <form class="console-form console-form-grid" action="/console/models/{{ model.id }}" method="post" hx-post="/console/models/{{ model.id }}" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+              <label><span>{% if is_en %}Display name{% else %}显示名称{% endif %}</span><input name="name" value="{{ model.name }}" maxlength="100" required></label>
+              <label><span>Provider</span><input name="provider" value="{{ model.provider }}" maxlength="64" pattern="[A-Za-z0-9._-]+" required></label>
+              <label><span>Model ID</span><input name="model_name" value="{{ model.model_name }}" maxlength="128" required></label>
+              <label><span>Base URL</span><input type="url" name="base_url" value="{% if let Some(value) = model.base_url %}{{ value }}{% endif %}" maxlength="512"></label>
+              <label><span>{% if is_en %}Context length{% else %}上下文长度{% endif %}</span><input type="number" name="context_length" min="256" max="2000000" value="{{ model.context_length }}" required></label>
+              <label><span>{% if is_en %}Order{% else %}排序{% endif %}</span><input type="number" name="sort_order" value="{{ model.sort_order }}" required></label>
+              <label class="console-check"><input type="checkbox" name="enabled"{% if model.enabled %} checked{% endif %}><span>{% if is_en %}Enabled{% else %}启用{% endif %}</span></label>
+              <label class="console-check"><input type="checkbox" name="is_default"{% if model.is_default %} checked{% endif %}><span>{% if is_en %}Default{% else %}默认{% endif %}</span></label>
+              <button class="button button-secondary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+            </form>
+            <form class="console-delete-form" action="/console/models/{{ model.id }}/delete" method="post" hx-post="/console/models/{{ model.id }}/delete" hx-swap="none" hx-confirm="{% if is_en %}Delete this model profile?{% else %}删除此模型配置？{% endif %}" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+              <button class="button button-danger" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
+            </form>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

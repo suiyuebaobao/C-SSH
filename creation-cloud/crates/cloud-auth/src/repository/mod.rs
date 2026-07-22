@@ -1,6 +1,7 @@
 //! 声明按认证动作拆分的 PostgreSQL repository。
 
 pub(crate) mod change_password;
+pub(crate) mod cleanup_expired_sessions;
 pub(crate) mod error;
 pub(crate) mod login;
 pub(crate) mod logout;

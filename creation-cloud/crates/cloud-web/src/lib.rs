@@ -2,10 +2,12 @@
 
 mod admin_state;
 mod assets;
+mod console_state;
 mod indexing;
 mod language_redirect;
 mod pages;
 mod private_indexing;
+mod public_state;
 mod query;
 mod render;
 mod seo;
@@ -18,7 +20,9 @@ use axum::{
 };
 
 pub use admin_state::{AdminHealth, AdminPageState};
+pub use console_state::ConsolePageState;
 pub use private_indexing::noindex_response;
+pub use public_state::PublicPageState;
 pub use seo::SeoConfig;
 
 #[must_use = "路由必须挂载到服务端才会生效"]
@@ -31,14 +35,52 @@ pub fn public_router_with_seo(seo: SeoConfig) -> Router {
     Router::new()
         .route("/", get(pages::public::home))
         .route("/en", get(pages::public::home_en))
+        .route("/downloads", get(pages::public::downloads))
+        .route("/en/downloads", get(pages::public::downloads_en))
+        .route("/changelog", get(pages::public::changelog))
+        .route("/en/changelog", get(pages::public::changelog_en))
+        .route("/robots.txt", get(indexing::robots))
+        .route("/sitemap.xml", get(indexing::sitemap))
+        .merge(public_common_router::<SeoConfig>())
+        .route_layer(middleware::from_fn(language_redirect::canonicalize))
+        .with_state(seo)
+        .merge(assets::router())
+}
+
+#[must_use = "路由必须挂载到服务端才会生效"]
+pub fn public_router_with_state(state: PublicPageState) -> Router {
+    Router::new()
+        .route("/", get(pages::public::home_live))
+        .route("/en", get(pages::public::home_en_live))
+        .route("/downloads", get(pages::public::downloads_live))
+        .route("/en/downloads", get(pages::public::downloads_en_live))
+        .route("/changelog", get(pages::public::changelog_live))
+        .route("/en/changelog", get(pages::public::changelog_en_live))
+        .route("/robots.txt", get(indexing::robots))
+        .route("/sitemap.xml", get(indexing::sitemap_live))
+        .merge(public_common_router::<PublicPageState>())
+        .route_layer(middleware::from_fn(language_redirect::canonicalize))
+        .with_state(state)
+        .merge(assets::router())
+}
+
+fn public_common_router<S>() -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+    SeoConfig: axum::extract::FromRef<S>,
+{
+    Router::new()
         .route("/en/", get(language_redirect::english_root_slash))
         .route("/features", get(language_redirect::legacy_documentation))
         .route(
             "/en/features",
             get(language_redirect::legacy_documentation_en),
         )
-        .route("/tutorials", get(pages::tutorials::page))
-        .route("/en/tutorials", get(pages::tutorials::page_en))
+        .route("/tutorials", get(language_redirect::legacy_documentation))
+        .route(
+            "/en/tutorials",
+            get(language_redirect::legacy_documentation_en),
+        )
         .route("/platforms", get(language_redirect::legacy_documentation))
         .route(
             "/en/platforms",
@@ -51,10 +93,6 @@ pub fn public_router_with_seo(seo: SeoConfig) -> Router {
         )
         .route("/security", get(pages::public::security))
         .route("/en/security", get(pages::public::security_en))
-        .route("/downloads", get(pages::public::downloads))
-        .route("/en/downloads", get(pages::public::downloads_en))
-        .route("/changelog", get(pages::public::changelog))
-        .route("/en/changelog", get(pages::public::changelog_en))
         .route("/faq", get(pages::public::faq))
         .route("/en/faq", get(pages::public::faq_en))
         .route("/feedback", get(pages::feedback::page))
@@ -63,21 +101,51 @@ pub fn public_router_with_seo(seo: SeoConfig) -> Router {
         .route("/en/login", get(pages::account::login_en))
         .route("/register", get(pages::account::register))
         .route("/en/register", get(pages::account::register_en))
-        .route("/robots.txt", get(indexing::robots))
-        .route("/sitemap.xml", get(indexing::sitemap))
-        .route_layer(middleware::from_fn(language_redirect::canonicalize))
-        .with_state(seo)
-        .merge(assets::router())
 }
 
 #[must_use = "路由必须挂载到服务端才会生效"]
 pub fn console_router() -> Router {
     Router::new()
+        .route("/", get(pages::console_preview::overview))
+        .route("/profile", get(pages::console_preview::profile))
+        .route("/devices", get(pages::console_preview::devices))
+        .route("/sync", get(pages::console_preview::sync))
+        .route("/models", get(pages::console_preview::models))
+        .route("/vault", get(pages::console_preview::vault))
+        .route("/downloads", get(pages::console_preview::downloads))
+}
+
+#[must_use = "路由必须挂载到已注入认证会话的服务端才会生效"]
+pub fn console_router_with_state(state: ConsolePageState) -> Router {
+    Router::new()
         .route("/", get(pages::console::overview))
+        .route(
+            "/profile",
+            get(pages::console::profile).post(pages::console::update_profile),
+        )
+        .route(
+            "/profile/password",
+            post(pages::console::change_password).layer(DefaultBodyLimit::max(4 * 1024)),
+        )
         .route("/devices", get(pages::console::devices))
+        .route("/devices/{device_id}", post(pages::console::rename_device))
+        .route(
+            "/devices/{device_id}/revoke",
+            post(pages::console::revoke_device),
+        )
         .route("/sync", get(pages::console::sync))
-        .route("/models", get(pages::console::models))
+        .route(
+            "/models",
+            get(pages::console::models).post(pages::console::create_model),
+        )
+        .route("/models/{model_id}", post(pages::console::update_model))
+        .route(
+            "/models/{model_id}/delete",
+            post(pages::console::delete_model),
+        )
         .route("/vault", get(pages::console::vault))
+        .route("/downloads", get(pages::console::downloads))
+        .with_state(state)
 }
 
 #[must_use = "路由必须挂载到服务端才会生效"]

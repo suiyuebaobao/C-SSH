@@ -23,6 +23,14 @@ pub(crate) fn storage(message: &'static str) -> impl FnOnce(sqlx::Error) -> AppE
 pub(crate) fn write_error(error: sqlx::Error) -> AppError {
     if matches!(
         &error,
+        sqlx::Error::Database(database)
+            if database.code().as_deref() == Some("23503")
+                && database.constraint() == Some("model_profiles_active_vault_envelope_fkey")
+    ) {
+        return AppError::NotFound("密文信封不存在".to_owned());
+    }
+    if matches!(
+        &error,
         sqlx::Error::Database(database) if database.code().as_deref() == Some("23505")
     ) {
         AppError::Conflict("同一账号下的模型名称已存在".to_owned())

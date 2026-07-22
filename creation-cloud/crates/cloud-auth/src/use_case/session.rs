@@ -17,7 +17,9 @@ pub(crate) async fn authenticate(
         session_id: row.session_id,
         account_id: row.account_id,
         email: row.email,
+        admin_login_name: row.admin_login_name,
         role: row.role,
+        device_id: row.device_id,
         expires_at: row.expires_at,
         csrf_token: token::csrf(raw_token),
     })

@@ -1,17 +1,16 @@
 //! 读取当前账号的未解决同步冲突列表。
 
-use cloud_domain::{AppResult, Page, PageQuery};
-use uuid::Uuid;
+use cloud_domain::{AppResult, AuthenticatedSession, Page, PageQuery};
 
-use crate::{Service, SyncConflict, repository, validation};
+use crate::{Service, SyncConflict, limiter::AccessKind, repository};
 
 impl Service {
     pub async fn list_conflicts(
         &self,
-        account_id: Uuid,
+        session: &AuthenticatedSession,
         page: PageQuery,
     ) -> AppResult<Page<SyncConflict>> {
-        validation::account(account_id)?;
-        repository::list_conflicts(&self.pool, account_id, page.normalized()).await
+        let (actor, _permit) = self.authorize(session, AccessKind::Read)?;
+        repository::list_conflicts(&self.pool, &actor, page.normalized()).await
     }
 }

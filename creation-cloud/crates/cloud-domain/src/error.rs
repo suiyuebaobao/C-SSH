@@ -2,7 +2,7 @@
 
 use axum::{
     Json,
-    http::StatusCode,
+    http::{HeaderValue, StatusCode, header::RETRY_AFTER},
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
@@ -26,7 +26,14 @@ pub enum AppError {
     #[error("{0}")]
     Conflict(String),
     #[error("{0}")]
+    SyncResyncRequired(String),
+    #[error("{0}")]
     RateLimited(String),
+    #[error("{message}")]
+    RateLimitedAfter {
+        message: String,
+        retry_after_seconds: u64,
+    },
     #[error("{0}")]
     Unavailable(String),
     #[error("{0}")]
@@ -45,13 +52,24 @@ struct ErrorBody {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
+        let retry_after_seconds = match &self {
+            Self::RateLimitedAfter {
+                retry_after_seconds,
+                ..
+            } => Some((*retry_after_seconds).max(1)),
+            _ => None,
+        };
+        let message = self.to_string();
         let (status, code) = match self {
             Self::Validation(_) => (StatusCode::BAD_REQUEST, "validation_error"),
             Self::Unauthorized(_) => (StatusCode::UNAUTHORIZED, "unauthorized"),
             Self::Forbidden(_) => (StatusCode::FORBIDDEN, "forbidden"),
             Self::NotFound(_) => (StatusCode::NOT_FOUND, "not_found"),
             Self::Conflict(_) => (StatusCode::CONFLICT, "conflict"),
-            Self::RateLimited(_) => (StatusCode::TOO_MANY_REQUESTS, "rate_limited"),
+            Self::SyncResyncRequired(_) => (StatusCode::CONFLICT, "sync_resync_required"),
+            Self::RateLimited(_) | Self::RateLimitedAfter { .. } => {
+                (StatusCode::TOO_MANY_REQUESTS, "rate_limited")
+            }
             Self::Unavailable(_) => (StatusCode::SERVICE_UNAVAILABLE, "unavailable"),
             Self::Storage(_) | Self::Internal(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal_error")
@@ -60,10 +78,16 @@ impl IntoResponse for AppError {
         let body = ErrorBody {
             code,
             message_key: code,
-            message: self.to_string(),
+            message,
             request_id: current_request_id().unwrap_or_else(|| Uuid::now_v7().to_string()),
         };
-        (status, Json(body)).into_response()
+        let mut response = (status, Json(body)).into_response();
+        if let Some(seconds) = retry_after_seconds
+            && let Ok(value) = HeaderValue::from_str(&seconds.to_string())
+        {
+            response.headers_mut().insert(RETRY_AFTER, value);
+        }
+        response
     }
 }
 
@@ -111,5 +135,33 @@ mod tests {
         let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
         assert_eq!(value["code"], "rate_limited");
         assert_eq!(value["message_key"], "rate_limited");
+    }
+
+    #[tokio::test]
+    async fn bounded_rate_limit_includes_retry_after_seconds() {
+        let response = AppError::RateLimitedAfter {
+            message: "同步请求过于频繁".to_owned(),
+            retry_after_seconds: 12,
+        }
+        .into_response();
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert_eq!(response.headers()[RETRY_AFTER], "12");
+        let body = to_bytes(response.into_body(), 4096)
+            .await
+            .expect("错误正文应可读取");
+        let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
+        assert_eq!(value["code"], "rate_limited");
+    }
+
+    #[tokio::test]
+    async fn sync_resync_required_has_a_stable_conflict_boundary() {
+        let response = AppError::SyncResyncRequired("需要全量重建".to_owned()).into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        let body = to_bytes(response.into_body(), 4096)
+            .await
+            .expect("错误正文应可读取");
+        let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
+        assert_eq!(value["code"], "sync_resync_required");
+        assert_eq!(value["message_key"], "sync_resync_required");
     }
 }

@@ -50,7 +50,7 @@ pub(super) fn page_content() -> PageContent {
             "button button-primary",
         ),
         action("查看更新日志", "/changelog", "button button-secondary"),
-        action("按教程开始", "/tutorials", "text-link"),
+        action("从文档开始", "/docs/getting-started#add-host", "text-link"),
     ])
     .with_home_page(home_page)
 }

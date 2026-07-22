@@ -1,12 +1,10 @@
 //! 校验设备登记输入并为当前账号创建设备。
 
+use crate::{Platform, model::CreateDeviceOutcome, repository, validation};
 use cloud_domain::AppResult;
 use cloud_domain::AuthenticatedSession;
 use cloud_store::PgPool;
 use serde::Deserialize;
-use uuid::Uuid;
-
-use crate::{Device, Platform, repository, validation};
 
 #[derive(Debug, Deserialize)]
 pub struct CreateDevice {
@@ -29,12 +27,11 @@ pub(crate) async fn execute(
     pool: &PgPool,
     session: &AuthenticatedSession,
     command: CreateDevice,
-) -> AppResult<Device> {
+) -> AppResult<CreateDeviceOutcome> {
     let command = command.validate()?;
-    repository::create::insert(
+    repository::create::bind(
         pool,
-        Uuid::now_v7(),
-        session.account_id,
+        session,
         &command.name,
         command.platform.as_str(),
         &command.public_id,

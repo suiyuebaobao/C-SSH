@@ -50,6 +50,8 @@ pub async fn promote_registered_admin(pool: &PgPool, email: &str) -> AppResult<U
         .execute(&mut *transaction)
         .await
         .map_err(repository::map_write_error)?;
+    // 角色提升必须令此前签发的普通用户会话失效，避免旧令牌继承管理员权限。
+    repository::sessions::delete_for_account(&mut transaction, account.id).await?;
     sqlx::query(AUDIT_SQL)
         .bind(Uuid::now_v7())
         .bind(account.id.to_string())

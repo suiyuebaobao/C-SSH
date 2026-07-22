@@ -1,4 +1,6 @@
-//! 定义官网文档中心的目录、平台状态、正文区块与脱敏界面证据模型。
+//! 定义官网文档中心的目录、平台状态、实操指南、正文与脱敏界面证据模型。
+
+use crate::TutorialContent;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DocumentationContent {
@@ -19,6 +21,7 @@ pub struct DocumentationContent {
     pub platform_title: &'static str,
     pub platform_lead: &'static str,
     pub platforms: Vec<DocumentationPlatform>,
+    pub tutorials: TutorialContent,
     pub sections: Vec<DocumentationSection>,
     pub screenshot: DocumentationScreenshot,
     pub final_code: &'static str,

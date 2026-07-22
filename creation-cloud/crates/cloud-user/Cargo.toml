@@ -14,5 +14,9 @@ serde.workspace = true
 sqlx.workspace = true
 uuid.workspace = true
 
+[dev-dependencies]
+tokio.workspace = true
+tower = { workspace = true, features = ["util"] }
+
 [lints]
 workspace = true

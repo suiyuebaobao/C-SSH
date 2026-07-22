@@ -37,10 +37,10 @@ impl Service {
             active_admins.len(),
         )?;
 
-        let next_status = input.status.unwrap_or(current_status);
+        let invalidates_sessions = invalidates_sessions(current_role, current_status, input);
         let user = repository::users::update::apply(&mut transaction, account_id, input).await?;
-        if next_status == AdminUserStatus::Disabled {
-            repository::users::update::delete_sessions(&mut transaction, account_id).await?;
+        if invalidates_sessions {
+            repository::sessions::delete_for_account(&mut transaction, account_id).await?;
         }
         transaction
             .commit()
@@ -48,6 +48,15 @@ impl Service {
             .map_err(repository::map_write_error)?;
         Ok(user)
     }
+}
+
+pub(crate) fn invalidates_sessions(
+    current_role: AdminUserRole,
+    current_status: AdminUserStatus,
+    input: AdminUpdateUserInput,
+) -> bool {
+    input.role.unwrap_or(current_role) != current_role
+        || input.status.unwrap_or(current_status) != current_status
 }
 
 pub(crate) fn validate_input(input: AdminUpdateUserInput) -> AppResult<()> {

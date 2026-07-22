@@ -14,5 +14,15 @@ pub fn router(service: Service) -> Router {
                 .put(handler::update)
                 .delete(handler::delete),
         )
+        .route(
+            "/wrappers",
+            get(handler::wrapper::list::handle).post(handler::wrapper::create::handle),
+        )
+        .route(
+            "/wrappers/{id}",
+            get(handler::wrapper::get::handle)
+                .put(handler::wrapper::update::handle)
+                .delete(handler::wrapper::delete::handle),
+        )
         .with_state(service)
 }

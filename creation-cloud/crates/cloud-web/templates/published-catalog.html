@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="marketing-main">
+  <section class="page-intro" aria-labelledby="catalog-title">
+    <div class="container page-intro-inner">
+      <p class="eyebrow">{{ view.page.eyebrow }}</p>
+      <h1 id="catalog-title">{{ view.page.heading }}</h1>
+      <p>{{ view.page.lead }}</p>
+      <div class="action-row">
+        {% for action in view.page.actions %}
+        <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {% if catalog.has_published() %}
+  <section class="content-band" id="published-catalog" aria-labelledby="published-catalog-title">
+    <div class="container section-layout">
+      <header class="section-heading">
+        <h2 id="published-catalog-title">{% if is_downloads %}{% if is_en %}Published downloads{% else %}已发布下载{% endif %}{% else %}{% if is_en %}Published changelog{% else %}已发布更新日志{% endif %}{% endif %}</h2>
+        <p>{% if is_en %}Every value below comes from the published release catalog.{% else %}以下版本、资产、来源与校验值全部来自已发布目录。{% endif %}</p>
+      </header>
+
+      <div class="published-catalog-list">
+        {% for release in catalog.releases %}
+        <article class="content-card release-catalog-entry" id="release-{{ release.version }}">
+        <span class="card-badge">{{ release.channel }} / {{ release.version }}</span>
+        <h3>{{ release.title }}</h3>
+        <p><time datetime="{{ release.published_at_iso }}">{{ release.published_at_label }}</time></p>
+        {% if !release.notes.is_empty() %}<p>{{ release.notes }}</p>{% endif %}
+
+        {% for platform in release.platforms %}
+        <section class="release-platform" aria-labelledby="release-{{ loop.index0 }}-platform-{{ platform.name }}">
+          <h4 id="release-{{ loop.index0 }}-platform-{{ platform.name }}">{{ platform.name }}</h4>
+          {% for asset in platform.assets %}
+          <article class="release-asset">
+            <h5>{{ asset.file_name }}</h5>
+            <dl>
+              <dt>{% if is_en %}Architecture{% else %}架构{% endif %}</dt><dd>{{ asset.architecture }}</dd>
+              <dt>{% if is_en %}Package{% else %}包类型{% endif %}</dt><dd>{{ asset.package_kind }}</dd>
+              <dt>{% if is_en %}Size{% else %}大小{% endif %}</dt><dd>{{ asset.byte_size }}</dd>
+              <dt>SHA256</dt><dd><code>{{ asset.sha256 }}</code></dd>
+            </dl>
+            <div class="action-row" aria-label="{% if is_en %}Download sources{% else %}下载来源{% endif %}">
+              {% for source in asset.sources %}
+              <a class="button button-secondary" href="{{ source.download_href }}"><span>{{ source.provider_name }}</span> · {{ source.kind_label }}</a>
+              {% endfor %}
+            </div>
+          </article>
+          {% endfor %}
+        </section>
+        {% endfor %}
+        </article>
+        {% endfor %}
+
+        {% if is_downloads && (!catalog.has_macos || !catalog.has_ios) %}
+        <div class="card-grid" aria-label="{% if is_en %}Platforms not yet released{% else %}尚未发布的平台{% endif %}">
+          {% if !catalog.has_macos %}<article class="content-card"><span class="card-badge">PLANNED</span><h3>macOS</h3><p>{% if is_en %}The independent macOS client has not been developed yet. No version, checksum, or download is offered.{% else %}独立 macOS 客户端尚未开发，不提供版本、校验值或下载动作。{% endif %}</p></article>{% endif %}
+          {% if !catalog.has_ios %}<article class="content-card"><span class="card-badge">PLANNED</span><h3>iOS</h3><p>{% if is_en %}The independent iOS companion has not been developed yet. No version, checksum, or download is offered.{% else %}独立 iOS 移动伴侣尚未开发，不提供版本、校验值或下载动作。{% endif %}</p></article>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+  {% else %}
+    {% for section in view.page.sections %}
+    <section class="content-band marketing-content-band" id="{{ section.anchor }}" aria-labelledby="catalog-section-{{ section.anchor }}">
+      <div class="container section-layout">
+        <header class="section-heading"><h2 id="catalog-section-{{ section.anchor }}">{{ section.title }}</h2><p>{{ section.lead }}</p></header>
+        <div class="card-grid">
+          {% for item in section.items %}<article class="content-card"><span class="card-badge">{{ item.badge }}</span><h3>{{ item.title }}</h3><p>{{ item.body }}</p><small>{{ item.meta }}</small></article>{% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endfor %}
+  {% endif %}
+
+  {% if catalog.has_published() && !is_downloads %}
+    {% for section in view.page.sections %}{% if section.anchor == "policy" %}
+    <section class="content-band marketing-content-band" id="{{ section.anchor }}" aria-labelledby="catalog-section-{{ section.anchor }}">
+      <div class="container section-layout"><header class="section-heading"><h2 id="catalog-section-{{ section.anchor }}">{{ section.title }}</h2><p>{{ section.lead }}</p></header><div class="card-grid">{% for item in section.items %}<article class="content-card"><span class="card-badge">{{ item.badge }}</span><h3>{{ item.title }}</h3><p>{{ item.body }}</p><small>{{ item.meta }}</small></article>{% endfor %}</div></div>
+    </section>
+    {% endif %}{% endfor %}
+  {% endif %}
+</main>
+{% endblock %}

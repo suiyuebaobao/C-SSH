@@ -19,7 +19,13 @@ pub(super) fn login() -> PageContent {
         "登录",
         "账号密码只用于登录，保险库密码始终独立。",
         vec![
-            FormField::new("email", "邮箱", "email", "email", "name@example.com"),
+            FormField::new(
+                "identifier",
+                "邮箱或管理员账号",
+                "text",
+                "username",
+                "name@example.com / ops-admin",
+            ),
             FormField::new(
                 "password",
                 "密码",

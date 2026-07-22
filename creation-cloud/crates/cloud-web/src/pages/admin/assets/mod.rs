@@ -59,7 +59,7 @@ struct ReleaseOption {
 struct AssetsTemplate {
     view: SiteView,
     seo: SeoHead,
-    session_email: Option<String>,
+    session_identity: Option<String>,
     csrf_token: String,
     is_en: bool,
     rows: Vec<AssetRow>,
@@ -109,7 +109,7 @@ pub(crate) async fn page(
     shared::render(&AssetsTemplate {
         view: parts.view,
         seo: parts.seo,
-        session_email: Some(parts.session_email),
+        session_identity: Some(parts.session_identity),
         csrf_token: parts.csrf_token,
         is_en: parts.is_en,
         rows,

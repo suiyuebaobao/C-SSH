@@ -5,6 +5,7 @@ pub(crate) mod delete;
 mod error;
 pub(crate) mod finalization;
 pub(crate) mod get;
+pub(crate) mod inspection;
 pub(crate) mod list;
 pub(crate) mod public;
 pub(crate) mod publish;

@@ -12,7 +12,6 @@ pub(super) fn view(page: PageId) -> SiteView {
         shell: shell(page),
         page: match page {
             PageId::Home => super::zh_cn_home::page_content(),
-            PageId::Tutorials => super::zh_cn_tutorials::page_content(),
             PageId::Documentation => super::zh_cn_documentation::page_content(),
             PageId::Security => super::zh_cn_public::security(),
             PageId::Downloads => super::zh_cn_public::downloads(),
@@ -22,10 +21,12 @@ pub(super) fn view(page: PageId) -> SiteView {
             PageId::Login => super::zh_cn_account::login(),
             PageId::Register => super::zh_cn_account::register(),
             PageId::Console => super::zh_cn_workspace::console_overview(),
+            PageId::Profile => super::zh_cn_workspace::profile(),
             PageId::Devices => super::zh_cn_workspace::devices(),
             PageId::Sync => super::zh_cn_workspace::sync(),
             PageId::Models => super::zh_cn_workspace::models(),
             PageId::Vault => super::zh_cn_workspace::vault(),
+            PageId::ConsoleDownloads => super::zh_cn_workspace::downloads(),
             PageId::Admin => super::zh_cn_workspace::admin(),
             PageId::AdminUsers => super::zh_cn_workspace::admin_users(),
             PageId::AdminDevices => super::zh_cn_workspace::admin_devices(),
@@ -42,7 +43,13 @@ fn shell(current: PageId) -> SiteShell {
     let mut console_link = nav("用户中心", PageId::Console, current);
     console_link.active = matches!(
         current,
-        PageId::Console | PageId::Devices | PageId::Sync | PageId::Models | PageId::Vault
+        PageId::Console
+            | PageId::Profile
+            | PageId::Devices
+            | PageId::Sync
+            | PageId::Models
+            | PageId::Vault
+            | PageId::ConsoleDownloads
     );
     let mut login_link = nav("登录", PageId::Login, current);
     login_link.active = matches!(current, PageId::Login | PageId::Register);
@@ -58,7 +65,6 @@ fn shell(current: PageId) -> SiteShell {
             nav("首页", PageId::Home, current),
             nav("文档", PageId::Documentation, current),
             nav("更新日志", PageId::Changelog, current),
-            nav("教程", PageId::Tutorials, current),
             nav("安全", PageId::Security, current),
             nav("下载", PageId::Downloads, current),
             nav("常见问题", PageId::Faq, current),

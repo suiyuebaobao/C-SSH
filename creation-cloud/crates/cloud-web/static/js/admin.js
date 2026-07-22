@@ -192,3 +192,107 @@ document.addEventListener("htmx:afterSwap", (event) => {
     focusTarget.focus({ preventScroll: true });
   }
 });
+
+function adminMaintenanceTime(value) {
+  if (typeof value !== "string" || value.length > 64) {
+    return adminIsEnglish() ? "Never" : "暂无";
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return adminIsEnglish() ? "Unknown" : "未知";
+  }
+  return new Intl.DateTimeFormat(adminIsEnglish() ? "en" : "zh-CN", {
+    dateStyle: "medium",
+    timeStyle: "medium",
+  }).format(parsed);
+}
+
+function adminMaintenanceTone(status) {
+  const outcome = status?.latest_attempt?.outcome;
+  if (status?.active_run_id) {
+    return "running";
+  }
+  if (Number(status?.consecutive_failures) > 0 || ["failed", "timed_out", "interrupted"].includes(outcome)) {
+    return "error";
+  }
+  if (["missing", "stale", "invalid", "issues_detected"].includes(status?.last_observation)) {
+    return "warning";
+  }
+  return "healthy";
+}
+
+function adminMaintenanceItem(status) {
+  const english = adminIsEnglish();
+  const item = document.createElement("article");
+  item.className = "admin-maintenance-item";
+  item.dataset.tone = adminMaintenanceTone(status);
+
+  const heading = document.createElement("div");
+  heading.className = "admin-maintenance-heading";
+  const name = document.createElement("strong");
+  name.textContent = typeof status?.task === "string" ? status.task.slice(0, 64) : "unknown-task";
+  const outcome = document.createElement("span");
+  outcome.className = "status-badge";
+  outcome.textContent = status?.active_run_id
+    ? (english ? "running" : "运行中")
+    : (status?.latest_attempt?.outcome ?? (english ? "not run" : "尚未运行"));
+  heading.append(name, outcome);
+
+  const attempt = document.createElement("p");
+  attempt.textContent = `${english ? "Latest attempt" : "最近尝试"}: ${adminMaintenanceTime(status?.latest_attempt?.started_at)}`;
+  const success = document.createElement("p");
+  success.textContent = `${english ? "Last success" : "最近成功"}: ${adminMaintenanceTime(status?.last_success_at)}`;
+  const detail = document.createElement("small");
+  const observation = status?.last_observation ?? (english ? "none" : "暂无");
+  const failures = Number.isSafeInteger(status?.consecutive_failures) ? status.consecutive_failures : 0;
+  detail.textContent = `${english ? "Observation" : "观察"}: ${observation} · ${english ? "Consecutive failures" : "连续失败"}: ${failures}`;
+  item.append(heading, attempt, success, detail);
+  return item;
+}
+
+async function adminLoadMaintenance(panel) {
+  if (!(panel instanceof HTMLElement) || panel.dataset.loading === "true") {
+    return;
+  }
+  const endpoint = panel.dataset.maintenanceEndpoint;
+  const list = panel.querySelector("[data-maintenance-list]");
+  const feedback = panel.querySelector("[data-maintenance-feedback]");
+  const refresh = panel.querySelector("[data-maintenance-refresh]");
+  if (!endpoint || !(list instanceof HTMLElement) || !(feedback instanceof HTMLElement)) {
+    return;
+  }
+  panel.dataset.loading = "true";
+  if (refresh instanceof HTMLButtonElement) {
+    refresh.disabled = true;
+  }
+  try {
+    const response = await fetch(endpoint, { credentials: "same-origin", headers: { Accept: "application/json" } });
+    if (!response.ok) {
+      throw new Error("maintenance_status_failed");
+    }
+    const statuses = await response.json();
+    if (!Array.isArray(statuses) || statuses.length !== 5) {
+      throw new Error("maintenance_status_shape");
+    }
+    list.replaceChildren(...statuses.map(adminMaintenanceItem));
+    feedback.textContent = adminIsEnglish() ? "Maintenance status is current." : "维护状态已更新。";
+    feedback.setAttribute("data-tone", "success");
+  } catch {
+    list.replaceChildren();
+    feedback.textContent = adminIsEnglish() ? "Maintenance status is temporarily unavailable." : "维护状态暂时无法读取。";
+    feedback.setAttribute("data-tone", "error");
+  } finally {
+    delete panel.dataset.loading;
+    if (refresh instanceof HTMLButtonElement) {
+      refresh.disabled = false;
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const panel = document.querySelector("[data-maintenance-panel]");
+  adminLoadMaintenance(panel);
+  panel?.querySelector("[data-maintenance-refresh]")?.addEventListener("click", () => {
+    adminLoadMaintenance(panel);
+  });
+});

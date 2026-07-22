@@ -8,6 +8,7 @@ rust-version.workspace = true
 [dependencies]
 anyhow.workspace = true
 axum.workspace = true
+chrono.workspace = true
 cloud-admin.workspace = true
 cloud-auth.workspace = true
 cloud-config.workspace = true
@@ -16,6 +17,7 @@ cloud-domain.workspace = true
 cloud-download.workspace = true
 cloud-feedback.workspace = true
 cloud-model.workspace = true
+cloud-maintenance.workspace = true
 cloud-release.workspace = true
 cloud-site-media.workspace = true
 cloud-store.workspace = true
@@ -24,6 +26,8 @@ cloud-user.workspace = true
 cloud-vault.workspace = true
 cloud-web.workspace = true
 serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
 tokio.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
@@ -31,7 +35,7 @@ tracing-subscriber.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
-sqlx.workspace = true
+tokio = { workspace = true, features = ["test-util"] }
 tower.workspace = true
 
 [lints]

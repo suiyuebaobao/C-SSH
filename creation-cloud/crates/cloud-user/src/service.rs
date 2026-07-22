@@ -1,4 +1,4 @@
-//! 持有用户域数据库连接并统一转发五个资料 CRUD 用例。
+//! 持有用户域数据库连接并转发资料创建、读取、列表与更新用例。
 
 use cloud_domain::{AppResult, AuthenticatedSession, Page, PageQuery};
 use cloud_store::PgPool;
@@ -51,9 +51,5 @@ impl Service {
         command: UpdateProfile,
     ) -> AppResult<Profile> {
         use_case::update::execute(&self.pool, session, account_id, command).await
-    }
-
-    pub async fn delete(&self, session: &AuthenticatedSession, account_id: Uuid) -> AppResult<()> {
-        use_case::delete::execute(&self.pool, session, account_id).await
     }
 }

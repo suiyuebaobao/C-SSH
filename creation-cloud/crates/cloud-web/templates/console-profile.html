@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Profile{% else %}个人资料{% endif %}</h2><span class="console-status">{{ role }}</span></div>
+        <p class="console-identity">{{ email }}</p>
+        <form class="console-form" action="/console/profile" method="post" hx-post="/console/profile" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+          <label><span>{% if is_en %}Display name{% else %}显示名称{% endif %}</span><input name="display_name" value="{{ profile.display_name }}" maxlength="100" required></label>
+          <label><span>{% if is_en %}Language{% else %}界面语言{% endif %}</span>
+            <select name="locale">
+              <option value="zh-CN"{% if profile.locale == "zh-CN" %} selected{% endif %}>简体中文</option>
+              <option value="en"{% if profile.locale == "en" %} selected{% endif %}>English</option>
+            </select>
+          </label>
+          <button class="button button-primary" type="submit">{% if is_en %}Save profile{% else %}保存资料{% endif %}</button>
+        </form>
+      </section>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Change password{% else %}修改账号密码{% endif %}</h2><span class="console-status console-status-warning">Argon2id</span></div>
+        <p>{% if is_en %}This changes only the account password and never the vault master key.{% else %}这里只修改账号密码，不影响保险库主密钥。{% endif %}</p>
+        <form class="console-form" action="/console/profile/password" method="post" hx-post="/console/profile/password" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+          <label><span>{% if is_en %}Current password{% else %}当前密码{% endif %}</span><input type="password" name="current_password" autocomplete="current-password" maxlength="128" required></label>
+          <label><span>{% if is_en %}New password{% else %}新密码{% endif %}</span><input type="password" name="new_password" autocomplete="new-password" maxlength="128" required></label>
+          <label class="console-check"><input type="checkbox" name="revoke_other_sessions" checked><span>{% if is_en %}Sign out other sessions{% else %}撤销其它会话{% endif %}</span></label>
+          <button class="button button-primary" type="submit">{% if is_en %}Update password{% else %}更新密码{% endif %}</button>
+        </form>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

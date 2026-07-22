@@ -18,7 +18,7 @@ const HX_REDIRECT: HeaderName = HeaderName::from_static("hx-redirect");
 pub(crate) struct PageParts {
     pub(crate) view: SiteView,
     pub(crate) seo: SeoHead,
-    pub(crate) session_email: String,
+    pub(crate) session_identity: String,
     pub(crate) csrf_token: String,
     pub(crate) is_en: bool,
 }
@@ -59,7 +59,10 @@ pub(crate) fn page_parts(
     PageParts {
         view: content_service().view(page, locale),
         seo: SeoHead::private(),
-        session_email: session.email.clone(),
+        session_identity: session
+            .admin_login_name
+            .clone()
+            .unwrap_or_else(|| session.email.clone()),
         csrf_token: session.csrf_token.clone(),
         is_en: locale == Locale::En,
     }
@@ -171,8 +174,10 @@ fn error_status(error: &AppError) -> StatusCode {
         AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
         AppError::Forbidden(_) => StatusCode::FORBIDDEN,
         AppError::NotFound(_) => StatusCode::NOT_FOUND,
-        AppError::Conflict(_) => StatusCode::CONFLICT,
-        AppError::RateLimited(_) => StatusCode::TOO_MANY_REQUESTS,
+        AppError::Conflict(_) | AppError::SyncResyncRequired(_) => StatusCode::CONFLICT,
+        AppError::RateLimited(_) | AppError::RateLimitedAfter { .. } => {
+            StatusCode::TOO_MANY_REQUESTS
+        }
         AppError::Unavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
         AppError::Storage(_) | AppError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
     }

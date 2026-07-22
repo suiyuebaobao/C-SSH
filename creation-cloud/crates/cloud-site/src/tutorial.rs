@@ -1,4 +1,4 @@
-//! 定义教程总览页的前置条件、操作步骤、验证与 agent 边界内容模型。
+//! 定义文档中心实操指南的前置条件、操作步骤、验证与 agent 边界模型。
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TutorialStep {
@@ -76,7 +76,7 @@ impl Tutorial {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TutorialPageContent {
+pub struct TutorialContent {
     pub index_label: &'static str,
     pub prerequisites_label: &'static str,
     pub steps_label: &'static str,
@@ -85,18 +85,7 @@ pub struct TutorialPageContent {
     pub items: Vec<Tutorial>,
 }
 
-impl TutorialPageContent {
-    pub(crate) const fn empty() -> Self {
-        Self {
-            index_label: "",
-            prerequisites_label: "",
-            steps_label: "",
-            verification_label: "",
-            agent_boundary_label: "",
-            items: Vec::new(),
-        }
-    }
-
+impl TutorialContent {
     pub(crate) fn new(
         index_label: &'static str,
         prerequisites_label: &'static str,

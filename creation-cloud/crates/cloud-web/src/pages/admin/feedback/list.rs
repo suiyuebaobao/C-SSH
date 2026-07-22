@@ -24,7 +24,7 @@ use super::{
 pub(super) struct FeedbackTemplate {
     pub(super) view: SiteView,
     pub(super) seo: SeoHead,
-    pub(super) session_email: Option<String>,
+    pub(super) session_identity: Option<String>,
     pub(super) csrf_token: String,
     pub(super) is_en: bool,
     pub(super) rows: Vec<FeedbackRow>,
@@ -127,7 +127,7 @@ pub(crate) async fn page(
     shared::render(&FeedbackTemplate {
         view: parts.view,
         seo: parts.seo,
-        session_email: Some(parts.session_email),
+        session_identity: Some(parts.session_identity),
         csrf_token: parts.csrf_token,
         is_en: parts.is_en,
         rows,

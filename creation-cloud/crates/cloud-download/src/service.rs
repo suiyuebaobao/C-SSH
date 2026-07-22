@@ -4,13 +4,14 @@ use std::{path::PathBuf, sync::Arc};
 
 use cloud_store::PgPool;
 
-use crate::file_verification::FileVerifier;
+use crate::{file_verification::FileVerifier, limiter::DownloadLimiter};
 
 #[derive(Clone)]
 pub struct Service {
     pub(crate) pool: PgPool,
     pub(crate) download_root: Arc<PathBuf>,
     pub(crate) file_verifier: FileVerifier,
+    pub(crate) limiter: DownloadLimiter,
 }
 
 impl Service {
@@ -20,6 +21,7 @@ impl Service {
             pool,
             download_root: Arc::new(download_root.into()),
             file_verifier: FileVerifier::default(),
+            limiter: DownloadLimiter::default(),
         }
     }
 }

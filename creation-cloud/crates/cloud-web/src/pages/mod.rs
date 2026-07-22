@@ -3,7 +3,7 @@
 pub(crate) mod account;
 pub(crate) mod admin;
 pub(crate) mod console;
+pub(crate) mod console_preview;
 pub(crate) mod documentation;
 pub(crate) mod feedback;
 pub(crate) mod public;
-pub(crate) mod tutorials;

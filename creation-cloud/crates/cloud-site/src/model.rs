@@ -1,12 +1,11 @@
 //! 定义模板可直接消费的导航、页面区块、表单与产品预览模型。
 
-use crate::{DocumentationContent, HomePageContent, Locale, RepositoryLink, TutorialPageContent};
+use crate::{DocumentationContent, HomePageContent, Locale, RepositoryLink};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PageId {
     Home,
     Documentation,
-    Tutorials,
     Security,
     Downloads,
     Changelog,
@@ -15,10 +14,12 @@ pub enum PageId {
     Login,
     Register,
     Console,
+    Profile,
     Devices,
     Sync,
     Models,
     Vault,
+    ConsoleDownloads,
     Admin,
     AdminUsers,
     AdminDevices,
@@ -30,10 +31,9 @@ pub enum PageId {
 }
 
 impl PageId {
-    pub const ALL: [Self; 23] = [
+    pub const ALL: [Self; 24] = [
         Self::Home,
         Self::Documentation,
-        Self::Tutorials,
         Self::Security,
         Self::Downloads,
         Self::Changelog,
@@ -42,10 +42,12 @@ impl PageId {
         Self::Login,
         Self::Register,
         Self::Console,
+        Self::Profile,
         Self::Devices,
         Self::Sync,
         Self::Models,
         Self::Vault,
+        Self::ConsoleDownloads,
         Self::Admin,
         Self::AdminUsers,
         Self::AdminDevices,
@@ -56,10 +58,9 @@ impl PageId {
         Self::AdminFeedback,
     ];
 
-    pub const INDEXABLE: [Self; 6] = [
+    pub const INDEXABLE: [Self; 5] = [
         Self::Home,
         Self::Documentation,
-        Self::Tutorials,
         Self::Security,
         Self::Faq,
         Self::Feedback,
@@ -69,7 +70,6 @@ impl PageId {
     pub const fn path(self) -> &'static str {
         match self {
             Self::Home => "/",
-            Self::Tutorials => "/tutorials",
             Self::Documentation => "/docs/getting-started",
             Self::Security => "/security",
             Self::Downloads => "/downloads",
@@ -79,10 +79,12 @@ impl PageId {
             Self::Login => "/login",
             Self::Register => "/register",
             Self::Console => "/console",
+            Self::Profile => "/console/profile",
             Self::Devices => "/console/devices",
             Self::Sync => "/console/sync",
             Self::Models => "/console/models",
             Self::Vault => "/console/vault",
+            Self::ConsoleDownloads => "/console/downloads",
             Self::Admin => "/admin",
             Self::AdminUsers => "/admin/users",
             Self::AdminDevices => "/admin/devices",
@@ -98,12 +100,7 @@ impl PageId {
     pub const fn is_indexable(self) -> bool {
         matches!(
             self,
-            Self::Home
-                | Self::Documentation
-                | Self::Tutorials
-                | Self::Security
-                | Self::Faq
-                | Self::Feedback
+            Self::Home | Self::Documentation | Self::Security | Self::Faq | Self::Feedback
         )
     }
 
@@ -281,7 +278,6 @@ pub struct PageContent {
     pub sections: Vec<ContentSection>,
     pub home_page: Option<HomePageContent>,
     pub documentation_page: Option<DocumentationContent>,
-    pub tutorial_page: TutorialPageContent,
     pub faqs: Vec<FaqItem>,
     pub fields: Vec<FormField>,
     pub form_action: &'static str,
@@ -312,7 +308,6 @@ impl PageContent {
             sections: Vec::new(),
             home_page: None,
             documentation_page: None,
-            tutorial_page: TutorialPageContent::empty(),
             faqs: Vec::new(),
             fields: Vec::new(),
             form_action: "",
@@ -352,12 +347,6 @@ impl PageContent {
         documentation_page: DocumentationContent,
     ) -> Self {
         self.documentation_page = Some(documentation_page);
-        self
-    }
-
-    #[must_use]
-    pub(crate) fn with_tutorial_page(mut self, tutorial_page: TutorialPageContent) -> Self {
-        self.tutorial_page = tutorial_page;
         self
     }
 

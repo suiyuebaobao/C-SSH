@@ -39,7 +39,9 @@ mod tests {
         AuthenticatedSession {
             account_id: Uuid::now_v7(),
             email: "admin@example.com".to_owned(),
+            admin_login_name: None,
             role: role.to_owned(),
+            device_id: None,
             expires_at: Utc::now() + Duration::minutes(10),
             csrf_token: "csrf-example".to_owned(),
             session_id: Uuid::now_v7(),

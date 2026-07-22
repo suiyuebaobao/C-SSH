@@ -54,6 +54,11 @@ pub struct Device {
     pub updated_at: DateTime<Utc>,
 }
 
+pub struct CreateDeviceOutcome {
+    pub device: Device,
+    pub created: bool,
+}
+
 impl Device {
     pub(crate) fn from_row(row: DeviceRow) -> Self {
         Self {

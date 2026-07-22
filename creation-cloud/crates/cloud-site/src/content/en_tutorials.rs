@@ -1,8 +1,6 @@
-//! 提供英文教程总览，覆盖六条可执行的核心产品路径。
+//! 提供英文文档实操指南，覆盖六条可执行的核心产品路径。
 
-use crate::{PageContent, PageId, Tutorial, TutorialPageContent, TutorialStep};
-
-use super::en::{action, page};
+use crate::{Tutorial, TutorialContent, TutorialStep};
 
 macro_rules! tutorial {
     ($anchor:expr, $sequence:expr, $title:expr, $summary:expr, $prerequisites:expr, $steps:expr, $verification:expr, $boundary:expr $(,)?) => {
@@ -12,25 +10,9 @@ macro_rules! tutorial {
     };
 }
 
-pub(super) fn page_content() -> PageContent {
-    page(
-        PageId::Tutorials,
-        "SSH client and agent tutorials | Creation-SSH",
-        "Follow verifiable steps to add a host, deploy the agent, use persistent terminals, monitor, manage files, and configure AI.",
-        "Start with your first host",
-        "Six tutorials for the core Creation-SSH workflow",
-        "Each tutorial provides prerequisites, concrete actions, completion checks, and the agent boundary so you can prove the path works.",
-    )
-    .with_actions(vec![
-        action(
-            "Read the getting-started guide",
-            "/docs/getting-started",
-            "button button-secondary",
-        ),
-        action("Download the client", "/downloads", "button button-primary"),
-    ])
-    .with_tutorial_page(TutorialPageContent::new(
-        "Tutorial index",
+pub(super) fn content() -> TutorialContent {
+    TutorialContent::new(
+        "Hands-on guides",
         "Before you start",
         "Steps",
         "Verify completion",
@@ -38,7 +20,7 @@ pub(super) fn page_content() -> PageContent {
         vec![
             tutorial!(
                 "add-host",
-                "01",
+                "02",
                 "Add your first host",
                 "Save an authenticatable Linux host and establish first-use host-key trust.",
                 vec![
@@ -77,7 +59,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "deploy-agent",
-                "02",
+                "03",
                 "Deploy or repair the agent",
                 "Let the client detect server architecture, upload only the matching agent and static tmux pair, and complete the protocol handshake.",
                 vec![
@@ -116,7 +98,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "persistent-terminal",
-                "03",
+                "04",
                 "Create a reconnectable terminal",
                 "Create a server-hosted tmux window and verify that its task survives a client disconnect.",
                 vec![
@@ -155,7 +137,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "monitoring",
-                "04",
+                "05",
                 "Enable monitoring and inspect history",
                 "Move from one background snapshot to live detail, then use history and process data to assess the host.",
                 vec![
@@ -194,7 +176,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "files",
-                "05",
+                "06",
                 "Browse and transfer files",
                 "Create, edit, upload or download inside a safe remote test directory and use validation to prove transfer integrity.",
                 vec![
@@ -233,7 +215,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "ai-assistant",
-                "06",
+                "07",
                 "Configure and run the AI assistant",
                 "Use your own model account to perform one read-only diagnosis against the selected host under controlled permissions.",
                 vec![
@@ -271,7 +253,7 @@ pub(super) fn page_content() -> PageContent {
                 "Remote tools require the agent and never expose SSH credentials to the model. Without the agent, remote work cannot fall back to arbitrary SSH execution.",
             ),
         ],
-    ))
+    )
 }
 
 const fn step(label: &'static str, title: &'static str, instruction: &'static str) -> TutorialStep {

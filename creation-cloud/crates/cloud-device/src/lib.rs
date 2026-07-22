@@ -12,7 +12,7 @@ use axum::{
     routing::{get, post},
 };
 
-pub use model::{Device, Platform};
+pub use model::{CreateDeviceOutcome, Device, Platform};
 pub use service::Service;
 pub use use_case::{CreateDevice, UpdateDevice};
 

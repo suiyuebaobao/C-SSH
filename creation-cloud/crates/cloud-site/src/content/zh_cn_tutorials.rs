@@ -1,8 +1,6 @@
-//! 提供简体中文教程总览，覆盖六条可执行的核心产品路径。
+//! 提供简体中文文档实操指南，覆盖六条可执行的核心产品路径。
 
-use crate::{PageContent, PageId, Tutorial, TutorialPageContent, TutorialStep};
-
-use super::zh_cn::{action, page};
+use crate::{Tutorial, TutorialContent, TutorialStep};
 
 macro_rules! tutorial {
     ($anchor:expr, $sequence:expr, $title:expr, $summary:expr, $prerequisites:expr, $steps:expr, $verification:expr, $boundary:expr $(,)?) => {
@@ -12,25 +10,9 @@ macro_rules! tutorial {
     };
 }
 
-pub(super) fn page_content() -> PageContent {
-    page(
-        PageId::Tutorials,
-        "SSH 客户端与 agent 使用教程｜Creation-SSH",
-        "按照可验证步骤完成添加主机、部署 agent、持久终端、监控、文件和 AI 助手配置。",
-        "从第一台主机开始",
-        "六条教程，走通 Creation-SSH 的核心工作流",
-        "每条教程都列出前置条件、实际操作、完成验证和 agent 边界，做完即可判断链路是否真的可用。",
-    )
-    .with_actions(vec![
-        action(
-            "先读入门文档",
-            "/docs/getting-started",
-            "button button-secondary",
-        ),
-        action("下载客户端", "/downloads", "button button-primary"),
-    ])
-    .with_tutorial_page(TutorialPageContent::new(
-        "教程目录",
+pub(super) fn content() -> TutorialContent {
+    TutorialContent::new(
+        "实操指南",
         "开始前准备",
         "操作步骤",
         "完成验证",
@@ -38,7 +20,7 @@ pub(super) fn page_content() -> PageContent {
         vec![
             tutorial!(
                 "add-host",
-                "01",
+                "02",
                 "添加第一台主机",
                 "保存一台可认证的 Linux 主机，并完成首次主机密钥信任。",
                 vec![
@@ -77,7 +59,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "deploy-agent",
-                "02",
+                "03",
                 "部署或修复 agent",
                 "让客户端自动探测服务器架构，只上传匹配的 agent 与静态 tmux，并完成协议握手。",
                 vec![
@@ -116,7 +98,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "persistent-terminal",
-                "03",
+                "04",
                 "建立可重连的持久终端",
                 "创建一个由服务器 tmux 托管的窗口，并亲自验证客户端断开后任务仍在。",
                 vec![
@@ -155,7 +137,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "monitoring",
-                "04",
+                "05",
                 "启用监控并查看历史",
                 "从后台单次快照进入实时详情，再用历史和进程列表完成一次状态判断。",
                 vec![
@@ -194,7 +176,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "files",
-                "05",
+                "06",
                 "浏览并传输文件",
                 "在远端测试目录完成创建、编辑、上传或下载，并用校验结果确认传输完整。",
                 vec![
@@ -233,7 +215,7 @@ pub(super) fn page_content() -> PageContent {
             ),
             tutorial!(
                 "ai-assistant",
-                "06",
+                "07",
                 "配置并运行 AI 助手",
                 "使用自己的模型账号，在受控权限下让 AI 对当前主机完成一次只读诊断。",
                 vec![
@@ -271,7 +253,7 @@ pub(super) fn page_content() -> PageContent {
                 "远程工具依赖 agent，模型不会获得 SSH 凭据。无 agent 时不允许把远程任务降级为任意裸 SSH 执行。",
             ),
         ],
-    ))
+    )
 }
 
 const fn step(label: &'static str, title: &'static str, instruction: &'static str) -> TutorialStep {

@@ -1,4 +1,4 @@
-//! 提供当前账号用户资料的独立 CRUD 服务与相对 Axum 路由。
+//! 提供当前账号用户资料的创建、读取、列表、更新服务与相对 Axum 路由。
 
 mod handler;
 mod model;
@@ -26,9 +26,7 @@ pub fn router(service: Service) -> Router {
         )
         .route(
             "/{id}",
-            get(handler::get::handle)
-                .patch(handler::update::handle)
-                .delete(handler::delete::handle),
+            get(handler::get::handle).patch(handler::update::handle),
         )
         .with_state(service)
 }

@@ -1,0 +1,249 @@
+/* 文档实操指南：压缩页首，把前置条件、编号步骤、结果和 agent 边界组织成任务页。 */
+.docs-workspace {
+  padding-top: 36px;
+}
+
+.docs-page-header {
+  min-width: 0;
+  padding: 8px 0 34px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.docs-page-header h1 {
+  max-width: 860px;
+  margin-block: 12px 14px;
+  font-size: clamp(2.35rem, 4.8vw, 4.5rem);
+  line-height: 0.98;
+}
+
+html[lang="en"] .docs-page-header h1 {
+  max-width: 940px;
+  font-size: clamp(2.2rem, 4.2vw, 4rem);
+}
+
+.docs-page-lead {
+  max-width: 780px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+.docs-page-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 22px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.docs-page-meta strong {
+  color: var(--ink);
+}
+
+.docs-page-meta a {
+  color: var(--accent-text);
+  font-weight: 760;
+}
+
+.docs-page-header .action-row {
+  margin-top: 22px;
+}
+
+.docs-safety-inline {
+  margin-top: 28px;
+  border: 1px solid var(--line-strong);
+}
+
+.docs-safety-inline .docs-safety-grid {
+  grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1.65fr);
+  padding: 24px;
+}
+
+.docs-guides-header {
+  padding: 52px 0 18px;
+  border-top: 1px solid var(--line-strong);
+}
+
+.docs-guides-header p {
+  margin: 0;
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+}
+
+.docs-guides-header h2 {
+  margin-top: 10px;
+  font-size: clamp(1.9rem, 3.8vw, 3.1rem);
+}
+
+.docs-guide {
+  padding-block: 48px;
+}
+
+.docs-guide-heading {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+
+.docs-guide-heading > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.docs-guide-heading h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.7rem, 3vw, 2.55rem);
+}
+
+.docs-guide-heading p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.docs-guide-body {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(190px, 0.55fr) minmax(0, 1.45fr);
+  gap: 34px;
+  align-items: start;
+}
+
+.docs-guide-prerequisites {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--paper-alt);
+}
+
+.docs-guide-prerequisites h3,
+.docs-guide-procedure > h3,
+.docs-guide-outcome h3 {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+}
+
+.docs-guide-prerequisites ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+.docs-guide-procedure {
+  min-width: 0;
+}
+
+.docs-guide-procedure ol {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line-strong);
+  list-style: none;
+}
+
+.docs-guide-step {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line-faint);
+}
+
+.docs-guide-step > span {
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 760;
+}
+
+.docs-guide-step h4 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.docs-guide-step p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.docs-guide-outcome {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 28px;
+  border: 1px solid var(--line-strong);
+}
+
+.docs-guide-outcome section {
+  min-width: 0;
+  padding: 18px;
+  background: var(--paper-raised);
+}
+
+.docs-guide-outcome section + section {
+  border-left: 1px solid var(--line-strong);
+}
+
+.docs-guide-outcome section:first-child {
+  box-shadow: inset 4px 0 0 var(--success);
+}
+
+.docs-guide-outcome p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 920px) {
+  .docs-page-header {
+    padding-top: 0;
+  }
+
+  .docs-safety-inline .docs-safety-grid,
+  .docs-guide-body {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-guide-prerequisites {
+    width: min(100%, 620px);
+  }
+}
+
+@media (max-width: 640px) {
+  .docs-page-header h1,
+  html[lang="en"] .docs-page-header h1 {
+    font-size: clamp(2.15rem, 10.5vw, 3.15rem);
+  }
+
+  .docs-guide-heading,
+  .docs-guide-step,
+  .docs-guide-outcome {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-guide-outcome section + section {
+    border-top: 1px solid var(--line-strong);
+    border-left: 0;
+  }
+}

@@ -14,5 +14,6 @@ pub fn router(service: Service) -> Router {
         .route("/pull", get(handler::pull))
         .route("/conflicts", get(handler::list_conflicts))
         .route("/conflicts/{id}", get(handler::get_conflict))
+        .route("/conflicts/{id}/resolve", post(handler::resolve_conflict))
         .with_state(service)
 }

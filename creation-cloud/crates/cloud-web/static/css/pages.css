@@ -65,6 +65,27 @@
   color: var(--ink-soft);
 }
 
+.published-catalog-list {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-5);
+}
+
+.release-catalog-entry {
+  border: 1px solid var(--line-strong);
+}
+
+.release-asset,
+.release-asset dd {
+  min-width: 0;
+}
+
+.release-asset code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
 .account-main {
   min-height: calc(100svh - var(--header-height));
   padding-block: var(--space-7);

@@ -3,6 +3,7 @@
 
 use std::{
     collections::HashMap,
+    io::ErrorKind,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
     time::{Duration, Instant},
@@ -16,13 +17,20 @@ use tokio::{
     sync::{Notify, Semaphore},
 };
 
+use crate::model::{AssetInspectionStatus, FileInspection};
+
 const CACHE_TTL: Duration = Duration::from_secs(600);
 const MAX_CACHE_ENTRIES: usize = 128;
-const MAX_PARALLEL_HASHES: usize = 2;
+pub(crate) const MAX_PARALLEL_HASHES: usize = 2;
 
 #[derive(Clone)]
 pub(crate) struct FileVerifier {
     entries: Arc<Mutex<HashMap<VerificationKey, Arc<VerificationEntry>>>>,
+    permits: Arc<Semaphore>,
+}
+
+#[derive(Clone)]
+pub(crate) struct InspectionVerifier {
     permits: Arc<Semaphore>,
 }
 
@@ -55,6 +63,15 @@ impl Default for FileVerifier {
     fn default() -> Self {
         Self {
             entries: Arc::new(Mutex::new(HashMap::new())),
+            permits: Arc::new(Semaphore::new(MAX_PARALLEL_HASHES)),
+        }
+    }
+}
+
+impl Default for InspectionVerifier {
+    fn default() -> Self {
+        Self {
+            // 巡检必须与在线下载的缓存和等待队列完全隔离，避免后台批次阻塞用户请求。
             permits: Arc::new(Semaphore::new(MAX_PARALLEL_HASHES)),
         }
     }
@@ -150,6 +167,76 @@ impl FileVerifier {
                 }
             }
         });
+    }
+}
+
+impl InspectionVerifier {
+    pub(crate) async fn inspect(
+        &self,
+        path: &Path,
+        expected_size: i64,
+        expected_sha256: &str,
+    ) -> FileInspection {
+        let Ok(_permit) = self.permits.clone().acquire_owned().await else {
+            return inspection(AssetInspectionStatus::IoError, None, None);
+        };
+        let mut file = match fs::File::open(path).await {
+            Ok(file) => file,
+            Err(error) if error.kind() == ErrorKind::NotFound => {
+                return inspection(AssetInspectionStatus::Missing, None, None);
+            }
+            Err(_) => return inspection(AssetInspectionStatus::IoError, None, None),
+        };
+        let before_metadata = match file.metadata().await {
+            Ok(metadata) if is_regular_single_link(&metadata) => metadata,
+            _ => return inspection(AssetInspectionStatus::IoError, None, None),
+        };
+        let before = file_stamp(&before_metadata);
+        let observed_size = i64::try_from(before_metadata.len()).ok();
+        if observed_size != Some(expected_size) {
+            return inspection(AssetInspectionStatus::SizeMismatch, observed_size, None);
+        }
+
+        let mut hasher = Sha256::new();
+        let mut buffer = vec![0_u8; 64 * 1024];
+        loop {
+            let read = match file.read(&mut buffer).await {
+                Ok(read) => read,
+                Err(_) => {
+                    return inspection(AssetInspectionStatus::IoError, observed_size, None);
+                }
+            };
+            if read == 0 {
+                break;
+            }
+            hasher.update(&buffer[..read]);
+        }
+        let after = match file.metadata().await {
+            Ok(metadata) if is_regular_single_link(&metadata) => file_stamp(&metadata),
+            _ => return inspection(AssetInspectionStatus::IoError, observed_size, None),
+        };
+        if after != before {
+            return inspection(AssetInspectionStatus::IoError, observed_size, None);
+        }
+        let observed_sha256 = format!("{:x}", hasher.finalize());
+        let status = if observed_sha256.eq_ignore_ascii_case(expected_sha256) {
+            AssetInspectionStatus::Healthy
+        } else {
+            AssetInspectionStatus::HashMismatch
+        };
+        inspection(status, observed_size, Some(observed_sha256))
+    }
+}
+
+fn inspection(
+    status: AssetInspectionStatus,
+    observed_byte_size: Option<i64>,
+    observed_sha256: Option<String>,
+) -> FileInspection {
+    FileInspection {
+        status,
+        observed_byte_size,
+        observed_sha256,
     }
 }
 
@@ -271,6 +358,22 @@ fn file_stamp(metadata: &std::fs::Metadata) -> FileStamp {
             metadata.ctime() as u64,
             metadata.ctime_nsec() as u64,
         ],
+    }
+}
+
+fn is_regular_single_link(metadata: &std::fs::Metadata) -> bool {
+    if !metadata.is_file() {
+        return false;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+
+        metadata.nlink() == 1
+    }
+    #[cfg(not(unix))]
+    {
+        true
     }
 }
 

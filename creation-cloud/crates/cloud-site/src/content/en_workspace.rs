@@ -44,6 +44,18 @@ pub(super) fn console_overview() -> PageContent {
     )
 }
 
+pub(super) fn profile() -> PageContent {
+    console_page(
+        PageId::Profile,
+        "Profile and security | Creation Cloud",
+        "Profile",
+        "Manage profile and account security",
+        "Profile data belongs to the current account; password changes never access the vault master key.",
+        Vec::new(),
+        Vec::new(),
+    )
+}
+
 pub(super) fn devices() -> PageContent {
     console_page(
         PageId::Devices,
@@ -139,6 +151,18 @@ pub(super) fn vault() -> PageContent {
                 "No plaintext",
             )],
         )],
+    )
+}
+
+pub(super) fn downloads() -> PageContent {
+    console_page(
+        PageId::ConsoleDownloads,
+        "Downloads | Creation Cloud",
+        "Downloads",
+        "Review compatible releases and download history",
+        "Versions and checksums come only from published records; account history shows only attributed events.",
+        Vec::new(),
+        Vec::new(),
     )
 }
 
@@ -240,10 +264,12 @@ fn console_page(
 fn console_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
         nav("Overview", PageId::Console, current),
+        nav("Profile", PageId::Profile, current),
         nav("Devices", PageId::Devices, current),
         nav("Sync", PageId::Sync, current),
         nav("Models", PageId::Models, current),
         nav("Vault", PageId::Vault, current),
+        nav("Downloads", PageId::ConsoleDownloads, current),
     ]
 }
 

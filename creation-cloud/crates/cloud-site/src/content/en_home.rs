@@ -50,7 +50,7 @@ pub(super) fn page_content() -> PageContent {
             "button button-primary",
         ),
         action("Read the changelog", "/changelog", "button button-secondary"),
-        action("Start with tutorials", "/tutorials", "text-link"),
+        action("Start with docs", "/docs/getting-started#add-host", "text-link"),
     ])
     .with_home_page(home_page)
 }

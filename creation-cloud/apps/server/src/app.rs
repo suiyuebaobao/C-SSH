@@ -2,30 +2,43 @@
 
 use axum::{Router, http::StatusCode, middleware, response::IntoResponse, routing::get};
 use cloud_config::CloudConfig;
-use cloud_store::PgPool;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
-use crate::{admin_overview, http_trace, request_id};
+use crate::{admin_overview, http_trace, request_id, services::AppServices};
 
-pub fn build(pool: PgPool, config: CloudConfig) -> Router {
+pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let seo = cloud_web::SeoConfig::from_validated_origin(
         config.public_base_url.clone(),
         config.google_site_verification.clone(),
         config.baidu_site_verification.clone(),
     );
-    let auth_service = cloud_auth::Service::new(pool.clone(), config.session_ttl);
-    let admin_service = cloud_admin::Service::new(pool.clone());
-    let download_service = cloud_download::Service::new(pool.clone(), config.download_root.clone());
-    let feedback_service = cloud_feedback::Service::new(pool.clone());
-    let release_service = cloud_release::Service::new(pool.clone());
-    let site_media_service =
-        cloud_site_media::Service::new(pool.clone(), config.site_media_root.clone());
+    let auth_service = services.auth.clone();
+    let admin_service = services.admin.clone();
+    let user_service = services.user.clone();
+    let device_service = services.device.clone();
+    let sync_service = services.sync.clone();
+    let model_service = services.model.clone();
+    let vault_service = services.vault.clone();
+    let download_service = services.download.clone();
+    let public_page_state = cloud_web::PublicPageState::new(seo, download_service.clone());
+    let console_page_state = cloud_web::ConsolePageState::new(
+        auth_service.clone(),
+        user_service.clone(),
+        device_service.clone(),
+        sync_service.clone(),
+        model_service.clone(),
+        vault_service.clone(),
+        download_service.clone(),
+    );
+    let feedback_service = services.feedback.clone();
+    let release_service = services.release.clone();
+    let site_media_service = services.site_media.clone();
     let admin_page_state = cloud_web::AdminPageState::new(
         admin_service.clone(),
         release_service.clone(),
         download_service.clone(),
         site_media_service.clone(),
-        pool.clone(),
+        services.pool.clone(),
         config.environment.clone(),
     );
     let admin_overview_state = admin_overview::AdminOverviewState::new(
@@ -50,6 +63,10 @@ pub fn build(pool: PgPool, config: CloudConfig) -> Router {
             "/feedback",
             cloud_feedback::management_router(feedback_service.clone()),
         )
+        .nest(
+            "/maintenance",
+            cloud_maintenance::management_router(services.maintenance.clone()),
+        )
         .layer(middleware::from_fn(cloud_auth::require_csrf))
         .layer(middleware::from_fn_with_state(
             admin_service.clone(),
@@ -61,25 +78,14 @@ pub fn build(pool: PgPool, config: CloudConfig) -> Router {
             cloud_auth::authenticate_session,
         ));
     let protected = Router::new()
+        .nest("/users", cloud_user::router(user_service))
+        .nest("/devices", cloud_device::router(device_service))
+        .nest("/sync", cloud_sync::router(sync_service))
+        .nest("/models", cloud_model::router(model_service))
+        .nest("/vault", cloud_vault::router(vault_service))
         .nest(
-            "/users",
-            cloud_user::router(cloud_user::Service::new(pool.clone())),
-        )
-        .nest(
-            "/devices",
-            cloud_device::router(cloud_device::Service::new(pool.clone())),
-        )
-        .nest(
-            "/sync",
-            cloud_sync::router(cloud_sync::Service::new(pool.clone())),
-        )
-        .nest(
-            "/models",
-            cloud_model::router(cloud_model::Service::new(pool.clone())),
-        )
-        .nest(
-            "/vault",
-            cloud_vault::router(cloud_vault::Service::new(pool.clone())),
+            "/downloads",
+            cloud_download::account_router(download_service.clone()),
         )
         .nest("/feedback", cloud_feedback::user_router(feedback_service))
         .route_layer(middleware::from_fn_with_state(
@@ -100,10 +106,10 @@ pub fn build(pool: PgPool, config: CloudConfig) -> Router {
         .merge(protected)
         .layer(middleware::from_fn(cloud_web::noindex_response));
 
-    let console = cloud_web::console_router()
+    let console = cloud_web::console_router_with_state(console_page_state)
         .route_layer(middleware::from_fn_with_state(
             auth_service.clone(),
-            cloud_auth::require_session,
+            cloud_auth::require_page_session,
         ))
         .layer(middleware::from_fn(cloud_web::noindex_response));
     let admin_pages = cloud_web::admin_router_with_state(admin_page_state.clone())
@@ -121,7 +127,7 @@ pub fn build(pool: PgPool, config: CloudConfig) -> Router {
 
     let ready_state = admin_page_state.clone();
 
-    cloud_web::public_router_with_seo(seo)
+    cloud_web::public_router_with_state(public_page_state)
         .nest("/web/auth", cloud_auth::form_router(auth_service))
         .nest("/console", console)
         .nest("/admin", admin_pages)
@@ -182,8 +188,10 @@ mod tests {
             site_media_root: PathBuf::from("data/site-media"),
             session_ttl: Duration::from_secs(3600),
             environment: "development".to_owned(),
+            maintenance: cloud_config::MaintenanceConfig::default(),
         };
-        build(pool, config)
+        let services = AppServices::new(pool, &config);
+        build(services, config)
     }
 
     #[tokio::test]
@@ -202,6 +210,40 @@ mod tests {
     async fn feedback_management_api_uses_the_admin_authentication_chain() {
         let request = Request::builder()
             .uri("/api/v1/admin/feedback")
+            .body(Body::empty())
+            .expect("请求应可构造");
+        let response = app().oneshot(request).await.expect("应用应返回响应");
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn maintenance_status_api_uses_the_admin_authentication_chain() {
+        let request = Request::builder()
+            .uri("/api/v1/admin/maintenance")
+            .body(Body::empty())
+            .expect("请求应可构造");
+        let response = app().oneshot(request).await.expect("应用应返回响应");
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn account_download_history_requires_a_session() {
+        let request = Request::builder()
+            .uri("/api/v1/downloads/history")
+            .body(Body::empty())
+            .expect("请求应可构造");
+        let response = app().oneshot(request).await.expect("应用应返回响应");
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn account_download_entry_requires_a_session_before_source_lookup() {
+        let asset_id = uuid::Uuid::now_v7();
+        let source_id = uuid::Uuid::now_v7();
+        let request = Request::builder()
+            .uri(format!(
+                "/api/v1/downloads/account/assets/{asset_id}/sources/{source_id}"
+            ))
             .body(Body::empty())
             .expect("请求应可构造");
         let response = app().oneshot(request).await.expect("应用应返回响应");

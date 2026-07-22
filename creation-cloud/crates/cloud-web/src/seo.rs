@@ -51,6 +51,17 @@ impl SeoConfig {
     pub(crate) fn is_indexable(&self, page: PageId) -> bool {
         page.is_indexable() && (page != PageId::Feedback || self.feedback_enabled)
     }
+
+    pub(crate) fn is_indexable_with_catalog(
+        &self,
+        page: PageId,
+        has_published_catalog: bool,
+    ) -> bool {
+        match page {
+            PageId::Downloads | PageId::Changelog => has_published_catalog,
+            _ => self.is_indexable(page),
+        }
+    }
 }
 
 impl Default for SeoConfig {
@@ -90,10 +101,45 @@ impl SeoHead {
         title: &'static str,
         description: &'static str,
     ) -> Self {
+        Self::public_with_indexing(
+            config,
+            page,
+            locale,
+            title,
+            description,
+            config.is_indexable(page),
+        )
+    }
+
+    pub(crate) fn public_with_catalog(
+        config: &SeoConfig,
+        page: PageId,
+        locale: Locale,
+        title: &'static str,
+        description: &'static str,
+        has_published_catalog: bool,
+    ) -> Self {
+        Self::public_with_indexing(
+            config,
+            page,
+            locale,
+            title,
+            description,
+            config.is_indexable_with_catalog(page, has_published_catalog),
+        )
+    }
+
+    fn public_with_indexing(
+        config: &SeoConfig,
+        page: PageId,
+        locale: Locale,
+        title: &'static str,
+        description: &'static str,
+        is_indexable: bool,
+    ) -> Self {
         let canonical_url = config.absolute_url(&page.localized_path(locale));
         let alternate_zh_url = config.absolute_url(&page.localized_path(Locale::ZhCn));
         let alternate_en_url = config.absolute_url(&page.localized_path(Locale::En));
-        let is_indexable = config.is_indexable(page);
         Self {
             robots: if is_indexable {
                 "index, follow, max-image-preview:large"

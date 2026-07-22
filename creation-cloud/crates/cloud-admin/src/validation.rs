@@ -1,5 +1,7 @@
 //! 校验审计字段并拒绝可能承载凭据的详情键。
 
+pub(crate) mod admin_login_name;
+
 use cloud_domain::{AdminActor, AppError, AppResult, PageQuery};
 use serde_json::Value;
 use uuid::Uuid;

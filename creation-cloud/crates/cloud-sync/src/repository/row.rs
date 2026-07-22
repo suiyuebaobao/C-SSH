@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{SyncChange, SyncConflict};
 
-pub(crate) type ConflictRow = (Uuid, Uuid, i64, i64, Value, DateTime<Utc>);
+pub(crate) type ConflictRow = (Uuid, Uuid, i64, i64, Value, Option<Uuid>, DateTime<Utc>);
 
 pub(crate) fn conflict_from_row(row: ConflictRow) -> AppResult<SyncConflict> {
     let attempted_changes = serde_json::from_value::<Vec<SyncChange>>(row.4)
@@ -18,6 +18,7 @@ pub(crate) fn conflict_from_row(row: ConflictRow) -> AppResult<SyncConflict> {
         base_revision: row.2,
         current_revision: row.3,
         attempted_changes,
-        created_at: row.5,
+        source_device_id: row.5,
+        created_at: row.6,
     })
 }

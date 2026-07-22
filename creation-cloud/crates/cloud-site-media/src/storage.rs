@@ -189,6 +189,29 @@ pub(crate) async fn read_verified(
     Ok(bytes)
 }
 
+pub(crate) async fn resolve_existing_for_inspection(
+    root: &Path,
+    storage_key: &str,
+) -> AppResult<PathBuf> {
+    validate_storage_key(storage_key)?;
+    let metadata = fs::symlink_metadata(root)
+        .await
+        .map_err(|error| match error.kind() {
+            ErrorKind::NotFound => AppError::NotFound("站点媒体根目录不存在".into()),
+            _ => AppError::Storage("无法读取站点媒体根目录".into()),
+        })?;
+    if is_link_like(&metadata) || !metadata.is_dir() {
+        return Err(AppError::Forbidden(
+            "站点媒体根目录必须是受控普通目录".into(),
+        ));
+    }
+    let root = fs::canonicalize(root)
+        .await
+        .map_err(|_| AppError::Storage("无法解析站点媒体根目录".into()))?;
+    let objects = existing_child_directory(&root, "objects").await?;
+    resolve_existing_object(&objects, storage_key).await
+}
+
 pub(crate) async fn readiness_probe(root: &Path) -> AppResult<()> {
     let mut staged = stage(root, b"ready").await?;
     staged.commit().await?;

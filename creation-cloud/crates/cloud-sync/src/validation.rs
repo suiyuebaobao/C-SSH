@@ -7,17 +7,12 @@ use serde::Deserialize;
 use serde_json::Value;
 use uuid::Uuid;
 
-use crate::types::{PullRequest, PushRequest, SyncChange, SyncOperation};
+use crate::types::{
+    PullMode, PullRequest, PushRequest, ResolveConflictRequest, SyncChange, SyncOperation,
+};
 
-const MAX_CHANGES: usize = 100;
+pub(crate) const MAX_CHANGES: usize = 100;
 const MAX_VALUE_BYTES: usize = 16 * 1024;
-
-pub(crate) fn account(account_id: Uuid) -> AppResult<()> {
-    if account_id.is_nil() {
-        return Err(AppError::Validation("账号标识不能为空".to_owned()));
-    }
-    Ok(())
-}
 
 pub(crate) fn push(request: &PushRequest) -> AppResult<()> {
     if request.base_revision < 0 {
@@ -28,14 +23,30 @@ pub(crate) fn push(request: &PushRequest) -> AppResult<()> {
             "client_mutation_id 不能为空".to_owned(),
         ));
     }
-    if request.changes.is_empty() || request.changes.len() > MAX_CHANGES {
+    change_set(&request.changes)
+}
+
+pub(crate) fn resolve(request: &ResolveConflictRequest) -> AppResult<()> {
+    if request.resolution_mutation_id().is_nil() {
+        return Err(AppError::Validation(
+            "resolution_mutation_id 不能为空".to_owned(),
+        ));
+    }
+    if let Some(changes) = request.changes() {
+        change_set(changes)?;
+    }
+    Ok(())
+}
+
+pub(crate) fn change_set(changes: &[SyncChange]) -> AppResult<()> {
+    if changes.is_empty() || changes.len() > MAX_CHANGES {
         return Err(AppError::Validation(format!(
             "changes 数量必须在 1 到 {MAX_CHANGES} 之间"
         )));
     }
 
-    let mut identities = HashSet::with_capacity(request.changes.len());
-    for change in &request.changes {
+    let mut identities = HashSet::with_capacity(changes.len());
+    for change in changes {
         let identity = (change.namespace.as_str(), change.key.as_str());
         if !identities.insert(identity) {
             return Err(AppError::Validation(
@@ -55,6 +66,33 @@ pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
         return Err(AppError::Validation(
             "limit 必须在 1 到 200 之间".to_owned(),
         ));
+    }
+    match request.mode {
+        PullMode::Incremental if request.snapshot_revision.is_some() => {
+            return Err(AppError::Validation(
+                "增量拉取不得携带 snapshot_revision".to_owned(),
+            ));
+        }
+        PullMode::Full if request.since_revision == 0 && request.snapshot_revision.is_some() => {
+            return Err(AppError::Validation(
+                "全量首个分页必须由服务端锁定 snapshot_revision".to_owned(),
+            ));
+        }
+        PullMode::Full if request.since_revision > 0 && request.snapshot_revision.is_none() => {
+            return Err(AppError::Validation(
+                "全量后续分页必须携带 snapshot_revision".to_owned(),
+            ));
+        }
+        PullMode::Full
+            if request
+                .snapshot_revision
+                .is_some_and(|snapshot| snapshot < request.since_revision) =>
+        {
+            return Err(AppError::Validation(
+                "snapshot_revision 不能早于全量分页游标".to_owned(),
+            ));
+        }
+        _ => {}
     }
     Ok(request)
 }

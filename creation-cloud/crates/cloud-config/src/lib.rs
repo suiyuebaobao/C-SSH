@@ -5,6 +5,11 @@ use std::{env, net::SocketAddr, path::PathBuf, time::Duration};
 use anyhow::{Context, Result, bail};
 use url::Url;
 
+mod maintenance;
+mod public_base_url;
+
+#[cfg(test)]
+mod public_base_url_tests;
 #[cfg(test)]
 mod tests;
 
@@ -21,16 +26,23 @@ pub struct CloudConfig {
     pub site_media_root: PathBuf,
     pub session_ttl: Duration,
     pub environment: String,
+    pub maintenance: MaintenanceConfig,
 }
+
+pub use maintenance::{MaintenanceConfig, TaskSchedule};
 
 impl CloudConfig {
     pub fn from_env() -> Result<Self> {
+        let configured_environment = read_optional("CLOUD_ENVIRONMENT")?;
+        let environment =
+            parse_environment(configured_environment.as_deref().unwrap_or("development"))?;
         let bind_addr = read("CLOUD_BIND_ADDR", "127.0.0.1:8088")
             .parse()
             .context("CLOUD_BIND_ADDR 不是合法监听地址")?;
         let database_url = required("CLOUD_DATABASE_URL")?;
+        let configured_public_base_url = read_optional("CLOUD_PUBLIC_BASE_URL")?;
         let public_base_url =
-            parse_public_base_url(&read("CLOUD_PUBLIC_BASE_URL", "http://127.0.0.1:8088"))?;
+            public_base_url::resolve(&environment, configured_public_base_url.as_deref())?;
         let google_site_verification = read_site_verification("CLOUD_GOOGLE_SITE_VERIFICATION")?;
         let baidu_site_verification = read_site_verification("CLOUD_BAIDU_SITE_VERIFICATION")?;
         let download_root = PathBuf::from(read("CLOUD_DOWNLOAD_ROOT", "./data/downloads"));
@@ -41,7 +53,7 @@ impl CloudConfig {
         if ttl_hours == 0 || ttl_hours > 24 * 90 {
             bail!("CLOUD_SESSION_TTL_HOURS 必须在 1 到 2160 之间");
         }
-        let environment = parse_environment(&read("CLOUD_ENVIRONMENT", "development"))?;
+        let maintenance = MaintenanceConfig::from_env()?;
         Ok(Self {
             bind_addr,
             database_url,
@@ -52,14 +64,15 @@ impl CloudConfig {
             site_media_root,
             session_ttl: Duration::from_secs(ttl_hours * 3600),
             environment,
+            maintenance,
         })
     }
 }
 
 fn parse_environment(value: &str) -> Result<String> {
     match value {
-        "development" | "staging" | "production" => Ok(value.to_owned()),
-        _ => bail!("CLOUD_ENVIRONMENT 只能是 development、staging 或 production"),
+        "development" | "test" | "staging" | "production" => Ok(value.to_owned()),
+        _ => bail!("CLOUD_ENVIRONMENT 只能是 development、test、staging 或 production"),
     }
 }
 
@@ -71,49 +84,16 @@ fn required(name: &str) -> Result<String> {
     env::var(name).with_context(|| format!("缺少必需环境变量 {name}"))
 }
 
-fn parse_public_base_url(value: &str) -> Result<Url> {
-    let mut url = Url::parse(value).context("CLOUD_PUBLIC_BASE_URL 不是合法 URL")?;
-    if !matches!(url.scheme(), "http" | "https") {
-        bail!("CLOUD_PUBLIC_BASE_URL 只能使用 http 或 https 协议");
-    }
-    if url.host_str().is_none() {
-        bail!("CLOUD_PUBLIC_BASE_URL 必须包含 host");
-    }
-    if !url.username().is_empty() || url.password().is_some() {
-        bail!("CLOUD_PUBLIC_BASE_URL 禁止包含用户名或密码");
-    }
-    if url.query().is_some() {
-        bail!("CLOUD_PUBLIC_BASE_URL 禁止包含查询参数");
-    }
-    if url.fragment().is_some() {
-        bail!("CLOUD_PUBLIC_BASE_URL 禁止包含片段");
-    }
-    if !has_only_root_path(value) || !matches!(url.path(), "" | "/") {
-        bail!("CLOUD_PUBLIC_BASE_URL 路径只能为空或 /");
-    }
-    url.set_path("/");
-    Ok(url)
-}
-
-fn has_only_root_path(value: &str) -> bool {
-    let Some((_, after_scheme)) = value.split_once(':') else {
-        return false;
-    };
-    let Some(after_authority) = after_scheme.strip_prefix("//") else {
-        return false;
-    };
-    match after_authority.find(['/', '\\']) {
-        Some(path_start) => &after_authority[path_start..] == "/",
-        None => true,
+fn read_optional(name: &str) -> Result<Option<String>> {
+    match env::var(name) {
+        Ok(value) => Ok(Some(value)),
+        Err(env::VarError::NotPresent) => Ok(None),
+        Err(env::VarError::NotUnicode(_)) => bail!("{name} 必须是有效 UTF-8 文本"),
     }
 }
 
 fn read_site_verification(name: &str) -> Result<Option<String>> {
-    let value = match env::var(name) {
-        Ok(value) => Some(value),
-        Err(env::VarError::NotPresent) => None,
-        Err(env::VarError::NotUnicode(_)) => bail!("{name} 必须是有效 UTF-8 文本"),
-    };
+    let value = read_optional(name)?;
     parse_site_verification(name, value.as_deref())
 }
 

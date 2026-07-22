@@ -44,6 +44,18 @@ pub(super) fn console_overview() -> PageContent {
     )
 }
 
+pub(super) fn profile() -> PageContent {
+    console_page(
+        PageId::Profile,
+        "资料与安全｜Creation Cloud",
+        "资料",
+        "管理个人资料与账号安全",
+        "资料来自当前账号；修改密码不会接触保险库主密钥。",
+        Vec::new(),
+        Vec::new(),
+    )
+}
+
 pub(super) fn devices() -> PageContent {
     console_page(
         PageId::Devices,
@@ -135,6 +147,18 @@ pub(super) fn vault() -> PageContent {
                 "不显示明文",
             )],
         )],
+    )
+}
+
+pub(super) fn downloads() -> PageContent {
+    console_page(
+        PageId::ConsoleDownloads,
+        "下载记录｜Creation Cloud",
+        "下载",
+        "查看兼容版本与下载历史",
+        "版本与校验值只来自已发布记录；账号历史只显示真实关联事件。",
+        Vec::new(),
+        Vec::new(),
     )
 }
 
@@ -236,10 +260,12 @@ fn console_page(
 fn console_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
         nav("总览", PageId::Console, current),
+        nav("资料与安全", PageId::Profile, current),
         nav("设备", PageId::Devices, current),
         nav("同步", PageId::Sync, current),
         nav("模型", PageId::Models, current),
         nav("保险库", PageId::Vault, current),
+        nav("下载", PageId::ConsoleDownloads, current),
     ]
 }
 

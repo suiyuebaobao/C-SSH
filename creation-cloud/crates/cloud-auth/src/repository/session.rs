@@ -11,7 +11,9 @@ pub(crate) struct SessionRow {
     pub session_id: Uuid,
     pub account_id: Uuid,
     pub email: String,
+    pub admin_login_name: Option<String>,
     pub role: String,
+    pub device_id: Option<Uuid>,
     pub expires_at: DateTime<Utc>,
 }
 
@@ -19,17 +21,32 @@ pub(crate) async fn authenticate(
     pool: &PgPool,
     token_hash: &[u8],
 ) -> AppResult<Option<SessionRow>> {
-    sqlx::query_as::<_, (Uuid, Uuid, String, String, DateTime<Utc>)>(
+    sqlx::query_as::<
+        _,
+        (
+            Uuid,
+            Uuid,
+            String,
+            Option<String>,
+            String,
+            Option<Uuid>,
+            DateTime<Utc>,
+        ),
+    >(
         "WITH active_session AS (\
             UPDATE sessions SET last_seen_at = now() \
             WHERE token_hash = $1 AND expires_at > now() \
-            RETURNING id, account_id, expires_at\
+            RETURNING id, account_id, device_id, expires_at\
          ) \
          SELECT active_session.id AS session_id, accounts.id AS account_id, \
-                accounts.email, accounts.role, active_session.expires_at \
+                accounts.email, accounts.admin_login_name, accounts.role, \
+                active_session.device_id, active_session.expires_at \
          FROM active_session \
          JOIN accounts ON accounts.id = active_session.account_id \
-         WHERE accounts.status = 'active'",
+         LEFT JOIN devices ON devices.account_id = active_session.account_id \
+             AND devices.active_session_reference_id = active_session.device_id \
+         WHERE accounts.status = 'active' \
+           AND (active_session.device_id IS NULL OR devices.id IS NOT NULL)",
     )
     .bind(token_hash)
     .fetch_optional(pool)
@@ -39,8 +56,10 @@ pub(crate) async fn authenticate(
             session_id: value.0,
             account_id: value.1,
             email: value.2,
-            role: value.3,
-            expires_at: value.4,
+            admin_login_name: value.3,
+            role: value.4,
+            device_id: value.5,
+            expires_at: value.6,
         })
     })
     .map_err(error::storage)

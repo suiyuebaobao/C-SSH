@@ -23,3 +23,14 @@ pub async fn signal() {
         () = terminate => {},
     }
 }
+
+pub async fn wait(mut cancellation: tokio::sync::watch::Receiver<bool>) {
+    if *cancellation.borrow() {
+        return;
+    }
+    while cancellation.changed().await.is_ok() {
+        if *cancellation.borrow() {
+            return;
+        }
+    }
+}

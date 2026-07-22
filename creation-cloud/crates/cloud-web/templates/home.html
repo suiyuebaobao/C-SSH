@@ -76,6 +76,34 @@
         <p>{{ section.lead }}</p>
       </header>
       <div class="home-system-grid home-layout-{{ section.layout }}">
+        {% if section.anchor == "downloads" && catalog.has_published() %}
+        {% match catalog.latest %}
+        {% when Some with (release) %}
+        {% for platform in release.platforms %}
+        <article class="home-system-item home-tone-accent">
+          <span class="home-item-index">0{{ loop.index }}</span>
+          <span class="home-item-badge">{{ platform.name }}</span>
+          <i class="home-item-port" aria-hidden="true"></i>
+          <h3>{{ release.version }} · {{ release.title }}</h3>
+          <p><time datetime="{{ release.published_at_iso }}">{{ release.published_at_label }}</time>{% if !release.notes.is_empty() %} · {{ release.notes }}{% endif %}</p>
+          {% for asset in platform.assets %}
+          <div class="home-release-asset">
+            <strong>{{ asset.file_name }}</strong>
+            <small>{{ asset.architecture }} · {{ asset.package_kind }} · {{ asset.byte_size }}</small>
+            <code>SHA256 {{ asset.sha256 }}</code>
+            <div class="action-row">{% for source in asset.sources %}<a class="button button-secondary" href="{{ source.download_href }}">{{ source.provider_name }} · {{ source.kind_label }}</a>{% endfor %}</div>
+          </div>
+          {% endfor %}
+        </article>
+        {% endfor %}
+        {% if !release.has_windows %}<article class="home-system-item home-tone-default"><span class="home-item-badge">WINDOWS</span><h3>{% if is_en %}No current asset{% else %}当前版本暂无资产{% endif %}</h3><p>{% if is_en %}The latest published release has no Windows asset.{% else %}最新 published 版本没有 Windows 资产，不提供占位下载。{% endif %}</p><small>SHA256：—</small></article>{% endif %}
+        {% if !release.has_linux %}<article class="home-system-item home-tone-default"><span class="home-item-badge">LINUX</span><h3>{% if is_en %}No current asset{% else %}当前版本暂无资产{% endif %}</h3><p>{% if is_en %}The latest published release has no Linux asset.{% else %}最新 published 版本没有 Linux 资产，不提供占位下载。{% endif %}</p><small>SHA256：—</small></article>{% endif %}
+        {% if !release.has_android %}<article class="home-system-item home-tone-default"><span class="home-item-badge">ANDROID</span><h3>{% if is_en %}No current asset{% else %}当前版本暂无资产{% endif %}</h3><p>{% if is_en %}The latest published release has no Android asset.{% else %}最新 published 版本没有 Android 资产，不提供占位下载。{% endif %}</p><small>SHA256：—</small></article>{% endif %}
+        {% if !release.has_macos %}<article class="home-system-item home-tone-planned"><span class="home-item-badge">macOS</span><h3>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</h3><p>{% if is_en %}No version, checksum, or download is offered.{% else %}不提供版本、校验值或下载动作。{% endif %}</p><small>SHA256：—</small></article>{% endif %}
+        {% if !release.has_ios %}<article class="home-system-item home-tone-planned"><span class="home-item-badge">iOS</span><h3>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</h3><p>{% if is_en %}No version, checksum, or download is offered.{% else %}不提供版本、校验值或下载动作。{% endif %}</p><small>SHA256：—</small></article>{% endif %}
+        {% when None %}
+        {% endmatch %}
+        {% else %}
         {% for item in section.items %}
         <article class="home-system-item home-tone-{{ item.tone }}">
           <span class="home-item-index">0{{ loop.index }}</span>
@@ -86,6 +114,7 @@
           <small>{{ item.meta }}</small>
         </article>
         {% endfor %}
+        {% endif %}
       </div>
     </div>
   </section>

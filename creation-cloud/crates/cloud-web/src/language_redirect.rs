@@ -55,7 +55,7 @@ const fn public_page(path: &str) -> Option<PageId> {
         | b"/en/platforms"
         | b"/features"
         | b"/en/features" => Some(PageId::Documentation),
-        b"/tutorials" => Some(PageId::Tutorials),
+        b"/tutorials" | b"/en/tutorials" => Some(PageId::Documentation),
         b"/security" => Some(PageId::Security),
         b"/downloads" => Some(PageId::Downloads),
         b"/changelog" => Some(PageId::Changelog),

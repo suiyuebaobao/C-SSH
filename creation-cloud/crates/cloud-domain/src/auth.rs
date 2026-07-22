@@ -7,7 +7,9 @@ use uuid::Uuid;
 pub struct AuthenticatedSession {
     pub account_id: Uuid,
     pub email: String,
+    pub admin_login_name: Option<String>,
     pub role: String,
+    pub device_id: Option<Uuid>,
     pub expires_at: DateTime<Utc>,
     pub csrf_token: String,
     pub session_id: Uuid,

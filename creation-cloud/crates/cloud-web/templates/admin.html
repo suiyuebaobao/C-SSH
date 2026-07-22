@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block styles %}
-  <link rel="stylesheet" href="/static/css/admin-foundation.css?v=20260720-admin">
-  <link rel="stylesheet" href="/static/css/admin-components.css?v=20260720-admin">
-  <link rel="stylesheet" href="/static/css/admin-pages.css?v=20260720-admin">
+  <link rel="stylesheet" href="/static/css/admin-foundation.css?v=20260721-maintenance">
+  <link rel="stylesheet" href="/static/css/admin-components.css?v=20260721-maintenance">
+  <link rel="stylesheet" href="/static/css/admin-pages.css?v=20260721-maintenance">
 {% endblock %}
 
 {% block scripts %}
-  <script src="/static/js/admin.js?v=20260720-admin" defer></script>
+  <script src="/static/js/admin.js?v=20260721-maintenance" defer></script>
 {% endblock %}
 
 {% block main %}
@@ -28,10 +28,10 @@
           <h1 id="admin-title">{{ view.page.heading }}</h1>
           <p>{{ view.page.lead }}</p>
         </div>
-        {% if let Some(email) = session_email %}
+        {% if let Some(identity) = session_identity %}
         <div class="admin-session">
           <span>{% if is_en %}Signed in administrator{% else %}当前管理员{% endif %}</span>
-          <strong>{{ email }}</strong>
+          <strong>{{ identity }}</strong>
           <button class="button button-secondary" type="button" data-admin-logout data-error-label="{% if is_en %}Unable to sign out.{% else %}退出失败，请稍后重试。{% endif %}">
             {% if is_en %}Sign out{% else %}退出登录{% endif %}
           </button>

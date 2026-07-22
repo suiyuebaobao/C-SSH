@@ -337,10 +337,12 @@ dependencies = [
  "hex",
  "rand 0.9.5",
  "serde",
+ "serde_json",
  "sha2",
  "sqlx",
  "subtle",
  "tokio",
+ "tower",
  "url",
  "uuid",
 ]
@@ -416,6 +418,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloud-maintenance"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "cloud-domain",
+ "cloud-store",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "cloud-model"
 version = "0.1.0"
 dependencies = [
@@ -483,6 +501,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "cloud-device",
  "cloud-domain",
  "cloud-store",
  "hex",
@@ -504,6 +523,8 @@ dependencies = [
  "cloud-store",
  "serde",
  "sqlx",
+ "tokio",
+ "tower",
  "uuid",
 ]
 
@@ -531,13 +552,19 @@ dependencies = [
  "axum",
  "chrono",
  "cloud-admin",
+ "cloud-auth",
+ "cloud-device",
  "cloud-domain",
  "cloud-download",
  "cloud-feedback",
+ "cloud-model",
  "cloud-release",
  "cloud-site",
  "cloud-site-media",
  "cloud-store",
+ "cloud-sync",
+ "cloud-user",
+ "cloud-vault",
  "serde",
  "serde_json",
  "tempfile",
@@ -624,6 +651,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
+ "chrono",
  "cloud-admin",
  "cloud-auth",
  "cloud-config",
@@ -631,6 +659,7 @@ dependencies = [
  "cloud-domain",
  "cloud-download",
  "cloud-feedback",
+ "cloud-maintenance",
  "cloud-model",
  "cloud-release",
  "cloud-site-media",
@@ -640,6 +669,7 @@ dependencies = [
  "cloud-vault",
  "cloud-web",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tower",

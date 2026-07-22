@@ -25,4 +25,4 @@ pub use model::{
 };
 pub use repository::RepositoryLink;
 pub use service::{ContentService, content_service};
-pub use tutorial::{Tutorial, TutorialPageContent, TutorialStep};
+pub use tutorial::{Tutorial, TutorialContent, TutorialStep};

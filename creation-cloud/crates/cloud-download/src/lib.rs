@@ -4,6 +4,7 @@
 mod authorization;
 mod file_verification;
 mod handler;
+mod limiter;
 mod local_file;
 mod model;
 mod range;
@@ -23,11 +24,18 @@ mod router_tests;
 mod authorization_tests;
 
 #[cfg(test)]
+mod aggregation_tests;
+
+#[cfg(test)]
+mod inspection_tests;
+
+#[cfg(test)]
 mod validation_tests;
 
 pub use model::{
-    CreateSourceInput, PublicAsset, PublicRelease, PublicSource, ReleaseSource, SourceKind,
-    UpdateSourceInput,
+    AssetInspectionStatus, CreateSourceInput, DownloadAggregationReport, DownloadHistoryItem,
+    PublicAsset, PublicRelease, PublicSource, PublishedAssetInspectionReport, ReleaseSource,
+    SourceKind, UpdateSourceInput,
 };
-pub use router::{management_router, public_router};
+pub use router::{account_router, management_router, public_router};
 pub use service::Service;

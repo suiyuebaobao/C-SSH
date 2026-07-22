@@ -21,14 +21,17 @@ const HOME_SECTIONS_CSS: &str = include_str!("../static/css/home-sections.css");
 const HOME_CLOSING_CSS: &str = include_str!("../static/css/home-closing.css");
 const HOME_QR_CSS: &str = include_str!("../static/css/home-qr.css");
 const DOCUMENTATION_CSS: &str = include_str!("../static/css/documentation.css");
+const DOCUMENTATION_GUIDES_CSS: &str = include_str!("../static/css/documentation-guides.css");
 const ADMIN_FOUNDATION_CSS: &str = include_str!("../static/css/admin-foundation.css");
 const ADMIN_COMPONENTS_CSS: &str = include_str!("../static/css/admin-components.css");
 const ADMIN_PAGES_CSS: &str = include_str!("../static/css/admin-pages.css");
+const CONSOLE_CSS: &str = include_str!("../static/css/console.css");
 const SITE_JS: &str = include_str!("../static/js/site.js");
 const HOME_QR_JS: &str = include_str!("../static/js/home-qr.js");
 const ADMIN_JS: &str = include_str!("../static/js/admin.js");
 const FEEDBACK_JS: &str = include_str!("../static/js/feedback.js");
 const DOCUMENTATION_SEARCH_JS: &str = include_str!("../static/js/documentation-search.js");
+const CONSOLE_JS: &str = include_str!("../static/js/console.js");
 // htmx 2.0.10 按官方 Zero-Clause BSD 许可随源码分发，来源固定到对应版本标签。
 // https://github.com/bigskysoftware/htmx/blob/v2.0.10/LICENSE
 const HTMX_JS: &str = include_str!("../static/js/htmx.min.js");
@@ -51,6 +54,10 @@ pub(crate) fn router() -> Router {
         .route("/static/css/home-qr.css", get(home_qr_css))
         .route("/static/css/documentation.css", get(documentation_css))
         .route(
+            "/static/css/documentation-guides.css",
+            get(documentation_guides_css),
+        )
+        .route(
             "/static/css/admin-foundation.css",
             get(admin_foundation_css),
         )
@@ -59,6 +66,7 @@ pub(crate) fn router() -> Router {
             get(admin_components_css),
         )
         .route("/static/css/admin-pages.css", get(admin_pages_css))
+        .route("/static/css/console.css", get(console_css))
         .route("/static/js/site.js", get(site_js))
         .route("/static/js/home-qr.js", get(home_qr_js))
         .route("/static/js/admin.js", get(admin_js))
@@ -67,6 +75,7 @@ pub(crate) fn router() -> Router {
             "/static/js/documentation-search.js",
             get(documentation_search_js),
         )
+        .route("/static/js/console.js", get(console_js))
         .route("/static/js/htmx.min.js", get(htmx_js))
         .route("/static/img/brand-c.png", get(brand_image))
         .route(
@@ -127,6 +136,10 @@ async fn documentation_css() -> Response {
     text_response(DOCUMENTATION_CSS, "text/css; charset=utf-8")
 }
 
+async fn documentation_guides_css() -> Response {
+    text_response(DOCUMENTATION_GUIDES_CSS, "text/css; charset=utf-8")
+}
+
 async fn admin_foundation_css() -> Response {
     text_response(ADMIN_FOUNDATION_CSS, "text/css; charset=utf-8")
 }
@@ -137,6 +150,10 @@ async fn admin_components_css() -> Response {
 
 async fn admin_pages_css() -> Response {
     text_response(ADMIN_PAGES_CSS, "text/css; charset=utf-8")
+}
+
+async fn console_css() -> Response {
+    text_response(CONSOLE_CSS, "text/css; charset=utf-8")
 }
 
 async fn site_js() -> Response {
@@ -157,6 +174,10 @@ async fn feedback_js() -> Response {
 
 async fn documentation_search_js() -> Response {
     text_response(DOCUMENTATION_SEARCH_JS, "text/javascript; charset=utf-8")
+}
+
+async fn console_js() -> Response {
+    text_response(CONSOLE_JS, "text/javascript; charset=utf-8")
 }
 
 async fn htmx_js() -> Response {

@@ -5,7 +5,7 @@ use cloud_store::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    Device,
+    CreateDeviceOutcome, Device,
     use_case::{self, CreateDevice, UpdateDevice},
 };
 
@@ -24,7 +24,7 @@ impl Service {
         &self,
         session: &AuthenticatedSession,
         command: CreateDevice,
-    ) -> AppResult<Device> {
+    ) -> AppResult<CreateDeviceOutcome> {
         use_case::create::execute(&self.pool, session, command).await
     }
 

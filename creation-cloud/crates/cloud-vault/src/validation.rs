@@ -1,4 +1,4 @@
-//! 校验密文信封格式并明确拒绝明文、凭据和主机字段。
+//! 提供保险库密文结构共用校验，并拒绝明文、凭据和主机字段。
 
 use std::collections::BTreeMap;
 
@@ -77,7 +77,7 @@ pub(crate) fn revision(value: i64) -> AppResult<()> {
     Ok(())
 }
 
-fn versions(schema_version: i32, key_version: i32) -> AppResult<()> {
+pub(crate) fn versions(schema_version: i32, key_version: i32) -> AppResult<()> {
     if !(1..=65_535).contains(&schema_version) || !(1..=65_535).contains(&key_version) {
         return Err(AppError::Validation(
             "schema_version 和 key_version 必须在 1 到 65535 之间".to_owned(),
@@ -86,7 +86,7 @@ fn versions(schema_version: i32, key_version: i32) -> AppResult<()> {
     Ok(())
 }
 
-fn cipher_suite(value: String) -> AppResult<String> {
+pub(crate) fn cipher_suite(value: String) -> AppResult<String> {
     let value = value.trim().to_ascii_lowercase();
     if value != "xchacha20-poly1305" {
         return Err(AppError::Validation(
@@ -96,7 +96,7 @@ fn cipher_suite(value: String) -> AppResult<String> {
     Ok(value)
 }
 
-fn kdf(mut value: KdfMetadata) -> AppResult<KdfMetadata> {
+pub(crate) fn kdf(mut value: KdfMetadata) -> AppResult<KdfMetadata> {
     value.algorithm = value.algorithm.trim().to_ascii_lowercase();
     if value.algorithm != "argon2id" {
         return Err(AppError::Validation(
@@ -114,7 +114,12 @@ fn kdf(mut value: KdfMetadata) -> AppResult<KdfMetadata> {
     Ok(value)
 }
 
-fn decode_bounded(name: &str, encoded: &str, minimum: usize, maximum: usize) -> AppResult<Vec<u8>> {
+pub(crate) fn decode_bounded(
+    name: &str,
+    encoded: &str,
+    minimum: usize,
+    maximum: usize,
+) -> AppResult<Vec<u8>> {
     let decoded = STANDARD
         .decode(encoded)
         .map_err(|_| AppError::Validation(format!("{name} 必须是有效 base64")))?;

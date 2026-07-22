@@ -9,6 +9,7 @@ members = [
     "crates/cloud-download",
     "crates/cloud-feedback",
     "crates/cloud-model",
+    "crates/cloud-maintenance",
     "crates/cloud-release",
     "crates/cloud-site",
     "crates/cloud-site-media",
@@ -42,6 +43,7 @@ cloud-domain = { path = "crates/cloud-domain" }
 cloud-download = { path = "crates/cloud-download" }
 cloud-feedback = { path = "crates/cloud-feedback" }
 cloud-model = { path = "crates/cloud-model" }
+cloud-maintenance = { path = "crates/cloud-maintenance" }
 cloud-release = { path = "crates/cloud-release" }
 cloud-site = { path = "crates/cloud-site" }
 cloud-site-media = { path = "crates/cloud-site-media" }
@@ -62,7 +64,7 @@ sqlx = { version = "0.8.6", default-features = false, features = ["chrono", "jso
 subtle = "2.6.1"
 tempfile = "3.27.0"
 thiserror = "2.0.12"
-tokio = { version = "1.45.1", features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "signal", "sync"] }
+tokio = { version = "1.45.1", features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
 tokio-util = { version = "0.7.15", features = ["io"] }
 tower = "0.5.2"
 tower-http = { version = "0.6.6", features = ["compression-gzip", "fs", "request-id", "trace"] }

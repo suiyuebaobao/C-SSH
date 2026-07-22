@@ -3,6 +3,7 @@
 mod create;
 mod delete;
 mod get;
+pub(crate) mod inspection;
 mod list;
 mod public;
 mod publish;

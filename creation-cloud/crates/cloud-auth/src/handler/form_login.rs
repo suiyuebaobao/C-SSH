@@ -9,8 +9,9 @@ use crate::{Login, Service};
 use super::form_response;
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct BrowserLogin {
-    email: String,
+    identifier: String,
     password: String,
     next: Option<String>,
 }
@@ -22,7 +23,7 @@ pub(crate) async fn handle(
 ) -> AppResult<Response> {
     let destination = form_response::safe_destination(form.next.as_deref());
     let command = Login {
-        email: form.email,
+        identifier: form.identifier,
         password: form.password,
     };
     let issued = service.login(command).await?;

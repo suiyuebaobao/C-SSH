@@ -307,5 +307,5 @@ fn is_sensitive_key(key: &str) -> bool {
         "privatekey",
     ]
     .iter()
-    .any(|blocked| normalized.contains(blocked))
+    .any(|blocked| normalized == *blocked)
 }

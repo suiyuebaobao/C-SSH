@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Registered product devices{% else %}已登记产品设备{% endif %}</h2><span class="console-status">{{ total }}</span></div>
+        <p class="console-boundary">{% if is_en %}This browser can manage existing devices, but it cannot register itself as a product device.{% else %}浏览器只能管理既有设备，不能把自己登记或伪装成产品设备。{% endif %}</p>
+        {% if devices.is_empty() %}
+        <p class="console-empty">{% if is_en %}No registered devices.{% else %}当前账号没有已登记设备。{% endif %}</p>
+        {% else %}
+        <div class="console-list">
+          {% for device in devices %}
+          <article class="console-record">
+            <div class="console-record-heading">
+              <div><strong>{{ device.name }}</strong><small>{{ device.platform }} · {{ device.id }}</small></div>
+              <span class="console-status{% if device.revoked_at.is_some() %} console-status-muted{% endif %}">{% if device.revoked_at.is_some() %}{% if is_en %}Revoked{% else %}已撤销{% endif %}{% else %}{% if is_en %}Active{% else %}有效{% endif %}{% endif %}</span>
+            </div>
+            <dl class="console-definition-grid console-definition-grid-compact">
+              <div><dt>{% if is_en %}Last active{% else %}最近活动{% endif %}</dt><dd>{% if let Some(value) = device.last_seen_at %}{{ value }}{% else %}—{% endif %}</dd></div>
+              <div><dt>{% if is_en %}Created{% else %}登记时间{% endif %}</dt><dd>{{ device.created_at }}</dd></div>
+            </dl>
+            {% if device.revoked_at.is_none() %}
+            <div class="console-record-actions">
+              <form class="console-inline-form" action="/console/devices/{{ device.id }}" method="post" hx-post="/console/devices/{{ device.id }}" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+                <label><span class="sr-only">{% if is_en %}New device name{% else %}新设备名称{% endif %}</span><input name="name" value="{{ device.name }}" maxlength="100" required></label>
+                <button class="button button-secondary" type="submit">{% if is_en %}Rename{% else %}重命名{% endif %}</button>
+              </form>
+              <form action="/console/devices/{{ device.id }}/revoke" method="post" hx-post="/console/devices/{{ device.id }}/revoke" hx-swap="none" hx-confirm="{% if is_en %}Revoke this device and all bound sessions?{% else %}撤销此设备及其全部绑定会话？{% endif %}" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+                <button class="button button-danger" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button>
+              </form>
+            </div>
+            {% endif %}
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

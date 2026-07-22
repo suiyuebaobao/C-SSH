@@ -1,0 +1,430 @@
+/* 用户控制台专属布局：保持暖白工业制图语言并容纳真实表单与长列表。 */
+.console-main {
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--space-6) 0 var(--space-8);
+  background-image:
+    linear-gradient(to right, rgb(16 17 18 / 4%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(16 17 18 / 4%) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.console-layout {
+  display: grid;
+  grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.console-sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.console-kicker {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.console-navigation {
+  display: grid;
+}
+
+.console-navigation a {
+  position: relative;
+  padding: 12px var(--space-4);
+  border-bottom: 1px dashed var(--line-faint);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.console-navigation a:last-child {
+  border-bottom: 0;
+}
+
+.console-navigation a:hover,
+.console-navigation a:focus-visible {
+  background: var(--paper-alt);
+}
+
+.console-navigation a[aria-current="page"] {
+  padding-left: calc(var(--space-4) + 4px);
+  border-left: 4px solid var(--accent);
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+
+.console-content {
+  min-width: 0;
+}
+
+.console-heading {
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.console-heading h1 {
+  max-width: 900px;
+  margin: var(--space-2) 0;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  line-height: 1;
+}
+
+.console-heading > p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.console-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: var(--space-4);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.console-metrics article {
+  min-width: 0;
+  padding: var(--space-4);
+  border-right: 1px dashed var(--line-soft);
+}
+
+.console-metrics article:last-child {
+  border-right: 0;
+}
+
+.console-metrics strong,
+.console-metrics span {
+  display: block;
+}
+
+.console-metrics strong {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+}
+
+.console-metrics span {
+  margin-top: var(--space-1);
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+.console-section {
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.console-section-heading,
+.console-record-heading,
+.console-record-actions,
+.console-inline-form,
+.console-source-list {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.console-section-heading,
+.console-record-heading {
+  justify-content: space-between;
+}
+
+.console-section-heading {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.console-section-heading h2,
+.console-record-heading strong {
+  margin: 0;
+}
+
+.console-status {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px solid var(--success);
+  background: var(--success-soft);
+  color: var(--success);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.console-status-warning {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.console-status-muted {
+  border-color: var(--line-soft);
+  background: var(--paper-alt);
+  color: var(--ink-soft);
+}
+
+.console-boundary,
+.console-empty {
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.console-empty {
+  border-left-color: var(--line-soft);
+  background: var(--paper-alt);
+  color: var(--ink-soft);
+}
+
+.console-identity {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.console-definition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--line-faint);
+  background: var(--line-faint);
+}
+
+.console-definition-grid div {
+  min-width: 0;
+  padding: var(--space-3);
+  background: var(--paper-raised);
+}
+
+.console-definition-grid dt {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.console-definition-grid dd {
+  margin: var(--space-1) 0 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+}
+
+.console-definition-grid-compact {
+  margin-top: var(--space-3);
+}
+
+.console-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.console-record {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.console-record-heading > div,
+.console-record-compact > div {
+  min-width: 0;
+}
+
+.console-record-heading small,
+.console-record-compact small,
+.console-asset small {
+  display: block;
+  margin-top: var(--space-1);
+  overflow-wrap: anywhere;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+
+.console-record-compact {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.console-record-actions {
+  justify-content: space-between;
+  margin-top: var(--space-4);
+}
+
+.console-inline-form {
+  flex: 1 1 auto;
+}
+
+.console-inline-form label,
+.console-inline-form input {
+  min-width: 0;
+  width: 100%;
+}
+
+.console-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.console-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.console-form label:not(.console-check) {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.console-form input,
+.console-form select,
+.console-inline-form input {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font: inherit;
+}
+
+.console-check {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.console-check input {
+  min-height: auto;
+}
+
+.console-form-feedback {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.console-form-feedback[data-tone="error"] {
+  color: var(--danger);
+}
+
+.console-delete-form {
+  margin-top: var(--space-3);
+  text-align: right;
+}
+
+.console-assets,
+.console-asset {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.console-assets {
+  margin-top: var(--space-4);
+}
+
+.console-asset {
+  padding: var(--space-3);
+  border-top: 1px dashed var(--line-soft);
+}
+
+.console-asset code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--ink-soft);
+}
+
+.console-source-list {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .console-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .console-sidebar {
+    position: static;
+  }
+
+  .console-navigation {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .console-navigation a {
+    border-right: 1px dashed var(--line-faint);
+  }
+
+  .console-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .console-metrics article:nth-child(2) {
+    border-right: 0;
+  }
+
+  .console-metrics article:nth-child(-n + 2) {
+    border-bottom: 1px dashed var(--line-soft);
+  }
+}
+
+@media (max-width: 620px) {
+  .console-main {
+    padding-top: var(--space-4);
+  }
+
+  .console-heading,
+  .console-section,
+  .console-record {
+    padding: var(--space-4);
+  }
+
+  .console-navigation,
+  .console-metrics,
+  .console-definition-grid,
+  .console-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .console-metrics article {
+    border-right: 0;
+    border-bottom: 1px dashed var(--line-soft);
+  }
+
+  .console-metrics article:last-child {
+    border-bottom: 0;
+  }
+
+  .console-section-heading,
+  .console-record-heading,
+  .console-record-actions,
+  .console-inline-form,
+  .console-record-compact {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .console-record-actions form,
+  .console-record-actions button,
+  .console-inline-form button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .console-main * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
