@@ -1,6 +1,13 @@
 //! 将独立业务模块挂载到统一页面与版本化 API 路由。
 
-use axum::{Router, http::StatusCode, middleware, response::IntoResponse, routing::get};
+use axum::{
+    Router,
+    extract::Request,
+    http::StatusCode,
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
+    routing::get,
+};
 use cloud_config::CloudConfig;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
@@ -137,9 +144,28 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/health/ready",
             get(move || health_ready(ready_state.clone())),
         )
+        .layer(middleware::from_fn(noindex_private_routes))
         .layer(CompressionLayer::new())
         .layer(TraceLayer::new_for_http().make_span_with(http_trace::make_span))
         .layer(middleware::from_fn(request_id::attach))
+}
+
+async fn noindex_private_routes(request: Request, next: Next) -> Response {
+    if route_requires_noindex(request.uri().path()) {
+        cloud_web::noindex_response(request, next).await
+    } else {
+        next.run(request).await
+    }
+}
+
+fn route_requires_noindex(path: &str) -> bool {
+    matches!(path, "/login" | "/en/login" | "/register" | "/en/register")
+        || ["/web/auth", "/console", "/admin", "/api/v1", "/health"]
+            .iter()
+            .any(|prefix| {
+                path.strip_prefix(prefix)
+                    .is_some_and(|suffix| suffix.is_empty() || suffix.starts_with('/'))
+            })
 }
 
 async fn health_live() -> impl IntoResponse {
@@ -169,7 +195,10 @@ fn health_response(status: StatusCode, body: &'static str) -> impl IntoResponse 
 mod tests {
     use std::{path::PathBuf, time::Duration};
 
-    use axum::{body::Body, http::Request};
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode, header},
+    };
     use tower::ServiceExt;
 
     use super::*;
@@ -248,5 +277,81 @@ mod tests {
             .expect("请求应可构造");
         let response = app().oneshot(request).await.expect("应用应返回响应");
         assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn account_pages_and_form_routes_send_noindex_response_header() {
+        let app = app();
+        for path in ["/login", "/en/login", "/register", "/en/register"] {
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::get(path)
+                        .body(Body::empty())
+                        .expect("账号页面请求应可构造"),
+                )
+                .await
+                .expect("账号页面应返回响应");
+            assert_eq!(response.status(), StatusCode::OK, "{path}");
+            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        }
+
+        for path in ["/web/auth/login", "/web/auth/register"] {
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::post(path)
+                        .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded")
+                        .body(Body::empty())
+                        .expect("空账号表单请求应可构造"),
+                )
+                .await
+                .expect("账号表单路由应返回响应");
+            assert_eq!(
+                response.status(),
+                StatusCode::UNPROCESSABLE_ENTITY,
+                "{path}"
+            );
+            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        }
+    }
+
+    #[tokio::test]
+    async fn public_content_does_not_inherit_account_noindex_header() {
+        for path in ["/", "/security", "/downloads"] {
+            assert!(!route_requires_noindex(path), "{path}");
+        }
+
+        let response = app()
+            .oneshot(
+                Request::get("/security")
+                    .body(Body::empty())
+                    .expect("公开页面请求应可构造"),
+            )
+            .await
+            .expect("公开页面应返回响应");
+        assert_eq!(response.status(), StatusCode::OK);
+        assert!(!response.headers().contains_key("x-robots-tag"));
+    }
+
+    #[tokio::test]
+    async fn unmatched_private_namespaces_remain_noindex() {
+        for path in [
+            "/api/v1/seo-not-found",
+            "/console/seo-not-found",
+            "/admin/seo-not-found",
+            "/health/seo-not-found",
+        ] {
+            let response = app()
+                .oneshot(
+                    Request::get(path)
+                        .body(Body::empty())
+                        .expect("私有命名空间请求应可构造"),
+                )
+                .await
+                .expect("私有命名空间应返回响应");
+            assert_eq!(response.status(), StatusCode::NOT_FOUND, "{path}");
+            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 use cloud_domain::AppResult;
 use cloud_store::PgPool;
+use sqlx::PgConnection;
 use uuid::Uuid;
 
 use crate::model::FeedbackRow;
@@ -33,6 +34,19 @@ pub(crate) async fn management(pool: &PgPool, id: Uuid) -> AppResult<Option<Feed
     ))
     .bind(id)
     .fetch_optional(pool)
+    .await
+    .map_err(error::read)
+}
+
+pub(crate) async fn management_for_update(
+    connection: &mut PgConnection,
+    id: Uuid,
+) -> AppResult<Option<FeedbackRow>> {
+    sqlx::query_as::<_, FeedbackRow>(&format!(
+        "SELECT {COLUMNS} FROM feedback_submissions WHERE id = $1 FOR UPDATE"
+    ))
+    .bind(id)
+    .fetch_optional(connection)
     .await
     .map_err(error::read)
 }

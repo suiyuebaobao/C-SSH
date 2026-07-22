@@ -7,16 +7,15 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use cloud_domain::{AdminActor, AppError, AppResult, AuthenticatedSession};
+use cloud_domain::{
+    AdminActor, AppError, AppResult, AuthenticatedSession, with_semantic_audit_tracking,
+};
 use uuid::Uuid;
 
 use crate::{Service, use_case::HttpAuditRecord};
 
 const REQUEST_ID_HEADER: &str = "x-request-id";
 const MAX_AUDIT_PATH_LEN: usize = 256;
-
-#[derive(Clone, Copy, Debug)]
-struct AuditRecorded;
 
 pub async fn audit_write_requests(
     State(service): State<Service>,
@@ -34,8 +33,14 @@ pub async fn audit_write_requests(
     let (resource_kind, resource_id) = resource(request.uri().path());
     let request_id = request_id(request.headers());
     let audit_request_id = request_id.clone();
-    let mut response = next.run(request).await;
-    if response.extensions().get::<AuditRecorded>().is_some() {
+    let (mut response, semantic_audit_recorded) =
+        with_semantic_audit_tracking(next.run(request)).await;
+    let response_request_id = HeaderValue::from_str(&request_id)
+        .map_err(|_| AppError::Internal("请求标识无法写入响应".to_owned()))?;
+    response
+        .headers_mut()
+        .insert(REQUEST_ID_HEADER, response_request_id);
+    if semantic_audit_recorded {
         return Ok(response);
     }
     service
@@ -51,12 +56,6 @@ pub async fn audit_write_requests(
             },
         )
         .await?;
-    let response_request_id = HeaderValue::from_str(&request_id)
-        .map_err(|_| AppError::Internal("请求标识无法写入响应".to_owned()))?;
-    response
-        .headers_mut()
-        .insert(REQUEST_ID_HEADER, response_request_id);
-    response.extensions_mut().insert(AuditRecorded);
     Ok(response)
 }
 

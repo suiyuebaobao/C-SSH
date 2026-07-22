@@ -15,11 +15,12 @@ pub struct CreateFeedbackInput {
     pub redaction_confirmed: bool,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct UpdateFeedbackStatusInput {
     pub status: FeedbackStatus,
     pub expected_version: i64,
+    pub reason: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]

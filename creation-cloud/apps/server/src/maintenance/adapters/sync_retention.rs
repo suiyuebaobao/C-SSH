@@ -1,4 +1,4 @@
-//! 调用同步域保留用例并汇总四类真实删除计数。
+//! 调用同步域保留用例并汇总五类真实删除计数。
 
 use chrono::{DateTime, Utc};
 use cloud_domain::AppResult;
@@ -27,6 +27,7 @@ pub async fn execute(
             .await?;
         let changed = report
             .tombstones_deleted
+            .saturating_add(report.record_versions_deleted)
             .saturating_add(report.applied_mutations_deleted)
             .saturating_add(report.resolved_conflicts_deleted)
             .saturating_add(report.conflict_mutations_deleted);

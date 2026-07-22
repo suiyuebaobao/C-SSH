@@ -52,15 +52,14 @@ fn validate_production(url: &Url) -> Result<()> {
     let Some(host) = url.host() else {
         bail!("CLOUD_PUBLIC_BASE_URL 必须包含 host");
     };
-    let points_to_loopback = match host {
-        Host::Domain(domain) => is_localhost_name(domain),
-        Host::Ipv4(address) => address.is_loopback(),
-        Host::Ipv6(address) => {
-            address.is_loopback() || address.to_ipv4().is_some_and(|mapped| mapped.is_loopback())
+    match host {
+        Host::Domain(domain) if is_localhost_name(domain) => {
+            bail!("production 环境的 CLOUD_PUBLIC_BASE_URL 禁止使用 localhost 域名");
         }
-    };
-    if points_to_loopback {
-        bail!("production 环境的 CLOUD_PUBLIC_BASE_URL 禁止使用 localhost 或 loopback IP");
+        Host::Domain(_) => {}
+        Host::Ipv4(_) | Host::Ipv6(_) => {
+            bail!("production 环境的 CLOUD_PUBLIC_BASE_URL 必须使用域名，禁止使用 IP literal");
+        }
     }
     Ok(())
 }

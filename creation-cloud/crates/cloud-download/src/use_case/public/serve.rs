@@ -23,6 +23,8 @@ use uuid::Uuid;
 
 use crate::{Service, SourceKind, local_file, range::ByteRange, repository, validation};
 
+use super::distribution::DistributionResult;
+
 impl Service {
     pub async fn serve_download(
         &self,
@@ -57,7 +59,7 @@ impl Service {
         let _permit = self.limiter.acquire(source_id)?;
         let target = repository::public::target::execute(&self.pool, asset_id, source_id).await?;
 
-        let response = match SourceKind::try_from(target.source_kind.as_str())? {
+        let distribution = match SourceKind::try_from(target.source_kind.as_str())? {
             SourceKind::External => external_response(
                 target
                     .external_url
@@ -81,20 +83,28 @@ impl Service {
                 .await?
             }
         };
-        repository::public::record_event::execute(
-            &self.pool,
-            target.asset_id,
-            target.source_id,
-            account_id,
-        )
-        .await?;
-        Ok(response)
+        match distribution {
+            DistributionResult::LocalStream(response)
+            | DistributionResult::ExternalRedirect(response) => {
+                repository::public::record_event::execute(
+                    &self.pool,
+                    target.asset_id,
+                    target.source_id,
+                    account_id,
+                )
+                .await?;
+                Ok(response)
+            }
+            DistributionResult::RangeRejected(response) => Ok(response),
+        }
     }
 }
 
-fn external_response(value: &str) -> AppResult<Response<Body>> {
+fn external_response(value: &str) -> AppResult<DistributionResult> {
     let url = validation::external_url(value)?;
-    Ok(Redirect::temporary(&url).into_response())
+    Ok(DistributionResult::ExternalRedirect(
+        Redirect::temporary(&url).into_response(),
+    ))
 }
 
 async fn local_response(
@@ -105,7 +115,7 @@ async fn local_response(
     expected_size: i64,
     sha256: &str,
     range_header: Option<&str>,
-) -> AppResult<Response<Body>> {
+) -> AppResult<DistributionResult> {
     let path = local_file::resolve(download_root, relative).await?;
     let mut file = fs::File::open(&path)
         .await
@@ -160,18 +170,20 @@ async fn local_response(
     if partial {
         builder = builder.header(CONTENT_RANGE, format!("bytes {start}-{end}/{actual_size}"));
     }
-    builder
+    let response = builder
         .body(Body::from_stream(stream))
-        .map_err(|_| AppError::Internal("构造下载响应失败".into()))
+        .map_err(|_| AppError::Internal("构造下载响应失败".into()))?;
+    Ok(DistributionResult::LocalStream(response))
 }
 
-fn range_not_satisfiable(size: u64) -> AppResult<Response<Body>> {
-    Response::builder()
+fn range_not_satisfiable(size: u64) -> AppResult<DistributionResult> {
+    let response = Response::builder()
         .status(StatusCode::RANGE_NOT_SATISFIABLE)
         .header(CONTENT_RANGE, format!("bytes */{size}"))
         .header(ACCEPT_RANGES, HeaderValue::from_static("bytes"))
         .body(Body::empty())
-        .map_err(|_| AppError::Internal("构造 Range 错误响应失败".into()))
+        .map_err(|_| AppError::Internal("构造 Range 错误响应失败".into()))?;
+    Ok(DistributionResult::RangeRejected(response))
 }
 
 fn safe_file_name(value: &str) -> String {

@@ -19,11 +19,16 @@ LIMIT $3
 "#;
 
 pub(crate) const FULL_PULL_SQL: &str = r#"
-SELECT namespace, record_key, revision, value, is_deleted, source_device_id, updated_at
-FROM sync_records
-WHERE account_id = $1
-  AND revision > $2
-  AND revision <= $3
+WITH snapshot_records AS MATERIALIZED (
+    SELECT DISTINCT ON (namespace, record_key)
+           namespace, record_key, revision, value, is_deleted, source_device_id, recorded_at
+    FROM sync_record_versions
+    WHERE account_id = $1 AND revision <= $3
+    ORDER BY namespace ASC, record_key ASC, revision DESC
+)
+SELECT namespace, record_key, revision, value, is_deleted, source_device_id, recorded_at
+FROM snapshot_records
+WHERE revision > $2
   AND is_deleted = FALSE
 ORDER BY revision ASC, namespace ASC, record_key ASC
 LIMIT $4
@@ -53,7 +58,7 @@ pub(crate) async fn pull(
 
     match request.mode {
         PullMode::Incremental => incremental(transaction, sync_actor, request, bounds).await,
-        PullMode::Full => full(transaction, sync_actor, request, bounds.current_revision).await,
+        PullMode::Full => full(transaction, sync_actor, request, bounds).await,
     }
 }
 
@@ -105,14 +110,20 @@ async fn full(
     mut transaction: Transaction<'_, Postgres>,
     actor: &SyncActor,
     request: PullRequest,
-    current_revision: i64,
+    bounds: state::RevisionBounds,
 ) -> AppResult<PullResponse> {
     checkpoint::touch(&mut transaction, actor).await?;
-    let snapshot_revision = request.snapshot_revision.unwrap_or(current_revision);
-    if snapshot_revision > current_revision {
+    let snapshot_revision = request.snapshot_revision.unwrap_or(bounds.current_revision);
+    if snapshot_revision > bounds.current_revision {
         commit(transaction).await?;
         return Err(AppError::Validation(
             "snapshot_revision 不能超过当前同步修订".to_owned(),
+        ));
+    }
+    if snapshot_revision < bounds.compacted_through_revision {
+        commit(transaction).await?;
+        return Err(AppError::SyncResyncRequired(
+            "全量快照早于服务端保留边界，请重新开始全量重建".to_owned(),
         ));
     }
 

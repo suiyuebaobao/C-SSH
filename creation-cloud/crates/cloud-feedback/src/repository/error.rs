@@ -18,5 +18,9 @@ pub(crate) fn write(error: sqlx::Error) -> AppError {
 }
 
 pub(crate) fn transaction(_error: sqlx::Error) -> AppError {
-    AppError::Storage("提交反馈事务失败".to_owned())
+    AppError::Storage("执行反馈事务失败".to_owned())
+}
+
+pub(crate) fn semantic_audit(_error: sqlx::Error) -> AppError {
+    AppError::Storage("写入反馈语义审计失败".to_owned())
 }

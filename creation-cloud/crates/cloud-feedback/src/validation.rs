@@ -50,8 +50,9 @@ pub(crate) fn id(value: Uuid) -> AppResult<Uuid> {
     Ok(value)
 }
 
-pub(crate) fn status(input: UpdateFeedbackStatusInput) -> AppResult<UpdateFeedbackStatusInput> {
+pub(crate) fn status(mut input: UpdateFeedbackStatusInput) -> AppResult<UpdateFeedbackStatusInput> {
     expected_version(input.expected_version)?;
+    input.reason = audit_reason(&input.reason, "状态变更原因")?;
     Ok(input)
 }
 
@@ -70,9 +71,19 @@ pub(crate) fn bounded_page(page: cloud_domain::PageQuery) -> cloud_domain::PageQ
 
 pub(crate) fn redaction(mut input: RedactFeedbackInput) -> AppResult<RedactFeedbackInput> {
     expected_version(input.expected_version)?;
-    input.reason = text(&input.reason, "脱敏原因", 5, 500, false)?;
-    reject_sensitive(&input.reason)?;
+    input.reason = audit_reason(&input.reason, "脱敏原因")?;
     Ok(input)
+}
+
+fn audit_reason(value: &str, field: &str) -> AppResult<String> {
+    let value = text(value, field, 5, 500, false)?;
+    reject_sensitive(&value)?;
+    if value.contains('@') {
+        return Err(AppError::Validation(format!(
+            "{field}不得包含账号邮箱，请使用无身份信息的摘要"
+        )));
+    }
+    Ok(value)
 }
 
 fn expected_version(value: i64) -> AppResult<()> {

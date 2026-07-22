@@ -20,6 +20,7 @@ use super::{super::shared, query};
 pub(crate) struct UpdateStatusForm {
     status: String,
     expected_version: i64,
+    reason: String,
     lang: Option<String>,
     page: Option<u32>,
     size: Option<u32>,
@@ -61,6 +62,7 @@ pub(crate) async fn handle(
             UpdateFeedbackStatusInput {
                 status,
                 expected_version: form.expected_version,
+                reason: form.reason,
             },
         )
         .await

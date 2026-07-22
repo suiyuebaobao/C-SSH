@@ -133,6 +133,7 @@
         {% if detail.status_filter != "" %}<input type="hidden" name="status_filter" value="{{ detail.status_filter }}">{% endif %}
         {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
         <label class="admin-field">{% if is_en %}Next status{% else %}下一状态{% endif %}<select name="status" required>{% for option in detail.next_statuses %}<option value="{{ option.value }}">{% if is_en %}{{ option.label_en }}{% else %}{{ option.label_zh }}{% endif %}</option>{% endfor %}</select></label>
+        <label class="admin-field">{% if is_en %}Reason{% else %}变更原因{% endif %}<input name="reason" minlength="5" maxlength="500" required autocomplete="off"></label>
         <button class="button button-primary" type="submit">{% if is_en %}Update status{% else %}更新状态{% endif %}</button>
       </form>
       {% endif %}

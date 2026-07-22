@@ -1,5 +1,5 @@
-//! 在稳定账号锁序内执行墓碑、已应用 mutation 与已解决冲突的有界清理。
-//! 墓碑删除和 compaction floor 推进位于同一事务，未解决冲突永不进入候选集。
+//! 在稳定账号锁序内执行墓碑、版本历史、已应用 mutation 与已解决冲突的有界清理。
+//! 数据删除和 compaction floor 推进位于同一事务，未解决冲突永不进入候选集。
 
 use std::collections::BTreeMap;
 
@@ -44,8 +44,50 @@ WHERE EXISTS (
           AND conflict.resolved_at IS NOT NULL
           AND conflict.resolved_at < $1
     )
+   OR EXISTS (
+        SELECT 1
+        FROM sync_record_versions AS version
+        JOIN sync_states AS state ON state.account_id = version.account_id
+        CROSS JOIN LATERAL (
+            SELECT GREATEST(
+                state.compacted_through_revision,
+                COALESCE(
+                    (
+                        SELECT MIN(checkpoint.acknowledged_revision)
+                        FROM sync_device_checkpoints AS checkpoint
+                        JOIN devices AS device
+                          ON device.account_id = checkpoint.account_id
+                         AND device.id = checkpoint.device_id
+                        WHERE checkpoint.account_id = state.account_id
+                          AND device.revoked_at IS NULL
+                          AND checkpoint.last_sync_at >= $2
+                    ),
+                    state.current_revision
+                )
+            ) AS revision
+        ) AS safe
+        WHERE version.account_id = account.id
+          AND version.recorded_at < $1
+          AND version.revision <= safe.revision
+          AND (
+              NOT EXISTS (
+                  SELECT 1 FROM sync_records AS current
+                  WHERE current.account_id = version.account_id
+                    AND current.namespace = version.namespace
+                    AND current.record_key = version.record_key
+              )
+              OR EXISTS (
+                  SELECT 1 FROM sync_record_versions AS newer
+                  WHERE newer.account_id = version.account_id
+                    AND newer.namespace = version.namespace
+                    AND newer.record_key = version.record_key
+                    AND newer.revision > version.revision
+                    AND newer.revision <= safe.revision
+              )
+          )
+    )
 ORDER BY account.id ASC
-FOR UPDATE SKIP LOCKED
+FOR UPDATE OF account SKIP LOCKED
 LIMIT $3
 "#;
 
@@ -92,6 +134,66 @@ SET compacted_through_revision = LEAST(
     GREATEST(compacted_through_revision, $2)
 )
 WHERE account_id = $1
+"#;
+
+pub(crate) const DELETE_RECORD_VERSIONS_SQL: &str = r#"
+WITH safe_bounds AS MATERIALIZED (
+    SELECT state.account_id,
+           GREATEST(
+               state.compacted_through_revision,
+               COALESCE(
+                   (
+                       SELECT MIN(checkpoint.acknowledged_revision)
+                       FROM sync_device_checkpoints AS checkpoint
+                       JOIN devices AS device
+                         ON device.account_id = checkpoint.account_id
+                        AND device.id = checkpoint.device_id
+                       WHERE checkpoint.account_id = state.account_id
+                         AND device.revoked_at IS NULL
+                         AND checkpoint.last_sync_at >= $3
+                   ),
+                   state.current_revision
+               )
+           ) AS safe_revision
+    FROM sync_states AS state
+    WHERE state.account_id = ANY($1::uuid[])
+),
+candidates AS MATERIALIZED (
+    SELECT version.account_id, version.revision
+    FROM sync_record_versions AS version
+    JOIN safe_bounds AS safe ON safe.account_id = version.account_id
+    WHERE version.recorded_at < $2
+      AND version.revision <= safe.safe_revision
+      AND (
+          NOT EXISTS (
+              SELECT 1 FROM sync_records AS current
+              WHERE current.account_id = version.account_id
+                AND current.namespace = version.namespace
+                AND current.record_key = version.record_key
+          )
+          OR EXISTS (
+              SELECT 1 FROM sync_record_versions AS newer
+              WHERE newer.account_id = version.account_id
+                AND newer.namespace = version.namespace
+                AND newer.record_key = version.record_key
+                AND newer.revision > version.revision
+                AND newer.revision <= safe.safe_revision
+          )
+      )
+    ORDER BY version.recorded_at ASC, version.account_id ASC, version.revision ASC
+    FOR UPDATE OF version SKIP LOCKED
+    LIMIT $4
+),
+deleted AS (
+    DELETE FROM sync_record_versions AS version
+    USING candidates
+    WHERE version.account_id = candidates.account_id
+      AND version.revision = candidates.revision
+    RETURNING version.account_id
+)
+SELECT deleted.account_id, safe.safe_revision
+FROM deleted
+JOIN safe_bounds AS safe ON safe.account_id = deleted.account_id
 "#;
 
 pub(crate) const DELETE_APPLIED_MUTATIONS_SQL: &str = r#"
@@ -218,6 +320,16 @@ pub(crate) async fn run_batch_on_connection(
         .map_err(storage("无法删除同步墓碑"))?;
     advance_floors(&mut transaction, &deleted_tombstones).await?;
 
+    let deleted_record_versions = sqlx::query_as::<_, (Uuid, i64)>(DELETE_RECORD_VERSIONS_SQL)
+        .bind(account_ids.as_slice())
+        .bind(request.retention_cutoff())
+        .bind(request.active_cutoff())
+        .bind(request.batch_size())
+        .fetch_all(&mut *transaction)
+        .await
+        .map_err(storage("无法删除同步版本历史"))?;
+    advance_floors(&mut transaction, &deleted_record_versions).await?;
+
     let deleted_applied = sqlx::query_scalar::<_, Uuid>(DELETE_APPLIED_MUTATIONS_SQL)
         .bind(account_ids.as_slice())
         .bind(request.retention_cutoff())
@@ -239,6 +351,7 @@ pub(crate) async fn run_batch_on_connection(
         .map_err(storage("无法提交同步保留事务"))?;
     Ok(RetentionReport {
         tombstones_deleted: deleted_tombstones.len() as u64,
+        record_versions_deleted: deleted_record_versions.len() as u64,
         applied_mutations_deleted: deleted_applied.len() as u64,
         resolved_conflicts_deleted: deleted_resolved.0 as u64,
         conflict_mutations_deleted: deleted_resolved.1 as u64,

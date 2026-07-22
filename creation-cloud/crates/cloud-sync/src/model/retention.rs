@@ -10,6 +10,7 @@ pub(crate) const MAX_RETENTION_BATCH_SIZE: u32 = 1_000;
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct RetentionReport {
     pub tombstones_deleted: u64,
+    pub record_versions_deleted: u64,
     pub applied_mutations_deleted: u64,
     pub resolved_conflicts_deleted: u64,
     pub conflict_mutations_deleted: u64,
@@ -18,6 +19,7 @@ pub struct RetentionReport {
 impl RetentionReport {
     pub(crate) const fn is_empty(&self) -> bool {
         self.tombstones_deleted == 0
+            && self.record_versions_deleted == 0
             && self.applied_mutations_deleted == 0
             && self.resolved_conflicts_deleted == 0
             && self.conflict_mutations_deleted == 0
@@ -25,6 +27,7 @@ impl RetentionReport {
 
     pub(crate) fn absorb(&mut self, batch: Self) {
         self.tombstones_deleted += batch.tombstones_deleted;
+        self.record_versions_deleted += batch.record_versions_deleted;
         self.applied_mutations_deleted += batch.applied_mutations_deleted;
         self.resolved_conflicts_deleted += batch.resolved_conflicts_deleted;
         self.conflict_mutations_deleted += batch.conflict_mutations_deleted;
