@@ -4,6 +4,45 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.6.19 - Five-Layer AI Memory, Long Context, and Conversation Persistence
+
+> Upgrading to schema 9 clears AI conversations, replay data, tasks/checkpoints, memories, and vector indexes from older versions. Non-AI data such as hosts, settings, and credential references is preserved.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.6.19_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.6.19_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.6.19_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.6.19_android-arm64.apk`
+- Android arm64 AAB: `C-SSH_0.6.19_android-arm64.aab`
+- Linux AppImage: `Creation-SSH_0.6.19_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.6.19_linux-amd64.deb`
+
+### Added
+- AI on all three clients now uses a local SQLite schema 9 raw layer with five rebuildable layers for the active task, event organization, task checkpoints, long-term recall, and context compilation.
+- Long context is compiled against the model's hard window. Capacity trimming changes only the provider working set for that call and never rewrites or deletes the local raw record.
+- Long operations emit a factual stage update after 10 seconds without a new user-visible event and every 10 silent seconds thereafter, stopping immediately on pause, cancellation, completion, or owner invalidation.
+
+### Fixed
+- Fixed context usage resetting to zero after restart, missing conversation history, and first-message conversation-not-found failures.
+- Fixed mobile update version comparison ([#32](https://github.com/suiyuebaobao/C-SSH/issues/32)) and restored the last host in separate desktop terminals ([#33](https://github.com/suiyuebaobao/C-SSH/issues/33)).
+- Consolidated broadcast execution, file-list scroll reset after directory/search changes, and terminal `Ctrl+V` behavior ([#23](https://github.com/suiyuebaobao/C-SSH/issues/23), [#26](https://github.com/suiyuebaobao/C-SSH/issues/26), [#28](https://github.com/suiyuebaobao/C-SSH/issues/28)).
+- Removed bundled Chinese font assets in favor of the system font stack.
+
+### Verified
+- Root-workspace formatting, version consistency, all-target tests, and strict Clippy passed.
+- Automated coverage passed for schema 9, five-layer memory, recovery/deletion, 10-second progress, and deterministic working-set trimming with a `500,000`-byte candidate input.
+- All seven production artifacts were rebuilt from frozen source commit `7d66fd2`. The Android x86_64 test build is not publicly uploaded.
+- The aarch64 agent/tmux pair passed cross-build and static validation. Real ARM-server no-mock remains pending, so complete ARM64 server support is not claimed.
+
+### SHA256
+- `761E9F89DA0A4E1DEEE4F2DB8286ACA44654A5C742C2E1D82CD67DC1F7976990`  `Creation-SSH_0.6.19_x64-setup.exe`
+- `FA52F284C7261710BC0D9851146B6617D939DA2E84CBE0DEA0854A2D6C3739C4`  `Creation-SSH_0.6.19_x64_en-US.msi`
+- `52C9849771FE06FB5DB8EA34F193BD7D59830D16884BDCB9B7518562BC1F4779`  `Creation-SSH_0.6.19_portable-Windows-x64.zip`
+- `CE370432AE74E8581801C3B59557BAE6232DBC62D86379D5F642CD16A93C6F94`  `Creation-SSH_0.6.19_linux-x86_64.AppImage`
+- `FEA80F4269FAA690FA11B31734E3A9C020E369A7B0341A2AC5885C1126E5E770`  `Creation-SSH_0.6.19_linux-amd64.deb`
+- `A2E6F76EAEF40A5883706FD09959012E64CDD05698BADD3A9F6BFA952D94456C`  `C-SSH_0.6.19_android-arm64.apk`
+- `4580588959AFB2A9EF26829249FFAC990610676B28903BE456C6C68170B77904`  `C-SSH_0.6.19_android-arm64.aab`
+
 ## v0.6.17 - Broadcast Execution, Terminal Shortcuts, and Font Consistency
 
 ### Downloads

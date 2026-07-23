@@ -4,6 +4,45 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.6.19 - AI 五层记忆、长上下文与会话持久化
+
+> 升级到 schema 9 时会清空旧版本的 AI 会话、回放、任务/检查点、记忆和向量索引；主机、设置和凭据引用等非 AI 数据保留。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.19_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.19_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.19_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.19_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.19_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.19_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.19_linux-amd64.deb`
+
+### 新增
+- 三端 AI 使用本地 SQLite schema 9 原始层，并构建当前任务、事件组织、任务检查点、长期召回和上下文编译五层可重建记忆。
+- 长上下文按模型硬窗口编译；容量裁剪只改变本次 provider 工作集，不改写或删除本地原始记录。
+- 长任务连续 10 秒没有新的用户可见事件时显示真实阶段进度，之后每静默 10 秒续报；暂停、停止、完成或 owner 失效后立即停发。
+
+### 修复
+- 修复重启后上下文占用归零、历史会话缺失和新会话首条消息可能提示会话不存在的问题。
+- 修复移动端更新版本判断（[#32](https://github.com/suiyuebaobao/C-SSH/issues/32)）和桌面独立终端上次主机恢复（[#33](https://github.com/suiyuebaobao/C-SSH/issues/33)）。
+- 收敛群发执行、文件列表在目录/搜索切换后的滚动复位和终端 `Ctrl+V` 行为（[#23](https://github.com/suiyuebaobao/C-SSH/issues/23)、[#26](https://github.com/suiyuebaobao/C-SSH/issues/26)、[#28](https://github.com/suiyuebaobao/C-SSH/issues/28)）。
+- 删除随包中文字体资源，继续使用系统字体栈。
+
+### 验证
+- 根工作区格式、版本一致性、全目标测试和严格 Clippy 通过。
+- schema 9、五层记忆、恢复/删除、10 秒进度，以及 `500,000` 字节候选输入的确定性工作集裁剪路径通过自动化验证。
+- 七个正式制品从同一冻结源码提交 `7d66fd2` 重建；Android x86_64 测试包不公开上传。
+- aarch64 agent/tmux 完成交叉构建与静态校验；真实 ARM 服务器 no-mock 尚未完成，不宣称完整 ARM64 服务器支持。
+
+### SHA256
+- `761E9F89DA0A4E1DEEE4F2DB8286ACA44654A5C742C2E1D82CD67DC1F7976990`  `Creation-SSH_0.6.19_x64-setup.exe`
+- `FA52F284C7261710BC0D9851146B6617D939DA2E84CBE0DEA0854A2D6C3739C4`  `Creation-SSH_0.6.19_x64_en-US.msi`
+- `52C9849771FE06FB5DB8EA34F193BD7D59830D16884BDCB9B7518562BC1F4779`  `Creation-SSH_0.6.19_portable-Windows-x64.zip`
+- `CE370432AE74E8581801C3B59557BAE6232DBC62D86379D5F642CD16A93C6F94`  `Creation-SSH_0.6.19_linux-x86_64.AppImage`
+- `FEA80F4269FAA690FA11B31734E3A9C020E369A7B0341A2AC5885C1126E5E770`  `Creation-SSH_0.6.19_linux-amd64.deb`
+- `A2E6F76EAEF40A5883706FD09959012E64CDD05698BADD3A9F6BFA952D94456C`  `C-SSH_0.6.19_android-arm64.apk`
+- `4580588959AFB2A9EF26829249FFAC990610676B28903BE456C6C68170B77904`  `C-SSH_0.6.19_android-arm64.aab`
+
 ## v0.6.17 - 群发执行、终端快捷键与字体一致性
 
 ### 下载
