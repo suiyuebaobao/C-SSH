@@ -8,7 +8,7 @@ use crate::{
 
 use super::en::{action, page};
 
-const RELEASE_HREF: &str = "https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16";
+const RELEASE_HREF: &str = "https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19";
 
 pub(super) fn page_content() -> PageContent {
     page(
@@ -20,7 +20,7 @@ pub(super) fn page_content() -> PageContent {
         "Documentation and tutorials now share one task-oriented home. Complete one real workflow and use its expected result to verify the path.",
     )
     .with_actions(vec![
-        action("Open the v0.6.16 release", RELEASE_HREF, "button button-secondary"),
+        action("Open the v0.6.19 release", RELEASE_HREF, "button button-secondary"),
         action("Download the client", "/downloads", "button button-primary"),
     ])
     .with_documentation_page(documentation())
@@ -29,8 +29,8 @@ pub(super) fn page_content() -> PageContent {
 fn documentation() -> DocumentationContent {
     DocumentationContent {
         release_label: "Current public release",
-        release_version: "v0.6.16",
-        release_date: "2026-07-18",
+        release_version: "v0.6.19",
+        release_date: "2026-07-23",
         release_href: RELEASE_HREF,
         release_action_label: "Open Release",
         index_label: "Documentation",
@@ -47,7 +47,7 @@ fn documentation() -> DocumentationContent {
         groups: groups(),
         platform_code: "00 / PLATFORM MATRIX",
         platform_title: "Choose the asset for your platform and architecture",
-        platform_lead: "v0.6.16 has seven application release assets. Windows, Linux, and Android are delivered; macOS and iOS remain planned.",
+        platform_lead: "v0.6.19 has seven application release assets. Windows, Linux, and Android are delivered; macOS and iOS remain planned.",
         platforms: platforms(),
         tutorials: super::en_tutorials::content(),
         sections: sections(),
@@ -108,8 +108,8 @@ fn platforms() -> Vec<DocumentationPlatform> {
             "W",
             "Windows",
             "Desktop mainline",
-            "v0.6.16 released",
-            "Creation-SSH_0.6.16_x64-setup.exe · Creation-SSH_0.6.16_x64_en-US.msi · Creation-SSH_0.6.16_portable-Windows-x64.zip",
+            "v0.6.19 released",
+            "Creation-SSH_0.6.19_x64-setup.exe · Creation-SSH_0.6.19_x64_en-US.msi · Creation-SSH_0.6.19_portable-Windows-x64.zip",
             "Choose one of NSIS, MSI, or portable; do not install multiple variants together.",
             RELEASE_HREF,
         ),
@@ -117,8 +117,8 @@ fn platforms() -> Vec<DocumentationPlatform> {
             "L",
             "Linux",
             "Independent desktop",
-            "v0.6.16 released",
-            "Creation-SSH_0.6.16_linux-amd64.deb · Creation-SSH_0.6.16_linux-x86_64.AppImage",
+            "v0.6.19 released",
+            "Creation-SSH_0.6.19_linux-amd64.deb · Creation-SSH_0.6.19_linux-x86_64.AppImage",
             "Use deb on Debian-family systems; other x86_64 desktops may use AppImage according to distribution policy.",
             RELEASE_HREF,
         ),
@@ -126,8 +126,8 @@ fn platforms() -> Vec<DocumentationPlatform> {
             "A",
             "Android",
             "Mobile companion",
-            "v0.6.16 released",
-            "C-SSH_0.6.16_android-arm64.apk · C-SSH_0.6.16_android-arm64.aab",
+            "v0.6.19 released",
+            "C-SSH_0.6.19_android-arm64.apk · C-SSH_0.6.19_android-arm64.aab",
             "Most users install the signed APK. AAB is for store distribution and is not directly installable.",
             RELEASE_HREF,
         ),
@@ -159,7 +159,7 @@ fn sections() -> Vec<DocumentationSection> {
                 text(
                     "SOURCE",
                     "Use the public Release only",
-                    "Open the v0.6.16 release and select one matching application asset from the platform matrix. Do not install copies from chat attachments, re-uploaded drives, or unknown mirrors.",
+                    "Open the v0.6.19 release and select one matching application asset from the platform matrix. Do not install copies from chat attachments, re-uploaded drives, or unknown mirrors.",
                     true,
                 ),
                 command(
@@ -194,12 +194,12 @@ fn sections() -> Vec<DocumentationSection> {
             "cloud-security",
             "09 / CLOUD & SECURITY",
             "A Cloud account is optional and SSH remains the data plane",
-            "The current local implementation is neither deployed nor connected online. A page existing does not mean the cloud capability is delivered.",
+            "The Creation Cloud production control plane is deployed. A Cloud account is still optional for local SSH workflows, and production client integration follows the active client configuration.",
             vec![
                 text(
                     "OPTIONAL",
                     "Manage local hosts without a Cloud account",
-                    "SSH connections, standard terminals, and local workflows do not require Cloud sign-in. Cloud is planned only as the control plane for accounts, devices, sync, models, vault envelopes, versions, and downloads.",
+                    "SSH connections, standard terminals, and local workflows do not require Cloud sign-in. Cloud is limited to the control plane for accounts, devices, sync, models, vault envelopes, versions, and downloads.",
                     false,
                 ),
                 text(

@@ -8,7 +8,7 @@ use crate::{
 
 use super::zh_cn::{action, page};
 
-const RELEASE_HREF: &str = "https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.16";
+const RELEASE_HREF: &str = "https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19";
 
 pub(super) fn page_content() -> PageContent {
     page(
@@ -20,7 +20,7 @@ pub(super) fn page_content() -> PageContent {
         "文档和实操指南已经合并。按目录完成一个真实任务，并用每章的预期结果判断链路是否可用。",
     )
     .with_actions(vec![
-        action("查看 v0.6.16 发布页", RELEASE_HREF, "button button-secondary"),
+        action("查看 v0.6.19 发布页", RELEASE_HREF, "button button-secondary"),
         action("下载客户端", "/downloads", "button button-primary"),
     ])
     .with_documentation_page(documentation())
@@ -29,8 +29,8 @@ pub(super) fn page_content() -> PageContent {
 fn documentation() -> DocumentationContent {
     DocumentationContent {
         release_label: "当前公开发布",
-        release_version: "v0.6.16",
-        release_date: "2026-07-18",
+        release_version: "v0.6.19",
+        release_date: "2026-07-23",
         release_href: RELEASE_HREF,
         release_action_label: "打开 Release",
         index_label: "文档目录",
@@ -47,7 +47,7 @@ fn documentation() -> DocumentationContent {
         groups: groups(),
         platform_code: "00 / PLATFORM MATRIX",
         platform_title: "选择与你的平台和架构匹配的发布资产",
-        platform_lead: "v0.6.16 共七个正式安装或发布资产。Windows、Linux、Android 已交付；macOS 与 iOS 仍处于规划中。",
+        platform_lead: "v0.6.19 共七个正式安装或发布资产。Windows、Linux、Android 已交付；macOS 与 iOS 仍处于规划中。",
         platforms: platforms(),
         tutorials: super::zh_cn_tutorials::content(),
         sections: sections(),
@@ -104,8 +104,8 @@ fn platforms() -> Vec<DocumentationPlatform> {
             "W",
             "Windows",
             "桌面主线",
-            "v0.6.16 已发布",
-            "Creation-SSH_0.6.16_x64-setup.exe · Creation-SSH_0.6.16_x64_en-US.msi · Creation-SSH_0.6.16_portable-Windows-x64.zip",
+            "v0.6.19 已发布",
+            "Creation-SSH_0.6.19_x64-setup.exe · Creation-SSH_0.6.19_x64_en-US.msi · Creation-SSH_0.6.19_portable-Windows-x64.zip",
             "选择 NSIS、MSI 或便携包之一；不要同时安装多个变体。",
             RELEASE_HREF,
         ),
@@ -113,8 +113,8 @@ fn platforms() -> Vec<DocumentationPlatform> {
             "L",
             "Linux",
             "独立桌面",
-            "v0.6.16 已发布",
-            "Creation-SSH_0.6.16_linux-amd64.deb · Creation-SSH_0.6.16_linux-x86_64.AppImage",
+            "v0.6.19 已发布",
+            "Creation-SSH_0.6.19_linux-amd64.deb · Creation-SSH_0.6.19_linux-x86_64.AppImage",
             "Debian 系选择 deb；其他 x86_64 桌面可按发行版策略使用 AppImage。",
             RELEASE_HREF,
         ),
@@ -122,8 +122,8 @@ fn platforms() -> Vec<DocumentationPlatform> {
             "A",
             "Android",
             "移动伴侣",
-            "v0.6.16 已发布",
-            "C-SSH_0.6.16_android-arm64.apk · C-SSH_0.6.16_android-arm64.aab",
+            "v0.6.19 已发布",
+            "C-SSH_0.6.19_android-arm64.apk · C-SSH_0.6.19_android-arm64.aab",
             "普通用户使用已签名 APK；AAB 面向应用商店分发，不是直接安装包。",
             RELEASE_HREF,
         ),
@@ -155,7 +155,7 @@ fn sections() -> Vec<DocumentationSection> {
                 text(
                     "SOURCE",
                     "只认公开 Release",
-                    "打开 v0.6.16 发布页，按平台矩阵选择一个正式资产；不要从聊天附件、网盘转存或不明镜像安装。",
+                    "打开 v0.6.19 发布页，按平台矩阵选择一个正式资产；不要从聊天附件、网盘转存或不明镜像安装。",
                     true,
                 ),
                 command(
@@ -190,12 +190,12 @@ fn sections() -> Vec<DocumentationSection> {
             "cloud-security",
             "09 / CLOUD & SECURITY",
             "Cloud 账号可选，数据面仍走 SSH",
-            "当前本地实现尚未部署，也未连接线上服务；页面存在不代表云端能力已经交付。",
+            "Creation Cloud 生产控制面已经部署；Cloud 账号仍不是本地 SSH 工作流的前提，客户端正式接入以当前版本配置为准。",
             vec![
                 text(
                     "OPTIONAL",
                     "无需 Cloud 账号也可管理本地主机",
-                    "SSH 连接、普通终端和本地工作流不以 Cloud 登录为前提。Cloud 只规划承载账号、设备、同步、模型、保险库信封、版本与下载控制面。",
+                    "SSH 连接、普通终端和本地工作流不以 Cloud 登录为前提。Cloud 仅承载账号、设备、同步、模型、保险库信封、版本与下载控制面。",
                     false,
                 ),
                 text(

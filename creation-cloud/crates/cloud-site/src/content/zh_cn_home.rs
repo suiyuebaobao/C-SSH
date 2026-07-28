@@ -11,7 +11,7 @@ pub(super) fn page_content() -> PageContent {
     let platforms = platforms();
     let sections = sections(&platforms);
     let home_page = HomePageContent {
-        status_note: "本地实现 · 未部署 · 未发布",
+        status_note: "生产控制面 · 正式版本已发布 · 客户端接入筹备中",
         platform_label: "I/O MATRIX / PLATFORM",
         platform_note: "5 SLOTS",
         platforms,
@@ -322,7 +322,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "cloud",
             HomeLayout::Cloud,
             "账号服务于设备与同步，不介入 SSH",
-            "Creation Cloud 控制面当前为本地实现阶段：未部署、未发布、未接入客户端；页面只说明控制面的正向价值与真实状态。",
+            "Creation Cloud 控制面已部署到正式服务器：账号、设备、同步、模型、保险库密文、版本、下载与后台已经提供；客户端正式接入另行发布。",
             vec![
                 item(
                     "ACCOUNT",

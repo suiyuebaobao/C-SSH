@@ -11,7 +11,7 @@ pub(super) fn page_content() -> PageContent {
     let platforms = platforms();
     let sections = sections(&platforms);
     let home_page = HomePageContent {
-        status_note: "Local implementation · Not deployed · Not published",
+        status_note: "Production control plane · Official release published · Client integration pending",
         platform_label: "I/O MATRIX / PLATFORM",
         platform_note: "5 SLOTS",
         platforms,
@@ -327,7 +327,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "cloud",
             HomeLayout::Cloud,
             "Accounts support devices and sync, never SSH",
-            "Creation Cloud control plane status: implemented locally, not deployed, not published, and not integrated into clients. The page states both value and delivery status.",
+            "The Creation Cloud control plane is deployed on the production server with accounts, devices, sync, model metadata, encrypted vault envelopes, releases, downloads, and administration. Production client integration ships separately.",
             vec![
                 item(
                     "ACCOUNT",
