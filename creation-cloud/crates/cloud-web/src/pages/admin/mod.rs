@@ -7,6 +7,7 @@ pub(crate) mod devices;
 pub(crate) mod feedback;
 pub(crate) mod overview;
 pub(crate) mod releases;
+pub(crate) mod seo;
 pub(crate) mod shared;
 pub(crate) mod site;
 pub(crate) mod users;
@@ -39,6 +40,10 @@ pub(crate) async fn static_assets(Query(query): Query<LocaleQuery>) -> AppResult
 
 pub(crate) async fn static_site(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
     render::admin(PageId::AdminSite, query.locale())
+}
+
+pub(crate) async fn static_seo(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
+    render::admin(PageId::AdminSeo, query.locale())
 }
 
 pub(crate) async fn static_audit(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {

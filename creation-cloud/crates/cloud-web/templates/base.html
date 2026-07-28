@@ -10,6 +10,7 @@
   <meta name="theme-color" content="#f4f1ec">
   {% if let Some(verification) = seo.google_site_verification %}<meta name="google-site-verification" content="{{ verification }}">{% endif %}
   {% if let Some(verification) = seo.baidu_site_verification %}<meta name="baidu-site-verification" content="{{ verification }}">{% endif %}
+  {% if let Some(keywords) = seo.keywords %}<meta name="keywords" content="{{ keywords }}">{% endif %}
   <title>{{ view.page.meta_title }}</title>
   {% if let Some(canonical_url) = seo.canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
   {% if let Some(alternate_url) = seo.alternate_zh_url %}<link rel="alternate" hreflang="zh-CN" href="{{ alternate_url }}">{% endif %}

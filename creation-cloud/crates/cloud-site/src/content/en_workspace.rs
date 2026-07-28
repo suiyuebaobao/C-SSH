@@ -226,6 +226,16 @@ pub(super) fn admin_site() -> PageContent {
     )
 }
 
+pub(super) fn admin_seo() -> PageContent {
+    admin_page(
+        PageId::AdminSeo,
+        "SEO topics | Creation Cloud Admin",
+        "SEO topics",
+        "Maintain visible search themes for public pages",
+        "Manage Chinese and English topics, visibility, and ordering. Topics appear naturally in crawlable copy; meta keywords remain a compatibility-only projection.",
+    )
+}
+
 pub(super) fn admin_audit() -> PageContent {
     admin_page(
         PageId::AdminAudit,
@@ -291,7 +301,8 @@ fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
         nav("30 Releases", PageId::AdminReleases, current),
         nav("40 Assets", PageId::AdminAssets, current),
         nav("50 Site", PageId::AdminSite, current),
-        nav("60 Audit", PageId::AdminAudit, current),
-        nav("70 Feedback", PageId::AdminFeedback, current),
+        nav("60 SEO", PageId::AdminSeo, current),
+        nav("70 Audit", PageId::AdminAudit, current),
+        nav("80 Feedback", PageId::AdminFeedback, current),
     ]
 }

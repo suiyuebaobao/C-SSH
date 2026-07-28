@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::response::Html;
 use cloud_domain::{AppError, AppResult};
-use cloud_download::{PublicAsset, PublicRelease, PublicSource};
+use cloud_download::{PublicAsset, PublicRelease};
 use cloud_site::{
     DocumentationContent, HomePageContent, Locale, PageId, SiteView, content_service,
 };
@@ -16,7 +16,7 @@ struct HomeTemplate {
     view: SiteView,
     home: HomePageContent,
     seo: SeoHead,
-    catalog: PublishedCatalogView,
+    topics: Vec<String>,
     is_en: bool,
 }
 
@@ -99,7 +99,7 @@ pub(crate) fn home(page: PageId, locale: Locale, config: &SeoConfig) -> AppResul
         view,
         home,
         seo,
-        catalog: PublishedCatalogView::empty(),
+        topics: Vec::new(),
         is_en: locale == Locale::En,
     })
 }
@@ -108,10 +108,10 @@ pub(crate) fn home_live(
     page: PageId,
     locale: Locale,
     config: &SeoConfig,
-    manifest: Vec<PublicRelease>,
+    topics: Vec<String>,
 ) -> AppResult<Html<String>> {
     let view = content_service().view(page, locale);
-    let seo = public_head(config, page, locale, &view);
+    let seo = public_head(config, page, locale, &view).with_keywords(&topics);
     let home = view
         .page
         .home_page
@@ -121,7 +121,7 @@ pub(crate) fn home_live(
         view,
         home,
         seo,
-        catalog: PublishedCatalogView::new(manifest, locale),
+        topics,
         is_en: locale == Locale::En,
     })
 }
@@ -238,34 +238,16 @@ pub(crate) fn admin(page: PageId, locale: Locale) -> AppResult<Html<String>> {
 struct PublishedCatalogView {
     releases: Vec<PublishedReleaseView>,
     latest: Option<PublishedReleaseView>,
-    has_macos: bool,
-    has_ios: bool,
 }
 
 impl PublishedCatalogView {
-    const fn empty() -> Self {
-        Self {
-            releases: Vec::new(),
-            latest: None,
-            has_macos: false,
-            has_ios: false,
-        }
-    }
-
     fn new(manifest: Vec<PublicRelease>, locale: Locale) -> Self {
         let releases = manifest
             .into_iter()
             .map(|release| PublishedReleaseView::new(release, locale))
             .collect::<Vec<_>>();
-        let has_macos = releases.iter().any(|release| release.has_macos);
-        let has_ios = releases.iter().any(|release| release.has_ios);
         let latest = releases.first().cloned();
-        Self {
-            releases,
-            latest,
-            has_macos,
-            has_ios,
-        }
+        Self { releases, latest }
     }
 
     fn has_published(&self) -> bool {
@@ -306,7 +288,7 @@ impl PublishedReleaseView {
             .to_string();
         let mut platforms = Vec::<PublishedPlatformView>::new();
         for asset in release.assets {
-            append_asset(&mut platforms, asset, locale);
+            append_asset(&mut platforms, asset);
         }
         platforms.sort_by_key(|platform| platform_rank(&platform.name));
         let has_windows = has_platform(&platforms, "windows");
@@ -341,32 +323,20 @@ struct PublishedPlatformView {
 struct PublishedAssetView {
     architecture: String,
     package_kind: String,
-    file_name: String,
-    byte_size: String,
-    sha256: String,
-    sources: Vec<PublishedSourceView>,
+    download_href: Option<String>,
 }
 
-#[derive(Clone, Debug)]
-struct PublishedSourceView {
-    provider_name: String,
-    kind_label: &'static str,
-    download_href: String,
-}
-
-fn append_asset(platforms: &mut Vec<PublishedPlatformView>, asset: PublicAsset, locale: Locale) {
+fn append_asset(platforms: &mut Vec<PublishedPlatformView>, asset: PublicAsset) {
     let platform_name = display_platform(&asset.platform);
+    let download_href = asset
+        .sources
+        .into_iter()
+        .min_by_key(|source| source.sort_order)
+        .map(|source| format!("/api/v1/downloads/{}", source.download_path));
     let asset_view = PublishedAssetView {
         architecture: asset.architecture,
         package_kind: asset.package_kind,
-        file_name: asset.file_name,
-        byte_size: format!("{} B", asset.byte_size),
-        sha256: asset.sha256,
-        sources: asset
-            .sources
-            .into_iter()
-            .map(|source| PublishedSourceView::new(source, locale))
-            .collect(),
+        download_href,
     };
     if let Some(platform) = platforms
         .iter_mut()
@@ -378,22 +348,6 @@ fn append_asset(platforms: &mut Vec<PublishedPlatformView>, asset: PublicAsset, 
             name: platform_name,
             assets: vec![asset_view],
         });
-    }
-}
-
-impl PublishedSourceView {
-    fn new(source: PublicSource, locale: Locale) -> Self {
-        let kind_label = match (locale, source.source_kind.as_str()) {
-            (Locale::ZhCn, "local") => "本站",
-            (Locale::ZhCn, _) => "外部来源",
-            (Locale::En, "local") => "This site",
-            (Locale::En, _) => "External source",
-        };
-        Self {
-            provider_name: source.provider_name,
-            kind_label,
-            download_href: format!("/api/v1/downloads/{}", source.download_path),
-        }
     }
 }
 

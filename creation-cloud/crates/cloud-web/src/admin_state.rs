@@ -19,6 +19,7 @@ pub struct AdminPageState {
     release: cloud_release::Service,
     download: cloud_download::Service,
     feedback: cloud_feedback::Service,
+    seo: cloud_seo::Service,
     site_media: cloud_site_media::Service,
     pool: cloud_store::PgPool,
     environment: String,
@@ -35,11 +36,13 @@ impl AdminPageState {
         environment: String,
     ) -> Self {
         let feedback = cloud_feedback::Service::new(pool.clone());
+        let seo = cloud_seo::Service::new(pool.clone());
         Self {
             admin,
             release,
             download,
             feedback,
+            seo,
             site_media,
             pool,
             environment,
@@ -60,6 +63,10 @@ impl AdminPageState {
 
     pub(crate) const fn feedback(&self) -> &cloud_feedback::Service {
         &self.feedback
+    }
+
+    pub(crate) const fn seo(&self) -> &cloud_seo::Service {
+        &self.seo
     }
 
     pub(crate) const fn site_media(&self) -> &cloud_site_media::Service {

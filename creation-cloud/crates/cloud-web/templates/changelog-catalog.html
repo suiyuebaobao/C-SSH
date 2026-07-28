@@ -1,0 +1,50 @@
+<section class="changelog-hero" aria-labelledby="changelog-title">
+  <div class="container changelog-hero-inner">
+    <div>
+      <p class="eyebrow">{{ view.page.eyebrow }}</p>
+      <h1 id="changelog-title">{{ view.page.heading }}</h1>
+      <p>{{ view.page.lead }}</p>
+    </div>
+    <a class="button button-primary" href="{% if is_en %}/en/downloads{% else %}/downloads{% endif %}">{% if is_en %}Download latest{% else %}下载最新版{% endif %}</a>
+  </div>
+</section>
+
+{% if catalog.has_published() %}
+<section class="changelog-history" aria-labelledby="changelog-history-title">
+  <div class="container">
+    <header class="changelog-history-heading">
+      <h2 id="changelog-history-title">{% if is_en %}Release history{% else %}版本记录{% endif %}</h2>
+      <p>{% if is_en %}What changed, when it shipped, and which platforms were included.{% else %}只记录变更、发布时间与覆盖平台。{% endif %}</p>
+    </header>
+
+    <ol class="changelog-timeline">
+      {% for release in catalog.releases %}
+      <li class="changelog-entry" id="release-{{ release.version }}">
+        <div class="changelog-entry-meta">
+          <span>{{ release.version }}</span>
+          <time datetime="{{ release.published_at_iso }}">{{ release.published_at_label }}</time>
+        </div>
+        <article class="changelog-entry-content">
+          <span class="card-badge">{{ release.channel }}</span>
+          <h3>{{ release.title }}</h3>
+          {% if !release.notes.is_empty() %}<p>{{ release.notes }}</p>{% endif %}
+          <ul class="changelog-platforms" aria-label="{% if is_en %}Released platforms{% else %}发布平台{% endif %}">
+            {% for platform in release.platforms %}<li>{{ platform.name }}</li>{% endfor %}
+          </ul>
+        </article>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% else %}
+{% for section in view.page.sections %}
+<section class="changelog-empty" aria-labelledby="changelog-empty-{{ section.anchor }}">
+  <div class="container">
+    <h2 id="changelog-empty-{{ section.anchor }}">{{ section.title }}</h2>
+    <p>{{ section.lead }}</p>
+    {% for item in section.items %}<p><strong>{{ item.title }}</strong> · {{ item.meta }}</p>{% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endif %}

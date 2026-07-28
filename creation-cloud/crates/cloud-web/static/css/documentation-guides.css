@@ -28,27 +28,6 @@ html[lang="en"] .docs-page-header h1 {
   font-size: 1.05rem;
 }
 
-.docs-page-meta {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  margin-top: 22px;
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-}
-
-.docs-page-meta strong {
-  color: var(--ink);
-}
-
-.docs-page-meta a {
-  color: var(--accent-text);
-  font-weight: 760;
-}
-
 .docs-page-header .action-row {
   margin-top: 22px;
 }

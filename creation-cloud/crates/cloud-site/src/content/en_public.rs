@@ -2,7 +2,7 @@
 
 use crate::{FaqItem, PageContent, PageId};
 
-use super::en::{action, item, page, section};
+use super::en::{item, page, section};
 
 pub(super) fn security() -> PageContent {
     page(
@@ -40,21 +40,20 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "Client releases and platform status | Creation-SSH",
-        "Review Creation-SSH status for Windows, Linux, Android, macOS, and iOS; verify source, architecture, and SHA256 after real assets are published.",
-        "Release records are authoritative",
-        "Choose the right build for your platform",
-        "Once assets are connected, this page will distinguish first-party files from clearly labeled external mirrors.",
+        "Download Creation-SSH for Windows, Linux, and Android",
+        "Download the latest Creation-SSH SSH terminal and server operations client for Windows, Linux, and Android; macOS and iOS are not developed yet.",
+        "DOWNLOADS / DIRECT",
+        "Download Creation-SSH",
+        "Choose a platform and package, then download.",
     )
-    .with_actions(vec![action("Read the changelog", "/changelog", "button button-secondary")])
     .with_sections(vec![section(
         "builds",
-        "Platform builds",
-        "Placeholder links never masquerade as downloadable assets.",
+        "Choose your platform",
+        "Only actionable download buttons are shown; platforms not developed yet keep a short status.",
         vec![
-            item("Desktop", "Windows", "Installer, MSI, and portable builds will list size and SHA256 separately.", "Awaiting release data"),
-            item("Desktop", "Linux", "AppImage and deb appear only after local builds and real validation.", "Awaiting release data"),
-            item("Mobile", "Android", "Release arm64 assets remain distinct from test-only x86_64 builds.", "Awaiting release data"),
+            item("Desktop", "Windows", "Available package buttons start the download directly.", "Awaiting release data"),
+            item("Desktop", "Linux", "Available package buttons start the download directly.", "Awaiting release data"),
+            item("Mobile", "Android", "Available package buttons start the download directly.", "Awaiting release data"),
             item("Planned", "macOS", "The independent macOS client has not been developed yet; no download is offered.", "Not developed yet"),
             item("Planned", "iOS", "The independent iOS companion has not been developed yet; no download is offered.", "Not developed yet"),
         ],
@@ -64,11 +63,11 @@ pub(super) fn downloads() -> PageContent {
 pub(super) fn changelog() -> PageContent {
     page(
         PageId::Changelog,
-        "Release records and publication policy | Creation-SSH",
-        "Review Creation-SSH release records, asset sources, SHA256, and real-validation policy without fabricated version data.",
-        "An immutable release history",
-        "Every formal version keeps its own record",
-        "Release notes, sources, validation, and SHA256 will appear together once the release service is connected.",
+        "Creation-SSH changelog | Releases and feature updates",
+        "Review Creation-SSH release dates, feature updates, and supported platforms; download files and SHA256 details stay on the download page.",
+        "CHANGELOG / RELEASE HISTORY",
+        "Changelog",
+        "Track what changed, when each release shipped, and which platforms were included.",
     )
     .with_sections(vec![
         section("latest", "Recent releases", "This page does not hard-code a version that can go stale.", vec![item("Pending", "Release records are not loaded", "Published versions will be ordered by release time.", "No mock data")]),

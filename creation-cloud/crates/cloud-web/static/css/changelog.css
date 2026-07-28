@@ -1,0 +1,199 @@
+/* 更新日志是版本时间线，不重复承担下载目录职责。 */
+.changelog-main {
+  min-height: calc(100svh - var(--header-height));
+}
+
+.changelog-hero {
+  padding-block: clamp(44px, 7vw, 80px);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-alt);
+}
+
+.changelog-hero-inner {
+  display: flex;
+  gap: var(--space-6);
+  align-items: end;
+  justify-content: space-between;
+}
+
+.changelog-hero-inner > div {
+  min-width: 0;
+}
+
+.changelog-hero h1 {
+  margin-block: var(--space-3);
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
+.changelog-hero p:last-child {
+  max-width: 680px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.04rem;
+}
+
+.changelog-hero .button {
+  flex: 0 0 auto;
+}
+
+.changelog-history {
+  padding-block: clamp(46px, 7vw, 84px);
+}
+
+.changelog-history-heading {
+  display: flex;
+  gap: var(--space-5);
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.changelog-history-heading h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.changelog-history-heading p {
+  max-width: 500px;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.changelog-timeline {
+  position: relative;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changelog-timeline::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 208px;
+  width: 1px;
+  background: var(--line-strong);
+  content: "";
+}
+
+.changelog-entry {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 56px;
+  padding-block: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+.changelog-entry:first-child {
+  border-top-color: var(--line-strong);
+}
+
+.changelog-entry::before {
+  position: absolute;
+  top: calc(var(--space-6) + 7px);
+  left: 202px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--paper);
+  content: "";
+}
+
+.changelog-entry-meta {
+  display: grid;
+  height: fit-content;
+  gap: 7px;
+}
+
+.changelog-entry-meta span {
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.changelog-entry-meta time {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+}
+
+.changelog-entry-content {
+  min-width: 0;
+}
+
+.changelog-entry-content h3 {
+  margin-block: var(--space-3);
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+}
+
+.changelog-entry-content > p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.changelog-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changelog-platforms li {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.changelog-empty {
+  padding-block: var(--space-7);
+  border-bottom: 1px solid var(--line);
+}
+
+.changelog-empty h2 {
+  margin-top: 0;
+}
+
+.changelog-empty p {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 720px) {
+  .changelog-hero-inner,
+  .changelog-history-heading {
+    display: grid;
+    align-items: start;
+  }
+
+  .changelog-hero .button {
+    width: fit-content;
+  }
+
+  .changelog-timeline::before {
+    left: 6px;
+  }
+
+  .changelog-entry {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding-left: 30px;
+  }
+
+  .changelog-entry::before {
+    top: calc(var(--space-6) + 4px);
+    left: 0;
+  }
+}

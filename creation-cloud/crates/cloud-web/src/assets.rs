@@ -13,6 +13,8 @@ const LAYOUT_CSS: &str = include_str!("../static/css/layout.css");
 const COMPONENTS_CSS: &str = include_str!("../static/css/components.css");
 const GITHUB_LINK_CSS: &str = include_str!("../static/css/github-link.css");
 const PAGES_CSS: &str = include_str!("../static/css/pages.css");
+const DOWNLOADS_CSS: &str = include_str!("../static/css/downloads.css");
+const CHANGELOG_CSS: &str = include_str!("../static/css/changelog.css");
 const FEEDBACK_CSS: &str = include_str!("../static/css/feedback.css");
 const PUBLIC_DETAIL_CSS: &str = include_str!("../static/css/public-detail.css");
 const HOME_FOUNDATION_CSS: &str = include_str!("../static/css/home-foundation.css");
@@ -37,14 +39,22 @@ const CONSOLE_JS: &str = include_str!("../static/js/console.js");
 const HTMX_JS: &str = include_str!("../static/js/htmx.min.js");
 const BRAND_IMAGE: &[u8] = include_bytes!("../static/img/brand-c.png");
 const PRODUCT_TERMINAL_IMAGE: &[u8] = include_bytes!("../static/img/product-terminal.png");
+const BAIDU_VERIFICATION_FILE: &[u8] =
+    include_bytes!("../static/baidu_verify_codeva-DseeJ4AVXG.html");
 
 pub(crate) fn router() -> Router {
     Router::new()
+        .route(
+            "/baidu_verify_codeva-DseeJ4AVXG.html",
+            get(baidu_verification_file),
+        )
         .route("/static/css/tokens.css", get(tokens_css))
         .route("/static/css/layout.css", get(layout_css))
         .route("/static/css/components.css", get(components_css))
         .route("/static/css/github-link.css", get(github_link_css))
         .route("/static/css/pages.css", get(pages_css))
+        .route("/static/css/downloads.css", get(downloads_css))
+        .route("/static/css/changelog.css", get(changelog_css))
         .route("/static/css/feedback.css", get(feedback_css))
         .route("/static/css/public-detail.css", get(public_detail_css))
         .route("/static/css/home-foundation.css", get(home_foundation_css))
@@ -102,6 +112,14 @@ async fn github_link_css() -> Response {
 
 async fn pages_css() -> Response {
     text_response(PAGES_CSS, "text/css; charset=utf-8")
+}
+
+async fn downloads_css() -> Response {
+    text_response(DOWNLOADS_CSS, "text/css; charset=utf-8")
+}
+
+async fn changelog_css() -> Response {
+    text_response(CHANGELOG_CSS, "text/css; charset=utf-8")
 }
 
 async fn feedback_css() -> Response {
@@ -192,6 +210,19 @@ async fn product_terminal_image() -> Response {
     binary_response(PRODUCT_TERMINAL_IMAGE, "image/png")
 }
 
+async fn baidu_verification_file() -> Response {
+    let body = strip_trailing_line_endings(BAIDU_VERIFICATION_FILE);
+    binary_response(body, "text/html; charset=utf-8")
+}
+
+fn strip_trailing_line_endings(content: &[u8]) -> &[u8] {
+    let end = content
+        .iter()
+        .rposition(|byte| !matches!(byte, b'\r' | b'\n'))
+        .map_or(0, |index| index + 1);
+    &content[..end]
+}
+
 fn text_response(content: &'static str, content_type: &'static str) -> Response {
     response(Body::from(content), content_type)
 }
@@ -210,4 +241,24 @@ fn response(body: Body, content_type: &'static str) -> Response {
         HeaderValue::from_static("public, max-age=3600"),
     );
     response
+}
+
+#[cfg(test)]
+mod tests {
+    use super::strip_trailing_line_endings;
+
+    #[test]
+    fn baidu_verification_body_removes_lf_and_crlf_line_endings() {
+        const EXPECTED: &[u8] = b"1dfe4b12720bf4e72461ac71b0bac4fd";
+
+        assert_eq!(strip_trailing_line_endings(EXPECTED), EXPECTED);
+        assert_eq!(
+            strip_trailing_line_endings(b"1dfe4b12720bf4e72461ac71b0bac4fd\n"),
+            EXPECTED
+        );
+        assert_eq!(
+            strip_trailing_line_endings(b"1dfe4b12720bf4e72461ac71b0bac4fd\r\n"),
+            EXPECTED
+        );
+    }
 }

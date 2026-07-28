@@ -286,39 +286,6 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             ],
         ),
         section(
-            "downloads",
-            HomeLayout::Downloads,
-            "下载前，先确认来源与校验值",
-            "首页只读取最近真实版本；发布数据未接入时保持明确空状态，不写死版本号或占位链接。",
-            vec![
-                item(
-                    "WINDOWS",
-                    "等待发布数据",
-                    "接入后显示架构、来源、大小与发布时间。",
-                    "SHA256：—",
-                ),
-                item(
-                    "LINUX",
-                    "等待发布数据",
-                    "AppImage 与 deb 必须来自真实本地构建记录。",
-                    "SHA256：—",
-                ),
-                item(
-                    "ANDROID",
-                    "等待发布数据",
-                    "正式 arm64 资产与测试用 x86_64 包保持分离。",
-                    "SHA256：—",
-                ),
-                item(
-                    "macOS",
-                    "规划中",
-                    "不提供下载动作或已支持暗示。",
-                    "SHA256：—",
-                ),
-                item("iOS", "规划中", "不提供下载动作或已支持暗示。", "SHA256：—"),
-            ],
-        ),
-        section(
             "cloud",
             HomeLayout::Cloud,
             "账号服务于设备与同步，不介入 SSH",
@@ -407,7 +374,6 @@ fn section(
         HomeLayout::Steps => ("03 / FIRST RUN", "OPERATION SEQUENCE / 06 STEPS"),
         HomeLayout::Platforms => ("04 / PLATFORMS", "PLATFORM MATRIX / 05 SLOTS"),
         HomeLayout::Security => ("05 / SECURITY BOUNDARY", "SEPARATED PLANES"),
-        HomeLayout::Downloads => ("06 / DOWNLOADS", "SOURCE AND CHECKSUM"),
         HomeLayout::Cloud => ("07 / CREATION CLOUD", "CONTROL SURFACE"),
     };
     HomeSection::new(anchor, code, side_label, layout, title, lead, items)

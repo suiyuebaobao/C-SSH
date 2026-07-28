@@ -33,6 +33,7 @@ pub(super) fn view(page: PageId) -> SiteView {
             PageId::AdminReleases => super::zh_cn_workspace::admin_releases(),
             PageId::AdminAssets => super::zh_cn_workspace::admin_assets(),
             PageId::AdminSite => super::zh_cn_workspace::admin_site(),
+            PageId::AdminSeo => super::zh_cn_workspace::admin_seo(),
             PageId::AdminAudit => super::zh_cn_workspace::admin_audit(),
             PageId::AdminFeedback => super::zh_cn_workspace::admin_feedback(),
         },

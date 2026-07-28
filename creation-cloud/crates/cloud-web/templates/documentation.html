@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{# 文档中心：把发布说明、实操指南和参考内容收敛到唯一知识入口。 #}
+{# 文档中心：只承载安装完成后的实操指南和参考内容。 #}
 
 {% block styles %}
   <link rel="stylesheet" href="/static/css/documentation.css?v=20260720-docs3">
@@ -69,12 +69,6 @@
         <p class="eyebrow">{{ view.page.eyebrow }}</p>
         <h1 id="docs-title">{{ view.page.heading }}</h1>
         <p class="docs-page-lead">{{ view.page.lead }}</p>
-        <div class="docs-page-meta">
-          <span>{{ documentation.release_label }}</span>
-          <strong>{{ documentation.release_version }}</strong>
-          <time>{{ documentation.release_date }}</time>
-          <a href="{{ documentation.release_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">{{ documentation.release_action_label }} ↗</a>
-        </div>
         <div class="action-row">
           {% for action in view.page.actions %}
           <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
@@ -89,25 +83,6 @@
             <h2 id="docs-safety-title">{{ documentation.status.title }}</h2>
             <p>{{ documentation.status.body }}</p>
           </div>
-        </div>
-      </section>
-
-      <section class="docs-section docs-platform-section" id="platform-matrix" aria-labelledby="docs-platform-title">
-        <header class="docs-section-heading">
-          <p>{{ documentation.platform_code }}</p>
-          <h2 id="docs-platform-title">{{ documentation.platform_title }}</h2>
-          <p>{{ documentation.platform_lead }}</p>
-        </header>
-        <div class="docs-platform-grid">
-          {% for platform in documentation.platforms %}
-          <article class="docs-platform{% if platform.planned %} docs-platform-planned{% endif %}">
-            <div class="docs-platform-head"><span aria-hidden="true">{{ platform.symbol }}</span><div><small>{{ platform.role }}</small><h3>{{ platform.name }}</h3></div></div>
-            <strong class="docs-platform-state">{{ platform.state }}</strong>
-            {% if !platform.planned %}<p class="docs-platform-assets">{{ platform.assets }}</p>{% endif %}
-            <p>{{ platform.detail }}</p>
-            {% if !platform.planned %}<a href="{{ platform.release_href }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hx-boost="false">{{ documentation.release_action_label }} ↗</a>{% endif %}
-          </article>
-          {% endfor %}
         </div>
       </section>
 

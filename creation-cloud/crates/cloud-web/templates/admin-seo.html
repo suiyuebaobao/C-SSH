@@ -1,0 +1,99 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="seo-guidance-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="seo-guidance-heading">{% if is_en %}How topics affect search{% else %}主题词如何影响搜索{% endif %}</h2>
+      <p>{% if is_en %}Enabled topics guide visible copy and page metadata. They improve relevance only when the public content genuinely answers the search intent.{% else %}启用的主题词会指导公开文案与页面元信息；只有页面内容真实回应搜索意图时，才会提升相关性。{% endif %}</p>
+    </div>
+  </div>
+  <div class="admin-feedback" data-tone="success">
+    <p>{% if is_en %}Use specific product topics, not repeated keyword lists. Indexing and ranking remain decisions made by each search engine.{% else %}请设置具体的产品主题，不要重复堆砌关键词。是否收录与如何排名仍由各搜索引擎决定。{% endif %}</p>
+  </div>
+</section>
+
+<section class="admin-section" aria-labelledby="create-seo-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="create-seo-heading">{% if is_en %}Add topic{% else %}新增主题词{% endif %}</h2>
+      <p>{% if is_en %}Manage Chinese and English search intent separately.{% else %}中文和英文搜索意图分开维护。{% endif %}</p>
+    </div>
+  </div>
+  <form class="admin-form-grid admin-seo-create" hx-post="/admin/seo" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+    <label class="admin-field">{% if is_en %}Locale{% else %}语言{% endif %}
+      <select name="locale" required>
+        <option value="zh-CN">简体中文</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+    <label class="admin-field">{% if is_en %}Topic phrase{% else %}主题词{% endif %}
+      <input name="phrase" required minlength="2" maxlength="48" autocomplete="off" placeholder="{% if is_en %}SSH client for server management{% else %}服务器管理 SSH 客户端{% endif %}">
+    </label>
+    <label class="admin-field">{% if is_en %}Order{% else %}排序{% endif %}
+      <input name="sort_order" type="number" value="0" required>
+    </label>
+    <label class="admin-field">{% if is_en %}Status{% else %}状态{% endif %}
+      <select name="enabled" required>
+        <option value="true">{% if is_en %}Enabled{% else %}启用{% endif %}</option>
+        <option value="false">{% if is_en %}Disabled{% else %}停用{% endif %}</option>
+      </select>
+    </label>
+    <button class="button button-primary" type="submit">{% if is_en %}Add topic{% else %}添加主题词{% endif %}</button>
+  </form>
+</section>
+
+<section class="admin-section" aria-labelledby="seo-topics-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="seo-topics-heading">{% if is_en %}Managed topics{% else %}已管理主题词{% endif %}</h2>
+      <p>{% if is_en %}Lower order values appear first in the public projection.{% else %}排序值越小，在公开投影中越靠前。{% endif %}</p>
+    </div>
+  </div>
+  {% if let Some(message) = load_error %}
+  <div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>
+  {% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}
+  <div class="admin-empty">
+    <strong>{% if is_en %}No topics yet{% else %}尚未添加主题词{% endif %}</strong>
+    <p>{% if is_en %}Add the first topic above. Public pages keep their curated defaults until enabled topics exist.{% else %}可在上方添加首个主题词；存在启用项前，公开页面继续使用经过审核的默认内容。{% endif %}</p>
+  </div>
+  {% endif %}
+  {% if !rows.is_empty() %}
+  <div class="admin-seo-list">
+    {% for row in rows %}
+    <article class="admin-seo-record">
+      <form class="admin-form-grid admin-seo-row" hx-post="/admin/seo/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <label class="admin-field">{% if is_en %}Locale{% else %}语言{% endif %}
+          <select name="locale" required>
+            <option value="zh-CN"{% if row.locale == "zh-CN" %} selected{% endif %}>简体中文</option>
+            <option value="en"{% if row.locale == "en" %} selected{% endif %}>English</option>
+          </select>
+        </label>
+        <label class="admin-field">{% if is_en %}Topic phrase{% else %}主题词{% endif %}
+          <input name="phrase" value="{{ row.phrase }}" required minlength="2" maxlength="48" autocomplete="off">
+        </label>
+        <label class="admin-field">{% if is_en %}Order{% else %}排序{% endif %}
+          <input name="sort_order" type="number" value="{{ row.sort_order }}" required>
+        </label>
+        <label class="admin-field">{% if is_en %}Status{% else %}状态{% endif %}
+          <select name="enabled" required>
+            <option value="true"{% if row.enabled %} selected{% endif %}>{% if is_en %}Enabled{% else %}启用{% endif %}</option>
+            <option value="false"{% if !row.enabled %} selected{% endif %}>{% if is_en %}Disabled{% else %}停用{% endif %}</option>
+          </select>
+        </label>
+        <button class="button button-secondary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+        <p class="admin-seo-meta">{{ row.id }} · {% if is_en %}updated{% else %}更新于{% endif %} {{ row.updated_at }}</p>
+      </form>
+      <form hx-post="/admin/seo/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this SEO topic?{% else %}确认删除这个 SEO 主题词？{% endif %}">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

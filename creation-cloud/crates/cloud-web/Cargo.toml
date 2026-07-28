@@ -17,6 +17,7 @@ cloud-domain.workspace = true
 cloud-feedback.workspace = true
 cloud-model.workspace = true
 cloud-release.workspace = true
+cloud-seo.workspace = true
 cloud-site.workspace = true
 cloud-site-media.workspace = true
 cloud-store.workspace = true

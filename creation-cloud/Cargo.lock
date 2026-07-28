@@ -465,6 +465,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloud-seo"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "cloud-domain",
+ "cloud-store",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tower",
+ "uuid",
+]
+
+[[package]]
 name = "cloud-site"
 version = "0.1.0"
 
@@ -559,6 +575,7 @@ dependencies = [
  "cloud-feedback",
  "cloud-model",
  "cloud-release",
+ "cloud-seo",
  "cloud-site",
  "cloud-site-media",
  "cloud-store",
@@ -662,6 +679,7 @@ dependencies = [
  "cloud-maintenance",
  "cloud-model",
  "cloud-release",
+ "cloud-seo",
  "cloud-site-media",
  "cloud-store",
  "cloud-sync",

@@ -1,14 +1,9 @@
-//! 定义官网文档中心的目录、平台状态、实操指南、正文与脱敏界面证据模型。
+//! 定义官网文档中心的目录、实操指南、正文与脱敏界面证据模型。
 
 use crate::TutorialContent;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DocumentationContent {
-    pub release_label: &'static str,
-    pub release_version: &'static str,
-    pub release_date: &'static str,
-    pub release_href: &'static str,
-    pub release_action_label: &'static str,
     pub index_label: &'static str,
     pub mobile_index_label: &'static str,
     pub search_label: &'static str,
@@ -17,10 +12,6 @@ pub struct DocumentationContent {
     pub search_empty: &'static str,
     pub status: DocumentationNotice,
     pub groups: Vec<DocumentationGroup>,
-    pub platform_code: &'static str,
-    pub platform_title: &'static str,
-    pub platform_lead: &'static str,
-    pub platforms: Vec<DocumentationPlatform>,
     pub tutorials: TutorialContent,
     pub sections: Vec<DocumentationSection>,
     pub screenshot: DocumentationScreenshot,
@@ -70,62 +61,6 @@ impl DocumentationLink {
             anchor,
             code,
             title,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct DocumentationPlatform {
-    pub symbol: &'static str,
-    pub name: &'static str,
-    pub role: &'static str,
-    pub state: &'static str,
-    pub assets: &'static str,
-    pub detail: &'static str,
-    pub release_href: &'static str,
-    pub planned: bool,
-}
-
-impl DocumentationPlatform {
-    #[must_use]
-    pub const fn released(
-        symbol: &'static str,
-        name: &'static str,
-        role: &'static str,
-        state: &'static str,
-        assets: &'static str,
-        detail: &'static str,
-        release_href: &'static str,
-    ) -> Self {
-        Self {
-            symbol,
-            name,
-            role,
-            state,
-            assets,
-            detail,
-            release_href,
-            planned: false,
-        }
-    }
-
-    #[must_use]
-    pub const fn planned(
-        symbol: &'static str,
-        name: &'static str,
-        role: &'static str,
-        state: &'static str,
-        detail: &'static str,
-    ) -> Self {
-        Self {
-            symbol,
-            name,
-            role,
-            state,
-            assets: "",
-            detail,
-            release_href: "",
-            planned: true,
         }
     }
 }

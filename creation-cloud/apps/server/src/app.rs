@@ -27,7 +27,9 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let model_service = services.model.clone();
     let vault_service = services.vault.clone();
     let download_service = services.download.clone();
-    let public_page_state = cloud_web::PublicPageState::new(seo, download_service.clone());
+    let seo_topic_service = services.seo.clone();
+    let public_page_state =
+        cloud_web::PublicPageState::new(seo, download_service.clone(), seo_topic_service.clone());
     let console_page_state = cloud_web::ConsolePageState::new(
         auth_service.clone(),
         user_service.clone(),
@@ -66,6 +68,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/site-media",
             cloud_site_media::management_router(site_media_service.clone()),
         )
+        .nest("/seo", cloud_seo::management_router(seo_topic_service))
         .nest(
             "/feedback",
             cloud_feedback::management_router(feedback_service.clone()),

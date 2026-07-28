@@ -110,6 +110,7 @@ fn is_known_segment(segment: &str) -> bool {
             | "sources"
             | "site-media"
             | "feedback"
+            | "seo"
             | "status"
             | "redact"
             | "publish"
@@ -175,6 +176,24 @@ mod tests {
         assert_eq!(
             resource(&path),
             ("feedback".to_owned(), Some(feedback_id.to_string()))
+        );
+    }
+
+    #[test]
+    fn recognizes_seo_ssr_path_as_an_admin_resource() {
+        let path = "/admin/seo";
+        assert_eq!(sanitize_path(path), path);
+        assert_eq!(resource(path), ("seo".to_owned(), None));
+    }
+
+    #[test]
+    fn recognizes_seo_api_path_and_extracts_topic_identity() {
+        let topic_id = Uuid::now_v7();
+        let path = format!("/api/v1/admin/seo/{topic_id}");
+        assert_eq!(sanitize_path(&path), path);
+        assert_eq!(
+            resource(&path),
+            ("seo".to_owned(), Some(topic_id.to_string()))
         );
     }
 }

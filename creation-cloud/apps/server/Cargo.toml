@@ -19,6 +19,7 @@ cloud-feedback.workspace = true
 cloud-model.workspace = true
 cloud-maintenance.workspace = true
 cloud-release.workspace = true
+cloud-seo.workspace = true
 cloud-site-media.workspace = true
 cloud-store.workspace = true
 cloud-sync.workspace = true

@@ -255,86 +255,6 @@ html[lang="en"] .docs-hero-copy h1 {
   font-size: 1.02rem;
 }
 
-.docs-platform-grid {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--line-strong);
-  border-left: 1px solid var(--line-strong);
-}
-
-.docs-platform {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  padding: 22px;
-  border-right: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
-  background: var(--paper-raised);
-}
-
-.docs-platform-head {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 14px;
-}
-
-.docs-platform-head > span {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  flex: none;
-  place-items: center;
-  border: 1px solid var(--line-strong);
-  font-family: var(--font-mono);
-  font-size: 1.3rem;
-}
-
-.docs-platform-head small {
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-}
-
-.docs-platform-head h3 {
-  margin: 2px 0 0;
-  font-size: 1.25rem;
-}
-
-.docs-platform-state {
-  margin-block: 18px 9px;
-  color: var(--success);
-  font-size: 0.8rem;
-}
-
-.docs-platform-assets {
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  overflow-wrap: anywhere;
-}
-
-.docs-platform > p:not(.docs-platform-assets) {
-  color: var(--ink-soft);
-}
-
-.docs-platform > a {
-  width: fit-content;
-  margin-top: auto;
-  color: var(--accent-text);
-  font-weight: 740;
-}
-
-.docs-platform-planned {
-  background: var(--paper-alt);
-}
-
-.docs-platform-planned .docs-platform-state {
-  color: var(--ink-muted);
-}
-
 .docs-step-list {
   border-top: 1px solid var(--line-strong);
 }
@@ -478,7 +398,6 @@ html[lang="en"] .docs-hero-copy h1 {
     font-size: clamp(2.45rem, 12vw, 3.6rem);
   }
 
-  .docs-platform-grid,
   .docs-step {
     grid-template-columns: 1fr;
   }

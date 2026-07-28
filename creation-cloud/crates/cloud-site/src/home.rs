@@ -143,7 +143,6 @@ pub enum HomeLayout {
     Steps,
     Platforms,
     Security,
-    Downloads,
     Cloud,
 }
 
@@ -155,7 +154,6 @@ impl fmt::Display for HomeLayout {
             Self::Steps => "steps",
             Self::Platforms => "platforms",
             Self::Security => "security",
-            Self::Downloads => "downloads",
             Self::Cloud => "cloud",
         };
         formatter.write_str(value)

@@ -286,44 +286,6 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             ],
         ),
         section(
-            "downloads",
-            HomeLayout::Downloads,
-            "Confirm source and checksum before downloading",
-            "The home page reads the latest real release. Until release data is connected, it keeps an explicit empty state without fake versions or placeholder links.",
-            vec![
-                item(
-                    "WINDOWS",
-                    "Awaiting release data",
-                    "Architecture, source, size, and release time appear after integration.",
-                    "SHA256: —",
-                ),
-                item(
-                    "LINUX",
-                    "Awaiting release data",
-                    "AppImage and deb entries require real local-build records.",
-                    "SHA256: —",
-                ),
-                item(
-                    "ANDROID",
-                    "Awaiting release data",
-                    "Formal arm64 assets stay separate from test-only x86_64 packages.",
-                    "SHA256: —",
-                ),
-                item(
-                    "macOS",
-                    "Planned",
-                    "No download action or support implication.",
-                    "SHA256: —",
-                ),
-                item(
-                    "iOS",
-                    "Planned",
-                    "No download action or support implication.",
-                    "SHA256: —",
-                ),
-            ],
-        ),
-        section(
             "cloud",
             HomeLayout::Cloud,
             "Accounts support devices and sync, never SSH",
@@ -412,7 +374,6 @@ fn section(
         HomeLayout::Steps => ("03 / FIRST RUN", "OPERATION SEQUENCE / 06 STEPS"),
         HomeLayout::Platforms => ("04 / PLATFORMS", "PLATFORM MATRIX / 05 SLOTS"),
         HomeLayout::Security => ("05 / SECURITY BOUNDARY", "SEPARATED PLANES"),
-        HomeLayout::Downloads => ("06 / DOWNLOADS", "SOURCE AND CHECKSUM"),
         HomeLayout::Cloud => ("07 / CREATION CLOUD", "CONTROL SURFACE"),
     };
     HomeSection::new(anchor, code, side_label, layout, title, lead, items)

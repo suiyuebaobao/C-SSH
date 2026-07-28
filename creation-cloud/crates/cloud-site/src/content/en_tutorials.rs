@@ -85,7 +85,7 @@ pub(super) fn content() -> TutorialContent {
                     step(
                         "Step 4",
                         "Wait for strict handshake",
-                        "The client then reaches the local Unix socket and verifies both protocol and agent versions.",
+                        "The client then reaches the local Unix socket and verifies protocol compatibility and agent readiness.",
                     ),
                     step(
                         "Step 5",
@@ -93,7 +93,7 @@ pub(super) fn content() -> TutorialContent {
                         "Fix the reported unsupported architecture, missing resource, permission, or readiness problem and rerun the operation without bypassing its gate.",
                     ),
                 ],
-                "The maintenance view reports READY and an agent version. If collection is enabled, a real MetricsSnapshot is fetched instead of merely clearing an error flag.",
+                "The maintenance view reports READY. If collection is enabled, a real MetricsSnapshot is fetched instead of merely clearing an error flag.",
                 "Deployment itself uses an SSH bootstrap. After READY, persistent terminal, monitoring, files, AI, and system capabilities use the agent.",
             ),
             tutorial!(

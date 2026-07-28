@@ -85,7 +85,7 @@ pub(super) fn content() -> TutorialContent {
                     step(
                         "步骤 4",
                         "等待严格握手",
-                        "部署结束后客户端会连接本机 unix socket，并校验协议版本和 agent 版本。",
+                        "部署结束后客户端会连接本机 unix socket，并校验协议兼容性与 agent 就绪状态。",
                     ),
                     step(
                         "步骤 5",
@@ -93,7 +93,7 @@ pub(super) fn content() -> TutorialContent {
                         "若提示架构不支持、资源缺失、权限不足或服务未就绪，应按原错误修复后再次运行，不要绕过门禁。",
                     ),
                 ],
-                "维护面板显示 READY 和 agent 版本；启用采集的主机还能获得一帧真实 MetricsSnapshot，而不是只清除失败标记。",
+                "维护面板显示 READY；启用采集的主机还能获得一帧真实 MetricsSnapshot，而不是只清除失败标记。",
                 "部署本身通过纯 SSH bootstrap 完成；READY 之后，持久终端、监控、文件、AI 和系统能力才走 agent。",
             ),
             tutorial!(

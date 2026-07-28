@@ -1,0 +1,49 @@
+<section class="download-hero" aria-labelledby="download-title">
+  <div class="container">
+    <p class="eyebrow">{{ view.page.eyebrow }}</p>
+    <h1 id="download-title">{{ view.page.heading }}</h1>
+    <p>{{ view.page.lead }}</p>
+  </div>
+</section>
+
+<section class="download-picker" aria-label="{% if is_en %}Downloads by platform{% else %}按平台下载{% endif %}">
+  <div class="container download-list">
+    {% match catalog.latest %}
+    {% when Some with (release) %}
+    {% for platform in release.platforms %}
+    <section class="download-row">
+      <h2>{{ platform.name }}</h2>
+      <div class="download-actions">
+        {% for asset in platform.assets %}
+        {% match asset.download_href %}
+        {% when Some with (download_href) %}
+        <a class="download-button" href="{{ download_href }}">
+          <span><strong>{{ asset.package_kind }}</strong><small>{{ asset.architecture }}</small></span>
+          <b>{% if is_en %}Download{% else %}下载{% endif %} →</b>
+        </a>
+        {% when None %}
+        <span class="download-button download-button-disabled">
+          <span><strong>{{ asset.package_kind }}</strong><small>{{ asset.architecture }}</small></span>
+          <b>{% if is_en %}Unavailable{% else %}暂不可用{% endif %}</b>
+        </span>
+        {% endmatch %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+
+    {% if !release.has_windows %}<div class="download-status"><strong>Windows</strong><span>{% if is_en %}No download available{% else %}暂无可用下载{% endif %}</span></div>{% endif %}
+    {% if !release.has_linux %}<div class="download-status"><strong>Linux</strong><span>{% if is_en %}No download available{% else %}暂无可用下载{% endif %}</span></div>{% endif %}
+    {% if !release.has_android %}<div class="download-status"><strong>Android</strong><span>{% if is_en %}No download available{% else %}暂无可用下载{% endif %}</span></div>{% endif %}
+    {% if !release.has_macos %}<div class="download-status download-status-planned"><strong>macOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>{% endif %}
+    {% if !release.has_ios %}<div class="download-status download-status-planned"><strong>iOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>{% endif %}
+    {% when None %}
+    <div class="download-empty">
+      <strong>{% if is_en %}No download is available yet{% else %}暂时没有可用下载{% endif %}</strong>
+      <p>{% if is_en %}Please check again later.{% else %}请稍后再来查看。{% endif %}</p>
+    </div>
+    <div class="download-status download-status-planned"><strong>macOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>
+    <div class="download-status download-status-planned"><strong>iOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>
+    {% endmatch %}
+  </div>
+</section>

@@ -222,6 +222,16 @@ pub(super) fn admin_site() -> PageContent {
     )
 }
 
+pub(super) fn admin_seo() -> PageContent {
+    admin_page(
+        PageId::AdminSeo,
+        "SEO 主题词｜Creation Cloud",
+        "SEO 主题词",
+        "维护公开页面可见的搜索主题",
+        "分别维护中英文主题词、启停状态和展示顺序；主题词会自然进入可抓取正文，meta keywords 仅作为兼容投影。",
+    )
+}
+
 pub(super) fn admin_audit() -> PageContent {
     admin_page(
         PageId::AdminAudit,
@@ -287,7 +297,8 @@ fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
         nav("30 版本", PageId::AdminReleases, current),
         nav("40 资产", PageId::AdminAssets, current),
         nav("50 站点", PageId::AdminSite, current),
-        nav("60 审计", PageId::AdminAudit, current),
-        nav("70 反馈", PageId::AdminFeedback, current),
+        nav("60 SEO", PageId::AdminSeo, current),
+        nav("70 审计", PageId::AdminAudit, current),
+        nav("80 反馈", PageId::AdminFeedback, current),
     ]
 }

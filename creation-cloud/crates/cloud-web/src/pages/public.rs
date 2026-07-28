@@ -15,13 +15,13 @@ pub(crate) async fn home_en(State(seo): State<SeoConfig>) -> AppResult<Html<Stri
 }
 
 pub(crate) async fn home_live(State(state): State<PublicPageState>) -> AppResult<Html<String>> {
-    let manifest = state.public_manifest().await?;
-    render::home_live(PageId::Home, Locale::ZhCn, state.seo(), manifest)
+    let topics = state.public_topics(Locale::ZhCn).await?;
+    render::home_live(PageId::Home, Locale::ZhCn, state.seo(), topics)
 }
 
 pub(crate) async fn home_en_live(State(state): State<PublicPageState>) -> AppResult<Html<String>> {
-    let manifest = state.public_manifest().await?;
-    render::home_live(PageId::Home, Locale::En, state.seo(), manifest)
+    let topics = state.public_topics(Locale::En).await?;
+    render::home_live(PageId::Home, Locale::En, state.seo(), topics)
 }
 
 pub(crate) async fn security(State(seo): State<SeoConfig>) -> AppResult<Html<String>> {

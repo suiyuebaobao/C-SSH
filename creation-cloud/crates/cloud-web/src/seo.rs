@@ -4,6 +4,9 @@ use cloud_site::{Locale, PageId};
 use serde_json::json;
 use url::Url;
 
+const OFFICIAL_SITE_ORIGIN: &str = "https://c-ssh.com/";
+const OFFICIAL_BAIDU_SITE_VERIFICATION: &str = "codeva-DseeJ4AVXG";
+
 #[derive(Clone, Debug)]
 pub struct SeoConfig {
     public_base_url: Url,
@@ -91,6 +94,7 @@ pub(crate) struct SeoHead {
     pub(crate) json_ld: Option<String>,
     pub(crate) google_site_verification: Option<String>,
     pub(crate) baidu_site_verification: Option<String>,
+    pub(crate) keywords: Option<String>,
 }
 
 impl SeoHead {
@@ -161,9 +165,30 @@ impl SeoHead {
                 .then(|| config.google_site_verification.clone())
                 .flatten(),
             baidu_site_verification: (page == PageId::Home)
-                .then(|| config.baidu_site_verification.clone())
+                .then(|| {
+                    if config.public_base_url.as_str() == OFFICIAL_SITE_ORIGIN {
+                        Some(OFFICIAL_BAIDU_SITE_VERIFICATION.to_owned())
+                    } else {
+                        config.baidu_site_verification.clone()
+                    }
+                })
                 .flatten(),
+            keywords: None,
         }
+    }
+
+    pub(crate) fn with_keywords(mut self, topics: &[String]) -> Self {
+        let keywords = topics
+            .iter()
+            .map(|topic| topic.trim())
+            .filter(|topic| !topic.is_empty())
+            .take(12)
+            .collect::<Vec<_>>()
+            .join(", ");
+        if !keywords.is_empty() {
+            self.keywords = Some(keywords);
+        }
+        self
     }
 
     pub(crate) const fn private() -> Self {
@@ -181,6 +206,7 @@ impl SeoHead {
             json_ld: None,
             google_site_verification: None,
             baidu_site_verification: None,
+            keywords: None,
         }
     }
 }

@@ -157,6 +157,7 @@ pub fn admin_router() -> Router {
         .route("/releases", get(pages::admin::static_releases))
         .route("/assets", get(pages::admin::static_assets))
         .route("/site", get(pages::admin::static_site))
+        .route("/seo", get(pages::admin::static_seo))
         .route("/audit", get(pages::admin::static_audit))
         .route("/feedback", get(pages::admin::static_feedback))
 }
@@ -233,6 +234,15 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
         .route(
             "/site/{media_id}/delete",
             post(pages::admin::site::delete::handle),
+        )
+        .route(
+            "/seo",
+            get(pages::admin::seo::page).post(pages::admin::seo::create::handle),
+        )
+        .route("/seo/{topic_id}", post(pages::admin::seo::update::handle))
+        .route(
+            "/seo/{topic_id}/delete",
+            post(pages::admin::seo::delete::handle),
         )
         .route("/audit", get(pages::admin::audit::page))
         .route("/feedback", get(pages::admin::feedback::page))

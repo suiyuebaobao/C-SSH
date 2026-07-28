@@ -1,38 +1,30 @@
-//! 提供英文文档入口、发布状态、实操指南与安全参考内容。
+//! 提供英文文档入口、实操指南与安全参考内容。
 
 use crate::{
     DocumentationContent, DocumentationGroup, DocumentationItem, DocumentationLink,
-    DocumentationNotice, DocumentationPlatform, DocumentationScreenshot, DocumentationSection,
-    PageContent, PageId,
+    DocumentationNotice, DocumentationScreenshot, DocumentationSection, PageContent, PageId,
 };
 
 use super::en::{action, page};
 
-const RELEASE_HREF: &str = "https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19";
-
 pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
-        "Creation-SSH Docs | Install, Connect, and Operate",
-        "Verifiable Creation-SSH documentation for trusted installation, adding a host, agent deployment, persistent terminals, monitoring, files, and AI.",
+        "Creation-SSH Docs | Connect and Operate",
+        "Task-oriented Creation-SSH documentation for adding a host, agent deployment, persistent terminals, monitoring, files, and AI.",
         "DOCS / TASK GUIDES",
         "Start with your first Creation-SSH host",
         "Documentation and tutorials now share one task-oriented home. Complete one real workflow and use its expected result to verify the path.",
     )
     .with_actions(vec![
-        action("Open the v0.6.19 release", RELEASE_HREF, "button button-secondary"),
-        action("Download the client", "/downloads", "button button-primary"),
+        action("Add your first host", "#add-host", "button button-primary"),
+        action("Review security boundaries", "/security", "button button-secondary"),
     ])
     .with_documentation_page(documentation())
 }
 
 fn documentation() -> DocumentationContent {
     DocumentationContent {
-        release_label: "Current public release",
-        release_version: "v0.6.19",
-        release_date: "2026-07-23",
-        release_href: RELEASE_HREF,
-        release_action_label: "Open Release",
         index_label: "Documentation",
         mobile_index_label: "Open documentation index",
         search_label: "Filter titles on this page",
@@ -41,14 +33,10 @@ fn documentation() -> DocumentationContent {
         search_empty: "No title on this page matches.",
         status: DocumentationNotice::new(
             "BEFORE YOU START",
-            "Verify the source and host identity first",
-            "Use only assets from the public Creation-SSH Release. Stop if SHA256 is missing or mismatched, the host key changes, or the architecture is unsupported.",
+            "Confirm the host identity and connection mode",
+            "Agent mode provides the full integrated workflow; SSH mode provides native connection capabilities. Verify the host key on first connect and stop on unexpected changes.",
         ),
         groups: groups(),
-        platform_code: "00 / PLATFORM MATRIX",
-        platform_title: "Choose the asset for your platform and architecture",
-        platform_lead: "v0.6.19 has seven application release assets. Windows, Linux, and Android are delivered; macOS and iOS remain planned.",
-        platforms: platforms(),
         tutorials: super::en_tutorials::content(),
         sections: sections(),
         screenshot: DocumentationScreenshot {
@@ -57,7 +45,7 @@ fn documentation() -> DocumentationContent {
             lead: "The image shows a direct standard PTY. Only persistent-terminal mode uses the client, agent, and tmux to provide a reconnectable session.",
             src: "/static/img/product-terminal.png",
             alt: "Redacted Creation-SSH demo terminal showing an example server and a standard SSH PTY",
-            caption: "Redacted demo with an RFC 5737 example address. It explains the UI path only and is not persistent-session, release, or no-mock evidence.",
+            caption: "Redacted demo with an RFC 5737 example address. It explains the UI path only and is not persistent-session or no-mock evidence.",
             width: 1650,
             height: 1080,
         },
@@ -71,10 +59,7 @@ fn groups() -> Vec<DocumentationGroup> {
     vec![
         group(
             "Quick start",
-            vec![
-                link("platform-matrix", "00", "Platforms and release status"),
-                link("getting-started", "01", "Download, verify, and install"),
-            ],
+            vec![link("getting-started", "01", "Before you connect")],
         ),
         group(
             "Hands-on guides",
@@ -102,77 +87,30 @@ fn groups() -> Vec<DocumentationGroup> {
     ]
 }
 
-fn platforms() -> Vec<DocumentationPlatform> {
-    vec![
-        DocumentationPlatform::released(
-            "W",
-            "Windows",
-            "Desktop mainline",
-            "v0.6.19 released",
-            "Creation-SSH_0.6.19_x64-setup.exe · Creation-SSH_0.6.19_x64_en-US.msi · Creation-SSH_0.6.19_portable-Windows-x64.zip",
-            "Choose one of NSIS, MSI, or portable; do not install multiple variants together.",
-            RELEASE_HREF,
-        ),
-        DocumentationPlatform::released(
-            "L",
-            "Linux",
-            "Independent desktop",
-            "v0.6.19 released",
-            "Creation-SSH_0.6.19_linux-amd64.deb · Creation-SSH_0.6.19_linux-x86_64.AppImage",
-            "Use deb on Debian-family systems; other x86_64 desktops may use AppImage according to distribution policy.",
-            RELEASE_HREF,
-        ),
-        DocumentationPlatform::released(
-            "A",
-            "Android",
-            "Mobile companion",
-            "v0.6.19 released",
-            "C-SSH_0.6.19_android-arm64.apk · C-SSH_0.6.19_android-arm64.aab",
-            "Most users install the signed APK. AAB is for store distribution and is not directly installable.",
-            RELEASE_HREF,
-        ),
-        DocumentationPlatform::planned(
-            "m",
-            "macOS",
-            "Future desktop",
-            "Planned, no download",
-            "No deliverable client or installer exists yet.",
-        ),
-        DocumentationPlatform::planned(
-            "i",
-            "iOS",
-            "Future companion",
-            "Planned, no download",
-            "Development and real-device validation are not complete.",
-        ),
-    ]
-}
-
 fn sections() -> Vec<DocumentationSection> {
     vec![
         section(
             "getting-started",
             "01 / QUICK START",
-            "Download, verify, and install",
-            "Establish a trusted software source before connecting to a server.",
+            "Before you connect",
+            "Open the installed client and confirm the connection mode, host identity, and data boundary.",
             vec![
                 text(
-                    "SOURCE",
-                    "Use the public Release only",
-                    "Open the v0.6.19 release and select one matching application asset from the platform matrix. Do not install copies from chat attachments, re-uploaded drives, or unknown mirrors.",
-                    true,
-                ),
-                command(
-                    "SHA256",
-                    "Compare the checksum character for character",
-                    "Compute SHA256 and compare it with the same asset in the Release notes. Stop if the checksum is missing or any character differs.",
-                    "Windows: Get-FileHash .\\<asset> -Algorithm SHA256\nLinux:   sha256sum ./<asset>",
+                    "MODE",
+                    "Choose Agent or SSH mode",
+                    "Use Agent mode for persistent terminals, monitoring, and structured operations. Choose SSH mode when you only need a native connection or the target should not run the agent.",
                     true,
                 ),
                 text(
-                    "INSTALL",
-                    "Install one matching variant",
-                    "On Windows choose NSIS, MSI, or portable; on Linux choose deb or AppImage; for Android use the signed APK. macOS and iOS have no downloads.",
+                    "HOST KEY",
+                    "Verify the host identity",
+                    "Verify the host-key fingerprint on first connect. If a known host key changes unexpectedly, stop instead of accepting it silently.",
+                    true,
+                ),
+                text(
+                    "DATA",
+                    "Confirm the Cloud data boundary",
+                    "The SSH data plane always connects directly from the client to the server. Creation Cloud stores accounts, devices, and allowed sync data only; it never proxies terminals or remote commands.",
                     false,
                 ),
             ],
@@ -194,12 +132,12 @@ fn sections() -> Vec<DocumentationSection> {
             "cloud-security",
             "09 / CLOUD & SECURITY",
             "A Cloud account is optional and SSH remains the data plane",
-            "The Creation Cloud production control plane is deployed. A Cloud account is still optional for local SSH workflows, and production client integration follows the active client configuration.",
+            "The Creation Cloud production control plane is deployed. A Cloud account is still optional for local SSH workflows.",
             vec![
                 text(
                     "OPTIONAL",
                     "Manage local hosts without a Cloud account",
-                    "SSH connections, standard terminals, and local workflows do not require Cloud sign-in. Cloud is limited to the control plane for accounts, devices, sync, models, vault envelopes, versions, and downloads.",
+                    "SSH connections, standard terminals, and local workflows do not require Cloud sign-in. Cloud is limited to control-plane data such as accounts, devices, sync, models, and vault envelopes.",
                     false,
                 ),
                 text(

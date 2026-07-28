@@ -2,7 +2,7 @@
 
 use crate::{FaqItem, PageContent, PageId};
 
-use super::zh_cn::{action, item, page, section};
+use super::zh_cn::{item, page, section};
 
 pub(super) fn security() -> PageContent {
     page(
@@ -70,38 +70,33 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "客户端发布与平台状态｜Creation-SSH",
-        "查看 Creation-SSH 的 Windows、Linux、Android、macOS 与 iOS 平台状态；真实发布后可核对来源、架构与 SHA256。",
-        "版本信息以发布记录为准",
-        "为你的平台选择正确构建",
-        "正式资产接入后，这里会同时展示本站来源与明确标注的外部镜像。",
+        "下载 Creation-SSH｜Windows、Linux 与 Android",
+        "下载 Creation-SSH SSH 终端与服务器运维客户端的 Windows、Linux、Android 最新正式版本；macOS 与 iOS 尚未开发。",
+        "DOWNLOADS / DIRECT",
+        "下载 Creation-SSH",
+        "选择平台和包型，点击即可下载。",
     )
-    .with_actions(vec![action(
-        "查看更新记录",
-        "/changelog",
-        "button button-secondary",
-    )])
     .with_sections(vec![section(
         "builds",
-        "平台构建",
-        "页面不会用占位链接冒充可下载资产。",
+        "选择你的平台",
+        "只显示可执行的下载入口；尚未开发的平台保留简短状态。",
         vec![
             item(
                 "桌面",
                 "Windows",
-                "安装包、MSI 与便携版将分别列出文件大小和 SHA256。",
+                "提供可用包型，按钮直达下载。",
                 "等待发布数据",
             ),
             item(
                 "桌面",
                 "Linux",
-                "AppImage 与 deb 只展示完成本地构建和真实验证的版本。",
+                "提供可用包型，按钮直达下载。",
                 "等待发布数据",
             ),
             item(
                 "移动",
                 "Android",
-                "正式 arm64 APK 与 AAB 和仅测试用 x86_64 构建严格区分。",
+                "提供可用包型，按钮直达下载。",
                 "等待发布数据",
             ),
             item(
@@ -123,11 +118,11 @@ pub(super) fn downloads() -> PageContent {
 pub(super) fn changelog() -> PageContent {
     page(
         PageId::Changelog,
-        "版本记录与发布原则｜Creation-SSH",
-        "查看 Creation-SSH 的版本记录、资产来源、SHA256 与真实发布验证原则；当前不使用模拟版本数据。",
-        "不可覆盖的发布历史",
-        "每个正式版本都有自己的记录",
-        "发布数据接入后，版本说明、资产来源、验证结果与 SHA256 将在同一条目中呈现。",
+        "Creation-SSH 更新日志｜版本与功能变化",
+        "查看 Creation-SSH 每个正式版本的发布时间、功能变化与覆盖平台；下载文件和 SHA256 统一前往下载页。",
+        "CHANGELOG / 更新日志",
+        "更新日志",
+        "记录每个正式版本的功能变化、发布时间与覆盖平台。",
     )
     .with_sections(vec![
         section(

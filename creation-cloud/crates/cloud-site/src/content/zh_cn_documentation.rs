@@ -1,38 +1,30 @@
-//! 提供简体中文文档入口、发布状态、实操指南与安全参考内容。
+//! 提供简体中文文档入口、实操指南与安全参考内容。
 
 use crate::{
     DocumentationContent, DocumentationGroup, DocumentationItem, DocumentationLink,
-    DocumentationNotice, DocumentationPlatform, DocumentationScreenshot, DocumentationSection,
-    PageContent, PageId,
+    DocumentationNotice, DocumentationScreenshot, DocumentationSection, PageContent, PageId,
 };
 
 use super::zh_cn::{action, page};
 
-const RELEASE_HREF: &str = "https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19";
-
 pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
-        "Creation-SSH 使用文档｜安装、连接与实操指南",
-        "从可信下载、添加主机到 agent 部署、持久终端、监控、文件与 AI 的可验证 Creation-SSH 使用文档。",
+        "Creation-SSH 使用文档｜连接与运维实操指南",
+        "从添加主机到 agent 部署、持久终端、监控、文件与 AI 的 Creation-SSH 使用文档。",
         "DOCS / TASK GUIDES",
         "从第一台主机开始使用 Creation-SSH",
         "文档和实操指南已经合并。按目录完成一个真实任务，并用每章的预期结果判断链路是否可用。",
     )
     .with_actions(vec![
-        action("查看 v0.6.19 发布页", RELEASE_HREF, "button button-secondary"),
-        action("下载客户端", "/downloads", "button button-primary"),
+        action("添加第一台主机", "#add-host", "button button-primary"),
+        action("查看安全边界", "/security", "button button-secondary"),
     ])
     .with_documentation_page(documentation())
 }
 
 fn documentation() -> DocumentationContent {
     DocumentationContent {
-        release_label: "当前公开发布",
-        release_version: "v0.6.19",
-        release_date: "2026-07-23",
-        release_href: RELEASE_HREF,
-        release_action_label: "打开 Release",
         index_label: "文档目录",
         mobile_index_label: "展开文档目录",
         search_label: "筛选本页标题",
@@ -41,14 +33,10 @@ fn documentation() -> DocumentationContent {
         search_empty: "当前页没有匹配的标题。",
         status: DocumentationNotice::new(
             "开始前",
-            "先验证来源与主机身份",
-            "仅从 Creation-SSH 公开 Release 获取资产。SHA256 缺失或不匹配、主机密钥变化、架构不受支持，任一情况都应立即停止。",
+            "先确认主机身份与连接模式",
+            "Agent 模式提供完整联动能力；SSH 模式提供原生连接能力。首次连接必须核对主机密钥，密钥变化时停止并显式确认。",
         ),
         groups: groups(),
-        platform_code: "00 / PLATFORM MATRIX",
-        platform_title: "选择与你的平台和架构匹配的发布资产",
-        platform_lead: "v0.6.19 共七个正式安装或发布资产。Windows、Linux、Android 已交付；macOS 与 iOS 仍处于规划中。",
-        platforms: platforms(),
         tutorials: super::zh_cn_tutorials::content(),
         sections: sections(),
         screenshot: DocumentationScreenshot {
@@ -57,7 +45,7 @@ fn documentation() -> DocumentationContent {
             lead: "图中是直连普通 PTY；切换到持久化终端后，才由客户端、agent 与 tmux 协作提供可重连会话。",
             src: "/static/img/product-terminal.png",
             alt: "Creation-SSH 脱敏演示终端，显示示例服务器和普通 SSH PTY",
-            caption: "脱敏演示图：地址使用 RFC 5737 示例值；只说明界面路径，不作为持久化会话、发布状态或 no-mock 证据。",
+            caption: "脱敏演示图：地址使用 RFC 5737 示例值；只说明界面路径，不作为持久化会话或 no-mock 证据。",
             width: 1650,
             height: 1080,
         },
@@ -71,10 +59,7 @@ fn groups() -> Vec<DocumentationGroup> {
     vec![
         group(
             "快速开始",
-            vec![
-                link("platform-matrix", "00", "平台与发布状态"),
-                link("getting-started", "01", "下载、校验与安装"),
-            ],
+            vec![link("getting-started", "01", "使用前准备")],
         ),
         group(
             "实操指南",
@@ -98,77 +83,30 @@ fn groups() -> Vec<DocumentationGroup> {
     ]
 }
 
-fn platforms() -> Vec<DocumentationPlatform> {
-    vec![
-        DocumentationPlatform::released(
-            "W",
-            "Windows",
-            "桌面主线",
-            "v0.6.19 已发布",
-            "Creation-SSH_0.6.19_x64-setup.exe · Creation-SSH_0.6.19_x64_en-US.msi · Creation-SSH_0.6.19_portable-Windows-x64.zip",
-            "选择 NSIS、MSI 或便携包之一；不要同时安装多个变体。",
-            RELEASE_HREF,
-        ),
-        DocumentationPlatform::released(
-            "L",
-            "Linux",
-            "独立桌面",
-            "v0.6.19 已发布",
-            "Creation-SSH_0.6.19_linux-amd64.deb · Creation-SSH_0.6.19_linux-x86_64.AppImage",
-            "Debian 系选择 deb；其他 x86_64 桌面可按发行版策略使用 AppImage。",
-            RELEASE_HREF,
-        ),
-        DocumentationPlatform::released(
-            "A",
-            "Android",
-            "移动伴侣",
-            "v0.6.19 已发布",
-            "C-SSH_0.6.19_android-arm64.apk · C-SSH_0.6.19_android-arm64.aab",
-            "普通用户使用已签名 APK；AAB 面向应用商店分发，不是直接安装包。",
-            RELEASE_HREF,
-        ),
-        DocumentationPlatform::planned(
-            "m",
-            "macOS",
-            "未来桌面",
-            "规划中，无下载",
-            "尚无可交付客户端或安装包。",
-        ),
-        DocumentationPlatform::planned(
-            "i",
-            "iOS",
-            "未来移动伴侣",
-            "规划中，无下载",
-            "尚未完成开发与真机验证。",
-        ),
-    ]
-}
-
 fn sections() -> Vec<DocumentationSection> {
     vec![
         section(
             "getting-started",
             "01 / QUICK START",
-            "下载、校验与安装",
-            "先建立可信的软件来源，再开始连接服务器。",
+            "使用前准备",
+            "打开已安装的客户端后，先确定连接模式、主机身份与数据边界。",
             vec![
                 text(
-                    "SOURCE",
-                    "只认公开 Release",
-                    "打开 v0.6.19 发布页，按平台矩阵选择一个正式资产；不要从聊天附件、网盘转存或不明镜像安装。",
-                    true,
-                ),
-                command(
-                    "SHA256",
-                    "逐字核对校验值",
-                    "计算下载文件的 SHA256，并与 Release notes 中同名资产逐字比较。缺少校验值或任一字符不一致都应停止。",
-                    "Windows: Get-FileHash .\\<asset> -Algorithm SHA256\nLinux:   sha256sum ./<asset>",
+                    "MODE",
+                    "选择 Agent 或 SSH 模式",
+                    "默认使用 Agent 模式获得持久终端、监控和结构化运维；只需原生连接或目标机不适合 agent 时选择 SSH 模式。",
                     true,
                 ),
                 text(
-                    "INSTALL",
-                    "只安装匹配变体",
-                    "Windows 选择 NSIS、MSI 或便携包之一；Linux 选择 deb 或 AppImage；Android 普通安装使用已签名 APK。macOS 与 iOS 没有下载。",
+                    "HOST KEY",
+                    "核对主机身份",
+                    "首次连接先核对主机密钥指纹；已知主机的密钥发生变化时必须停止，不要静默接受。",
+                    true,
+                ),
+                text(
+                    "DATA",
+                    "确认 Cloud 数据边界",
+                    "SSH 数据面始终由客户端直连服务器；Creation Cloud 只保存账号、设备和允许同步的数据，不代理终端或远程命令。",
                     false,
                 ),
             ],
@@ -190,12 +128,12 @@ fn sections() -> Vec<DocumentationSection> {
             "cloud-security",
             "09 / CLOUD & SECURITY",
             "Cloud 账号可选，数据面仍走 SSH",
-            "Creation Cloud 生产控制面已经部署；Cloud 账号仍不是本地 SSH 工作流的前提，客户端正式接入以当前版本配置为准。",
+            "Creation Cloud 生产控制面已经部署；Cloud 账号仍不是本地 SSH 工作流的前提。",
             vec![
                 text(
                     "OPTIONAL",
                     "无需 Cloud 账号也可管理本地主机",
-                    "SSH 连接、普通终端和本地工作流不以 Cloud 登录为前提。Cloud 仅承载账号、设备、同步、模型、保险库信封、版本与下载控制面。",
+                    "SSH 连接、普通终端和本地工作流不以 Cloud 登录为前提。Cloud 仅承载账号、设备、同步、模型与保险库信封等控制面数据。",
                     false,
                 ),
                 text(

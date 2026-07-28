@@ -12,7 +12,7 @@ mod tutorial;
 
 pub use documentation::{
     DocumentationContent, DocumentationGroup, DocumentationItem, DocumentationLink,
-    DocumentationNotice, DocumentationPlatform, DocumentationScreenshot, DocumentationSection,
+    DocumentationNotice, DocumentationScreenshot, DocumentationSection,
 };
 pub use home::{
     HomeFaqItem, HomeItem, HomeLayout, HomePageContent, HomePlatform, HomeSection, HomeTone,
