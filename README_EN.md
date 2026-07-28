@@ -6,51 +6,51 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/C-SSH_0.6.19_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19)
-[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19)
-[![Stable](https://img.shields.io/badge/stable-v0.6.19-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/C-SSH_7.0.0_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)
+[![Stable](https://img.shields.io/badge/stable-v7.0.0-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Core capabilities are delivered through a structured resident agent on the Linux server, while standard terminals and port forwarding retain pure SSH paths. The current public stable release is **`v0.6.19`**. Older releases remain available as history.
+Creation-SSH now provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v7.0.0`**.
 
-> Upgrade notice: `0.6.19` uses the new SQLite schema 9 and does not migrate AI conversations, replay data, tasks/checkpoints, memories, or vector indexes from older versions. The upgrade clears legacy AI data while preserving non-AI data such as hosts, settings, and credential references.
+> Android upgrade notice: the first launch after every install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained.
 
-## v0.6.19 Highlights
+## v7.0.0 Highlights
 
-- AI conversations on Windows, Linux, and Android now use local SQLite schema 9. Client-visible conversations, attachments, tool calls, progress, errors, and provider metadata are persisted in their original structure, with five rebuildable memory layers derived from that source.
-- Long context is compiled against the model's hard window. Large working sets trim only the provider history for that call and never rewrite the local raw record. Automated tests cover a `500,000`-byte candidate input and deterministic working-set trimming.
-- Long AI operations emit a factual stage update after 10 seconds without a new user-visible event and every 10 silent seconds thereafter, stopping immediately on pause, cancellation, completion, or owner invalidation.
-- Fixed context usage resetting to zero after restart, first-message “conversation not found” failures, and missing conversation history.
-- Fixed mobile update comparison after downloading a newer version and restored the last host preference in separate desktop terminals.
-- Removed bundled Chinese font assets in favor of system fonts, reducing duplicate package data and cross-platform font drift.
+- Shared Windows, Linux, and Android server operations now run through the common Rust `client-runtime`.
+- Added explicit Agent and SSH host modes. Native SSH provides terminal, SFTP files, online monitoring, system management, and AI tools without installing the server agent.
+- Host lists consistently show connection mode, architecture, and recent CPU, memory, disk, load, and uptime data.
+- Unified single-host selectors and strengthened owner isolation across asynchronous switches, deletion, and mobile back navigation.
+- Fixed SSH terminal tail-output loss, ignored extended data, duplicate terminal completion, monitoring parsing, and system-management compatibility.
+- Retained client-local SQLite raw AI events, five derived memory layers, hard-window context compilation, and factual 10-second progress updates.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.6.19` production assets are the arm64 APK/AAB. Public Releases do not include the x86_64 emulator test build.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v7.0.0` ships one arm64 APK. Starting with this version, AAB is no longer generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/C-SSH_0.6.19_android-arm64.apk) | [AAB](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/C-SSH_0.6.19_android-arm64.aab) for store distribution |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/Creation-SSH_0.6.19_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/Creation-SSH_0.6.19_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/Creation-SSH_0.6.19_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/Creation-SSH_0.6.19_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.6.19/Creation-SSH_0.6.19_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/C-SSH_7.0.0_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_linux-amd64.deb) |
 
-See the [v0.6.19 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.6.19) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v7.0.0 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.6.19` |
+| Platform | Delivered in `v7.0.0` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
 | Linux desktop | Independent AppImage/deb with persistent terminals, monitoring, system/process, file, AI, and reconnect workflows |
 | Linux agent deployment resources | Independent `x86_64` and `aarch64` agent/static-tmux pairs selected after authenticated `uname -m`; real aarch64 no-mock validation is pending, so complete ARM64 support is not claimed |
-| iOS / macOS | **Not released** and not part of the `v0.6.19` delivery |
+| iOS / macOS | **Not released** and not part of the `v7.0.0` delivery |
 
 ## Main Pages
 

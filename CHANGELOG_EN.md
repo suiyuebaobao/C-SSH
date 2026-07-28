@@ -4,6 +4,43 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v7.0.0 - Shared Client Runtime and Agent/SSH Host Modes
+
+> The first launch after every Android install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained. Windows artifacts are currently unsigned.
+
+### Downloads
+- Windows installer: `Creation-SSH_7.0.0_x64-setup.exe`
+- Windows MSI: `Creation-SSH_7.0.0_x64_en-US.msi`
+- Windows portable: `Creation-SSH_7.0.0_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_7.0.0_android-arm64.apk`
+- Linux AppImage: `Creation-SSH_7.0.0_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_7.0.0_linux-amd64.deb`
+
+### Added
+- Added explicit Agent and native SSH host modes. Agent retains persistent tmux sessions and server-side monitoring. SSH requires no installed agent and provides terminal access, port forwarding, SFTP files, online monitoring, system management, app-center operations, and SSH AI tools.
+- Moved shared Windows, Linux, and Android server operations into the common Rust `client-runtime`; host lists now expose consistent mode, architecture, and resource data.
+- Unified single-host selectors and asynchronous owner isolation. AI retains local SQLite raw events, five derived memory layers, hard-window context compilation, and factual 10-second progress.
+
+### Fixed
+- Fixed dropped SSH terminal tail output, ignored extended data, and duplicate terminal completion.
+- Fixed SSH monitoring parsing, system-management compatibility, and host-list data projection.
+- Fixed mobile horizontal host chips, overlay stacking, and stale cached-page back-button handlers.
+- Fixed Android SQLite code 14 / CANTOPEN, startup ordering, and Windows NSIS/MSI first-launch and uninstall leftovers.
+
+### Verified
+- Windows background checks passed for eight primary entry points; fresh NSIS/MSI install, first launch, and uninstall checks passed.
+- Android MuMu multi-host checks passed for five primary entry points, and the production APK passed version, ABI, signature, and embedded-resource checks.
+- Linux AppImage/deb were built in an authorized Linux VM and passed version, architecture, resource, SHA-256, and isolated-startup checks.
+- SSH mode does not provide tmux or claim continuous monitoring while the client is offline; those remain Agent-mode capabilities.
+
+### SHA256
+- `7FC9C415B1458880C340B88903AF6C77B3D2BCB21F719ECABE83498A06CB01EF`  `Creation-SSH_7.0.0_x64-setup.exe`
+- `E62D8A466F4836E2E9C185EE503E9FB22104C9A6737D64E7B50D505E93A99499`  `Creation-SSH_7.0.0_x64_en-US.msi`
+- `3EC32802C66CAE2ED25F434197E626C47CA86E338C362C6D2244AB830B486E0A`  `Creation-SSH_7.0.0_portable-Windows-x64.zip`
+- `5936656CF04B3E60AA7318328194B14DB92A0C704A19FE83B519BE1E18764635`  `Creation-SSH_7.0.0_linux-x86_64.AppImage`
+- `BA8CABC824B6AF37FB46F7EF30A1BB8341EE0E0D3F0D6EC502D547B78702A7E7`  `Creation-SSH_7.0.0_linux-amd64.deb`
+- `5EC2964EA362F216B4E4B229ED5F5D5A8F551E060F216E2946C0C59072A3F72F`  `C-SSH_7.0.0_android-arm64.apk`
+
 ## v0.6.19 - Five-Layer AI Memory, Long Context, and Conversation Persistence
 
 > Upgrading to schema 9 clears AI conversations, replay data, tasks/checkpoints, memories, and vector indexes from older versions. Non-AI data such as hosts, settings, and credential references is preserved.

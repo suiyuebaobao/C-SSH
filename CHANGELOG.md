@@ -4,6 +4,43 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v7.0.0 - 统一客户端运行时与 Agent/SSH 双模式
+
+> Android 每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。Windows 安装包当前未使用 Authenticode 签名。
+
+### 下载
+- Windows 安装版：`Creation-SSH_7.0.0_x64-setup.exe`
+- Windows MSI：`Creation-SSH_7.0.0_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_7.0.0_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_7.0.0_android-arm64.apk`
+- Linux AppImage：`Creation-SSH_7.0.0_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_7.0.0_linux-amd64.deb`
+
+### 新增
+- 新增 Agent 与原生 SSH 两种主机模式。Agent 保留 tmux 持久终端与服务端持续监控；SSH 无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心及 SSH AI 工具。
+- Windows、Linux、Android 的服务器业务统一进入共享 Rust `client-runtime`，主机列表统一显示连接模式、架构和资源数据。
+- 三端统一单主机选择并强化异步 owner 隔离；AI 继续使用本地 SQLite 原始事件、五层派生记忆、硬窗口上下文编译和 10 秒真实进度。
+
+### 修复
+- 修复原生 SSH 终端丢失尾部输出、忽略扩展数据或重复终态的问题。
+- 修复 SSH 监控响应解析、系统管理兼容和主机列表数据展示。
+- 修复移动端横向主机滑块、弹层层级和缓存页面返回键问题。
+- 修复 Android SQLite code 14 / CANTOPEN、启动顺序，以及 Windows NSIS/MSI 首次运行和卸载残留问题。
+
+### 验证
+- Windows 八个主要入口后台验收、NSIS/MSI fresh 安装/首次运行/卸载通过。
+- Android MuMu 五入口多主机验收以及正式 APK 的版本、ABI、签名和内嵌资源检查通过。
+- Linux AppImage/deb 在授权 Linux VM 构建，并通过版本、架构、资源、SHA256 与隔离启动检查。
+- SSH 模式不提供 tmux，也不在客户端离线期间宣称持续监控；这些仍是 Agent 模式能力。
+
+### SHA256
+- `7FC9C415B1458880C340B88903AF6C77B3D2BCB21F719ECABE83498A06CB01EF`  `Creation-SSH_7.0.0_x64-setup.exe`
+- `E62D8A466F4836E2E9C185EE503E9FB22104C9A6737D64E7B50D505E93A99499`  `Creation-SSH_7.0.0_x64_en-US.msi`
+- `3EC32802C66CAE2ED25F434197E626C47CA86E338C362C6D2244AB830B486E0A`  `Creation-SSH_7.0.0_portable-Windows-x64.zip`
+- `5936656CF04B3E60AA7318328194B14DB92A0C704A19FE83B519BE1E18764635`  `Creation-SSH_7.0.0_linux-x86_64.AppImage`
+- `BA8CABC824B6AF37FB46F7EF30A1BB8341EE0E0D3F0D6EC502D547B78702A7E7`  `Creation-SSH_7.0.0_linux-amd64.deb`
+- `5EC2964EA362F216B4E4B229ED5F5D5A8F551E060F216E2946C0C59072A3F72F`  `C-SSH_7.0.0_android-arm64.apk`
+
 ## v0.6.19 - AI 五层记忆、长上下文与会话持久化
 
 > 升级到 schema 9 时会清空旧版本的 AI 会话、回放、任务/检查点、记忆和向量索引；主机、设置和凭据引用等非 AI 数据保留。
