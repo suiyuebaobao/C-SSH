@@ -3,8 +3,8 @@
 use axum::{
     Extension,
     body::{Body, to_bytes},
-    extract::{Request, State},
-    http::{HeaderMap, Method, StatusCode, Uri, header::CONTENT_TYPE},
+    extract::{OriginalUri, Request, State},
+    http::{HeaderMap, Method, StatusCode, header::CONTENT_TYPE},
     middleware::Next,
     response::{IntoResponse, Redirect, Response},
 };
@@ -57,7 +57,7 @@ pub async fn require_page_session(
         match authenticate_request(&service, request.headers()).await {
             Ok(session) => session,
             Err(_error) if request.method() == Method::GET || request.method() == Method::HEAD => {
-                return login_redirect(request.uri()).into_response();
+                return login_redirect(&request).into_response();
             }
             Err(error) => return error.into_response(),
         };
@@ -85,7 +85,7 @@ pub async fn authenticate_page_session(
         match authenticate_request(&service, request.headers()).await {
             Ok(session) => session,
             Err(_error) if request.method() == Method::GET || request.method() == Method::HEAD => {
-                return login_redirect(request.uri()).into_response();
+                return login_redirect(&request).into_response();
             }
             Err(error) => return error.into_response(),
         };
@@ -192,7 +192,11 @@ fn refresh_device_cookie(
     Ok(response)
 }
 
-fn login_redirect(uri: &Uri) -> Redirect {
+fn login_redirect(request: &Request) -> Redirect {
+    let uri = request
+        .extensions()
+        .get::<OriginalUri>()
+        .map_or(request.uri(), |original| &original.0);
     let next = uri
         .path_and_query()
         .map_or("/admin", axum::http::uri::PathAndQuery::as_str);
@@ -206,11 +210,28 @@ mod tests {
 
     #[test]
     fn login_redirect_keeps_only_the_local_request_target() {
-        let uri: Uri = "/admin/releases?lang=en".parse().expect("URI 应有效");
-        let response = login_redirect(&uri).into_response();
+        let request = Request::get("/admin/releases?lang=en")
+            .body(Body::empty())
+            .expect("请求应有效");
+        let response = login_redirect(&request).into_response();
         assert_eq!(
             response.headers()[axum::http::header::LOCATION],
             "/login?next=%2Fadmin%2Freleases%3Flang%3Den"
+        );
+    }
+
+    #[test]
+    fn login_redirect_uses_the_original_uri_after_router_nesting() {
+        let mut request = Request::get("/site")
+            .body(Body::empty())
+            .expect("嵌套路由请求应有效");
+        request.extensions_mut().insert(OriginalUri(
+            "/admin/site?lang=en".parse().expect("原始 URI 应有效"),
+        ));
+        let response = login_redirect(&request).into_response();
+        assert_eq!(
+            response.headers()[axum::http::header::LOCATION],
+            "/login?next=%2Fadmin%2Fsite%3Flang%3Den"
         );
     }
 
