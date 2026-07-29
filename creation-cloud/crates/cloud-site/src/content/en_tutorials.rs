@@ -80,7 +80,7 @@ pub(super) fn content() -> TutorialContent {
                     step(
                         "Step 3",
                         "Watch deployment progress",
-                        "Wait for the matching agent and tmux upload, length and SHA256 validation, atomic installation, and service readiness.",
+                        "Wait for the matching agent and tmux upload, length and integrity validation, atomic installation, and service readiness.",
                     ),
                     step(
                         "Step 4",
