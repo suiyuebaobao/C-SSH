@@ -82,7 +82,7 @@ impl SmtpConfig {
             bail!("CLOUD_SMTP_PORT 必须是 1 到 65535 的整数");
         }
         let security = parse_security(security.as_deref().unwrap_or("tls"))?;
-        validate_mailbox("CLOUD_SMTP_USERNAME", &username)?;
+        validate_identity("CLOUD_SMTP_USERNAME", &username)?;
         validate_mailbox("CLOUD_SMTP_FROM", &from_address)?;
 
         let password = read_secret_file("CLOUD_SMTP_PASSWORD_FILE", &password_path)?;
@@ -136,11 +136,20 @@ fn parse_security(value: &str) -> Result<SmtpSecurity> {
 }
 
 fn validate_mailbox(name: &str, value: &str) -> Result<()> {
-    if value.len() > 320
-        || value.bytes().any(|byte| byte.is_ascii_control())
-        || !value.contains('@')
-    {
+    validate_identity(name, value)?;
+    if !value.contains('@') {
         bail!("{name} 不是合法邮箱地址");
+    }
+    Ok(())
+}
+
+fn validate_identity(name: &str, value: &str) -> Result<()> {
+    if value.is_empty()
+        || value.len() > 320
+        || value.trim() != value
+        || value.bytes().any(|byte| byte.is_ascii_control())
+    {
+        bail!("{name} 不是合法 SMTP 账号标识");
     }
     Ok(())
 }
@@ -172,6 +181,15 @@ mod tests {
         );
         for invalid in ["", "plain", "TLS", "opportunistic"] {
             assert!(parse_security(invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn smtp_username_accepts_provider_account_identifiers() {
+        validate_identity("CLOUD_SMTP_USERNAME", "123456789").expect("numeric account");
+        validate_identity("CLOUD_SMTP_USERNAME", "mailer@example.com").expect("mailbox account");
+        for invalid in ["", " leading", "trailing ", "line\nbreak"] {
+            assert!(validate_identity("CLOUD_SMTP_USERNAME", invalid).is_err());
         }
     }
 
