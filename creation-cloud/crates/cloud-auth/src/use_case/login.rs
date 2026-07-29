@@ -54,7 +54,10 @@ pub(crate) async fn execute(
     };
     // Argon2id 验证可能耗时，必须在取得账号行锁之前完成。
     let password_valid = password::verify(command.password, account.password_hash.clone()).await?;
-    if !password_valid || account.status != "active" {
+    if !password_valid
+        || account.status != "active"
+        || (account.role != "admin" && account.email_verified_at.is_none())
+    {
         return Err(invalid_credentials());
     }
 
@@ -77,6 +80,7 @@ pub(crate) async fn execute(
         current_account.id,
         &token_hash,
         expires_at,
+        current_account.credential_version,
     )
     .await?;
     transaction
@@ -88,13 +92,17 @@ pub(crate) async fn execute(
         session: AuthenticatedSession {
             session_id,
             account_id: current_account.id,
-            email: current_account.email,
+            email: current_account.email.clone().unwrap_or_default(),
             admin_login_name: current_account.admin_login_name,
             role: current_account.role,
             device_id: None,
             expires_at,
             csrf_token: token::csrf(&raw_token),
         },
+        metadata: crate::session::SessionMetadata::unbound(
+            expires_at,
+            current_account.email_verified_at.is_some(),
+        ),
         raw_token,
     })
 }
@@ -120,10 +128,12 @@ pub(crate) fn snapshot_allows_session(
 fn same_account_snapshot(initial: &LoginAccount, current: &LoginAccount) -> bool {
     initial.id == current.id
         && initial.email == current.email
+        && initial.email_verified_at == current.email_verified_at
         && initial.admin_login_name == current.admin_login_name
         && initial.password_hash == current.password_hash
         && initial.role == current.role
         && initial.status == current.status
+        && initial.credential_version == current.credential_version
 }
 
 fn identifier_matches_current(
@@ -137,7 +147,7 @@ fn identifier_matches_current(
         account.role == "admin"
             && account.admin_login_name.as_deref() == Some(identifier.value.as_str())
     } else {
-        account.email == identifier.value
+        account.email.as_deref() == Some(identifier.value.as_str())
     }
 }
 

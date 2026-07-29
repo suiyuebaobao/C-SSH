@@ -8,17 +8,17 @@ use axum::{
 };
 use cloud_domain::AppResult;
 
-use crate::{Login, Service, SessionView, cookie};
+use crate::{Login, Service, cookie};
 
 pub(crate) async fn handle(
     State(service): State<Service>,
     Json(command): Json<Login>,
 ) -> AppResult<Response> {
     let issued = service.login(command).await?;
-    let mut response = Json(SessionView::from(&issued.session)).into_response();
+    let mut response = Json(issued.view()).into_response();
     response.headers_mut().insert(
         header::SET_COOKIE,
-        cookie::session_header(&issued.raw_token, issued.session.expires_at)?,
+        cookie::session_header(&issued.raw_token, issued.metadata.idle_expires_at)?,
     );
     Ok(response)
 }

@@ -272,9 +272,8 @@ fn console_navigation(current: PageId) -> Vec<NavigationItem> {
         nav("总览", PageId::Console, current),
         nav("资料与安全", PageId::Profile, current),
         nav("设备", PageId::Devices, current),
-        nav("同步", PageId::Sync, current),
+        nav("主机", PageId::Sync, current),
         nav("模型", PageId::Models, current),
-        nav("保险库", PageId::Vault, current),
         nav("下载", PageId::ConsoleDownloads, current),
     ]
 }

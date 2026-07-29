@@ -7,6 +7,7 @@ use cloud_download::{PublicAsset, PublicRelease};
 use cloud_site::{
     DocumentationContent, HomePageContent, Locale, PageId, SiteView, content_service,
 };
+use cloud_site_content::SiteContentPayload;
 
 use crate::seo::{SeoConfig, SeoHead};
 
@@ -17,6 +18,13 @@ struct HomeTemplate {
     home: HomePageContent,
     seo: SeoHead,
     topics: Vec<String>,
+}
+
+#[derive(Template)]
+#[template(path = "home-unavailable.html")]
+struct HomeUnavailableTemplate {
+    view: SiteView,
+    seo: SeoHead,
     is_en: bool,
 }
 
@@ -100,7 +108,6 @@ pub(crate) fn home(page: PageId, locale: Locale, config: &SeoConfig) -> AppResul
         home,
         seo,
         topics: Vec::new(),
-        is_en: locale == Locale::En,
     })
 }
 
@@ -109,8 +116,12 @@ pub(crate) fn home_live(
     locale: Locale,
     config: &SeoConfig,
     topics: Vec<String>,
+    documents: Vec<SiteContentPayload>,
 ) -> AppResult<Html<String>> {
-    let view = content_service().view(page, locale);
+    let mut view = content_service().view(page, locale);
+    for document in documents {
+        document.apply(&mut view);
+    }
     let seo = public_head(config, page, locale, &view).with_keywords(&topics);
     let home = view
         .page
@@ -122,6 +133,44 @@ pub(crate) fn home_live(
         home,
         seo,
         topics,
+    })
+}
+
+pub(crate) fn home_preview(
+    page: PageId,
+    locale: Locale,
+    topics: Vec<String>,
+    documents: Vec<SiteContentPayload>,
+) -> AppResult<Html<String>> {
+    let mut view = content_service().view(page, locale);
+    for document in documents {
+        document.apply(&mut view);
+    }
+    let home = view
+        .page
+        .home_page
+        .clone()
+        .ok_or_else(|| AppError::Internal("首页预览内容暂时无法渲染".to_owned()))?;
+    render(&HomeTemplate {
+        view,
+        home,
+        seo: SeoHead::private(),
+        topics,
+    })
+}
+
+pub(crate) fn home_unavailable(
+    page: PageId,
+    locale: Locale,
+    documents: Vec<SiteContentPayload>,
+) -> AppResult<Html<String>> {
+    let mut view = content_service().view(page, locale);
+    for document in documents {
+        document.apply(&mut view);
+    }
+    render(&HomeUnavailableTemplate {
+        view,
+        seo: SeoHead::private(),
         is_en: locale == Locale::En,
     })
 }
@@ -148,8 +197,8 @@ pub(crate) fn published_catalog(
         config,
         page,
         locale,
-        view.page.meta_title,
-        view.page.meta_description,
+        &view.page.meta_title,
+        &view.page.meta_description,
         catalog.has_published(),
     );
     render(&PublishedCatalogTemplate {
@@ -384,8 +433,8 @@ fn public_head(config: &SeoConfig, page: PageId, locale: Locale, view: &SiteView
         config,
         page,
         locale,
-        view.page.meta_title,
-        view.page.meta_description,
+        &view.page.meta_title,
+        &view.page.meta_description,
     )
 }
 

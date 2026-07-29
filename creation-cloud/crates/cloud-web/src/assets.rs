@@ -27,10 +27,12 @@ const DOCUMENTATION_GUIDES_CSS: &str = include_str!("../static/css/documentation
 const ADMIN_FOUNDATION_CSS: &str = include_str!("../static/css/admin-foundation.css");
 const ADMIN_COMPONENTS_CSS: &str = include_str!("../static/css/admin-components.css");
 const ADMIN_PAGES_CSS: &str = include_str!("../static/css/admin-pages.css");
+const ADMIN_SITE_CONTENT_CSS: &str = include_str!("../static/css/admin-site-content.css");
 const CONSOLE_CSS: &str = include_str!("../static/css/console.css");
 const SITE_JS: &str = include_str!("../static/js/site.js");
 const HOME_QR_JS: &str = include_str!("../static/js/home-qr.js");
 const ADMIN_JS: &str = include_str!("../static/js/admin.js");
+const ADMIN_SITE_CONTENT_JS: &str = include_str!("../static/js/admin-site-content.js");
 const FEEDBACK_JS: &str = include_str!("../static/js/feedback.js");
 const DOCUMENTATION_SEARCH_JS: &str = include_str!("../static/js/documentation-search.js");
 const CONSOLE_JS: &str = include_str!("../static/js/console.js");
@@ -76,10 +78,18 @@ pub(crate) fn router() -> Router {
             get(admin_components_css),
         )
         .route("/static/css/admin-pages.css", get(admin_pages_css))
+        .route(
+            "/static/css/admin-site-content.css",
+            get(admin_site_content_css),
+        )
         .route("/static/css/console.css", get(console_css))
         .route("/static/js/site.js", get(site_js))
         .route("/static/js/home-qr.js", get(home_qr_js))
         .route("/static/js/admin.js", get(admin_js))
+        .route(
+            "/static/js/admin-site-content.js",
+            get(admin_site_content_js),
+        )
         .route("/static/js/feedback.js", get(feedback_js))
         .route(
             "/static/js/documentation-search.js",
@@ -170,6 +180,10 @@ async fn admin_pages_css() -> Response {
     text_response(ADMIN_PAGES_CSS, "text/css; charset=utf-8")
 }
 
+async fn admin_site_content_css() -> Response {
+    text_response(ADMIN_SITE_CONTENT_CSS, "text/css; charset=utf-8")
+}
+
 async fn console_css() -> Response {
     text_response(CONSOLE_CSS, "text/css; charset=utf-8")
 }
@@ -184,6 +198,10 @@ async fn home_qr_js() -> Response {
 
 async fn admin_js() -> Response {
     text_response(ADMIN_JS, "text/javascript; charset=utf-8")
+}
+
+async fn admin_site_content_js() -> Response {
+    text_response(ADMIN_SITE_CONTENT_JS, "text/javascript; charset=utf-8")
 }
 
 async fn feedback_js() -> Response {

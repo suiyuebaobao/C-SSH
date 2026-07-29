@@ -26,10 +26,6 @@ pub(crate) async fn models(Query(query): Query<LocaleQuery>) -> AppResult<Html<S
     render::console(PageId::Models, query.locale())
 }
 
-pub(crate) async fn vault(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
-    render::console(PageId::Vault, query.locale())
-}
-
 pub(crate) async fn downloads(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
     render::console(PageId::ConsoleDownloads, query.locale())
 }

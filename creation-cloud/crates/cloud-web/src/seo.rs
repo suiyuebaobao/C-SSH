@@ -86,8 +86,8 @@ pub(crate) struct SeoHead {
     pub(crate) alternate_zh_url: Option<String>,
     pub(crate) alternate_en_url: Option<String>,
     pub(crate) alternate_default_url: Option<String>,
-    pub(crate) open_graph_title: Option<&'static str>,
-    pub(crate) open_graph_description: Option<&'static str>,
+    pub(crate) open_graph_title: Option<String>,
+    pub(crate) open_graph_description: Option<String>,
     pub(crate) open_graph_url: Option<String>,
     pub(crate) open_graph_locale: Option<&'static str>,
     pub(crate) open_graph_alternate_locale: Option<&'static str>,
@@ -102,8 +102,8 @@ impl SeoHead {
         config: &SeoConfig,
         page: PageId,
         locale: Locale,
-        title: &'static str,
-        description: &'static str,
+        title: &str,
+        description: &str,
     ) -> Self {
         Self::public_with_indexing(
             config,
@@ -119,8 +119,8 @@ impl SeoHead {
         config: &SeoConfig,
         page: PageId,
         locale: Locale,
-        title: &'static str,
-        description: &'static str,
+        title: &str,
+        description: &str,
         has_published_catalog: bool,
     ) -> Self {
         Self::public_with_indexing(
@@ -137,8 +137,8 @@ impl SeoHead {
         config: &SeoConfig,
         page: PageId,
         locale: Locale,
-        title: &'static str,
-        description: &'static str,
+        title: &str,
+        description: &str,
         is_indexable: bool,
     ) -> Self {
         let canonical_url = config.absolute_url(&page.localized_path(locale));
@@ -154,8 +154,8 @@ impl SeoHead {
             alternate_zh_url: Some(alternate_zh_url.clone()),
             alternate_en_url: Some(alternate_en_url),
             alternate_default_url: Some(alternate_zh_url),
-            open_graph_title: Some(title),
-            open_graph_description: Some(description),
+            open_graph_title: Some(title.to_owned()),
+            open_graph_description: Some(description.to_owned()),
             open_graph_url: Some(canonical_url.clone()),
             open_graph_locale: Some(open_graph_locale(locale)),
             open_graph_alternate_locale: Some(open_graph_locale(locale.alternate())),

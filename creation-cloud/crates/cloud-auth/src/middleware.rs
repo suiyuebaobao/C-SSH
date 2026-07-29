@@ -10,7 +10,7 @@ use axum::{
 };
 use cloud_domain::{AppError, AppResult, AuthenticatedSession};
 
-use crate::{Service, cookie, token};
+use crate::{Service, SessionMetadata, cookie, token};
 
 const CSRF_HEADER: &str = "x-csrf-token";
 const MAX_FORM_CSRF_BODY_BYTES: usize = 4 * 1024;
@@ -21,13 +21,15 @@ pub async fn require_session(
     next: Next,
 ) -> AppResult<Response> {
     let raw_token = cookie::read(request.headers())?;
-    let session = service.authenticate(&raw_token).await?;
+    let (session, metadata) = service.authenticate_with_metadata(&raw_token).await?;
     if requires_csrf(request.method()) {
         validate_csrf(request.headers(), &session.csrf_token)?;
     }
     request.extensions_mut().insert(session.account_id);
     request.extensions_mut().insert(session);
-    Ok(next.run(request).await)
+    request.extensions_mut().insert(metadata.clone());
+    let response = next.run(request).await;
+    refresh_device_cookie(response, &raw_token, &metadata)
 }
 
 /// 只认证并注入 API 会话，供需要在 CSRF 之前审计的管理路由分层装配。
@@ -37,10 +39,12 @@ pub async fn authenticate_session(
     next: Next,
 ) -> AppResult<Response> {
     let raw_token = cookie::read(request.headers())?;
-    let session = service.authenticate(&raw_token).await?;
+    let (session, metadata) = service.authenticate_with_metadata(&raw_token).await?;
     request.extensions_mut().insert(session.account_id);
     request.extensions_mut().insert(session);
-    Ok(next.run(request).await)
+    request.extensions_mut().insert(metadata.clone());
+    let response = next.run(request).await;
+    refresh_device_cookie(response, &raw_token, &metadata)
 }
 
 /// 页面 GET 在会话缺失时跳到登录页，其它方法仍返回可机读认证错误。
@@ -49,13 +53,14 @@ pub async fn require_page_session(
     mut request: Request,
     next: Next,
 ) -> Response {
-    let session = match authenticate_request(&service, request.headers()).await {
-        Ok(session) => session,
-        Err(_error) if request.method() == Method::GET || request.method() == Method::HEAD => {
-            return login_redirect(request.uri()).into_response();
-        }
-        Err(error) => return error.into_response(),
-    };
+    let (session, metadata, raw_token) =
+        match authenticate_request(&service, request.headers()).await {
+            Ok(session) => session,
+            Err(_error) if request.method() == Method::GET || request.method() == Method::HEAD => {
+                return login_redirect(request.uri()).into_response();
+            }
+            Err(error) => return error.into_response(),
+        };
     if requires_csrf(request.method()) {
         request = match validate_page_csrf(request, &session.csrf_token).await {
             Ok(request) => request,
@@ -64,7 +69,10 @@ pub async fn require_page_session(
     }
     request.extensions_mut().insert(session.account_id);
     request.extensions_mut().insert(session);
-    next.run(request).await
+    request.extensions_mut().insert(metadata.clone());
+    let response = next.run(request).await;
+    refresh_device_cookie(response, &raw_token, &metadata)
+        .unwrap_or_else(IntoResponse::into_response)
 }
 
 /// 只认证并注入页面会话，状态变更请求的 CSRF 由内层管理中间件校验。
@@ -73,16 +81,20 @@ pub async fn authenticate_page_session(
     mut request: Request,
     next: Next,
 ) -> Response {
-    let session = match authenticate_request(&service, request.headers()).await {
-        Ok(session) => session,
-        Err(_error) if request.method() == Method::GET || request.method() == Method::HEAD => {
-            return login_redirect(request.uri()).into_response();
-        }
-        Err(error) => return error.into_response(),
-    };
+    let (session, metadata, raw_token) =
+        match authenticate_request(&service, request.headers()).await {
+            Ok(session) => session,
+            Err(_error) if request.method() == Method::GET || request.method() == Method::HEAD => {
+                return login_redirect(request.uri()).into_response();
+            }
+            Err(error) => return error.into_response(),
+        };
     request.extensions_mut().insert(session.account_id);
     request.extensions_mut().insert(session);
-    next.run(request).await
+    request.extensions_mut().insert(metadata.clone());
+    let response = next.run(request).await;
+    refresh_device_cookie(response, &raw_token, &metadata)
+        .unwrap_or_else(IntoResponse::into_response)
 }
 
 /// 在管理审计层之内校验状态变更请求，使失败尝试也留下 failure 事件。
@@ -156,9 +168,28 @@ async fn validate_page_csrf(request: Request, expected: &str) -> Result<Request,
 async fn authenticate_request(
     service: &Service,
     headers: &HeaderMap,
-) -> AppResult<AuthenticatedSession> {
+) -> AppResult<(AuthenticatedSession, SessionMetadata, String)> {
     let raw_token = cookie::read(headers)?;
-    service.authenticate(&raw_token).await
+    let (session, metadata) = service.authenticate_with_metadata(&raw_token).await?;
+    Ok((session, metadata, raw_token))
+}
+
+fn refresh_device_cookie(
+    mut response: Response,
+    raw_token: &str,
+    metadata: &SessionMetadata,
+) -> AppResult<Response> {
+    if metadata.session_kind == "device"
+        && !response
+            .headers()
+            .contains_key(axum::http::header::SET_COOKIE)
+    {
+        response.headers_mut().insert(
+            axum::http::header::SET_COOKIE,
+            cookie::session_header(raw_token, metadata.idle_expires_at)?,
+        );
+    }
+    Ok(response)
 }
 
 fn login_redirect(uri: &Uri) -> Redirect {

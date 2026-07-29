@@ -103,7 +103,7 @@ function accountErrorMessage(status, networkFailure = false) {
 
 function accountShowError(event, networkFailure = false) {
   const form = accountFormFromHtmxEvent(event);
-  const feedback = form?.querySelector("#auth-feedback");
+  const feedback = form?.querySelector(".form-feedback");
   if (!(feedback instanceof HTMLElement)) {
     return;
   }
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", synchronizeMenu);
 document.addEventListener("htmx:beforeSwap", () => closeMenu());
 document.addEventListener("htmx:load", synchronizeMenu);
 document.addEventListener("htmx:beforeRequest", (event) => {
-  const feedback = accountFormFromHtmxEvent(event)?.querySelector("#auth-feedback");
+  const feedback = accountFormFromHtmxEvent(event)?.querySelector(".form-feedback");
   if (feedback instanceof HTMLElement) {
     feedback.textContent = "";
     feedback.removeAttribute("data-tone");

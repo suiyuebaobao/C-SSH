@@ -121,7 +121,8 @@ pub struct AdminDevice {
 pub(crate) struct AdminDeviceRow {
     pub id: Uuid,
     pub account_id: Uuid,
-    pub owner_email: String,
+    pub owner_email: Option<String>,
+    pub owner_admin_login_name: Option<String>,
     pub name: String,
     pub platform: String,
     pub public_id: String,
@@ -138,7 +139,12 @@ impl TryFrom<AdminDeviceRow> for AdminDevice {
         Ok(Self {
             id: row.id,
             account_id: row.account_id,
-            owner_masked_email: redaction::email(&row.owner_email),
+            owner_masked_email: row
+                .owner_email
+                .as_deref()
+                .map(redaction::email)
+                .or(row.owner_admin_login_name)
+                .unwrap_or_else(|| "无账号标识".to_owned()),
             name: row.name,
             platform: AdminDevicePlatform::try_from(row.platform.as_str())?,
             public_id: row.public_id,

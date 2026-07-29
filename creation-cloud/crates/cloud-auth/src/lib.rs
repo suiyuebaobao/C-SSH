@@ -4,6 +4,7 @@ mod cookie;
 mod credential_limiter;
 mod handler;
 mod login_limiter;
+mod mailer;
 mod middleware;
 mod model;
 mod password;
@@ -13,6 +14,7 @@ mod session;
 mod token;
 mod use_case;
 mod validation;
+mod verification;
 
 use axum::{
     Router,
@@ -21,13 +23,25 @@ use axum::{
     routing::{get, post},
 };
 
+pub use mailer::VerificationMailer;
 pub use middleware::{
     authenticate_page_session, authenticate_session, require_admin, require_csrf,
     require_page_session, require_session,
 };
 pub use service::Service;
-pub use session::{AuthenticatedSession, SessionView};
-pub use use_case::{ChangePassword, Login, Register};
+pub use session::{AuthenticatedSession, IssuedSession, SessionMetadata, SessionView};
+pub use use_case::{
+    ChangePassword, Login, Register, RegistrationStatus, ResendStatus, ResendVerification,
+    VerifyEmail,
+};
+
+/// 为带外管理员创建命令生成符合当前账号策略的 Argon2id 哈希。
+///
+/// 调用方只能持有并传入原始密码，禁止记录、回显或持久化该输入。
+pub async fn hash_admin_password(value: &str) -> cloud_domain::AppResult<String> {
+    validation::password(value)?;
+    password::hash(value.to_owned()).await
+}
 
 /// 构建不含业务前缀的认证路由，由服务端统一挂载。
 #[must_use = "路由必须挂载到服务端才会生效"]
@@ -43,6 +57,11 @@ pub fn router(service: Service) -> Router {
 
     Router::new()
         .route("/register", post(handler::register::handle))
+        .route("/verify-email", post(handler::verify_email::handle))
+        .route(
+            "/resend-verification",
+            post(handler::resend_verification::handle),
+        )
         .route("/login", post(handler::login::handle))
         .merge(protected)
         .with_state(service)
@@ -55,6 +74,11 @@ pub fn form_router(service: Service) -> Router {
     Router::new()
         .route("/register", post(handler::form_register::handle))
         .route("/login", post(handler::form_login::handle))
+        .route("/verify-email", post(handler::form_verify_email::handle))
+        .route(
+            "/resend-verification",
+            post(handler::form_resend_verification::handle),
+        )
         .with_state(service)
         .layer(DefaultBodyLimit::max(4 * 1024))
 }

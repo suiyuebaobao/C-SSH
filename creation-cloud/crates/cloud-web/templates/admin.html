@@ -4,10 +4,12 @@
   <link rel="stylesheet" href="/static/css/admin-foundation.css?v=20260721-maintenance">
   <link rel="stylesheet" href="/static/css/admin-components.css?v=20260721-maintenance">
   <link rel="stylesheet" href="/static/css/admin-pages.css?v=20260728-seo-topics">
+  <link rel="stylesheet" href="/static/css/admin-site-content.css?v=20260729-content-admin">
 {% endblock %}
 
 {% block scripts %}
   <script src="/static/js/admin.js?v=20260721-maintenance" defer></script>
+  <script src="/static/js/admin-site-content.js?v=20260729-content-admin" defer></script>
 {% endblock %}
 
 {% block main %}
@@ -19,6 +21,7 @@
         {% for item in view.page.local_navigation %}
         <a href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
         {% endfor %}
+        <a href="/admin/models{% if is_en %}?lang=en{% endif %}">{% if is_en %}70 Models{% else %}70 模型{% endif %}</a>
       </nav>
     </aside>
     <div class="admin-panel">

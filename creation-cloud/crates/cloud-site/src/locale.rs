@@ -1,9 +1,13 @@
 //! 定义网站支持的语言并收敛语言代码解析规则。
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum Locale {
     #[default]
+    #[serde(rename = "zh-CN")]
     ZhCn,
+    #[serde(rename = "en")]
     En,
 }
 

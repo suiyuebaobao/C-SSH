@@ -1,15 +1,25 @@
-//! 接收改密 JSON，并由用例校验当前密码及撤销策略。
+//! 修改密码后撤销旧版本会话并通过响应 Cookie 签发当前新会话。
 
-use axum::{Extension, Json, extract::State, http::StatusCode};
+use axum::{
+    Extension, Json,
+    extract::State,
+    http::{StatusCode, header},
+    response::{IntoResponse, Response},
+};
 use cloud_domain::AppResult;
 
-use crate::{AuthenticatedSession, ChangePassword, Service};
+use crate::{AuthenticatedSession, ChangePassword, Service, cookie};
 
 pub(crate) async fn handle(
     State(service): State<Service>,
     Extension(session): Extension<AuthenticatedSession>,
     Json(command): Json<ChangePassword>,
-) -> AppResult<StatusCode> {
-    service.change_password(&session, command).await?;
-    Ok(StatusCode::NO_CONTENT)
+) -> AppResult<Response> {
+    let issued = service.change_password(&session, command).await?;
+    let mut response = StatusCode::NO_CONTENT.into_response();
+    response.headers_mut().insert(
+        header::SET_COOKIE,
+        cookie::session_header(&issued.raw_token, issued.metadata.idle_expires_at)?,
+    );
+    Ok(response)
 }

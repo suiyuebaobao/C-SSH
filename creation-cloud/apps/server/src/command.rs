@@ -7,6 +7,7 @@ use std::str::FromStr;
 #[derive(Debug, Eq, PartialEq)]
 pub enum Command {
     Serve,
+    CreateAdmin(String),
     PromoteAdmin(String),
     SetAdminLogin {
         registered_email: String,
@@ -24,6 +25,9 @@ fn parse(arguments: impl IntoIterator<Item = String>) -> Result<Command> {
     let arguments = arguments.into_iter().collect::<Vec<_>>();
     match arguments.as_slice() {
         [] => Ok(Command::Serve),
+        [admin, create, login_name] if admin == "admin" && create == "create" => {
+            Ok(Command::CreateAdmin(login_name.clone()))
+        }
         [admin, promote, email] if admin == "admin" && promote == "promote" => {
             Ok(Command::PromoteAdmin(email.clone()))
         }
@@ -64,6 +68,11 @@ mod tests {
 
     #[test]
     fn parses_supported_commands_without_accepting_credentials_or_extra_arguments() {
+        assert_eq!(
+            parse(["admin", "create", "ops_admin"].map(str::to_owned))
+                .expect("管理员创建命令应通过解析"),
+            Command::CreateAdmin("ops_admin".to_owned())
+        );
         assert_eq!(parse(Vec::new()).expect("空参数应启动服务"), Command::Serve);
         assert!(matches!(
             parse(["admin", "promote", "admin@example.com"].map(str::to_owned)),
@@ -77,6 +86,8 @@ mod tests {
                 admin_login_name: "ops_admin".to_owned(),
             }
         );
+        assert!(parse(["admin", "create"].map(str::to_owned)).is_err());
+        assert!(parse(["admin", "create", "ops_admin", "password"].map(str::to_owned)).is_err());
         assert!(parse(["admin", "promote"].map(str::to_owned)).is_err());
         assert!(parse(["admin", "set-login", "admin@example.com"].map(str::to_owned)).is_err());
         assert!(

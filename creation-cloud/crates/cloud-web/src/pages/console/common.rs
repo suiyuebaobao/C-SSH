@@ -34,7 +34,20 @@ pub(super) fn locale(value: Option<&str>) -> Locale {
 }
 
 pub(super) fn action_success(headers: &HeaderMap, page: PageId, locale: Locale) -> Response {
-    let target = page.localized_path(locale);
+    action_success_to(headers, page.localized_path(locale), locale)
+}
+
+pub(super) fn action_success_to(
+    headers: &HeaderMap,
+    path: impl Into<String>,
+    locale: Locale,
+) -> Response {
+    let mut target = path.into();
+    if locale == Locale::En && !target.split(['?', '&']).any(|part| part == "lang=en") {
+        let separator = if target.contains('?') { '&' } else { '?' };
+        target.push(separator);
+        target.push_str("lang=en");
+    }
     if headers
         .get(HX_REQUEST)
         .and_then(|value| value.to_str().ok())

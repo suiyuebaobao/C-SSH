@@ -23,20 +23,23 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let admin_service = services.admin.clone();
     let user_service = services.user.clone();
     let device_service = services.device.clone();
-    let sync_service = services.sync.clone();
+    let host_service = services.host.clone();
     let model_service = services.model.clone();
-    let vault_service = services.vault.clone();
     let download_service = services.download.clone();
     let seo_topic_service = services.seo.clone();
-    let public_page_state =
-        cloud_web::PublicPageState::new(seo, download_service.clone(), seo_topic_service.clone());
+    let site_content_service = services.site_content.clone();
+    let public_page_state = cloud_web::PublicPageState::new(
+        seo,
+        download_service.clone(),
+        seo_topic_service.clone(),
+        site_content_service.clone(),
+    );
     let console_page_state = cloud_web::ConsolePageState::new(
         auth_service.clone(),
         user_service.clone(),
         device_service.clone(),
-        sync_service.clone(),
+        host_service.clone(),
         model_service.clone(),
-        vault_service.clone(),
         download_service.clone(),
     );
     let feedback_service = services.feedback.clone();
@@ -46,6 +49,9 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         admin_service.clone(),
         release_service.clone(),
         download_service.clone(),
+        host_service.clone(),
+        model_service.clone(),
+        site_content_service.clone(),
         site_media_service.clone(),
         services.pool.clone(),
         config.environment.clone(),
@@ -59,6 +65,14 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .route("/overview", get(admin_overview::handle))
         .with_state(admin_overview_state)
         .merge(cloud_admin::router_without_overview(admin_service.clone()))
+        .nest(
+            "/users",
+            cloud_host::management_router(host_service.clone()),
+        )
+        .nest(
+            "/models",
+            cloud_model::management_router(model_service.clone()),
+        )
         .nest("/releases", cloud_release::router(release_service))
         .nest(
             "/downloads",
@@ -67,6 +81,10 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .nest(
             "/site-media",
             cloud_site_media::management_router(site_media_service.clone()),
+        )
+        .nest(
+            "/site-content",
+            cloud_site_content::management_router(site_content_service),
         )
         .nest("/seo", cloud_seo::management_router(seo_topic_service))
         .nest(
@@ -89,15 +107,21 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         ));
     let protected = Router::new()
         .nest("/users", cloud_user::router(user_service))
-        .nest("/devices", cloud_device::router(device_service))
-        .nest("/sync", cloud_sync::router(sync_service))
-        .nest("/models", cloud_model::router(model_service))
-        .nest("/vault", cloud_vault::router(vault_service))
+        .nest(
+            "/devices",
+            cloud_device::router(device_service)
+                .merge(cloud_host::device_router(host_service.clone())),
+        )
+        .nest("/hosts", cloud_host::host_router(host_service.clone()))
+        .nest("/sync", cloud_host::sync_router(host_service))
+        .nest("/models", cloud_model::router(model_service.clone()))
+        .nest("/model-secrets", cloud_model::secret_router(model_service))
         .nest(
             "/downloads",
             cloud_download::account_router(download_service.clone()),
         )
         .nest("/feedback", cloud_feedback::user_router(feedback_service))
+        .layer(middleware::from_fn(cloud_auth::require_csrf))
         .route_layer(middleware::from_fn_with_state(
             auth_service.clone(),
             cloud_auth::require_session,
@@ -221,8 +245,9 @@ mod tests {
             session_ttl: Duration::from_secs(3600),
             environment: "development".to_owned(),
             maintenance: cloud_config::MaintenanceConfig::default(),
+            smtp: None,
         };
-        let services = AppServices::new(pool, &config);
+        let services = AppServices::new(pool, &config).expect("测试服务应可装配");
         build(services, config)
     }
 

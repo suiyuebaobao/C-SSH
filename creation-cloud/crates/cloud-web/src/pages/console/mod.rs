@@ -3,23 +3,18 @@
 mod common;
 mod devices;
 mod downloads;
+mod hosts;
 mod models;
 mod overview;
 mod profile;
-mod sync;
-mod vault;
 
 pub(crate) use devices::{
     page as devices, rename::handle as rename_device, revoke::handle as revoke_device,
 };
 pub(crate) use downloads::page as downloads;
-pub(crate) use models::{
-    create::handle as create_model, delete::handle as delete_model, page as models,
-    update::handle as update_model,
-};
+pub(crate) use hosts::{allowlist::handle as update_host_allowlist, page as hosts};
+pub(crate) use models::page as models;
 pub(crate) use overview::page as overview;
 pub(crate) use profile::{
     change_password::handle as change_password, page as profile, update::handle as update_profile,
 };
-pub(crate) use sync::page as sync;
-pub(crate) use vault::page as vault;

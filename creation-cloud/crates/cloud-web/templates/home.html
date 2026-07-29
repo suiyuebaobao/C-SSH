@@ -14,9 +14,9 @@
 
 {% block main %}
 <main id="main-content" class="home-main">
-  <div class="home-status-strip" aria-label="Page status">
+  <div class="home-status-strip" aria-label="{{ home.status_strip_label }}">
     <div class="container home-status-inner">
-      <span>OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM</span>
+      <span>{{ home.status_strip_label }}</span>
       <span>{{ home.status_note }}</span>
     </div>
   </div>
@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="hero-blueprint" aria-hidden="true">
-        <span class="blueprint-label">BRAND GEOMETRY / UNIT 01</span>
+        <span class="blueprint-label">{{ home.hero_blueprint_label }}</span>
         <span class="blueprint-axis blueprint-axis-x"></span>
         <span class="blueprint-axis blueprint-axis-y"></span>
         <span class="blueprint-target blueprint-target-start"></span>
@@ -92,7 +92,7 @@
   {% endfor %}
 
   <section class="home-system-section home-faq-section" id="home-faq" aria-labelledby="home-faq-title">
-    <span class="home-section-side" aria-hidden="true">FAQ / DECISION QUESTIONS</span>
+    <span class="home-section-side" aria-hidden="true">{{ home.faq_side_label }}</span>
     <div class="container">
       <header class="home-section-heading">
         <div>
@@ -104,7 +104,7 @@
       <div class="home-faq-list">
         {% for item in home.faqs %}
         <details class="home-faq-item">
-          <summary><span>FAQ 0{{ loop.index }}</span>{{ item.question }}</summary>
+          <summary><span>{{ home.faq_item_prefix }} 0{{ loop.index }}</span>{{ item.question }}</summary>
           <p>{{ item.answer }}</p>
         </details>
         {% endfor %}
@@ -116,10 +116,10 @@
   <section class="home-seo-topics" aria-labelledby="home-seo-topics-title">
     <div class="container home-seo-topics-inner">
       <div>
-        <p class="home-section-code">SEARCH TOPICS / CONTENT MAP</p>
-        <h2 id="home-seo-topics-title">{% if is_en %}Related SSH topics{% else %}相关 SSH 主题{% endif %}</h2>
+        <p class="home-section-code">{{ home.seo_code }}</p>
+        <h2 id="home-seo-topics-title">{{ home.seo_heading }}</h2>
       </div>
-      <ul aria-label="{% if is_en %}Published SEO topics{% else %}已发布的 SEO 主题词{% endif %}">
+      <ul aria-label="{{ home.seo_topics_label }}">
         {% for topic in topics %}<li>{{ topic }}</li>{% endfor %}
       </ul>
     </div>
@@ -163,7 +163,7 @@
         <span class="home-qr-finder home-qr-finder-top-left" aria-hidden="true"></span>
         <span class="home-qr-finder home-qr-finder-top-right" aria-hidden="true"></span>
         <span class="home-qr-finder home-qr-finder-bottom-left" aria-hidden="true"></span>
-        <span class="home-qr-waiting"><strong>QR</strong><small>WAITING</small></span>
+        <span class="home-qr-waiting"><strong>{{ home.qr_placeholder_code }}</strong><small>{{ home.qr_placeholder_waiting }}</small></span>
       </div>
       {% endmatch %}
       <span class="home-qr-scanline" aria-hidden="true"></span>

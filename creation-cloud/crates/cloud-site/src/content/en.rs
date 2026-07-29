@@ -56,12 +56,12 @@ fn shell(current: PageId) -> SiteShell {
     login_link.active = matches!(current, PageId::Login | PageId::Register);
     SiteShell {
         locale: LOCALE,
-        html_lang: LOCALE.code(),
-        brand: "Creation-SSH",
-        brand_note: "Native SSH operations workspace",
+        html_lang: LOCALE.code().into(),
+        brand: "Creation-SSH".into(),
+        brand_note: "Native SSH operations workspace".into(),
         home_href: PageId::Home.localized_path(LOCALE),
-        skip_label: "Skip to main content",
-        menu_label: "Menu",
+        skip_label: "Skip to main content".into(),
+        menu_label: "Menu".into(),
         navigation: vec![
             nav("Home", PageId::Home, current),
             nav("Docs", PageId::Documentation, current),
@@ -73,16 +73,18 @@ fn shell(current: PageId) -> SiteShell {
         ],
         console_link,
         login_link,
-        language_label: "中文",
+        language_label: "中文".into(),
         language_href: current.path().to_owned(),
-        alternate_lang: Locale::ZhCn.code(),
-        utility_navigation_label: "Utility",
+        alternate_lang: Locale::ZhCn.code().into(),
+        utility_navigation_label: "Utility".into(),
         github_repository: RepositoryLink::github(
             "Open the Creation-SSH GitHub repository in a new tab",
         ),
-        footer_summary: "Cross-platform SSH operations built around a native client and resident agent.",
-        footer_motto: "岁月牵涉年华，流年纠结浮生",
-        footer_note: "Creation Cloud is a control plane and never proxies the SSH data plane.",
+        footer_summary:
+            "Cross-platform SSH operations built around a native client and resident agent.".into(),
+        footer_motto: "岁月牵涉年华，流年纠结浮生".into(),
+        footer_note: "Creation Cloud is a control plane and never proxies the SSH data plane."
+            .into(),
         footer_navigation: vec![
             nav("Security", PageId::Security, current),
             nav("Changelog", PageId::Changelog, current),

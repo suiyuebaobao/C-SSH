@@ -5,6 +5,8 @@ pub(crate) mod assets;
 pub(crate) mod audit;
 pub(crate) mod devices;
 pub(crate) mod feedback;
+pub(crate) mod hosts;
+pub(crate) mod models;
 pub(crate) mod overview;
 pub(crate) mod releases;
 pub(crate) mod seo;
@@ -52,4 +54,8 @@ pub(crate) async fn static_audit(Query(query): Query<LocaleQuery>) -> AppResult<
 
 pub(crate) async fn static_feedback(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
     render::admin(PageId::AdminFeedback, query.locale())
+}
+
+pub(crate) async fn static_models(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
+    render::admin(PageId::Admin, query.locale())
 }

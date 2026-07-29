@@ -276,9 +276,8 @@ fn console_navigation(current: PageId) -> Vec<NavigationItem> {
         nav("Overview", PageId::Console, current),
         nav("Profile", PageId::Profile, current),
         nav("Devices", PageId::Devices, current),
-        nav("Sync", PageId::Sync, current),
+        nav("Hosts", PageId::Sync, current),
         nav("Models", PageId::Models, current),
-        nav("Vault", PageId::Vault, current),
         nav("Downloads", PageId::ConsoleDownloads, current),
     ]
 }

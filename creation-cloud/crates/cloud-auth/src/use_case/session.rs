@@ -1,26 +1,39 @@
-//! 将 Cookie 原始令牌哈希后查询会话，并构造跨业务鉴权上下文。
+//! 由原始会话令牌构造业务身份及可公开期限元数据。
 
 use cloud_domain::{AppError, AppResult};
 use cloud_store::PgPool;
 
-use crate::{repository, session::AuthenticatedSession, token};
+use crate::{
+    repository,
+    session::{AuthenticatedSession, SessionMetadata},
+    token,
+};
 
 pub(crate) async fn authenticate(
     pool: &PgPool,
     raw_token: &str,
-) -> AppResult<AuthenticatedSession> {
+) -> AppResult<(AuthenticatedSession, SessionMetadata)> {
     let token_hash = token::hash(raw_token)?;
     let row = repository::session::authenticate(pool, &token_hash)
         .await?
         .ok_or_else(|| AppError::Unauthorized("会话无效或已过期".to_owned()))?;
-    Ok(AuthenticatedSession {
-        session_id: row.session_id,
-        account_id: row.account_id,
-        email: row.email,
-        admin_login_name: row.admin_login_name,
-        role: row.role,
-        device_id: row.device_id,
-        expires_at: row.expires_at,
-        csrf_token: token::csrf(raw_token),
-    })
+    let metadata = SessionMetadata {
+        email_verified: row.email_verified,
+        session_kind: row.session_kind,
+        idle_expires_at: row.idle_expires_at,
+        absolute_expires_at: row.absolute_expires_at,
+    };
+    Ok((
+        AuthenticatedSession {
+            session_id: row.session_id,
+            account_id: row.account_id,
+            email: row.email.unwrap_or_default(),
+            admin_login_name: row.admin_login_name,
+            role: row.role,
+            device_id: row.device_id,
+            expires_at: row.idle_expires_at,
+            csrf_token: token::csrf(raw_token),
+        },
+        metadata,
+    ))
 }

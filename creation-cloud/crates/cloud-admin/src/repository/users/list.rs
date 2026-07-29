@@ -22,11 +22,15 @@ pub(crate) const COUNT_SQL: &str = r#"
 "#;
 
 pub(crate) const LIST_SQL: &str = r#"
-    SELECT accounts.id, accounts.email,
+    SELECT accounts.id, accounts.email, accounts.admin_login_name,
+           accounts.email_verified_at IS NOT NULL AS email_verified,
            COALESCE(user_profiles.display_name, '') AS display_name,
            accounts.role, accounts.status,
            (SELECT count(*)::BIGINT FROM devices WHERE devices.account_id = accounts.id)
                AS device_count,
+           (SELECT count(*)::BIGINT FROM cloud_hosts
+            WHERE cloud_hosts.account_id = accounts.id
+              AND cloud_hosts.is_deleted = FALSE) AS host_count,
            accounts.created_at, accounts.updated_at
     FROM accounts
     LEFT JOIN user_profiles ON user_profiles.account_id = accounts.id

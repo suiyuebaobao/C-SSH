@@ -1,8 +1,13 @@
 //! 处理首页、产品信息、下载、更新记录与常见问题页面。
 
-use axum::{extract::State, response::Html};
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::{Html, IntoResponse, Response},
+};
 use cloud_domain::AppResult;
 use cloud_site::{Locale, PageId};
+use cloud_site_content::{PublicSiteContent, SiteContentDocumentKey, SiteContentPayload};
 
 use crate::{PublicPageState, render, seo::SeoConfig};
 
@@ -14,14 +19,45 @@ pub(crate) async fn home_en(State(seo): State<SeoConfig>) -> AppResult<Html<Stri
     render::home(PageId::Home, Locale::En, &seo)
 }
 
-pub(crate) async fn home_live(State(state): State<PublicPageState>) -> AppResult<Html<String>> {
-    let topics = state.public_topics(Locale::ZhCn).await?;
-    render::home_live(PageId::Home, Locale::ZhCn, state.seo(), topics)
+pub(crate) async fn home_live(State(state): State<PublicPageState>) -> AppResult<Response> {
+    live_home(state, Locale::ZhCn).await
 }
 
-pub(crate) async fn home_en_live(State(state): State<PublicPageState>) -> AppResult<Html<String>> {
-    let topics = state.public_topics(Locale::En).await?;
-    render::home_live(PageId::Home, Locale::En, state.seo(), topics)
+pub(crate) async fn home_en_live(State(state): State<PublicPageState>) -> AppResult<Response> {
+    live_home(state, Locale::En).await
+}
+
+async fn live_home(state: PublicPageState, locale: Locale) -> AppResult<Response> {
+    let (topics, shell, home) = tokio::try_join!(
+        state.public_topics(locale),
+        state.public_content(SiteContentDocumentKey::SiteShell, locale),
+        state.public_content(SiteContentDocumentKey::Home, locale)
+    )?;
+    let mut documents = Vec::with_capacity(2);
+    let unavailable = collect_public_document(shell, &mut documents)
+        | collect_public_document(home, &mut documents);
+    if unavailable {
+        return Ok((
+            StatusCode::SERVICE_UNAVAILABLE,
+            render::home_unavailable(PageId::Home, locale, documents)?,
+        )
+            .into_response());
+    }
+    Ok(render::home_live(PageId::Home, locale, state.seo(), topics, documents)?.into_response())
+}
+
+fn collect_public_document(
+    content: PublicSiteContent,
+    documents: &mut Vec<SiteContentPayload>,
+) -> bool {
+    match content {
+        PublicSiteContent::LegacyFallback => false,
+        PublicSiteContent::Published(document) => {
+            documents.push(document);
+            false
+        }
+        PublicSiteContent::Unavailable => true,
+    }
 }
 
 pub(crate) async fn security(State(seo): State<SeoConfig>) -> AppResult<Html<String>> {

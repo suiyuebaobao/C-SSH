@@ -11,12 +11,13 @@ pub(crate) struct LockedAccount {
     pub id: Uuid,
     pub role: String,
     pub status: String,
+    pub email_verified: bool,
 }
 
 pub(crate) const LOCK_ACTIVE_ADMINS_SQL: &str =
     "SELECT id FROM accounts WHERE role = 'admin' AND status = 'active' ORDER BY id FOR UPDATE";
-pub(crate) const LOCK_ACCOUNT_SQL: &str =
-    "SELECT id, role, status FROM accounts WHERE id = $1 FOR UPDATE";
+pub(crate) const LOCK_ACCOUNT_SQL: &str = "SELECT id, role, status, email_verified_at IS NOT NULL AS email_verified \
+     FROM accounts WHERE id = $1 FOR UPDATE";
 pub(crate) const APPLY_UPDATE_SQL: &str = r#"
     WITH updated AS (
         UPDATE accounts
@@ -28,13 +29,19 @@ pub(crate) const APPLY_UPDATE_SQL: &str = r#"
             END,
             updated_at = now()
         WHERE id = $1
-        RETURNING id, email, role, status, created_at, updated_at
+        RETURNING id, email, admin_login_name,
+                  email_verified_at IS NOT NULL AS email_verified,
+                  role, status, created_at, updated_at
     )
-    SELECT updated.id, updated.email,
+    SELECT updated.id, updated.email, updated.admin_login_name,
+           updated.email_verified,
            COALESCE(user_profiles.display_name, '') AS display_name,
            updated.role, updated.status,
            (SELECT count(*)::BIGINT FROM devices WHERE devices.account_id = updated.id)
                AS device_count,
+           (SELECT count(*)::BIGINT FROM cloud_hosts
+            WHERE cloud_hosts.account_id = updated.id
+              AND cloud_hosts.is_deleted = FALSE) AS host_count,
            updated.created_at, updated.updated_at
     FROM updated
     LEFT JOIN user_profiles ON user_profiles.account_id = updated.id

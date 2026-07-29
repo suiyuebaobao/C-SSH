@@ -34,11 +34,12 @@ pub(crate) struct UsersQuery {
 struct UserRow {
     id: String,
     email: String,
+    login_name: String,
     display_name: String,
     role: &'static str,
     status: &'static str,
     device_count: i64,
-    created_at: String,
+    host_count: i64,
 }
 
 #[derive(Template)]
@@ -122,11 +123,12 @@ impl From<AdminUser> for UserRow {
         Self {
             id: value.id.to_string(),
             email: value.masked_email,
+            login_name: value.admin_login_name.unwrap_or_default(),
             display_name: value.display_name,
             role: value.role.as_str(),
             status: value.status.as_str(),
             device_count: value.device_count,
-            created_at: value.created_at.to_rfc3339(),
+            host_count: value.host_count,
         }
     }
 }
@@ -167,6 +169,7 @@ where
     let value = Option::<String>::deserialize(deserializer)?;
     match value.as_deref().map(str::trim) {
         None | Some("") => Ok(None),
+        Some("pending_verification") => Ok(Some(AdminUserStatus::PendingVerification)),
         Some("active") => Ok(Some(AdminUserStatus::Active)),
         Some("disabled") => Ok(Some(AdminUserStatus::Disabled)),
         Some(_) => Err(serde::de::Error::custom("invalid user status")),

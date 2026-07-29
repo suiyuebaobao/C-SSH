@@ -10,6 +10,7 @@
         <p>{{ view.page.lead }}</p>
       </header>
       <form class="account-form" action="{{ view.page.form_action }}" method="post" hx-post="{{ view.page.form_action }}" hx-target="#auth-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
+        {% if view.page.form_action == "/web/auth/register" %}<input type="hidden" name="locale" value="{{ view.shell.html_lang }}">{% endif %}
         {% if let Some(next_path) = next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
         {% for field in view.page.fields %}
         <label class="field-label" for="field-{{ field.name }}">

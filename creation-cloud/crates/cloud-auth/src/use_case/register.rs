@@ -1,18 +1,14 @@
-//! 校验注册资料、生成密码哈希并原子创建账号、资料和首个会话。
+//! 创建待验证账号并在事务提交后投递一次性六位验证码。
 
-use std::time::Duration;
+use std::sync::Arc;
 
 use chrono::Utc;
 use cloud_domain::{AppError, AppResult};
 use cloud_store::PgPool;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{
-    password, repository,
-    session::{AuthenticatedSession, IssuedSession},
-    token, validation,
-};
+use crate::{mailer::VerificationMailer, password, repository, validation, verification};
 
 #[derive(Deserialize)]
 pub struct Register {
@@ -21,6 +17,11 @@ pub struct Register {
     pub display_name: String,
     #[serde(default = "default_locale")]
     pub locale: String,
+}
+
+#[derive(Serialize)]
+pub struct RegistrationStatus {
+    pub status: &'static str,
 }
 
 pub(crate) struct ValidatedRegister {
@@ -44,46 +45,53 @@ impl Register {
 
 pub(crate) async fn execute(
     pool: &PgPool,
-    session_ttl: Duration,
+    verification_key: &[u8],
+    mailer: &Arc<dyn VerificationMailer>,
     command: Register,
-) -> AppResult<IssuedSession> {
+) -> AppResult<RegistrationStatus> {
+    if verification_key.len() < 32 {
+        return Err(AppError::Unavailable("邮箱验证密钥尚未安全配置".to_owned()));
+    }
     let command = command.validate()?;
     let password_hash = password::hash(command.password).await?;
-    let account_id = Uuid::now_v7();
-    let session_id = Uuid::now_v7();
-    let expires_at = Utc::now()
-        + chrono::Duration::from_std(session_ttl)
-            .map_err(|_| AppError::Internal("会话有效期配置超出支持范围".to_owned()))?;
-    let (raw_token, token_hash) = token::issue();
-
-    repository::register::insert(
+    let challenge_id = Uuid::now_v7();
+    let code = verification::issue_code();
+    let code_digest = verification::digest(verification_key, challenge_id, &command.email, &code);
+    let expires_at = Utc::now() + chrono::Duration::minutes(verification::CODE_TTL_MINUTES);
+    let should_send = repository::register::prepare(
         pool,
-        repository::register::NewAccount {
-            account_id,
+        repository::register::PendingAccount {
+            account_id: Uuid::now_v7(),
             email: &command.email,
             password_hash: &password_hash,
             display_name: &command.display_name,
             locale: &command.locale,
-            session_id,
-            token_hash: &token_hash,
+            challenge_id,
+            code_digest: &code_digest,
             expires_at,
         },
     )
     .await?;
-
-    Ok(IssuedSession {
-        session: AuthenticatedSession {
-            session_id,
-            account_id,
-            email: command.email,
-            admin_login_name: None,
-            role: "user".to_owned(),
-            device_id: None,
-            expires_at,
-            csrf_token: token::csrf(&raw_token),
-        },
-        raw_token,
+    if should_send {
+        dispatch(pool, mailer, challenge_id, &command.email, &code).await?;
+    }
+    Ok(RegistrationStatus {
+        status: "verification_required",
     })
+}
+
+pub(crate) async fn dispatch(
+    pool: &PgPool,
+    mailer: &Arc<dyn VerificationMailer>,
+    challenge_id: Uuid,
+    email: &str,
+    code: &str,
+) -> AppResult<()> {
+    if let Err(error) = mailer.send_verification(email, code).await {
+        repository::verification::cancel_unsent(pool, challenge_id).await?;
+        return Err(error);
+    }
+    repository::verification::mark_sent(pool, challenge_id).await
 }
 
 fn default_locale() -> String {

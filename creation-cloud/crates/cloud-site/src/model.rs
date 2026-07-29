@@ -83,7 +83,7 @@ impl PageId {
             Self::Console => "/console",
             Self::Profile => "/console/profile",
             Self::Devices => "/console/devices",
-            Self::Sync => "/console/sync",
+            Self::Sync => "/console/hosts",
             Self::Models => "/console/models",
             Self::Vault => "/console/vault",
             Self::ConsoleDownloads => "/console/downloads",
@@ -115,20 +115,15 @@ impl PageId {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NavigationItem {
-    pub label: &'static str,
+    pub label: String,
     pub href: String,
     pub active: bool,
 }
 
 impl NavigationItem {
-    pub(crate) fn new(
-        label: &'static str,
-        target: PageId,
-        current: PageId,
-        locale: Locale,
-    ) -> Self {
+    pub(crate) fn new(label: &str, target: PageId, current: PageId, locale: Locale) -> Self {
         Self {
-            label,
+            label: label.to_owned(),
             href: localized_href(target.path(), locale),
             active: target == current,
         }
@@ -137,22 +132,17 @@ impl NavigationItem {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Action {
-    pub label: &'static str,
+    pub label: String,
     pub href: String,
-    pub class_name: &'static str,
+    pub class_name: String,
 }
 
 impl Action {
-    pub(crate) fn new(
-        label: &'static str,
-        href: &'static str,
-        class_name: &'static str,
-        locale: Locale,
-    ) -> Self {
+    pub(crate) fn new(label: &str, href: &str, class_name: &str, locale: Locale) -> Self {
         Self {
-            label,
+            label: label.to_owned(),
             href: localized_href(href, locale),
-            class_name,
+            class_name: class_name.to_owned(),
         }
     }
 }
@@ -271,11 +261,11 @@ impl FormField {
 pub struct PageContent {
     pub id: PageId,
     pub path: &'static str,
-    pub meta_title: &'static str,
-    pub meta_description: &'static str,
-    pub eyebrow: &'static str,
-    pub heading: &'static str,
-    pub lead: &'static str,
+    pub meta_title: String,
+    pub meta_description: String,
+    pub eyebrow: String,
+    pub heading: String,
+    pub lead: String,
     pub actions: Vec<Action>,
     pub metrics: Vec<Metric>,
     pub sections: Vec<ContentSection>,
@@ -301,11 +291,11 @@ impl PageContent {
         Self {
             id,
             path: id.path(),
-            meta_title,
-            meta_description,
-            eyebrow,
-            heading,
-            lead,
+            meta_title: meta_title.to_owned(),
+            meta_description: meta_description.to_owned(),
+            eyebrow: eyebrow.to_owned(),
+            heading: heading.to_owned(),
+            lead: lead.to_owned(),
             actions: Vec::new(),
             metrics: Vec::new(),
             sections: Vec::new(),
@@ -384,23 +374,23 @@ impl PageContent {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SiteShell {
     pub locale: Locale,
-    pub html_lang: &'static str,
-    pub brand: &'static str,
-    pub brand_note: &'static str,
+    pub html_lang: String,
+    pub brand: String,
+    pub brand_note: String,
     pub home_href: String,
-    pub skip_label: &'static str,
-    pub menu_label: &'static str,
+    pub skip_label: String,
+    pub menu_label: String,
     pub navigation: Vec<NavigationItem>,
     pub console_link: NavigationItem,
     pub login_link: NavigationItem,
-    pub language_label: &'static str,
+    pub language_label: String,
     pub language_href: String,
-    pub alternate_lang: &'static str,
-    pub utility_navigation_label: &'static str,
+    pub alternate_lang: String,
+    pub utility_navigation_label: String,
     pub github_repository: RepositoryLink,
-    pub footer_summary: &'static str,
-    pub footer_motto: &'static str,
-    pub footer_note: &'static str,
+    pub footer_summary: String,
+    pub footer_motto: String,
+    pub footer_note: String,
     pub footer_navigation: Vec<NavigationItem>,
 }
 

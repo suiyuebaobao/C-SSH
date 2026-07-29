@@ -8,26 +8,39 @@ use uuid::Uuid;
 
 use super::error;
 
-type LoginAccountRow = (Uuid, String, Option<String>, String, String, String);
+type LoginAccountRow = (
+    Uuid,
+    Option<String>,
+    Option<DateTime<Utc>>,
+    Option<String>,
+    String,
+    String,
+    String,
+    i64,
+);
 
 #[derive(Clone)]
 pub(crate) struct LoginAccount {
     pub id: Uuid,
-    pub email: String,
+    pub email: Option<String>,
+    pub email_verified_at: Option<DateTime<Utc>>,
     pub admin_login_name: Option<String>,
     pub password_hash: String,
     pub role: String,
     pub status: String,
+    pub credential_version: i64,
 }
 
 pub(crate) const FIND_BY_EMAIL_SQL: &str = r#"
-    SELECT id, email, admin_login_name, password_hash, role, status
+    SELECT id, email, email_verified_at, admin_login_name, password_hash,
+           role, status, credential_version
     FROM accounts
     WHERE email = $1
 "#;
 
 pub(crate) const FIND_ADMIN_BY_LOGIN_NAME_SQL: &str = r#"
-    SELECT id, email, admin_login_name, password_hash, role, status
+    SELECT id, email, email_verified_at, admin_login_name, password_hash,
+           role, status, credential_version
     FROM accounts
     WHERE admin_login_name = $1
       AND role = 'admin'
@@ -35,14 +48,16 @@ pub(crate) const FIND_ADMIN_BY_LOGIN_NAME_SQL: &str = r#"
 "#;
 
 pub(crate) const LOCK_ACCOUNT_BY_ID_SQL: &str = r#"
-    SELECT id, email, admin_login_name, password_hash, role, status
+    SELECT id, email, email_verified_at, admin_login_name, password_hash,
+           role, status, credential_version
     FROM accounts
     WHERE id = $1
     FOR UPDATE
 "#;
 
-pub(crate) const INSERT_SESSION_SQL: &str =
-    "INSERT INTO sessions (id, account_id, token_hash, expires_at) VALUES ($1, $2, $3, $4)";
+pub(crate) const INSERT_SESSION_SQL: &str = "INSERT INTO sessions \
+     (id, account_id, token_hash, expires_at, absolute_expires_at, credential_version, session_kind) \
+     VALUES ($1, $2, $3, $4, $4, $5, 'unbound')";
 
 pub(crate) async fn find_by_email(pool: &PgPool, email: &str) -> AppResult<Option<LoginAccount>> {
     find(pool, FIND_BY_EMAIL_SQL, email).await
@@ -80,10 +95,12 @@ fn into_account(row: Option<LoginAccountRow>) -> Option<LoginAccount> {
     row.map(|value| LoginAccount {
         id: value.0,
         email: value.1,
-        admin_login_name: value.2,
-        password_hash: value.3,
-        role: value.4,
-        status: value.5,
+        email_verified_at: value.2,
+        admin_login_name: value.3,
+        password_hash: value.4,
+        role: value.5,
+        status: value.6,
+        credential_version: value.7,
     })
 }
 
@@ -93,12 +110,14 @@ pub(crate) async fn insert_session(
     account_id: Uuid,
     token_hash: &[u8],
     expires_at: DateTime<Utc>,
+    credential_version: i64,
 ) -> AppResult<()> {
     sqlx::query(INSERT_SESSION_SQL)
         .bind(session_id)
         .bind(account_id)
         .bind(token_hash)
         .bind(expires_at)
+        .bind(credential_version)
         .execute(&mut **transaction)
         .await
         .map_err(error::storage)?;
