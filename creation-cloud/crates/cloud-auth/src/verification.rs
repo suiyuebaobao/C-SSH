@@ -9,7 +9,7 @@ pub(crate) const CODE_TTL_MINUTES: i64 = 10;
 pub(crate) const MAX_ATTEMPTS: i32 = 5;
 pub(crate) const RESEND_COOLDOWN_SECONDS: i64 = 60;
 const LOGIN_CONTEXT: &[u8] = b"creation-cloud-login-verification-v1\0";
-const CAPTCHA_CONTEXT: &[u8] = b"creation-cloud-admin-captcha-v1\0";
+const CAPTCHA_CONTEXT: &[u8] = b"creation-cloud-auth-captcha-v2\0";
 
 pub(crate) fn issue_code() -> String {
     format!("{:06}", rand::rng().random_range(0_u32..1_000_000))
@@ -46,10 +46,18 @@ pub(crate) fn login_digest(
     hmac_sha256(key, &message)
 }
 
-pub(crate) fn captcha_digest(key: &[u8], challenge_id: Uuid, code: &str) -> [u8; 32] {
-    let mut message = Vec::with_capacity(CAPTCHA_CONTEXT.len() + 16 + code.len());
+pub(crate) fn captcha_digest(
+    key: &[u8],
+    challenge_id: Uuid,
+    purpose: crate::captcha::CaptchaPurpose,
+    code: &str,
+) -> [u8; 32] {
+    let mut message =
+        Vec::with_capacity(CAPTCHA_CONTEXT.len() + 16 + purpose.as_str().len() + code.len() + 1);
     message.extend_from_slice(CAPTCHA_CONTEXT);
     message.extend_from_slice(challenge_id.as_bytes());
+    message.extend_from_slice(purpose.as_str().as_bytes());
+    message.push(0);
     message.extend_from_slice(code.as_bytes());
     hmac_sha256(key, &message)
 }
@@ -174,14 +182,38 @@ mod tests {
     #[test]
     fn captcha_digest_is_domain_separated_and_bound_to_the_challenge() {
         let challenge_id = Uuid::now_v7();
-        let expected = captcha_digest(b"test-key", challenge_id, "123456");
+        let expected = captcha_digest(
+            b"test-key",
+            challenge_id,
+            crate::captcha::CaptchaPurpose::Login,
+            "123456",
+        );
         assert!(matches(
             &expected,
-            &captcha_digest(b"test-key", challenge_id, "123456")
+            &captcha_digest(
+                b"test-key",
+                challenge_id,
+                crate::captcha::CaptchaPurpose::Login,
+                "123456"
+            )
         ));
         assert!(!matches(
             &expected,
-            &captcha_digest(b"test-key", Uuid::now_v7(), "123456")
+            &captcha_digest(
+                b"test-key",
+                Uuid::now_v7(),
+                crate::captcha::CaptchaPurpose::Login,
+                "123456"
+            )
+        ));
+        assert!(!matches(
+            &expected,
+            &captcha_digest(
+                b"test-key",
+                challenge_id,
+                crate::captcha::CaptchaPurpose::Register,
+                "123456"
+            )
         ));
         assert_ne!(
             expected,

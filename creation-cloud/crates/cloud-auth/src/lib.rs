@@ -32,9 +32,10 @@ pub use middleware::{
 pub use service::Service;
 pub use session::{AuthenticatedSession, IssuedSession, SessionMetadata, SessionView};
 pub use use_case::{
-    AuthSettings, ChangePassword, Login, LoginOutcome, LoginVerificationRequired, Register,
-    RegistrationOutcome, RegistrationStatus, ResendLoginVerification, ResendStatus,
-    ResendVerification, UpdateAuthSettings, VerifyEmail, VerifyLogin,
+    AuthSettings, ChangePassword, ClientLoginConfig, Login, LoginCaptchaSettings, LoginOutcome,
+    LoginVerificationRequired, Register, RegistrationOutcome, RegistrationStatus,
+    ResendLoginVerification, ResendStatus, ResendVerification, UpdateAuthSettings, VerifyEmail,
+    VerifyLogin,
 };
 
 /// 为带外管理员创建命令生成符合当前账号策略的 Argon2id 哈希。
@@ -58,7 +59,7 @@ pub fn router(service: Service) -> Router {
         ));
 
     Router::new()
-        .route("/admin-captcha", get(handler::admin_captcha::handle))
+        .route("/captcha", get(handler::captcha::handle))
         .route("/register", post(handler::register::handle))
         .route("/verify-email", post(handler::verify_email::handle))
         .route(

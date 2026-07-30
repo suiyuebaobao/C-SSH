@@ -10,15 +10,19 @@ use super::form_response;
 pub(crate) async fn handle(
     State(service): State<Service>,
     headers: HeaderMap,
-    Form(command): Form<Register>,
+    Form(mut command): Form<Register>,
 ) -> AppResult<Response> {
+    if command.captcha_id.is_none() {
+        command.captcha_id =
+            crate::cookie::read_captcha(&headers, crate::captcha::CaptchaPurpose::Register);
+    }
     let is_en = command.locale == "en";
     let verification_destination = if is_en {
         "/en/verify-email"
     } else {
         "/verify-email"
     };
-    match service.register(command).await? {
+    let mut response = match service.register(command).await? {
         RegistrationOutcome::VerificationRequired(_) => {
             form_response::redirect_without_session(&headers, verification_destination)
         }
@@ -32,5 +36,10 @@ pub(crate) async fn handle(
             &headers,
             if is_en { "/en/login" } else { "/login" },
         ),
-    }
+    }?;
+    response.headers_mut().append(
+        axum::http::header::SET_COOKIE,
+        crate::cookie::clear_captcha_header(crate::captcha::CaptchaPurpose::Register)?,
+    );
+    Ok(response)
 }

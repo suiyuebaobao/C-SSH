@@ -14,9 +14,10 @@ use crate::{
     mailer::{UnavailableVerificationMailer, VerificationMailer},
     session::{AuthenticatedSession, IssuedSession, SessionMetadata},
     use_case::{
-        self, AuthSettings, ChangePassword, Login, LoginOutcome, LoginVerificationRequired,
-        Register, RegistrationOutcome, ResendLoginVerification, ResendStatus, ResendVerification,
-        UpdateAuthSettings, VerifyEmail, VerifyLogin,
+        self, AuthSettings, ChangePassword, ClientLoginConfig, Login, LoginCaptchaSettings,
+        LoginOutcome, LoginVerificationRequired, Register, RegistrationOutcome,
+        ResendLoginVerification, ResendStatus, ResendVerification, UpdateAuthSettings, VerifyEmail,
+        VerifyLogin,
     },
 };
 
@@ -74,16 +75,26 @@ impl Service {
             &self.pool,
             self.session_ttl,
             &self.verification_key,
+            &self.captcha_key,
             &self.verification_mailer,
             command,
         )
         .await
     }
 
-    pub(crate) async fn issue_admin_captcha(
+    pub(crate) async fn issue_captcha(
         &self,
-    ) -> AppResult<use_case::admin_captcha::IssuedAdminCaptcha> {
-        use_case::admin_captcha::issue(&self.pool, &self.captcha_key).await
+        purpose: crate::captcha::CaptchaPurpose,
+    ) -> AppResult<use_case::captcha::IssuedCaptcha> {
+        use_case::captcha::issue(&self.pool, &self.captcha_key, purpose).await
+    }
+
+    pub async fn client_login_config(&self) -> AppResult<ClientLoginConfig> {
+        use_case::auth_settings::client_login_config(&self.pool).await
+    }
+
+    pub async fn login_captcha_settings(&self) -> AppResult<LoginCaptchaSettings> {
+        use_case::auth_settings::login_captcha_settings(&self.pool).await
     }
 
     pub async fn auth_settings(&self, actor: &AdminActor) -> AppResult<AuthSettings> {

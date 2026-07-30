@@ -3,22 +3,26 @@
 use axum::{
     Json,
     extract::State,
-    http::{StatusCode, header},
+    http::{HeaderMap, StatusCode, header},
     response::{IntoResponse, Response},
 };
 use cloud_domain::AppResult;
 
-use crate::{Register, RegistrationOutcome, Service, cookie};
+use crate::{Register, RegistrationOutcome, Service, captcha::CaptchaPurpose, cookie};
 
 pub(crate) async fn handle(
     State(service): State<Service>,
-    Json(command): Json<Register>,
+    headers: HeaderMap,
+    Json(mut command): Json<Register>,
 ) -> AppResult<Response> {
+    if command.captcha_id.is_none() {
+        command.captcha_id = cookie::read_captcha(&headers, CaptchaPurpose::Register);
+    }
     response(service.register(command).await?)
 }
 
 fn response(outcome: RegistrationOutcome) -> AppResult<Response> {
-    match outcome {
+    let mut response = match outcome {
         RegistrationOutcome::VerificationRequired(status)
         | RegistrationOutcome::Accepted(status) => {
             Ok((StatusCode::ACCEPTED, Json(status)).into_response())
@@ -31,5 +35,10 @@ fn response(outcome: RegistrationOutcome) -> AppResult<Response> {
             );
             Ok(response)
         }
-    }
+    }?;
+    response.headers_mut().append(
+        header::SET_COOKIE,
+        cookie::clear_captcha_header(CaptchaPurpose::Register)?,
+    );
+    Ok(response)
 }

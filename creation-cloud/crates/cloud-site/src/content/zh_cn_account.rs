@@ -11,13 +11,13 @@ pub(super) fn login() -> PageContent {
         "登录 Creation Cloud 用户中心。",
         "Creation Cloud",
         "登录你的账号",
-        "普通用户按站点当前设置完成邮箱验证；管理员进入后台时使用一次性图形验证码。",
+        "普通用户与管理员分别按后台当前设置完成邮箱验证码或图形验证码。",
     )
     .with_actions(vec![action("创建账号", "/register", "text-link")])
     .with_form(
         "/web/auth/login",
         "登录",
-        "邮箱验证开启时，普通用户收到六位登录码；管理员始终使用管理员账号、密码和图形验证码。",
+        "验证码开启时，登录会按普通用户或管理员各自的后台设置要求邮箱码或图形码。",
         vec![
             FormField::new(
                 "identifier",

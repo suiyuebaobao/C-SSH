@@ -24,27 +24,39 @@ pub(crate) async fn handle(
     Form(form): Form<BrowserLogin>,
 ) -> AppResult<Response> {
     let destination = form_response::safe_destination(form.next.as_deref());
+    let purpose = if form.identifier.trim().contains('@') {
+        crate::captcha::CaptchaPurpose::Login
+    } else {
+        crate::captcha::CaptchaPurpose::AdminLogin
+    };
     let command = Login {
         identifier: form.identifier,
         password: form.password,
-        captcha_id: crate::cookie::read_admin_captcha(&headers),
+        captcha_id: crate::cookie::read_captcha(&headers, purpose),
         captcha_code: form.captcha_code,
     };
-    match service.login(command).await? {
+    let mut response = match service.login(command).await? {
         LoginOutcome::Session(issued) => form_response::redirect(
             &headers,
             &issued.raw_token,
             issued.session.expires_at,
             destination,
         ),
-        LoginOutcome::VerificationRequired(status) => form_response::redirect_without_session(
-            &headers,
-            &form_response::login_verification_destination(
-                form.lang.as_deref() == Some("en"),
-                status.challenge_id,
-                Some(destination),
-                false,
-            ),
-        ),
-    }
+        LoginOutcome::VerificationRequired { status, .. } => {
+            form_response::redirect_without_session(
+                &headers,
+                &form_response::login_verification_destination(
+                    form.lang.as_deref() == Some("en"),
+                    status.challenge_id,
+                    Some(destination),
+                    false,
+                ),
+            )
+        }
+    }?;
+    response.headers_mut().append(
+        axum::http::header::SET_COOKIE,
+        crate::cookie::clear_captcha_header(purpose)?,
+    );
+    Ok(response)
 }

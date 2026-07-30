@@ -25,9 +25,6 @@ pub(crate) fn redirect(
         header::SET_COOKIE,
         cookie::session_header(raw_token, expires_at)?,
     );
-    response
-        .headers_mut()
-        .append(header::SET_COOKIE, cookie::clear_admin_captcha_header()?);
     Ok(response)
 }
 

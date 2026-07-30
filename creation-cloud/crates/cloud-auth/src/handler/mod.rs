@@ -1,6 +1,6 @@
 //! 声明按认证动作拆分的 HTTP handler。
 
-pub(crate) mod admin_captcha;
+pub(crate) mod captcha;
 pub(crate) mod change_password;
 pub(crate) mod form_login;
 pub(crate) mod form_register;

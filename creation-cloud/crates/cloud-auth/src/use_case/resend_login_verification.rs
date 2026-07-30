@@ -1,4 +1,4 @@
-//! 使用既有不透明挑战标识重发普通用户的登录邮箱验证码。
+//! 使用既有不透明挑战标识重发普通用户或管理员的登录邮箱验证码。
 
 use std::sync::Arc;
 
@@ -31,8 +31,15 @@ pub(crate) async fn execute(
         .await?
         .ok_or_else(invalid_challenge)?;
     let mut transaction = pool.begin().await.map_err(repository::error::storage)?;
-    let verification_enabled =
-        repository::settings::email_verification_enabled(&mut transaction).await?;
+    let account = repository::login::lock_by_id(&mut transaction, account_id)
+        .await?
+        .ok_or_else(invalid_challenge)?;
+    let auth_settings = repository::settings::lock(&mut transaction).await?;
+    let verification_enabled = super::login::requires_login_verification(
+        &account,
+        auth_settings.email_verification_enabled,
+        auth_settings.admin_email_verification_enabled,
+    );
     if !verification_enabled {
         transaction
             .commit()
@@ -45,15 +52,12 @@ pub(crate) async fn execute(
             "登录验证码密钥尚未安全配置".to_owned(),
         ));
     }
-    let account = repository::login::lock_by_id(&mut transaction, account_id)
-        .await?
-        .ok_or_else(invalid_challenge)?;
     let current =
         repository::login_verification::lock_by_id(&mut transaction, command.challenge_id)
             .await?
             .filter(|value| value.account_id == account.id)
             .ok_or_else(invalid_challenge)?;
-    let snapshot_valid = account.role == "user"
+    let snapshot_valid = matches!(account.role.as_str(), "user" | "admin")
         && account.status == "active"
         && account.email_verified_at.is_some()
         && account.email.as_deref() == Some(current.email.as_str())

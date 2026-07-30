@@ -1,4 +1,4 @@
-//! 使用不透明挑战标识重发普通用户的登录邮箱验证码。
+//! 使用不透明挑战标识重发普通用户或管理员的登录邮箱验证码。
 
 use axum::{Json, extract::State, http::StatusCode};
 use cloud_domain::AppResult;

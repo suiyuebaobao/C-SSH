@@ -11,7 +11,7 @@ use axum::{
 use cloud_config::CloudConfig;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
-use crate::{admin_overview, http_trace, request_id, services::AppServices};
+use crate::{admin_overview, client_config, http_trace, request_id, services::AppServices};
 
 pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let seo = cloud_web::SeoConfig::from_validated_origin(
@@ -31,6 +31,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let site_content_service = services.site_content.clone();
     let public_page_state = cloud_web::PublicPageState::new(
         seo,
+        auth_service.clone(),
         download_service.clone(),
         seo_topic_service.clone(),
         site_content_service.clone(),
@@ -134,6 +135,14 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             cloud_auth::require_session,
         ));
     let api = Router::new()
+        .nest(
+            "/client",
+            client_config::router(client_config::ClientConfigState::new(
+                announcement_service.clone(),
+                auth_service.clone(),
+                download_service.clone(),
+            )),
+        )
         .nest("/auth", cloud_auth::router(auth_service.clone()))
         .nest(
             "/updates",
@@ -305,6 +314,20 @@ mod tests {
             assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
             assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
         }
+    }
+
+    #[tokio::test]
+    async fn unified_client_config_is_anonymous_and_takes_no_query_parameters() {
+        let response = app()
+            .oneshot(
+                Request::post("/api/v1/client/config")
+                    .body(Body::empty())
+                    .expect("客户端配置请求应可构造"),
+            )
+            .await
+            .expect("客户端配置接口应返回响应");
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+        assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
     }
 
     #[tokio::test]

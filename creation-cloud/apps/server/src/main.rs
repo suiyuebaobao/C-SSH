@@ -3,6 +3,7 @@
 
 mod admin_overview;
 mod app;
+mod client_config;
 mod command;
 mod http_trace;
 mod maintenance;

@@ -4,8 +4,8 @@
 <section class="admin-section" aria-labelledby="auth-settings-heading">
   <div class="admin-section-heading">
     <div>
-      <h2 id="auth-settings-heading">{% if is_en %}Email verification{% else %}邮箱验证码{% endif %}</h2>
-      <p>{% if is_en %}This switch applies only to ordinary-user registration and sign-in. Administrators always use username, password and a one-time visual CAPTCHA.{% else %}此开关只控制普通用户注册和登录；管理员始终使用账号、密码和一次性图形验证码。{% endif %}</p>
+      <h2 id="auth-settings-heading">{% if is_en %}Login verification{% else %}登录验证{% endif %}</h2>
+      <p>{% if is_en %}Four simple switches control ordinary-user and administrator verification.{% else %}四个简单开关分别控制普通用户和管理员验证。{% endif %}</p>
     </div>
   </div>
 
@@ -25,6 +25,28 @@
         {% if is_en %}Require a code to activate registration and complete each new sign-in.{% else %}注册激活和每次新登录都需要输入邮箱验证码。{% endif %}
       </span>
     </label>
+    <label class="admin-field">
+      <span>{% if is_en %}Require visual CAPTCHA{% else %}启用图形验证码{% endif %}</span>
+      <span>
+        <input type="checkbox" name="user_captcha_enabled" value="true"{% if settings.user_captcha_enabled %} checked{% endif %}>
+        {% if is_en %}Require a visual CAPTCHA before ordinary-user registration and sign-in.{% else %}普通用户注册和登录前需要输入图形验证码。{% endif %}
+      </span>
+    </label>
+    <label class="admin-field">
+      <span>{% if is_en %}Administrator email code{% else %}管理员邮箱验证码{% endif %}</span>
+      <span>
+        <input type="checkbox" name="admin_email_verification_enabled" value="true"{% if settings.admin_email_verification_enabled %} checked{% endif %}>
+        {% if is_en %}Require an email code for administrator sign-in.{% else %}管理员登录时需要邮箱验证码。{% endif %}
+      </span>
+    </label>
+    <label class="admin-field">
+      <span>{% if is_en %}Administrator CAPTCHA{% else %}管理员图形验证码{% endif %}</span>
+      <span>
+        <input type="checkbox" name="admin_captcha_enabled" value="true"{% if settings.admin_captcha_enabled %} checked{% endif %}>
+        {% if is_en %}Require a visual CAPTCHA for administrator sign-in.{% else %}管理员登录时需要图形验证码。{% endif %}
+      </span>
+    </label>
+    <p class="admin-field-note">{% if is_en %}Administrator email code and CAPTCHA cannot both be disabled. All active administrators need verified email before email codes can be enabled.{% else %}管理员邮箱验证码和图形验证码不能同时关闭；启用管理员邮箱验证码前，所有有效管理员必须已验证邮箱。{% endif %}</p>
     <div class="admin-actions">
       <button class="button button-primary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
       <small>{% if is_en %}Last updated{% else %}最后更新{% endif %}: {{ settings.updated_at }}</small>

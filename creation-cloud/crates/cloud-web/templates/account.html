@@ -19,10 +19,10 @@
           <input id="field-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" autocomplete="{{ field.autocomplete }}" placeholder="{{ field.placeholder }}"{% if field.required %} required{% endif %}>
         </label>
         {% endfor %}
-        {% if admin_login %}
+        {% if captcha_required %}
         <div class="admin-captcha">
-          <p><strong>{% if view.shell.html_lang == "en" %}Administrator CAPTCHA{% else %}管理员图形验证码{% endif %}</strong></p>
-          <img src="/api/v1/auth/admin-captcha" width="240" height="80" alt="{% if view.shell.html_lang == "en" %}One-time administrator sign-in CAPTCHA{% else %}一次性管理员登录图形验证码{% endif %}">
+          <p><strong>{% if admin_login %}{% if view.shell.html_lang == "en" %}Administrator CAPTCHA{% else %}管理员图形验证码{% endif %}{% else %}{% if view.shell.html_lang == "en" %}Visual CAPTCHA{% else %}图形验证码{% endif %}{% endif %}</strong></p>
+          <img src="/api/v1/auth/captcha?purpose={{ captcha_purpose }}" width="240" height="80" alt="{% if view.shell.html_lang == "en" %}One-time authentication CAPTCHA{% else %}一次性认证图形验证码{% endif %}">
           <label class="field-label" for="field-captcha-code">
             <span>{% if view.shell.html_lang == "en" %}Enter the six digits shown above{% else %}输入图片中的六位数字{% endif %}</span>
             <input id="field-captcha-code" name="captcha_code" type="text" autocomplete="off" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" required>

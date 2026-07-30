@@ -5,7 +5,7 @@ use cloud_domain::{AppError, AppResult};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
-use super::{error, login, settings, verification};
+use super::{captcha, error, login, settings, verification};
 
 pub(crate) struct RegistrationAccount<'a> {
     pub account_id: Uuid,
@@ -19,6 +19,9 @@ pub(crate) struct RegistrationAccount<'a> {
     pub session_id: Uuid,
     pub session_token_hash: &'a [u8],
     pub session_expires_at: DateTime<Utc>,
+    pub captcha_id: Uuid,
+    pub captcha_digest: &'a [u8; 32],
+    pub captcha_code_valid: bool,
 }
 
 pub(crate) enum RegistrationPreparation {
@@ -33,7 +36,21 @@ pub(crate) async fn prepare(
     account: RegistrationAccount<'_>,
 ) -> AppResult<RegistrationPreparation> {
     let mut transaction = pool.begin().await.map_err(error::storage)?;
-    let verification_enabled = settings::email_verification_enabled(&mut transaction).await?;
+    let auth_settings = settings::lock(&mut transaction).await?;
+    if auth_settings.user_captcha_enabled {
+        let valid = captcha::consume(
+            &mut transaction,
+            account.captcha_id,
+            crate::captcha::CaptchaPurpose::Register,
+            account.captcha_digest,
+        )
+        .await?;
+        if !valid || !account.captcha_code_valid {
+            transaction.commit().await.map_err(error::storage)?;
+            return Err(AppError::Unauthorized("图形验证码错误或已失效".to_owned()));
+        }
+    }
+    let verification_enabled = auth_settings.email_verification_enabled;
     if verification_enabled && !verification_available {
         return Err(AppError::Unavailable("邮箱验证密钥尚未安全配置".to_owned()));
     }

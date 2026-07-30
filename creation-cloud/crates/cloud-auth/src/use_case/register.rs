@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
+    captcha::CaptchaPurpose,
     mailer::{VerificationMailer, VerificationPurpose},
     password, repository,
     repository::register::RegistrationPreparation,
@@ -17,12 +18,17 @@ use crate::{
 };
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Register {
     pub email: String,
     pub password: String,
     pub display_name: String,
     #[serde(default = "default_locale")]
     pub locale: String,
+    #[serde(default)]
+    pub captcha_id: Option<Uuid>,
+    #[serde(default)]
+    pub captcha_code: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -41,6 +47,8 @@ pub(crate) struct ValidatedRegister {
     pub password: String,
     pub display_name: String,
     pub locale: String,
+    pub captcha_id: Option<Uuid>,
+    pub captcha_code: Option<String>,
 }
 
 impl Register {
@@ -51,6 +59,8 @@ impl Register {
             password: self.password,
             display_name: validation::display_name(&self.display_name)?,
             locale: validation::locale(&self.locale)?,
+            captcha_id: self.captcha_id,
+            captcha_code: self.captcha_code,
         })
     }
 }
@@ -59,10 +69,24 @@ pub(crate) async fn execute(
     pool: &PgPool,
     session_ttl: std::time::Duration,
     verification_key: &[u8],
+    captcha_key: &[u8],
     mailer: &Arc<dyn VerificationMailer>,
     command: Register,
 ) -> AppResult<RegistrationOutcome> {
     let command = command.validate()?;
+    let captcha_id = command.captcha_id.unwrap_or_else(Uuid::nil);
+    let captcha_code = command.captcha_code.as_deref().unwrap_or_default();
+    let captcha_code_valid = valid_captcha_code(captcha_code);
+    let captcha_digest = verification::captcha_digest(
+        captcha_key,
+        captcha_id,
+        CaptchaPurpose::Register,
+        if captcha_code_valid {
+            captcha_code
+        } else {
+            "000000"
+        },
+    );
     let password_hash = password::hash(command.password).await?;
     let challenge_id = Uuid::now_v7();
     let code = verification::issue_code();
@@ -89,6 +113,9 @@ pub(crate) async fn execute(
             session_id,
             session_token_hash: &token_hash,
             session_expires_at,
+            captcha_id,
+            captcha_digest: &captcha_digest,
+            captcha_code_valid,
         },
     )
     .await?;
@@ -146,4 +173,8 @@ pub(crate) async fn dispatch(
 
 fn default_locale() -> String {
     "zh-CN".to_owned()
+}
+
+fn valid_captcha_code(code: &str) -> bool {
+    code.len() == crate::captcha::CODE_LENGTH && code.bytes().all(|byte| byte.is_ascii_digit())
 }

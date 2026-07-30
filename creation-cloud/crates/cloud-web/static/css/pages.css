@@ -141,15 +141,37 @@
 
 .admin-captcha {
   display: grid;
-  gap: 0.75rem;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 0.5rem var(--space-4);
+  align-items: end;
+}
+
+.admin-captcha > p {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .admin-captcha img {
+  grid-column: 1;
+  grid-row: 2;
   display: block;
+  width: 100%;
   max-width: 100%;
   height: auto;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
+}
+
+.admin-captcha > .field-label {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+}
+
+.admin-captcha > .text-link {
+  grid-column: 1;
+  grid-row: 3;
+  justify-self: start;
 }
 
 .form-feedback {
@@ -379,5 +401,21 @@
 @media (max-width: 420px) {
   .account-heading h1 {
     font-size: 1.9rem;
+  }
+
+  .admin-captcha {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-captcha > p,
+  .admin-captcha img,
+  .admin-captcha > .field-label,
+  .admin-captcha > .text-link {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .admin-captcha img {
+    width: min(100%, 240px);
   }
 }

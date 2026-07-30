@@ -1,4 +1,4 @@
-//! 校验普通用户的登录邮箱验证码并在同一事务中签发会话。
+//! 校验普通用户或管理员的登录邮箱验证码，并在同一事务中签发会话。
 
 use std::time::Duration;
 
@@ -52,6 +52,7 @@ pub(crate) async fn execute(
     let account = repository::login::lock_by_id(&mut transaction, account_id)
         .await?
         .ok_or_else(invalid_code)?;
+    let auth_settings = repository::settings::lock(&mut transaction).await?;
     let challenge =
         repository::login_verification::lock_by_id(&mut transaction, command.challenge_id)
             .await?
@@ -65,7 +66,12 @@ pub(crate) async fn execute(
         challenge.credential_version,
         &command.code,
     );
-    let snapshot_valid = account.role == "user"
+    let snapshot_valid = matches!(account.role.as_str(), "user" | "admin")
+        && super::login::requires_login_verification(
+            &account,
+            auth_settings.email_verification_enabled,
+            auth_settings.admin_email_verification_enabled,
+        )
         && account.status == "active"
         && account.email_verified_at.is_some()
         && account.email.as_deref() == Some(challenge.email.as_str())
@@ -110,7 +116,7 @@ pub(crate) async fn execute(
             session_id,
             account_id: account.id,
             email: account.email.unwrap_or_default(),
-            admin_login_name: None,
+            admin_login_name: account.admin_login_name,
             role: account.role,
             device_id: None,
             expires_at,

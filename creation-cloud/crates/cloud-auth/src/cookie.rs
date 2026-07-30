@@ -6,7 +6,6 @@ use cloud_domain::{AppError, AppResult};
 use uuid::Uuid;
 
 const SESSION_COOKIE: &str = "creation_session";
-const ADMIN_CAPTCHA_COOKIE: &str = "creation_admin_captcha";
 const COOKIE_PATH: &str = "/";
 
 pub(crate) fn session_header(raw_token: &str, expires_at: DateTime<Utc>) -> AppResult<HeaderValue> {
@@ -34,7 +33,8 @@ pub(crate) fn clear_header() -> AppResult<HeaderValue> {
     ))
 }
 
-pub(crate) fn admin_captcha_header(
+pub(crate) fn captcha_header(
+    purpose: crate::captcha::CaptchaPurpose,
     challenge_id: Uuid,
     expires_at: DateTime<Utc>,
 ) -> AppResult<HeaderValue> {
@@ -43,18 +43,33 @@ pub(crate) fn admin_captcha_header(
         return Err(AppError::Internal("图形验证码已在响应前过期".to_owned()));
     }
     header_value(&format!(
-        "{ADMIN_CAPTCHA_COOKIE}={challenge_id}; Path={COOKIE_PATH}; Max-Age={max_age_seconds}; Secure; HttpOnly; SameSite=Strict"
+        "{}={challenge_id}; Path={COOKIE_PATH}; Max-Age={max_age_seconds}; Secure; HttpOnly; SameSite=Strict",
+        captcha_cookie_name(purpose)
     ))
 }
 
-pub(crate) fn clear_admin_captcha_header() -> AppResult<HeaderValue> {
+pub(crate) fn clear_captcha_header(
+    purpose: crate::captcha::CaptchaPurpose,
+) -> AppResult<HeaderValue> {
     header_value(&format!(
-        "{ADMIN_CAPTCHA_COOKIE}=; Path={COOKIE_PATH}; Max-Age=0; Secure; HttpOnly; SameSite=Strict"
+        "{}=; Path={COOKIE_PATH}; Max-Age=0; Secure; HttpOnly; SameSite=Strict",
+        captcha_cookie_name(purpose)
     ))
 }
 
-pub(crate) fn read_admin_captcha(headers: &HeaderMap) -> Option<Uuid> {
-    read_named(headers, ADMIN_CAPTCHA_COOKIE).and_then(|value| Uuid::parse_str(&value).ok())
+pub(crate) fn read_captcha(
+    headers: &HeaderMap,
+    purpose: crate::captcha::CaptchaPurpose,
+) -> Option<Uuid> {
+    read_named(headers, captcha_cookie_name(purpose)).and_then(|value| Uuid::parse_str(&value).ok())
+}
+
+const fn captcha_cookie_name(purpose: crate::captcha::CaptchaPurpose) -> &'static str {
+    match purpose {
+        crate::captcha::CaptchaPurpose::Register => "creation_captcha_register",
+        crate::captcha::CaptchaPurpose::Login => "creation_captcha_login",
+        crate::captcha::CaptchaPurpose::AdminLogin => "creation_captcha_admin",
+    }
 }
 
 pub(crate) fn read(headers: &HeaderMap) -> AppResult<String> {

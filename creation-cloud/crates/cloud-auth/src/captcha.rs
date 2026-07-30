@@ -1,4 +1,4 @@
-//! 生成不含明文字符节点的短期管理员图形验证码 SVG。
+//! 生成不含明文字符节点的短期认证图形验证码 SVG。
 
 use std::fmt::Write;
 
@@ -7,6 +7,32 @@ use rand::Rng;
 pub(crate) const CODE_LENGTH: usize = 6;
 pub(crate) const TTL_MINUTES: i64 = 5;
 pub(crate) const MAX_ATTEMPTS: i32 = 5;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum CaptchaPurpose {
+    Register,
+    Login,
+    AdminLogin,
+}
+
+impl CaptchaPurpose {
+    pub(crate) const fn as_str(self) -> &'static str {
+        match self {
+            Self::Register => "register",
+            Self::Login => "login",
+            Self::AdminLogin => "admin_login",
+        }
+    }
+
+    pub(crate) fn parse(value: &str) -> Option<Self> {
+        match value {
+            "register" => Some(Self::Register),
+            "login" => Some(Self::Login),
+            "admin_login" => Some(Self::AdminLogin),
+            _ => None,
+        }
+    }
+}
 
 const SEGMENTS: [[bool; 7]; 10] = [
     [true, true, true, false, true, true, true],
@@ -32,7 +58,7 @@ pub(crate) fn issue_code() -> String {
 pub(crate) fn render_svg(code: &str) -> String {
     let mut rng = rand::rng();
     let mut svg = String::from(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80" viewBox="0 0 240 80" role="img" aria-label="Administrator sign-in CAPTCHA"><rect width="240" height="80" rx="8" fill="#f3efe6"/>"##,
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80" viewBox="0 0 240 80" role="img" aria-label="Authentication CAPTCHA"><rect width="240" height="80" rx="8" fill="#f3efe6"/>"##,
     );
     for _ in 0..9 {
         let x1 = rng.random_range(0..240);

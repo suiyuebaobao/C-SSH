@@ -1,4 +1,4 @@
-//! 更新普通用户邮箱验证码的全局开关。
+//! 用一个 revision/CAS 更新普通用户和管理员的四项认证开关。
 
 use axum::{Extension, Form, extract::State, http::HeaderMap, response::Response};
 use cloud_auth::UpdateAuthSettings;
@@ -13,6 +13,12 @@ use super::super::shared;
 pub(crate) struct AuthSettingsForm {
     #[serde(default)]
     email_verification_enabled: bool,
+    #[serde(default)]
+    user_captcha_enabled: bool,
+    #[serde(default)]
+    admin_email_verification_enabled: bool,
+    #[serde(default)]
+    admin_captcha_enabled: bool,
     expected_revision: i64,
     #[serde(rename = "csrf_token")]
     _csrf_token: String,
@@ -32,6 +38,9 @@ pub(crate) async fn handle(
     };
     let input = UpdateAuthSettings {
         email_verification_enabled: form.email_verification_enabled,
+        user_captcha_enabled: form.user_captcha_enabled,
+        admin_email_verification_enabled: form.admin_email_verification_enabled,
+        admin_captcha_enabled: form.admin_captcha_enabled,
         expected_revision: form.expected_revision,
     };
     match state.auth().update_auth_settings(&actor, input).await {
@@ -63,6 +72,9 @@ mod tests {
             .expect("unchecked checkbox should be accepted");
 
         assert!(!form.email_verification_enabled);
+        assert!(!form.user_captcha_enabled);
+        assert!(!form.admin_email_verification_enabled);
+        assert!(!form.admin_captcha_enabled);
         assert_eq!(form.expected_revision, 7);
         assert_eq!(form.lang.as_deref(), Some("en"));
     }
@@ -72,7 +84,7 @@ mod tests {
         let request = Request::post("/admin/site/auth-settings")
             .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded")
             .body(Body::from(
-                "csrf_token=csrf-example&lang=zh-CN&expected_revision=8&email_verification_enabled=true",
+                "csrf_token=csrf-example&lang=zh-CN&expected_revision=8&email_verification_enabled=true&user_captcha_enabled=true&admin_email_verification_enabled=true&admin_captcha_enabled=true",
             ))
             .expect("form request should be valid");
         let Form(form) = Form::<AuthSettingsForm>::from_request(request, &())
@@ -80,6 +92,9 @@ mod tests {
             .expect("checked checkbox should be accepted");
 
         assert!(form.email_verification_enabled);
+        assert!(form.user_captcha_enabled);
+        assert!(form.admin_email_verification_enabled);
+        assert!(form.admin_captcha_enabled);
         assert_eq!(form.expected_revision, 8);
         assert_eq!(form.lang.as_deref(), Some("zh-CN"));
     }

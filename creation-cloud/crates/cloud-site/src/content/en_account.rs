@@ -11,13 +11,13 @@ pub(super) fn login() -> PageContent {
         "Sign in to the Creation Cloud console.",
         "Creation Cloud",
         "Sign in to your account",
-        "Regular users follow the current email-verification setting; administrators use a one-time visual CAPTCHA.",
+        "Regular users and administrators follow their own email-code and visual-CAPTCHA settings.",
     )
     .with_actions(vec![action("Create an account", "/register", "text-link")])
     .with_form(
         "/web/auth/login",
         "Sign in",
-        "When email verification is on, regular users receive a six-digit code; administrators always use username, password and CAPTCHA.",
+        "When enabled, login requires an email code or visual CAPTCHA according to the current policy for that account type.",
         vec![
             FormField::new(
                 "identifier",

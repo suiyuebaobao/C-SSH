@@ -64,6 +64,9 @@ struct ContentHistoryRow {
 
 struct AuthSettingsView {
     email_verification_enabled: bool,
+    user_captcha_enabled: bool,
+    admin_email_verification_enabled: bool,
+    admin_captcha_enabled: bool,
     revision: i64,
     updated_at: String,
 }
@@ -160,6 +163,9 @@ impl From<cloud_auth::AuthSettings> for AuthSettingsView {
     fn from(value: cloud_auth::AuthSettings) -> Self {
         Self {
             email_verification_enabled: value.email_verification_enabled,
+            user_captcha_enabled: value.user_captcha_enabled,
+            admin_email_verification_enabled: value.admin_email_verification_enabled,
+            admin_captcha_enabled: value.admin_captcha_enabled,
             revision: value.revision,
             updated_at: value.updated_at.format("%Y-%m-%d %H:%M UTC").to_string(),
         }
@@ -254,7 +260,12 @@ mod tests {
 
     use super::*;
 
-    fn render_settings(locale: Locale, enabled: bool) -> String {
+    fn render_settings(
+        locale: Locale,
+        user_enabled: bool,
+        admin_email_enabled: bool,
+        admin_captcha_enabled: bool,
+    ) -> String {
         let session = AuthenticatedSession {
             account_id: Uuid::now_v7(),
             email: "admin@example.test".to_owned(),
@@ -273,7 +284,10 @@ mod tests {
             csrf_token: parts.csrf_token,
             is_en: parts.is_en,
             auth_settings: Some(AuthSettingsView {
-                email_verification_enabled: enabled,
+                email_verification_enabled: user_enabled,
+                user_captcha_enabled: user_enabled,
+                admin_email_verification_enabled: admin_email_enabled,
+                admin_captcha_enabled,
                 revision: 7,
                 updated_at: "2026-07-29 10:00 UTC".to_owned(),
             }),
@@ -291,7 +305,7 @@ mod tests {
 
     #[test]
     fn auth_settings_form_is_native_htmx_bilingual_and_revisioned() {
-        let zh = render_settings(Locale::ZhCn, true);
+        let zh = render_settings(Locale::ZhCn, true, true, true);
         assert!(zh.contains("邮箱验证码"));
         assert!(zh.contains(
             "action=\"/admin/site/auth-settings\" method=\"post\" hx-post=\"/admin/site/auth-settings\""
@@ -300,11 +314,17 @@ mod tests {
         assert!(zh.contains("name=\"lang\" value=\"zh-CN\""));
         assert!(zh.contains("name=\"expected_revision\" value=\"7\""));
         assert!(zh.contains("name=\"email_verification_enabled\" value=\"true\" checked"));
+        assert!(zh.contains("name=\"user_captcha_enabled\" value=\"true\" checked"));
+        assert!(zh.contains("name=\"admin_email_verification_enabled\" value=\"true\" checked"));
+        assert!(zh.contains("name=\"admin_captcha_enabled\" value=\"true\" checked"));
 
-        let en = render_settings(Locale::En, false);
-        assert!(en.contains("Email verification"));
+        let en = render_settings(Locale::En, false, false, true);
+        assert!(en.contains("Login verification"));
         assert!(en.contains("name=\"lang\" value=\"en\""));
         assert!(en.contains("Require a code to activate registration"));
-        assert!(!en.contains("value=\"true\" checked"));
+        assert!(en.contains("Require visual CAPTCHA"));
+        assert!(en.contains("Administrator email code"));
+        assert!(en.contains("Administrator CAPTCHA"));
+        assert_eq!(en.matches("value=\"true\" checked").count(), 1);
     }
 }
