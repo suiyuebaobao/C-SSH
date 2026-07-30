@@ -7,6 +7,7 @@ mod auth;
 mod error;
 mod page;
 mod request_context;
+mod semantic_version;
 
 pub use admin_actor::AdminActor;
 pub use admin_login_name::{
@@ -17,4 +18,7 @@ pub use error::{AppError, AppResult};
 pub use page::{Page, PageQuery};
 pub use request_context::{
     current_request_id, mark_semantic_audit_recorded, with_request_id, with_semantic_audit_tracking,
+};
+pub use semantic_version::{
+    MAX_SEMANTIC_VERSION_LENGTH, SemanticVersion, normalize_semantic_version,
 };

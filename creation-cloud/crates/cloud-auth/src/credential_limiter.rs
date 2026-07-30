@@ -24,6 +24,7 @@ const OVERFLOW_BUCKET: &str = "overflow-bucket";
 #[derive(Clone)]
 pub(crate) struct CredentialLimiter {
     register: FixedWindowLimiter,
+    login_verification: FixedWindowLimiter,
     password: FixedWindowLimiter,
 }
 
@@ -52,6 +53,7 @@ impl Default for CredentialLimiter {
     fn default() -> Self {
         Self {
             register: FixedWindowLimiter::new("注册请求过于频繁，请稍后重试"),
+            login_verification: FixedWindowLimiter::new("登录验证码操作过于频繁，请稍后重试"),
             password: FixedWindowLimiter::new("密码操作过于频繁，请稍后重试"),
         }
     }
@@ -69,6 +71,13 @@ impl CredentialLimiter {
 
     pub(crate) fn acquire_password(&self, account_id: Uuid) -> AppResult<CredentialPermit> {
         self.password.acquire(account_id.as_bytes())
+    }
+
+    pub(crate) fn acquire_login_verification(
+        &self,
+        challenge_id: Uuid,
+    ) -> AppResult<CredentialPermit> {
+        self.login_verification.acquire(challenge_id.as_bytes())
     }
 }
 

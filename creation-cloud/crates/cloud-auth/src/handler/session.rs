@@ -2,10 +2,11 @@
 
 use axum::{Extension, Json};
 
-use crate::{AuthenticatedSession, SessionView};
+use crate::{AuthenticatedSession, SessionMetadata, SessionView};
 
 pub(crate) async fn handle(
     Extension(session): Extension<AuthenticatedSession>,
+    Extension(metadata): Extension<SessionMetadata>,
 ) -> Json<SessionView> {
-    Json(SessionView::from(&session))
+    Json(SessionView::from_parts(&session, &metadata))
 }

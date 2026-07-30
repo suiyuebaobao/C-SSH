@@ -36,6 +36,14 @@ pub(crate) fn email_filter(value: &str) -> AppResult<String> {
     Ok(value)
 }
 
+pub(crate) fn user_search(value: &str) -> AppResult<String> {
+    let value = value.trim();
+    if value.is_empty() || value.chars().count() > 100 || value.chars().any(char::is_control) {
+        return Err(AppError::Validation("用户搜索内容格式无效".to_owned()));
+    }
+    Ok(value.to_lowercase())
+}
+
 pub(crate) fn page(value: PageQuery) -> PageQuery {
     let value = value.normalized();
     PageQuery {

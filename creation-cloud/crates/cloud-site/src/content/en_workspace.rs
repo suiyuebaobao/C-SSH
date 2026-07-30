@@ -216,6 +216,26 @@ pub(super) fn admin_assets() -> PageContent {
     )
 }
 
+pub(super) fn admin_models() -> PageContent {
+    admin_page(
+        PageId::AdminModels,
+        "Models | Creation Cloud Admin",
+        "Models",
+        "Manage the global model catalog for clients",
+        "Add, edit, enable, and order global models. Regular users can only read entries enabled by administrators.",
+    )
+}
+
+pub(super) fn admin_announcements() -> PageContent {
+    admin_page(
+        PageId::AdminAnnouncements,
+        "Announcements | Creation Cloud Admin",
+        "Announcements",
+        "Edit the current announcement available to clients",
+        "Maintain drafts and publish the current announcement. The anonymous API returns published content only.",
+    )
+}
+
 pub(super) fn admin_site() -> PageContent {
     admin_page(
         PageId::AdminSite,
@@ -276,9 +296,8 @@ fn console_navigation(current: PageId) -> Vec<NavigationItem> {
         nav("Overview", PageId::Console, current),
         nav("Profile", PageId::Profile, current),
         nav("Devices", PageId::Devices, current),
-        nav("Sync", PageId::Sync, current),
+        nav("Hosts", PageId::Sync, current),
         nav("Models", PageId::Models, current),
-        nav("Vault", PageId::Vault, current),
         nav("Downloads", PageId::ConsoleDownloads, current),
     ]
 }
@@ -295,14 +314,14 @@ fn admin_page(
 
 fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
-        nav("00 Overview", PageId::Admin, current),
-        nav("10 Users", PageId::AdminUsers, current),
-        nav("20 Devices", PageId::AdminDevices, current),
-        nav("30 Releases", PageId::AdminReleases, current),
-        nav("40 Assets", PageId::AdminAssets, current),
-        nav("50 Site", PageId::AdminSite, current),
-        nav("60 SEO", PageId::AdminSeo, current),
-        nav("70 Audit", PageId::AdminAudit, current),
-        nav("80 Feedback", PageId::AdminFeedback, current),
+        nav("Users", PageId::AdminUsers, current),
+        nav("Home content", PageId::AdminSite, current),
+        nav("Client updates", PageId::AdminReleases, current),
+        nav("Downloads", PageId::AdminAssets, current),
+        nav("Models", PageId::AdminModels, current),
+        nav("Announcements", PageId::AdminAnnouncements, current),
+        nav("Feedback", PageId::AdminFeedback, current),
+        nav("SEO", PageId::AdminSeo, current),
+        nav("Activity", PageId::AdminAudit, current),
     ]
 }

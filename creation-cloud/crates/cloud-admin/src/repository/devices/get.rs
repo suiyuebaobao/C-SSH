@@ -8,6 +8,7 @@ use crate::{AdminDevice, model::AdminDeviceRow, repository::map_read_error};
 
 pub(crate) const GET_SQL: &str = r#"
     SELECT devices.id, devices.account_id, accounts.email AS owner_email,
+           accounts.admin_login_name AS owner_admin_login_name,
            devices.name, devices.platform, devices.public_id, devices.last_seen_at,
            devices.revoked_at, devices.created_at, devices.updated_at
     FROM devices

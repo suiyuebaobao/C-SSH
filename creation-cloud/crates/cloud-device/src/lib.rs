@@ -4,6 +4,7 @@ mod handler;
 mod model;
 mod repository;
 mod service;
+mod session;
 mod use_case;
 mod validation;
 
@@ -12,7 +13,7 @@ use axum::{
     routing::{get, post},
 };
 
-pub use model::{CreateDeviceOutcome, Device, Platform};
+pub use model::{CreateDeviceOutcome, Device, DeviceSessionResult, DeviceSessionView, Platform};
 pub use service::Service;
 pub use use_case::{CreateDevice, UpdateDevice};
 

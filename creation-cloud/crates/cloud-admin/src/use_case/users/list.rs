@@ -20,6 +20,11 @@ impl Service {
 pub(crate) fn normalize(query: AdminUserListQuery) -> AppResult<AdminUserListFilter> {
     Ok(AdminUserListFilter {
         page: validation::page(query.page),
+        search: query
+            .search
+            .as_deref()
+            .map(validation::user_search)
+            .transpose()?,
         email: query
             .email
             .as_deref()

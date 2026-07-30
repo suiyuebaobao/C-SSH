@@ -11,18 +11,28 @@ pub(super) fn page_content() -> PageContent {
     let platforms = platforms();
     let sections = sections(&platforms);
     let home_page = HomePageContent {
-        status_note: "生产控制面 · 正式版本已发布 · 客户端接入筹备中",
-        platform_label: "I/O MATRIX / PLATFORM",
-        platform_note: "5 SLOTS",
+        status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
+        status_note: "生产控制面 · 正式版本已发布 · 客户端接入筹备中".into(),
+        hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
+        platform_label: "I/O MATRIX / PLATFORM".into(),
+        platform_note: "5 SLOTS".into(),
         platforms,
         sections,
-        faq_code: "08 / FAQ",
-        faq_heading: "把决定是否使用前的问题说清楚",
-        faq_lead: "只保留高价值决策问题，完整解释继续进入常见问题页。",
+        faq_side_label: "FAQ / DECISION QUESTIONS".into(),
+        faq_item_prefix: "FAQ".into(),
+        faq_code: "08 / FAQ".into(),
+        faq_heading: "把决定是否使用前的问题说清楚".into(),
+        faq_lead: "只保留高价值决策问题，完整解释继续进入常见问题页。".into(),
         faqs: faqs(),
-        final_code: "NEXT STEP / START HERE",
-        final_heading: "先选平台，再从第一条教程开始",
-        final_lead: "所有能力、平台状态与下载信息都以真实实现、部署和发布记录为准。",
+        seo_code: "SEARCH TOPICS / CONTENT MAP".into(),
+        seo_heading: "相关 SSH 主题".into(),
+        seo_topics_label: "已发布的 SEO 主题词".into(),
+        final_code: "NEXT STEP / START HERE".into(),
+        final_heading: "先选平台，再从第一条教程开始".into(),
+        final_lead: "所有能力、平台状态与下载信息都以真实实现、部署和发布记录为准。".into(),
+        qr_placeholder_code: "QR".into(),
+        qr_placeholder_waiting: "WAITING".into(),
+        media_slot: None,
         qr_widget: HomeQrWidget::pending(HomeQrLabels {
             code: "MOBILE ACCESS / QR",
             title: "扫码入口",
@@ -399,10 +409,10 @@ fn platform_items(platforms: &[HomePlatform]) -> Vec<HomeItem> {
         .iter()
         .map(|platform| {
             HomeItem::new(
-                platform.state,
-                platform.name,
-                platform.position,
-                platform.shell,
+                &platform.state,
+                &platform.name,
+                &platform.position,
+                &platform.shell,
                 if platform.planned {
                     HomeTone::Planned
                 } else {

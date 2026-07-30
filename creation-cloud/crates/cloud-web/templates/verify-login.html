@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="account-main">
+  <div class="container account-layout">
+    <section class="account-panel" aria-labelledby="verify-login-title">
+      <header class="account-heading">
+        <p class="eyebrow">Creation Cloud</p>
+        <h1 id="verify-login-title">{% if is_en %}Verify this sign-in{% else %}验证本次登录{% endif %}</h1>
+        <p>{% if is_en %}Enter the six-digit code sent to your account email. It is valid for 10 minutes, allows at most 5 attempts, and can be resent after 60 seconds.{% else %}输入账号邮箱收到的六位验证码。验证码 10 分钟内有效，最多可尝试 5 次，60 秒后可重新发送。{% endif %}</p>
+      </header>
+
+      {% if resent %}
+      <p class="form-feedback" data-tone="success">{% if is_en %}A new sign-in code has been sent.{% else %}新的登录验证码已发送。{% endif %}</p>
+      {% endif %}
+
+      <form class="account-form" action="/web/auth/verify-login" method="post" hx-post="/web/auth/verify-login" hx-target="#verify-login-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
+        <input type="hidden" name="challenge_id" value="{{ challenge_id }}">
+        {% if let Some(next_path) = next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
+        <label class="field-label" for="login-verification-code">
+          <span>{% if is_en %}Sign-in code{% else %}登录验证码{% endif %}</span>
+          <input id="login-verification-code" name="code" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required autofocus>
+        </label>
+        <button class="button button-primary button-full" type="submit">{% if is_en %}Verify and sign in{% else %}验证并登录{% endif %}</button>
+        <div class="form-feedback" id="verify-login-feedback" aria-live="polite"></div>
+      </form>
+
+      <form class="account-form" action="/web/auth/resend-login-verification" method="post" hx-post="/web/auth/resend-login-verification" hx-disabled-elt="find button">
+        <input type="hidden" name="challenge_id" value="{{ challenge_id }}">
+        <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+        {% if let Some(next_path) = next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
+        <button class="button button-secondary button-full" type="submit">{% if is_en %}Send a new code{% else %}重新发送验证码{% endif %}</button>
+      </form>
+
+      <div class="account-alternative">
+        <a class="text-link" href="{% if is_en %}/en/login{% else %}/login{% endif %}">{% if is_en %}Return to sign in{% else %}返回登录{% endif %}</a>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

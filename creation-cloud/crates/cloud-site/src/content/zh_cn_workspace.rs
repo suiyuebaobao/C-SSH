@@ -212,6 +212,26 @@ pub(super) fn admin_assets() -> PageContent {
     )
 }
 
+pub(super) fn admin_models() -> PageContent {
+    admin_page(
+        PageId::AdminModels,
+        "模型管理｜Creation Cloud",
+        "模型",
+        "管理客户端可读取的全局模型",
+        "新增、编辑、启停和排序全局模型；普通用户只读取管理员启用的条目。",
+    )
+}
+
+pub(super) fn admin_announcements() -> PageContent {
+    admin_page(
+        PageId::AdminAnnouncements,
+        "公告管理｜Creation Cloud",
+        "公告",
+        "编辑客户端可读取的当前公告",
+        "维护草稿并发布当前公告；匿名接口只返回已经发布的内容。",
+    )
+}
+
 pub(super) fn admin_site() -> PageContent {
     admin_page(
         PageId::AdminSite,
@@ -272,9 +292,8 @@ fn console_navigation(current: PageId) -> Vec<NavigationItem> {
         nav("总览", PageId::Console, current),
         nav("资料与安全", PageId::Profile, current),
         nav("设备", PageId::Devices, current),
-        nav("同步", PageId::Sync, current),
+        nav("主机", PageId::Sync, current),
         nav("模型", PageId::Models, current),
-        nav("保险库", PageId::Vault, current),
         nav("下载", PageId::ConsoleDownloads, current),
     ]
 }
@@ -291,14 +310,14 @@ fn admin_page(
 
 fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
-        nav("00 总览", PageId::Admin, current),
-        nav("10 用户", PageId::AdminUsers, current),
-        nav("20 设备", PageId::AdminDevices, current),
-        nav("30 版本", PageId::AdminReleases, current),
-        nav("40 资产", PageId::AdminAssets, current),
-        nav("50 站点", PageId::AdminSite, current),
-        nav("60 SEO", PageId::AdminSeo, current),
-        nav("70 审计", PageId::AdminAudit, current),
-        nav("80 反馈", PageId::AdminFeedback, current),
+        nav("用户管理", PageId::AdminUsers, current),
+        nav("首页内容", PageId::AdminSite, current),
+        nav("客户端更新", PageId::AdminReleases, current),
+        nav("下载", PageId::AdminAssets, current),
+        nav("模型", PageId::AdminModels, current),
+        nav("公告", PageId::AdminAnnouncements, current),
+        nav("问题反馈", PageId::AdminFeedback, current),
+        nav("SEO", PageId::AdminSeo, current),
+        nav("操作记录", PageId::AdminAudit, current),
     ]
 }

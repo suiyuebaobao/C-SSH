@@ -1,5 +1,5 @@
 //! 管理安装资产的多来源元数据与公开下载分发。
-//! 本包不依赖其它业务包，版本与资产仅通过只读 SQL 投影关联。
+//! 常规来源仍只读投影版本；极简后台组合用例通过发布域受控事务入口原子创建资产与来源。
 
 mod authorization;
 mod file_verification;
@@ -34,8 +34,10 @@ mod validation_tests;
 
 pub use model::{
     AssetInspectionStatus, CreateSourceInput, DownloadAggregationReport, DownloadHistoryItem,
-    PublicAsset, PublicRelease, PublicSource, PublishedAssetInspectionReport, ReleaseSource,
-    SourceKind, UpdateSourceInput,
+    LatestUpdate, PublicAsset, PublicRelease, PublicSource, PublishedAssetInspectionReport,
+    ReleaseSource, SourceKind, UpdateAsset, UpdateCheckQuery, UpdateCheckResponse, UpdateSource,
+    UpdateSourceInput,
 };
-pub use router::{account_router, management_router, public_router};
+pub use router::{account_router, management_router, public_router, update_router};
 pub use service::Service;
+pub use upload_file::PreparedLocalUpload;

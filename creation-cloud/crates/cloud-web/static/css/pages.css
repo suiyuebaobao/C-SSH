@@ -139,6 +139,19 @@
   margin-top: var(--space-6);
 }
 
+.admin-captcha {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-captcha img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
 .form-feedback {
   padding: 10px 12px;
   border-left: 3px solid var(--danger);

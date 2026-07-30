@@ -52,3 +52,10 @@ pub fn public_router(service: Service) -> Router {
         )
         .with_state(service)
 }
+
+#[must_use = "路由必须以 /updates 挂载到匿名公开 API 才会生效"]
+pub fn update_router(service: Service) -> Router {
+    Router::new()
+        .route("/check", get(public::update::handle))
+        .with_state(service)
+}

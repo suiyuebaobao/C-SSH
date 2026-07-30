@@ -1,139 +1,148 @@
-//! 规范化模型元数据，并递归拒绝凭据字段和带凭据的 URL。
+//! 校验全局模型元数据与不透明客户端密文。
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::HashSet;
 
+use base64::{Engine as _, engine::general_purpose::STANDARD};
 use cloud_domain::{AppError, AppResult};
 use serde_json::Value;
 use url::Url;
 use uuid::Uuid;
 
-use crate::types::{CreateModel, CreateModelInput, UpdateModel, UpdateModelInput};
+use crate::types::{CreateGlobalModelInput, ReplaceGlobalModelInput, ValidatedModel};
 
 const MAX_PARAMETERS_BYTES: usize = 16 * 1024;
+const MAX_SECRET_BYTES: usize = 1024 * 1024;
 
-pub(crate) fn account(account_id: Uuid) -> AppResult<()> {
-    if account_id.is_nil() {
-        return Err(AppError::Validation("账号标识不能为空".to_owned()));
+pub(crate) fn model_id(value: Uuid) -> AppResult<Uuid> {
+    if value.is_nil() {
+        Err(AppError::Validation("模型标识不能为空".to_owned()))
+    } else {
+        Ok(value)
     }
-    Ok(())
 }
 
-pub(crate) fn model_id(model_id: Uuid) -> AppResult<()> {
-    if model_id.is_nil() {
-        return Err(AppError::Validation("模型标识不能为空".to_owned()));
+pub(crate) fn revision(value: i64) -> AppResult<i64> {
+    if value <= 0 {
+        Err(AppError::Validation(
+            "expected_revision 必须大于 0".to_owned(),
+        ))
+    } else {
+        Ok(value)
     }
-    Ok(())
 }
 
-pub(crate) fn create(input: CreateModelInput) -> AppResult<CreateModel> {
-    reject_extra_fields(&input.extra_fields)?;
-    let name = bounded_text(input.name, "name", 100)?;
-    let provider = slug(input.provider, "provider", 64)?;
-    let model_name = bounded_text(input.model_name, "model_name", 128)?;
-    let base_url = optional_url(input.base_url)?;
-    context_length(input.context_length)?;
-    let capability_tags = tags(input.capability_tags)?;
-    parameters(&input.default_parameters)?;
-    vault_reference(input.vault_envelope_id)?;
-    if input.is_default && !input.enabled {
-        return Err(AppError::Validation("禁用模型不能设为默认模型".to_owned()));
-    }
-    Ok(CreateModel {
-        id: Uuid::now_v7(),
-        name,
-        provider,
-        base_url,
-        model_name,
-        context_length: input.context_length,
-        capability_tags,
-        default_parameters: input.default_parameters,
-        enabled: input.enabled,
-        is_default: input.is_default,
-        sort_order: input.sort_order,
-        vault_envelope_id: input.vault_envelope_id,
-    })
+pub(crate) fn create(input: CreateGlobalModelInput) -> AppResult<ValidatedModel> {
+    validate_model(
+        input.name,
+        input.provider,
+        input.api_format,
+        input.base_url,
+        input.model_name,
+        input.context_length,
+        input.capability_tags,
+        input.default_parameters,
+        input.enabled,
+        input.is_default,
+        input.sort_order,
+    )
 }
 
-pub(crate) fn update(input: UpdateModelInput) -> AppResult<UpdateModel> {
-    reject_extra_fields(&input.extra_fields)?;
-    if input.clear_vault_envelope && input.vault_envelope_id.is_some() {
+pub(crate) fn replace(input: ReplaceGlobalModelInput) -> AppResult<(i64, ValidatedModel)> {
+    let expected_revision = revision(input.expected_revision)?;
+    let model = validate_model(
+        input.name,
+        input.provider,
+        input.api_format,
+        input.base_url,
+        input.model_name,
+        input.context_length,
+        input.capability_tags,
+        input.default_parameters,
+        input.enabled,
+        input.is_default,
+        input.sort_order,
+    )?;
+    Ok((expected_revision, model))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn validate_model(
+    name: String,
+    provider: String,
+    api_format: String,
+    base_url: Option<String>,
+    model_name: String,
+    context_length: i32,
+    capability_tags: Vec<String>,
+    default_parameters: Value,
+    enabled: bool,
+    is_default: bool,
+    sort_order: i32,
+) -> AppResult<ValidatedModel> {
+    let name = bounded_text(name, "name", 100)?;
+    let provider = slug(provider, "provider", 64)?;
+    let api_format = validate_api_format(api_format)?;
+    let model_name = bounded_text(model_name, "model_name", 128)?;
+    let base_url = optional_url(base_url)?
+        .ok_or_else(|| AppError::Validation("base_url 不能为空".to_owned()))?;
+    if !(256..=2_000_000).contains(&context_length) {
         return Err(AppError::Validation(
-            "不能同时设置并清除 vault_envelope_id".to_owned(),
+            "context_length 必须在 256 到 2000000 之间".to_owned(),
         ));
     }
-    let has_change = input.name.is_some()
-        || input.provider.is_some()
-        || input.base_url.is_some()
-        || input.model_name.is_some()
-        || input.context_length.is_some()
-        || input.capability_tags.is_some()
-        || input.default_parameters.is_some()
-        || input.enabled.is_some()
-        || input.is_default.is_some()
-        || input.sort_order.is_some()
-        || input.vault_envelope_id.is_some()
-        || input.clear_vault_envelope;
-    if !has_change {
-        return Err(AppError::Validation("模型更新内容不能为空".to_owned()));
-    }
-    if input.enabled == Some(false) && input.is_default == Some(true) {
+    if !enabled && is_default {
         return Err(AppError::Validation("禁用模型不能设为默认模型".to_owned()));
     }
-
-    let name = input
-        .name
-        .map(|value| bounded_text(value, "name", 100))
-        .transpose()?;
-    let provider = input
-        .provider
-        .map(|value| slug(value, "provider", 64))
-        .transpose()?;
-    let model_name = input
-        .model_name
-        .map(|value| bounded_text(value, "model_name", 128))
-        .transpose()?;
-    let base_url = input
-        .base_url
-        .map(|value| optional_url(Some(value)))
-        .transpose()?;
-    if let Some(value) = input.context_length {
-        context_length(value)?;
-    }
-    let capability_tags = input.capability_tags.map(tags).transpose()?;
-    if let Some(value) = &input.default_parameters {
-        parameters(value)?;
-    }
-    vault_reference(input.vault_envelope_id)?;
-    let (enabled, is_default) = match (input.enabled, input.is_default) {
-        (Some(false), _) => (Some(false), Some(false)),
-        (_, Some(true)) => (Some(true), Some(true)),
-        (enabled, is_default) => (enabled, is_default),
-    };
-    let vault_envelope_id = if input.clear_vault_envelope {
-        Some(None)
-    } else {
-        input.vault_envelope_id.map(Some)
-    };
-    Ok(UpdateModel {
+    let capability_tags = tags(capability_tags)?;
+    parameters(&default_parameters)?;
+    Ok(ValidatedModel {
         name,
         provider,
-        base_url,
+        api_format,
+        base_url: Some(base_url),
         model_name,
-        context_length: input.context_length,
+        context_length,
         capability_tags,
-        default_parameters: input.default_parameters,
+        default_parameters,
         enabled,
         is_default,
-        sort_order: input.sort_order,
-        vault_envelope_id,
+        sort_order,
     })
+}
+
+fn validate_api_format(value: String) -> AppResult<String> {
+    let value = value.trim().to_ascii_lowercase();
+    if matches!(value.as_str(), "openai_compatible" | "anthropic_compatible") {
+        Ok(value)
+    } else {
+        Err(AppError::Validation(
+            "api_format 只能是 openai_compatible 或 anthropic_compatible".to_owned(),
+        ))
+    }
+}
+
+pub(crate) fn ciphertext(value: &str) -> AppResult<Vec<u8>> {
+    let decoded = STANDARD
+        .decode(value)
+        .map_err(|_| AppError::Validation("ciphertext 必须是规范 base64".to_owned()))?;
+    if !(16..=MAX_SECRET_BYTES).contains(&decoded.len()) {
+        return Err(AppError::Validation(
+            "ciphertext 解码后必须在 16 字节到 1 MiB 之间".to_owned(),
+        ));
+    }
+    if STANDARD.encode(&decoded) != value {
+        return Err(AppError::Validation(
+            "ciphertext 必须使用规范 base64 编码".to_owned(),
+        ));
+    }
+    Ok(decoded)
 }
 
 fn bounded_text(value: String, field: &str, max: usize) -> AppResult<String> {
     let value = value.trim().to_owned();
-    if value.is_empty() || value.chars().count() > max {
+    if value.is_empty() || value.chars().count() > max || value.chars().any(char::is_control) {
         return Err(AppError::Validation(format!(
-            "{field} 长度必须在 1 到 {max} 个字符之间"
+            "{field} 必须是 1 到 {max} 个无控制字符的文本"
         )));
     }
     Ok(value)
@@ -179,41 +188,33 @@ fn optional_url(value: Option<String>) -> AppResult<Option<String>> {
     Ok(Some(parsed.to_string().trim_end_matches('/').to_owned()))
 }
 
-fn context_length(value: i32) -> AppResult<()> {
-    if !(256..=2_000_000).contains(&value) {
-        return Err(AppError::Validation(
-            "context_length 必须在 256 到 2000000 之间".to_owned(),
-        ));
-    }
-    Ok(())
-}
-
 fn tags(values: Vec<String>) -> AppResult<Vec<String>> {
     if values.len() > 16 {
         return Err(AppError::Validation(
-            "capability_tags 最多包含 16 项".to_owned(),
+            "capability_tags 最多 16 项".to_owned(),
         ));
     }
-    let mut unique = HashSet::with_capacity(values.len());
-    let mut normalized = Vec::with_capacity(values.len());
+    let mut seen = HashSet::new();
+    let mut result = Vec::with_capacity(values.len());
     for value in values {
         let value = slug(value, "capability_tags", 32)?;
-        if !unique.insert(value.clone()) {
+        if !seen.insert(value.clone()) {
             return Err(AppError::Validation("capability_tags 不得重复".to_owned()));
         }
-        normalized.push(value);
+        result.push(value);
     }
-    Ok(normalized)
+    Ok(result)
 }
 
 fn parameters(value: &Value) -> AppResult<()> {
-    reject_sensitive_value(value)?;
     let object = value
         .as_object()
-        .ok_or_else(|| AppError::Validation("default_parameters 必须是 JSON object".to_owned()))?;
-    let encoded = serde_json::to_vec(value)
-        .map_err(|_| AppError::Validation("default_parameters 无法编码".to_owned()))?;
-    if encoded.len() > MAX_PARAMETERS_BYTES {
+        .ok_or_else(|| AppError::Validation("default_parameters 必须是对象".to_owned()))?;
+    if serde_json::to_vec(value)
+        .map_err(|_| AppError::Validation("default_parameters 无法编码".to_owned()))?
+        .len()
+        > MAX_PARAMETERS_BYTES
+    {
         return Err(AppError::Validation(
             "default_parameters 超过 16 KiB".to_owned(),
         ));
@@ -226,7 +227,9 @@ fn parameters(value: &Value) -> AppResult<()> {
             "frequency_penalty" | "presence_penalty" => number_in(value, -2.0, 2.0),
             "seed" => value.as_i64().is_some(),
             "parallel_tool_calls" => value.is_boolean(),
-            "reasoning_effort" => matches!(value.as_str(), Some("low" | "medium" | "high")),
+            "reasoning_effort" => {
+                matches!(value.as_str(), Some("low" | "medium" | "high" | "xhigh"))
+            }
             _ => false,
         };
         if !valid {
@@ -250,62 +253,30 @@ fn integer_in(value: &Value, minimum: i64, maximum: i64) -> bool {
         .is_some_and(|number| (minimum..=maximum).contains(&number))
 }
 
-fn vault_reference(value: Option<Uuid>) -> AppResult<()> {
-    if value.is_some_and(|id| id.is_nil()) {
-        return Err(AppError::Validation(
-            "vault_envelope_id 不能为空 UUID".to_owned(),
-        ));
-    }
-    Ok(())
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-fn reject_extra_fields(fields: &BTreeMap<String, Value>) -> AppResult<()> {
-    if let Some(field) = fields.keys().find(|field| is_sensitive_key(field)) {
-        return Err(AppError::Validation(format!(
-            "模型元数据禁止包含敏感字段 {field}"
-        )));
+    #[test]
+    fn api_format_accepts_only_the_two_supported_interfaces() {
+        assert_eq!(
+            validate_api_format(" OpenAI_Compatible ".to_owned()).expect("OpenAI 兼容格式应有效"),
+            "openai_compatible"
+        );
+        assert_eq!(
+            validate_api_format("anthropic_compatible".to_owned())
+                .expect("Anthropic 兼容格式应有效"),
+            "anthropic_compatible"
+        );
+        assert!(validate_api_format("claude".to_owned()).is_err());
+        assert!(validate_api_format("custom".to_owned()).is_err());
     }
-    if let Some(field) = fields.keys().next() {
-        return Err(AppError::Validation(format!("未知模型字段 {field}")));
-    }
-    Ok(())
-}
 
-fn reject_sensitive_value(value: &Value) -> AppResult<()> {
-    match value {
-        Value::Object(entries) => {
-            for (key, nested) in entries {
-                if is_sensitive_key(key) {
-                    return Err(AppError::Validation(format!(
-                        "模型元数据禁止包含敏感字段 {key}"
-                    )));
-                }
-                reject_sensitive_value(nested)?;
-            }
-        }
-        Value::Array(items) => {
-            for item in items {
-                reject_sensitive_value(item)?;
-            }
-        }
-        _ => {}
+    #[test]
+    fn ciphertext_is_canonical_and_bounded() {
+        let encoded = STANDARD.encode([7_u8; 32]);
+        assert_eq!(ciphertext(&encoded).expect("密文应有效"), vec![7_u8; 32]);
+        assert!(ciphertext("not base64").is_err());
+        assert!(ciphertext(&STANDARD.encode([0_u8; 4])).is_err());
     }
-    Ok(())
-}
-
-fn is_sensitive_key(key: &str) -> bool {
-    let normalized = key.to_ascii_lowercase().replace(['-', '_'], "");
-    [
-        "apikey",
-        "token",
-        "accesstoken",
-        "refreshtoken",
-        "authorization",
-        "password",
-        "secret",
-        "credential",
-        "privatekey",
-    ]
-    .iter()
-    .any(|blocked| normalized == *blocked)
 }

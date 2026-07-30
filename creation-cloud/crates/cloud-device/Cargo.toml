@@ -10,7 +10,10 @@ axum.workspace = true
 chrono.workspace = true
 cloud-domain.workspace = true
 cloud-store.workspace = true
+hex.workspace = true
+rand.workspace = true
 serde.workspace = true
+sha2.workspace = true
 sqlx.workspace = true
 uuid.workspace = true
 

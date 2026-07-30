@@ -1,6 +1,11 @@
 //! 修改当前账号密码并复用认证域限流、验密与会话撤销逻辑。
 
-use axum::{Extension, Form, extract::State, http::HeaderMap, response::Response};
+use axum::{
+    Extension, Form,
+    extract::State,
+    http::{HeaderMap, header},
+    response::Response,
+};
 use cloud_auth::ChangePassword;
 use cloud_domain::{AppResult, AuthenticatedSession};
 use cloud_site::PageId;
@@ -25,7 +30,7 @@ pub(crate) async fn handle(
     Form(form): Form<ChangePasswordForm>,
 ) -> AppResult<Response> {
     let locale = common::locale(form.lang.as_deref());
-    state
+    let issued = state
         .auth()
         .change_password(
             &session,
@@ -36,5 +41,9 @@ pub(crate) async fn handle(
             },
         )
         .await?;
-    Ok(common::action_success(&headers, PageId::Profile, locale))
+    let mut response = common::action_success(&headers, PageId::Profile, locale);
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, issued.set_cookie_header()?);
+    Ok(response)
 }

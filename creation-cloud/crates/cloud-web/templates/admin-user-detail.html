@@ -1,0 +1,73 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section admin-user-detail" aria-labelledby="user-detail-heading">
+  <p><a href="/admin/users{% if is_en %}?lang=en{% endif %}">← {% if is_en %}Back to users{% else %}返回用户列表{% endif %}</a></p>
+
+  {% if let Some(user) = user %}
+  <div class="admin-user-detail-header">
+    <div>
+      <h2 id="user-detail-heading">{% if user.display_name.is_empty() %}{% if user.login_name.is_empty() %}{% if is_en %}User details{% else %}用户详情{% endif %}{% else %}{{ user.login_name }}{% endif %}{% else %}{{ user.display_name }}{% endif %}</h2>
+      <p>{{ user.email }}{% if !user.login_name.is_empty() %} · @{{ user.login_name }}{% endif %}</p>
+    </div>
+    <div class="admin-actions">
+      <span class="status-badge">{% if user.role == "admin" %}{% if is_en %}Administrator{% else %}管理员{% endif %}{% else %}{% if is_en %}User{% else %}用户{% endif %}{% endif %}</span>
+      <span class="status-badge" data-tone="{% if user.status == "active" %}success{% else if user.status == "pending_verification" %}warning{% else %}danger{% endif %}">{% if user.status == "active" %}{% if is_en %}Active{% else %}正常{% endif %}{% else if user.status == "pending_verification" %}{% if is_en %}Pending verification{% else %}待验证{% endif %}{% else %}{% if is_en %}Disabled{% else %}已停用{% endif %}{% endif %}</span>
+    </div>
+  </div>
+
+  <div class="admin-user-summary">
+    <div><strong>{{ user.host_count }}</strong><span>{% if is_en %}Hosts{% else %}主机{% endif %}</span></div>
+    <div><strong>{{ user.device_count }}</strong><span>{% if is_en %}Devices{% else %}设备{% endif %}</span></div>
+    <div><strong>{% if user.email_verified %}{% if is_en %}Verified{% else %}已验证{% endif %}{% else %}{% if is_en %}Unverified{% else %}未验证{% endif %}{% endif %}</strong><span>{% if is_en %}Email{% else %}邮箱{% endif %}</span></div>
+  </div>
+
+  <nav class="admin-detail-tabs" aria-label="{% if is_en %}User detail sections{% else %}用户详情栏目{% endif %}">
+    <a href="/admin/users/{{ account_id }}?tab=hosts{% if is_en %}&lang=en{% endif %}"{% if active_tab == "hosts" %} aria-current="page"{% endif %}>{% if is_en %}Hosts{% else %}主机数据{% endif %}</a>
+    <a href="/admin/users/{{ account_id }}?tab=sync{% if is_en %}&lang=en{% endif %}"{% if active_tab == "sync" %} aria-current="page"{% endif %}>{% if is_en %}Sync records{% else %}同步记录{% endif %}</a>
+    <a href="/admin/users/{{ account_id }}?tab=devices{% if is_en %}&lang=en{% endif %}"{% if active_tab == "devices" %} aria-current="page"{% endif %}>{% if is_en %}Login devices{% else %}登录设备{% endif %}</a>
+    <a href="/admin/users/{{ account_id }}?tab=basic{% if is_en %}&lang=en{% endif %}"{% if active_tab == "basic" %} aria-current="page"{% endif %}>{% if is_en %}Account{% else %}账号信息{% endif %}</a>
+  </nav>
+
+  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+
+  {% if active_tab == "hosts" %}
+    <div class="admin-section-heading"><div><h3>{% if is_en %}Host data{% else %}主机数据{% endif %}</h3><p>{{ total }} {% if is_en %}records{% else %}条记录{% endif %}</p></div></div>
+    {% if hosts.is_empty() && load_error.is_none() %}<div class="admin-empty">{% if is_en %}No host data{% else %}暂无主机数据{% endif %}</div>{% endif %}
+    {% if !hosts.is_empty() %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>{% if is_en %}Host{% else %}主机{% endif %}</th><th>{% if is_en %}Platform / status{% else %}平台 / 状态{% endif %}</th><th>{% if is_en %}Source device{% else %}来源设备{% endif %}</th><th>{% if is_en %}Revision{% else %}修订{% endif %}</th><th>{% if is_en %}Updated{% else %}更新时间{% endif %}</th></tr></thead><tbody>
+    {% for row in hosts %}<tr><td><strong>{{ row.name }}</strong><br>{{ row.endpoint }}{% if !row.tags.is_empty() %}<br><small>{{ row.tags }}</small>{% endif %}{% if row.secret_present %}<br><small>{% if is_en %}Encrypted fields stored{% else %}含客户端密文字段{% endif %}</small>{% endif %}</td><td>{{ row.platform }}<br><span class="status-badge">{{ row.status }}</span></td><td>{{ row.source_device }}</td><td>{{ row.revision }}</td><td class="admin-mono">{{ row.updated_at }}</td></tr>{% endfor %}
+    </tbody></table></div>{% endif %}
+  {% else if active_tab == "sync" %}
+    <div class="admin-section-heading"><div><h3>{% if is_en %}Manual sync records{% else %}手动同步记录{% endif %}</h3><p>{{ total }} {% if is_en %}records{% else %}条记录{% endif %}</p></div></div>
+    {% if sync_records.is_empty() && load_error.is_none() %}<div class="admin-empty">{% if is_en %}No sync records{% else %}暂无同步记录{% endif %}</div>{% endif %}
+    {% if !sync_records.is_empty() %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>{% if is_en %}Time{% else %}时间{% endif %}</th><th>{% if is_en %}Action{% else %}操作{% endif %}</th><th>{% if is_en %}Device{% else %}设备{% endif %}</th><th>{% if is_en %}Result{% else %}结果{% endif %}</th><th>{% if is_en %}Revision / changes{% else %}修订 / 变更{% endif %}</th></tr></thead><tbody>
+    {% for row in sync_records %}<tr><td class="admin-mono">{{ row.occurred_at }}</td><td><span class="status-badge">{% if row.direction == "upload" %}{% if is_en %}Upload{% else %}上传{% endif %}{% else %}{% if is_en %}Download{% else %}下载{% endif %}{% endif %}</span></td><td><strong>{{ row.device }}</strong><br>{{ row.platform }}</td><td>{{ row.outcome }}</td><td>{{ row.revision }} / {{ row.changed_count }}</td></tr>{% endfor %}
+    </tbody></table></div>{% endif %}
+  {% else if active_tab == "devices" %}
+    <div class="admin-section-heading"><div><h3>{% if is_en %}Login devices{% else %}登录设备{% endif %}</h3><p>{{ total }} {% if is_en %}devices{% else %}台设备{% endif %}</p></div></div>
+    {% if devices.is_empty() && load_error.is_none() %}<div class="admin-empty">{% if is_en %}No devices{% else %}暂无登录设备{% endif %}</div>{% endif %}
+    {% if !devices.is_empty() %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>{% if is_en %}Device{% else %}设备{% endif %}</th><th>{% if is_en %}Platform{% else %}平台{% endif %}</th><th>{% if is_en %}Last active{% else %}最近活动{% endif %}</th><th>{% if is_en %}Status{% else %}状态{% endif %}</th></tr></thead><tbody>
+    {% for row in devices %}<tr><td><strong>{{ row.name }}</strong><br><span class="admin-mono">{{ row.public_id }}</span></td><td>{{ row.platform }}</td><td class="admin-mono">{{ row.last_seen_at }}</td><td>{% if row.revoked %}<span class="status-badge" data-tone="danger">{% if is_en %}Revoked{% else %}已撤销{% endif %}</span>{% else %}<form hx-post="/admin/devices/{{ row.id }}/revoke" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke this device?{% else %}确认撤销这台设备？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销设备{% endif %}</button></form>{% endif %}</td></tr>{% endfor %}
+    </tbody></table></div>{% endif %}
+  {% else %}
+    <div class="admin-user-account-grid">
+      <dl>
+        <div><dt>{% if is_en %}Account ID{% else %}账号 ID{% endif %}</dt><dd class="admin-mono">{{ user.id }}</dd></div>
+        <div><dt>{% if is_en %}Created{% else %}注册时间{% endif %}</dt><dd>{{ user.created_at }}</dd></div>
+        <div><dt>{% if is_en %}Updated{% else %}更新时间{% endif %}</dt><dd>{{ user.updated_at }}</dd></div>
+      </dl>
+      <div>
+        <h3>{% if is_en %}Account controls{% else %}账号操作{% endif %}</h3>
+        <div class="admin-actions">
+          {% if user.status != "pending_verification" %}<form hx-post="/admin/users/{{ account_id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Change this user role?{% else %}确认变更用户角色？{% endif %}"><input type="hidden" name="role" value="{% if user.role == "admin" %}user{% else %}admin{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if user.role == "admin" %}{% if is_en %}Set as user{% else %}设为普通用户{% endif %}{% else %}{% if is_en %}Set as administrator{% else %}设为管理员{% endif %}{% endif %}</button></form>{% endif %}
+          <form hx-post="/admin/users/{{ account_id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Change this account status?{% else %}确认变更账号状态？{% endif %}"><input type="hidden" name="status" value="{% if user.status == "active" %}disabled{% else %}active{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit"{% if user.status == "pending_verification" %} disabled{% endif %}>{% if user.status == "active" %}{% if is_en %}Disable account{% else %}停用账号{% endif %}{% else %}{% if is_en %}Enable account{% else %}启用账号{% endif %}{% endif %}</button></form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  {% else %}
+    <h2 id="user-detail-heading">{% if is_en %}User details{% else %}用户详情{% endif %}</h2>
+    {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+  {% endif %}
+</section>
+{% endblock %}

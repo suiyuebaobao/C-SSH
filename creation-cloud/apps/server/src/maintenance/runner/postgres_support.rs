@@ -56,7 +56,7 @@ impl TestDatabase {
         let config = test_config(&self.database_url, &self.schema);
         let maintenance = config.maintenance.clone();
         Runner::new(
-            AppServices::new(self.runner_pool.clone(), &config),
+            AppServices::new(self.runner_pool.clone(), &config).expect("测试服务应可装配"),
             maintenance,
         )
     }
@@ -110,6 +110,7 @@ fn test_config(database_url: &str, schema: &str) -> CloudConfig {
         session_ttl: Duration::from_secs(3600),
         environment: "test".to_owned(),
         maintenance: cloud_config::MaintenanceConfig::default(),
+        smtp: None,
     }
 }
 

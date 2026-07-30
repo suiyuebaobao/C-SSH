@@ -2,141 +2,152 @@
 
 use std::fmt;
 
+use serde::{Deserialize, Serialize};
+
 use crate::HomeQrWidget;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct HomePageContent {
-    pub status_note: &'static str,
-    pub platform_label: &'static str,
-    pub platform_note: &'static str,
+    pub status_strip_label: String,
+    pub status_note: String,
+    pub hero_blueprint_label: String,
+    pub platform_label: String,
+    pub platform_note: String,
     pub platforms: Vec<HomePlatform>,
     pub sections: Vec<HomeSection>,
-    pub faq_code: &'static str,
-    pub faq_heading: &'static str,
-    pub faq_lead: &'static str,
+    pub faq_side_label: String,
+    pub faq_item_prefix: String,
+    pub faq_code: String,
+    pub faq_heading: String,
+    pub faq_lead: String,
     pub faqs: Vec<HomeFaqItem>,
-    pub final_code: &'static str,
-    pub final_heading: &'static str,
-    pub final_lead: &'static str,
+    pub seo_code: String,
+    pub seo_heading: String,
+    pub seo_topics_label: String,
+    pub final_code: String,
+    pub final_heading: String,
+    pub final_lead: String,
+    pub qr_placeholder_code: String,
+    pub qr_placeholder_waiting: String,
+    pub media_slot: Option<String>,
     pub qr_widget: HomeQrWidget,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct HomePlatform {
-    pub symbol: &'static str,
-    pub name: &'static str,
-    pub detail: &'static str,
-    pub position: &'static str,
-    pub shell: &'static str,
-    pub state: &'static str,
+    pub symbol: String,
+    pub name: String,
+    pub detail: String,
+    pub position: String,
+    pub shell: String,
+    pub state: String,
     pub planned: bool,
 }
 
 impl HomePlatform {
     #[must_use]
-    pub const fn current(
-        symbol: &'static str,
-        name: &'static str,
-        detail: &'static str,
-        position: &'static str,
-        shell: &'static str,
-        state: &'static str,
+    pub fn current(
+        symbol: &str,
+        name: &str,
+        detail: &str,
+        position: &str,
+        shell: &str,
+        state: &str,
     ) -> Self {
         Self {
-            symbol,
-            name,
-            detail,
-            position,
-            shell,
-            state,
+            symbol: symbol.to_owned(),
+            name: name.to_owned(),
+            detail: detail.to_owned(),
+            position: position.to_owned(),
+            shell: shell.to_owned(),
+            state: state.to_owned(),
             planned: false,
         }
     }
 
     #[must_use]
-    pub const fn planned(
-        symbol: &'static str,
-        name: &'static str,
-        detail: &'static str,
-        position: &'static str,
-        shell: &'static str,
-        state: &'static str,
+    pub fn planned(
+        symbol: &str,
+        name: &str,
+        detail: &str,
+        position: &str,
+        shell: &str,
+        state: &str,
     ) -> Self {
         Self {
-            symbol,
-            name,
-            detail,
-            position,
-            shell,
-            state,
+            symbol: symbol.to_owned(),
+            name: name.to_owned(),
+            detail: detail.to_owned(),
+            position: position.to_owned(),
+            shell: shell.to_owned(),
+            state: state.to_owned(),
             planned: true,
         }
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct HomeSection {
-    pub anchor: &'static str,
-    pub code: &'static str,
-    pub side_label: &'static str,
+    pub anchor: String,
+    pub code: String,
+    pub side_label: String,
     pub layout: HomeLayout,
-    pub title: &'static str,
-    pub lead: &'static str,
+    pub title: String,
+    pub lead: String,
     pub items: Vec<HomeItem>,
 }
 
 impl HomeSection {
     #[must_use]
     pub fn new(
-        anchor: &'static str,
-        code: &'static str,
-        side_label: &'static str,
+        anchor: &str,
+        code: &str,
+        side_label: &str,
         layout: HomeLayout,
-        title: &'static str,
-        lead: &'static str,
+        title: &str,
+        lead: &str,
         items: Vec<HomeItem>,
     ) -> Self {
         Self {
-            anchor,
-            code,
-            side_label,
+            anchor: anchor.to_owned(),
+            code: code.to_owned(),
+            side_label: side_label.to_owned(),
             layout,
-            title,
-            lead,
+            title: title.to_owned(),
+            lead: lead.to_owned(),
             items,
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct HomeItem {
-    pub badge: &'static str,
-    pub title: &'static str,
-    pub body: &'static str,
-    pub meta: &'static str,
+    pub badge: String,
+    pub title: String,
+    pub body: String,
+    pub meta: String,
     pub tone: HomeTone,
 }
 
 impl HomeItem {
     #[must_use]
-    pub const fn new(
-        badge: &'static str,
-        title: &'static str,
-        body: &'static str,
-        meta: &'static str,
-        tone: HomeTone,
-    ) -> Self {
+    pub fn new(badge: &str, title: &str, body: &str, meta: &str, tone: HomeTone) -> Self {
         Self {
-            badge,
-            title,
-            body,
-            meta,
+            badge: badge.to_owned(),
+            title: title.to_owned(),
+            body: body.to_owned(),
+            meta: meta.to_owned(),
             tone,
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum HomeLayout {
     Workflow,
     Capabilities,
@@ -160,7 +171,8 @@ impl fmt::Display for HomeLayout {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum HomeTone {
     Default,
     Dark,
@@ -180,15 +192,19 @@ impl fmt::Display for HomeTone {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct HomeFaqItem {
-    pub question: &'static str,
-    pub answer: &'static str,
+    pub question: String,
+    pub answer: String,
 }
 
 impl HomeFaqItem {
     #[must_use]
-    pub const fn new(question: &'static str, answer: &'static str) -> Self {
-        Self { question, answer }
+    pub fn new(question: &str, answer: &str) -> Self {
+        Self {
+            question: question.to_owned(),
+            answer: answer.to_owned(),
+        }
     }
 }

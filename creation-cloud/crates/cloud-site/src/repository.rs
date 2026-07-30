@@ -2,20 +2,20 @@
 
 const PUBLIC_REPOSITORY_URL: &str = "https://github.com/suiyuebaobao/C-SSH";
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RepositoryLink {
-    pub label: &'static str,
-    pub href: &'static str,
-    pub aria_label: &'static str,
+    pub label: String,
+    pub href: String,
+    pub aria_label: String,
 }
 
 impl RepositoryLink {
     #[must_use]
-    pub(crate) const fn github(aria_label: &'static str) -> Self {
+    pub(crate) fn github(aria_label: &str) -> Self {
         Self {
-            label: "GitHub",
-            href: PUBLIC_REPOSITORY_URL,
-            aria_label,
+            label: "GitHub".to_owned(),
+            href: PUBLIC_REPOSITORY_URL.to_owned(),
+            aria_label: aria_label.to_owned(),
         }
     }
 }

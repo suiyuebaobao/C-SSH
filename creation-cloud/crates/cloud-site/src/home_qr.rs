@@ -1,15 +1,19 @@
 //! 定义首页悬浮二维码的展示内容与未来受控同源图片地址契约。
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct HomeQrWidget {
-    pub code: &'static str,
-    pub title: &'static str,
-    pub pending_label: &'static str,
-    pub ready_label: &'static str,
-    pub note: &'static str,
-    pub image_alt: &'static str,
-    pub open_label: &'static str,
-    pub close_label: &'static str,
+    pub code: String,
+    pub title: String,
+    pub pending_label: String,
+    pub ready_label: String,
+    pub note: String,
+    pub image_alt: String,
+    pub open_label: String,
+    pub close_label: String,
+    #[serde(skip)]
     image_src: Option<String>,
 }
 
@@ -27,16 +31,16 @@ pub struct HomeQrLabels {
 
 impl HomeQrWidget {
     #[must_use]
-    pub const fn pending(labels: HomeQrLabels) -> Self {
+    pub fn pending(labels: HomeQrLabels) -> Self {
         Self {
-            code: labels.code,
-            title: labels.title,
-            pending_label: labels.pending,
-            ready_label: labels.ready,
-            note: labels.note,
-            image_alt: labels.image_alt,
-            open_label: labels.open,
-            close_label: labels.close,
+            code: labels.code.to_owned(),
+            title: labels.title.to_owned(),
+            pending_label: labels.pending.to_owned(),
+            ready_label: labels.ready.to_owned(),
+            note: labels.note.to_owned(),
+            image_alt: labels.image_alt.to_owned(),
+            open_label: labels.open.to_owned(),
+            close_label: labels.close.to_owned(),
             image_src: None,
         }
     }

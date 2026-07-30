@@ -221,6 +221,79 @@ function adminMaintenanceTone(status) {
   return "healthy";
 }
 
+function adminSyncDownloadMethod(form) {
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+  const selected = form.querySelector('input[name="source_mode"]:checked');
+  const localPanel = form.querySelector("[data-download-local]");
+  const externalPanel = form.querySelector("[data-download-external]");
+  const localInput = form.querySelector("[data-download-local-input]");
+  const externalInputs = form.querySelectorAll("[data-download-external-input]");
+  const external = selected instanceof HTMLInputElement && selected.value === "external";
+
+  if (localPanel instanceof HTMLElement) {
+    localPanel.hidden = external;
+  }
+  if (externalPanel instanceof HTMLElement) {
+    externalPanel.hidden = !external;
+  }
+  if (localInput instanceof HTMLInputElement) {
+    localInput.disabled = external;
+    localInput.required = !external;
+  }
+  for (const externalInput of externalInputs) {
+    if (!(externalInput instanceof HTMLInputElement)) {
+      continue;
+    }
+    externalInput.disabled = !external;
+    externalInput.required = external && externalInput.matches("[data-download-external-url]");
+  }
+}
+
+function adminSyncDownloadPackages(form) {
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+  const platform = form.querySelector("[data-download-platform]");
+  const packages = form.querySelector("[data-download-package]");
+  if (!(platform instanceof HTMLSelectElement) || !(packages instanceof HTMLSelectElement)) {
+    return;
+  }
+
+  for (const option of packages.options) {
+    const matches = option.dataset.platform === platform.value;
+    option.disabled = !matches;
+    option.hidden = !matches;
+  }
+  if (packages.selectedOptions[0]?.disabled) {
+    const firstAvailable = Array.from(packages.options).find((option) => !option.disabled);
+    if (firstAvailable) {
+      packages.value = firstAvailable.value;
+    }
+  }
+}
+
+function adminSetupDownloadForms(root = document) {
+  for (const form of root.querySelectorAll("[data-download-create]")) {
+    if (!(form instanceof HTMLFormElement) || form.dataset.downloadReady === "true") {
+      continue;
+    }
+    form.dataset.downloadReady = "true";
+    form.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target instanceof HTMLInputElement && target.name === "source_mode") {
+        adminSyncDownloadMethod(form);
+      }
+      if (target instanceof HTMLSelectElement && target.matches("[data-download-platform]")) {
+        adminSyncDownloadPackages(form);
+      }
+    });
+    adminSyncDownloadMethod(form);
+    adminSyncDownloadPackages(form);
+  }
+}
+
 function adminMaintenanceItem(status) {
   const english = adminIsEnglish();
   const item = document.createElement("article");
@@ -290,6 +363,7 @@ async function adminLoadMaintenance(panel) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  adminSetupDownloadForms();
   const panel = document.querySelector("[data-maintenance-panel]");
   adminLoadMaintenance(panel);
   panel?.querySelector("[data-maintenance-refresh]")?.addEventListener("click", () => {

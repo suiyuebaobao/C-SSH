@@ -5,9 +5,8 @@ pub struct ConsolePageState {
     auth: cloud_auth::Service,
     user: cloud_user::Service,
     device: cloud_device::Service,
-    sync: cloud_sync::Service,
+    host: cloud_host::Service,
     model: cloud_model::Service,
-    vault: cloud_vault::Service,
     download: cloud_download::Service,
 }
 
@@ -17,18 +16,16 @@ impl ConsolePageState {
         auth: cloud_auth::Service,
         user: cloud_user::Service,
         device: cloud_device::Service,
-        sync: cloud_sync::Service,
+        host: cloud_host::Service,
         model: cloud_model::Service,
-        vault: cloud_vault::Service,
         download: cloud_download::Service,
     ) -> Self {
         Self {
             auth,
             user,
             device,
-            sync,
+            host,
             model,
-            vault,
             download,
         }
     }
@@ -45,16 +42,12 @@ impl ConsolePageState {
         &self.device
     }
 
-    pub(crate) const fn sync(&self) -> &cloud_sync::Service {
-        &self.sync
+    pub(crate) const fn host(&self) -> &cloud_host::Service {
+        &self.host
     }
 
     pub(crate) const fn model(&self) -> &cloud_model::Service {
         &self.model
-    }
-
-    pub(crate) const fn vault(&self) -> &cloud_vault::Service {
-        &self.vault
     }
 
     pub(crate) const fn download(&self) -> &cloud_download::Service {

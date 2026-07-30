@@ -13,6 +13,7 @@ pub struct PublicPageState {
     seo: SeoConfig,
     download: cloud_download::Service,
     topics: cloud_seo::Service,
+    content: cloud_site_content::Service,
 }
 
 impl PublicPageState {
@@ -21,11 +22,13 @@ impl PublicPageState {
         seo: SeoConfig,
         download: cloud_download::Service,
         topics: cloud_seo::Service,
+        content: cloud_site_content::Service,
     ) -> Self {
         Self {
             seo,
             download,
             topics,
+            content,
         }
     }
 
@@ -49,6 +52,14 @@ impl PublicPageState {
             .into_iter()
             .map(|topic| topic.phrase)
             .collect())
+    }
+
+    pub(crate) async fn public_content(
+        &self,
+        key: cloud_site_content::SiteContentDocumentKey,
+        locale: Locale,
+    ) -> AppResult<cloud_site_content::PublicSiteContent> {
+        self.content.public_content(key, locale).await
     }
 }
 

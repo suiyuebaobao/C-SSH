@@ -28,7 +28,7 @@ pub(crate) async fn register_en() -> AppResult<Html<String>> {
     render::account(PageId::Register, Locale::En, None)
 }
 
-fn safe_next(value: Option<String>) -> Option<String> {
+pub(crate) fn safe_next(value: Option<String>) -> Option<String> {
     let value = value?.trim().to_owned();
     let allowed_root = value == "/admin"
         || value.starts_with("/admin/")

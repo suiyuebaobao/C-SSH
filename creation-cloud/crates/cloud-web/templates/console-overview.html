@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
-{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
-{% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260729-overview">{% endblock %}
 
 {% block main %}
 <main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
@@ -11,20 +10,17 @@
       {% include "console-heading.html" %}
       <section class="console-metrics" aria-label="{% if is_en %}Account summary{% else %}账号摘要{% endif %}">
         <article><strong>{{ device_total }}</strong><span>{% if is_en %}Devices{% else %}设备{% endif %}</span></article>
-        <article><strong>{{ sync.current_revision }}</strong><span>Revision</span></article>
+        <article><strong>{{ host_total }}</strong><span>{% if is_en %}Cloud hosts{% else %}云端主机{% endif %}</span></article>
         <article><strong>{{ model_total }}</strong><span>{% if is_en %}Models{% else %}模型{% endif %}</span></article>
-        <article><strong>{{ vault_total }}</strong><span>{% if is_en %}Vault envelopes{% else %}密文信封{% endif %}</span></article>
+        <article><strong>{{ conflict_total }}</strong><span>{% if is_en %}Open conflicts{% else %}待处理冲突{% endif %}</span></article>
       </section>
       <section class="console-section">
-        <div class="console-section-heading">
-          <h2>{% if is_en %}Current account{% else %}当前账号{% endif %}</h2>
-          <span class="console-status">{{ profile.locale }}</span>
-        </div>
+        <div class="console-section-heading"><h2>{% if is_en %}Current account{% else %}当前账号{% endif %}</h2><span class="console-status">{{ profile.locale }}</span></div>
         <dl class="console-definition-grid">
           <div><dt>{% if is_en %}Display name{% else %}显示名称{% endif %}</dt><dd>{{ profile.display_name }}</dd></div>
           <div><dt>{% if is_en %}Published releases{% else %}已发布版本{% endif %}</dt><dd>{{ release_total }}</dd></div>
-          <div><dt>{% if is_en %}Active sync records{% else %}有效同步记录{% endif %}</dt><dd>{{ sync.active_record_count }}</dd></div>
-          <div><dt>{% if is_en %}Open conflicts{% else %}未解决冲突{% endif %}</dt><dd>{{ sync.unresolved_conflict_count }}</dd></div>
+          <div><dt>{% if is_en %}Sync mode{% else %}同步方式{% endif %}</dt><dd>{% if is_en %}Manual upload / download{% else %}手动上传 / 下载{% endif %}</dd></div>
+          <div><dt>{% if is_en %}Conflict choices{% else %}冲突选择{% endif %}</dt><dd>{% if is_en %}Replace or keep{% else %}替换或保留{% endif %}</dd></div>
         </dl>
       </section>
     </div>

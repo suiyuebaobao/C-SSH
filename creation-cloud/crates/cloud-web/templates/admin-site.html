@@ -1,33 +1,265 @@
 {% extends "admin.html" %}
 
 {% block admin_content %}
-<section class="admin-section" aria-labelledby="current-media-heading">
-  <div class="admin-section-heading"><div><h2 id="current-media-heading">{% if is_en %}Current home QR{% else %}当前首页二维码{% endif %}</h2><p>{% if is_en %}The public page reads this same-origin published projection.{% else %}公开首页读取同一个同源发布投影。{% endif %}</p></div></div>
-  {% if let Some(media) = current %}
-  <div class="admin-split"><div class="admin-media-preview"><img src="{{ media.content_url }}" alt="{% if is_en %}{{ media.alt_en }}{% else %}{{ media.alt_zh }}{% endif %}"><p><strong>{% if is_en %}Published{% else %}已发布{% endif %}</strong><br><span class="admin-mono">{{ media.id }}</span><br>{{ media.dimensions }} · {{ media.published_at }}</p></div><div><p><strong>SHA256</strong><br><span class="admin-mono">{{ media.sha256 }}</span></p><p><strong>中文 alt</strong><br>{{ media.alt_zh }}</p><p><strong>English alt</strong><br>{{ media.alt_en }}</p></div></div>
-  {% else if load_error.is_none() %}
-  <div class="admin-empty"><strong>{% if is_en %}No QR is published{% else %}尚未发布二维码{% endif %}</strong><p>{% if is_en %}The public home page keeps its honest empty state until a draft is published.{% else %}发布草稿前，公开首页会保持真实空态。{% endif %}</p></div>
+<section class="admin-section" aria-labelledby="auth-settings-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="auth-settings-heading">{% if is_en %}Email verification{% else %}邮箱验证码{% endif %}</h2>
+      <p>{% if is_en %}This switch applies only to ordinary-user registration and sign-in. Administrators always use username, password and a one-time visual CAPTCHA.{% else %}此开关只控制普通用户注册和登录；管理员始终使用账号、密码和一次性图形验证码。{% endif %}</p>
+    </div>
+  </div>
+
+  {% if let Some(message) = auth_settings_error %}
+  <div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>
+  {% endif %}
+
+  {% if let Some(settings) = auth_settings %}
+  <form class="admin-form-grid" action="/admin/site/auth-settings" method="post" hx-post="/admin/site/auth-settings" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+    <input type="hidden" name="expected_revision" value="{{ settings.revision }}">
+    <label class="admin-field">
+      <span>{% if is_en %}Require email codes{% else %}启用邮箱验证码{% endif %}</span>
+      <span>
+        <input type="checkbox" name="email_verification_enabled" value="true"{% if settings.email_verification_enabled %} checked{% endif %}>
+        {% if is_en %}Require a code to activate registration and complete each new sign-in.{% else %}注册激活和每次新登录都需要输入邮箱验证码。{% endif %}
+      </span>
+    </label>
+    <div class="admin-actions">
+      <button class="button button-primary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+      <small>{% if is_en %}Last updated{% else %}最后更新{% endif %}: {{ settings.updated_at }}</small>
+    </div>
+  </form>
   {% endif %}
 </section>
 
-<section class="admin-section" aria-labelledby="upload-media-heading">
-  <div class="admin-section-heading"><div><h2 id="upload-media-heading">{% if is_en %}Upload QR draft{% else %}上传二维码草稿{% endif %}</h2><p>{% if is_en %}PNG or JPEG, square, at most 2 MiB; the service re-encodes it to controlled PNG.{% else %}支持 PNG/JPEG、正方形、最大 2 MiB；服务会重编码为受控 PNG。{% endif %}</p></div></div>
-  <form class="admin-form-grid" enctype="multipart/form-data" hx-post="/admin/site{% if is_en %}?lang=en{% endif %}" hx-encoding="multipart/form-data" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-    <label class="admin-field">{% if is_en %}QR image{% else %}二维码图片{% endif %}<input type="file" name="file" accept="image/png,image/jpeg" required></label>
-    <label class="admin-field">中文替代文本<input name="alt_zh" required maxlength="300"></label><label class="admin-field">English alternative text<input name="alt_en" required maxlength="300"></label>
-    <button class="button button-primary" type="submit">{% if is_en %}Create draft{% else %}创建草稿{% endif %}</button>
-  </form>
+<section class="admin-section" aria-labelledby="site-content-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="site-content-heading">{% if is_en %}Home-page content{% else %}首页内容{% endif %}</h2>
+      <p>{% if is_en %}Add an item, then expand it to edit, save and publish.{% else %}新增内容后，逐条展开编辑、保存和发布。{% endif %}</p>
+    </div>
+  </div>
+
+  {% if let Some(message) = content_error %}
+  <div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>
+  {% endif %}
+
+  <details class="admin-simple-editor site-simple-create">
+    <summary>{% if is_en %}Add content{% else %}新增内容{% endif %}</summary>
+    <div class="site-simple-create-grid">
+      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        <input type="hidden" name="document_key" value="home">
+        <input type="hidden" name="content_locale" value="zh-CN">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <button class="button button-secondary" type="submit">{% if is_en %}Chinese home page{% else %}中文首页{% endif %}</button>
+      </form>
+      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        <input type="hidden" name="document_key" value="home">
+        <input type="hidden" name="content_locale" value="en">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <button class="button button-secondary" type="submit">{% if is_en %}English home page{% else %}英文首页{% endif %}</button>
+      </form>
+      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        <input type="hidden" name="document_key" value="site_shell">
+        <input type="hidden" name="content_locale" value="zh-CN">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <button class="button button-secondary" type="submit">{% if is_en %}Chinese header and footer{% else %}中文页头与页脚{% endif %}</button>
+      </form>
+      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        <input type="hidden" name="document_key" value="site_shell">
+        <input type="hidden" name="content_locale" value="en">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <button class="button button-secondary" type="submit">{% if is_en %}English header and footer{% else %}英文页头与页脚{% endif %}</button>
+      </form>
+    </div>
+  </details>
+
+  {% if content_editors.is_empty() && content_error.is_none() %}
+  <div class="admin-empty site-simple-empty">
+    <strong>{% if is_en %}No editable items{% else %}暂无可编辑内容{% endif %}</strong>
+    <p>{% if is_en %}Use “Add content” to create the first draft.{% else %}点击“新增内容”创建第一条草稿。{% endif %}</p>
+  </div>
+  {% endif %}
+
+  <div class="admin-simple-list site-simple-list">
+    {% for editor in content_editors %}
+    <article class="admin-simple-record">
+      <details data-site-content-editor>
+        <summary>
+          <span class="site-simple-record-heading">
+            <span>
+              <strong>{% if is_en %}{{ editor.document_label_en }}{% else %}{{ editor.document_label_zh }}{% endif %} · {% if is_en %}{{ editor.locale_label_en }}{% else %}{{ editor.locale_label_zh }}{% endif %}</strong>
+              <small>{% if is_en %}Draft · revision{% else %}草稿 · 修订{% endif %} {{ editor.revision }}</small>
+            </span>
+            <span class="site-content-dirty" data-site-content-dirty hidden>{% if is_en %}Unsaved{% else %}未保存{% endif %}</span>
+          </span>
+        </summary>
+
+        <form class="site-simple-content-form" data-site-content-form hx-post="/admin/site/content/{{ editor.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+          <input type="hidden" name="expected_revision" value="{{ editor.revision }}">
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <div class="site-simple-groups">
+            {% for section in editor.sections %}
+            <fieldset class="site-simple-group">
+              <legend>{% if is_en %}{{ section.title_en }}{% else %}{{ section.title_zh }}{% endif %}</legend>
+              <div class="site-simple-fields">
+                {% for field in section.fields %}
+                <label class="admin-field site-simple-field" data-kind="{{ field.kind }}">
+                  <span>{% if is_en %}{{ field.label_en }}{% else %}{{ field.label_zh }}{% endif %}</span>
+                  {% if field.kind == "textarea" %}
+                  <textarea name="field:{{ field.path }}" rows="4" required>{{ field.value }}</textarea>
+                  {% else if field.kind == "boolean" %}
+                  <select name="field:{{ field.path }}" required>
+                    <option value="false"{% if field.value == "false" %} selected{% endif %}>{% if is_en %}No{% else %}否{% endif %}</option>
+                    <option value="true"{% if field.value == "true" %} selected{% endif %}>{% if is_en %}Yes{% else %}是{% endif %}</option>
+                  </select>
+                  {% else if field.kind == "media" %}
+                  <select name="field:{{ field.path }}">
+                    <option value=""{% if field.value.is_empty() %} selected{% endif %}>{% if is_en %}No QR code{% else %}不显示二维码{% endif %}</option>
+                    <option value="home_qr"{% if field.value == "home_qr" %} selected{% endif %}>{% if is_en %}Published home QR{% else %}已发布首页二维码{% endif %}</option>
+                  </select>
+                  {% else %}
+                  <input name="field:{{ field.path }}" value="{{ field.value }}" required{% if field.kind == "link" %} inputmode="url" spellcheck="false"{% endif %}>
+                  {% endif %}
+                </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+            {% endfor %}
+          </div>
+          <div class="admin-actions site-simple-actions">
+            <button class="button button-primary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+            <a class="button button-secondary" href="/admin/site/content/{{ editor.id }}/preview" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" data-site-content-preview>{% if is_en %}Preview{% else %}预览{% endif %}</a>
+          </div>
+        </form>
+        <div class="admin-actions site-simple-actions site-simple-transitions">
+          <form hx-post="/admin/site/content/{{ editor.id }}/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish the saved version?{% else %}确认发布已保存版本？{% endif %}">
+            <input type="hidden" name="expected_revision" value="{{ editor.revision }}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button>
+          </form>
+          <form hx-post="/admin/site/content/{{ editor.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft?{% else %}确认删除这条草稿？{% endif %}">
+            <input type="hidden" name="expected_revision" value="{{ editor.revision }}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
+          </form>
+        </div>
+      </details>
+    </article>
+    {% endfor %}
+  </div>
+
+  {% if !content_history.is_empty() %}
+  <details class="admin-simple-editor site-simple-history">
+    <summary>{% if is_en %}Previous versions{% else %}历史版本{% endif %} ({{ content_history.len() }})</summary>
+    <div class="site-history-list">
+      {% for item in content_history %}
+      <article class="site-history-row">
+        <div>
+          <strong>{% if is_en %}{{ item.document_label_en }}{% else %}{{ item.document_label_zh }}{% endif %} · {% if is_en %}{{ item.locale_label_en }}{% else %}{{ item.locale_label_zh }}{% endif %}</strong>
+          <small>{{ item.state }} · {% if is_en %}revision{% else %}修订{% endif %} {{ item.revision }} · {{ item.updated_at }}</small>
+        </div>
+        <div class="admin-actions">
+          <a class="button button-secondary" href="/admin/site/content/{{ item.id }}/preview" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{% if is_en %}Preview{% else %}预览{% endif %}</a>
+          {% if item.is_published %}
+          <form hx-post="/admin/site/content/{{ item.id }}/revoke" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke this published version?{% else %}确认撤销此已发布版本？{% endif %}">
+            <input type="hidden" name="expected_revision" value="{{ item.revision }}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button>
+          </form>
+          {% else %}
+          <form hx-post="/admin/site/content/{{ item.id }}/rollback" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish a new version copied from this one?{% else %}确认基于此版本重新发布？{% endif %}">
+            <input type="hidden" name="expected_revision" value="{{ item.revision }}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-secondary" type="submit">{% if is_en %}Restore{% else %}恢复此版本{% endif %}</button>
+          </form>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
 </section>
 
-<section class="admin-section" aria-labelledby="media-history-heading">
-  <div class="admin-section-heading"><div><h2 id="media-history-heading">{% if is_en %}Controlled history{% else %}受控历史{% endif %}</h2><p>{% if is_en %}Published and revoked records retain their immutable file identity.{% else %}已发布和已撤销记录保留不可变文件身份。{% endif %}</p></div></div>
-  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
-  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No media history{% else %}暂无媒体历史{% endif %}</strong><p>{% if is_en %}Upload a controlled draft above.{% else %}可在上方上传受控草稿。{% endif %}</p></div>{% endif %}
-  {% if !rows.is_empty() %}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>{% if is_en %}Identity{% else %}身份{% endif %}</th><th>{% if is_en %}Alternative text{% else %}替代文本{% endif %}</th><th>{% if is_en %}File identity{% else %}文件身份{% endif %}</th><th>{% if is_en %}Actions{% else %}操作{% endif %}</th></tr></thead><tbody>
-    {% for row in rows %}<tr><td><span class="status-badge" data-tone="{% if row.state == "published" %}success{% else if row.state == "revoked" %}danger{% else %}warning{% endif %}">{{ row.state }}</span><br><span class="admin-mono">{{ row.id }}</span><br><span class="admin-mono">{{ row.created_at }}</span></td><td><form class="admin-form-grid" hx-post="/admin/site/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML"><label class="admin-field">中文 alt<input name="alt_zh" value="{{ row.alt_zh }}" required></label><label class="admin-field">English alt<input name="alt_en" value="{{ row.alt_en }}" required></label>{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Update alt text{% else %}更新替代文本{% endif %}</button></form></td><td>{{ row.content_type }} · {{ row.dimensions }} · {{ row.byte_size }} B<br><span class="admin-mono">{{ row.sha256 }}</span></td><td><div class="admin-actions">
-      {% if row.state == "draft" %}<form hx-post="/admin/site/{{ row.id }}/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this QR as the current home-page image?{% else %}确认将此二维码发布为当前首页图片？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button></form><form hx-post="/admin/site/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft and its controlled file?{% else %}确认删除此草稿及其受控文件？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Delete draft{% else %}删除草稿{% endif %}</button></form>{% endif %}
-      {% if row.state == "published" %}<form hx-post="/admin/site/{{ row.id }}/revoke" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke the currently published QR? The public page will return to an empty state unless another version is live.{% else %}确认撤销当前二维码？若无其他已发布版本，公开首页将回到空态。{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button></form>{% endif %}
-    </div></td></tr>{% endfor %}
-  </tbody></table></div>{% endif %}
+<section class="admin-section" aria-labelledby="site-media-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="site-media-heading">{% if is_en %}Home-page QR code{% else %}首页二维码{% endif %}</h2>
+      <p>{% if is_en %}Upload a QR code, then edit or publish it from the list.{% else %}上传二维码后，可在列表中逐条编辑或发布。{% endif %}</p>
+    </div>
+  </div>
+
+  {% if let Some(message) = load_error %}
+  <div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>
+  {% endif %}
+
+  {% if let Some(media) = current %}
+  <div class="site-current-media">
+    <img src="{{ media.content_url }}" alt="{% if is_en %}{{ media.alt_en }}{% else %}{{ media.alt_zh }}{% endif %}">
+    <div>
+      <strong>{% if is_en %}Currently published{% else %}当前已发布{% endif %}</strong>
+      <p>{% if is_en %}{{ media.alt_en }}{% else %}{{ media.alt_zh }}{% endif %}</p>
+      <small>{{ media.dimensions }} · {{ media.published_at }}</small>
+    </div>
+  </div>
+  {% endif %}
+
+  <details class="admin-simple-editor site-simple-create">
+    <summary>{% if is_en %}Add QR code{% else %}新增二维码{% endif %}</summary>
+    <form class="admin-form-grid site-media-create-form" enctype="multipart/form-data" hx-post="/admin/site{% if is_en %}?lang=en{% endif %}" hx-encoding="multipart/form-data" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+      <label class="admin-field">{% if is_en %}Image (PNG or JPEG, square, up to 2 MiB){% else %}图片（PNG/JPEG、正方形、最大 2 MiB）{% endif %}<input type="file" name="file" accept="image/png,image/jpeg" required></label>
+      <label class="admin-field">{% if is_en %}Chinese alternative text{% else %}中文替代文本{% endif %}<input name="alt_zh" required maxlength="300"></label>
+      <label class="admin-field">{% if is_en %}English alternative text{% else %}英文替代文本{% endif %}<input name="alt_en" required maxlength="300"></label>
+      <button class="button button-primary" type="submit">{% if is_en %}Add{% else %}新增{% endif %}</button>
+    </form>
+  </details>
+
+  {% if rows.is_empty() && load_error.is_none() %}
+  <div class="admin-empty site-simple-empty"><strong>{% if is_en %}No QR codes{% else %}暂无二维码{% endif %}</strong></div>
+  {% endif %}
+
+  <div class="admin-simple-list site-simple-list">
+    {% for row in rows %}
+    <article class="admin-simple-record">
+      <details>
+        <summary>
+          <span class="site-simple-record-heading">
+            <span>
+              <strong>{% if is_en %}{{ row.alt_en }}{% else %}{{ row.alt_zh }}{% endif %}</strong>
+              <small>{{ row.state }} · {{ row.created_at }}</small>
+            </span>
+          </span>
+        </summary>
+        <form class="admin-form-grid site-media-edit-form" hx-post="/admin/site/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+          <label class="admin-field">{% if is_en %}Chinese alternative text{% else %}中文替代文本{% endif %}<input name="alt_zh" value="{{ row.alt_zh }}" required></label>
+          <label class="admin-field">{% if is_en %}English alternative text{% else %}英文替代文本{% endif %}<input name="alt_en" value="{{ row.alt_en }}" required></label>
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <button class="button button-secondary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+        </form>
+        <p class="site-file-meta">{{ row.content_type }} · {{ row.dimensions }} · {{ row.byte_size }} B · <span class="admin-mono">{{ row.sha256 }}</span></p>
+        <div class="admin-actions site-simple-actions">
+          {% if row.state == "draft" %}
+          <form hx-post="/admin/site/{{ row.id }}/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this QR code?{% else %}确认发布此二维码？{% endif %}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button>
+          </form>
+          <form hx-post="/admin/site/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft?{% else %}确认删除这条草稿？{% endif %}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
+          </form>
+          {% endif %}
+          {% if row.state == "published" %}
+          <form hx-post="/admin/site/{{ row.id }}/revoke" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke this QR code?{% else %}确认撤销此二维码？{% endif %}">
+            {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+            <button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button>
+          </form>
+          {% endif %}
+        </div>
+      </details>
+    </article>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

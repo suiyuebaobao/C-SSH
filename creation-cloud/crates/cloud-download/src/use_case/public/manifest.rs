@@ -10,6 +10,10 @@ use crate::{
 
 impl Service {
     pub async fn public_manifest(&self) -> AppResult<Vec<PublicRelease>> {
+        #[cfg(test)]
+        if let Some(releases) = &self.public_manifest_override {
+            return Ok(releases.as_ref().clone());
+        }
         assemble(repository::public::catalog::execute(&self.pool).await?)
     }
 }

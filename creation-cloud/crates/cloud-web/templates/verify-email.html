@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="account-main">
+  <div class="container account-layout">
+    <section class="account-panel" aria-labelledby="verify-email-title">
+      <header class="account-heading">
+        <p class="eyebrow">Creation Cloud</p>
+        <h1 id="verify-email-title">{% if is_en %}Verify your email{% else %}验证你的邮箱{% endif %}</h1>
+        <p>{% if is_en %}Enter the six-digit code sent to your inbox. The code expires after 10 minutes.{% else %}输入邮件中的六位验证码，验证码将在 10 分钟后过期。{% endif %}</p>
+      </header>
+
+      {% if resent %}
+      <p class="form-feedback" data-tone="success">{% if is_en %}A new verification code has been sent.{% else %}新的验证码已发送。{% endif %}</p>
+      {% endif %}
+
+      <form class="account-form" action="/web/auth/verify-email" method="post" hx-post="/web/auth/verify-email" hx-target="#verify-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
+        <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+        <label class="field-label" for="verification-email">
+          <span>{% if is_en %}Email{% else %}邮箱{% endif %}</span>
+          <input id="verification-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+        </label>
+        <label class="field-label" for="verification-code">
+          <span>{% if is_en %}Verification code{% else %}验证码{% endif %}</span>
+          <input id="verification-code" name="code" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required>
+        </label>
+        <button class="button button-primary button-full" type="submit">{% if is_en %}Verify and continue{% else %}验证并继续{% endif %}</button>
+        <div class="form-feedback" id="verify-feedback" aria-live="polite"></div>
+      </form>
+
+      <form class="account-form" action="/web/auth/resend-verification" method="post" hx-post="/web/auth/resend-verification" hx-target="#resend-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
+        <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+        <label class="field-label" for="resend-email">
+          <span>{% if is_en %}Did not receive it? Enter your email again{% else %}没有收到？再次输入邮箱{% endif %}</span>
+          <input id="resend-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+        </label>
+        <button class="button button-secondary button-full" type="submit">{% if is_en %}Send a new code{% else %}重新发送验证码{% endif %}</button>
+        <div class="form-feedback" id="resend-feedback" aria-live="polite"></div>
+      </form>
+
+      <div class="account-alternative">
+        <a class="text-link" href="{% if is_en %}/en/login{% else %}/login{% endif %}">{% if is_en %}Return to sign in{% else %}返回登录{% endif %}</a>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

@@ -80,7 +80,7 @@ pub(super) fn content() -> TutorialContent {
                     step(
                         "步骤 3",
                         "观察部署进度",
-                        "等待匹配的 agent 与 tmux 完成上传、长度与 SHA256 校验、原子安装和服务就绪。",
+                        "等待匹配的 agent 与 tmux 完成上传、长度与完整性校验、原子安装和服务就绪。",
                     ),
                     step(
                         "步骤 4",

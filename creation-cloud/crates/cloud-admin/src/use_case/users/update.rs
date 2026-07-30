@@ -33,6 +33,7 @@ impl Service {
             locked.id,
             current_role,
             current_status,
+            locked.email_verified,
             input,
             active_admins.len(),
         )?;
@@ -65,6 +66,11 @@ pub(crate) fn validate_input(input: AdminUpdateUserInput) -> AppResult<()> {
             "角色或账号状态至少需要提供一项".to_owned(),
         ));
     }
+    if input.status == Some(AdminUserStatus::PendingVerification) {
+        return Err(AppError::Validation(
+            "待验证状态只能由邮箱验证流程管理".to_owned(),
+        ));
+    }
     Ok(())
 }
 
@@ -73,11 +79,23 @@ pub(crate) fn enforce_policy(
     target_id: Uuid,
     current_role: AdminUserRole,
     current_status: AdminUserStatus,
+    email_verified: bool,
     input: AdminUpdateUserInput,
     active_admin_count: usize,
 ) -> AppResult<()> {
     let next_role = input.role.unwrap_or(current_role);
     let next_status = input.status.unwrap_or(current_status);
+    if next_role == AdminUserRole::User && next_status == AdminUserStatus::Active && !email_verified
+    {
+        return Err(AppError::Conflict(
+            "普通用户完成邮箱验证前不能启用".to_owned(),
+        ));
+    }
+    if current_status == AdminUserStatus::PendingVerification && next_role != current_role {
+        return Err(AppError::Conflict(
+            "待验证账号完成邮箱验证前不能变更角色".to_owned(),
+        ));
+    }
     if target_id == actor.account_id()
         && (next_role == AdminUserRole::User || next_status == AdminUserStatus::Disabled)
     {

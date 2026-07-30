@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="home-main">
+  <section class="workspace-section">
+    <div class="container">
+      <header class="section-heading">
+        <p class="eyebrow">SITE CONTENT / UNAVAILABLE</p>
+        <h1>{% if is_en %}The home-page content is temporarily unavailable{% else %}首页内容暂时不可用{% endif %}</h1>
+        <p>{% if is_en %}No draft or historical revision is exposed. Please try again later.{% else %}草稿与历史版本不会公开，请稍后重试。{% endif %}</p>
+      </header>
+    </div>
+  </section>
+</main>
+{% endblock %}

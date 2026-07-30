@@ -101,6 +101,10 @@ where
         .route("/en/login", get(pages::account::login_en))
         .route("/register", get(pages::account::register))
         .route("/en/register", get(pages::account::register_en))
+        .route("/verify-email", get(pages::verify_email::page))
+        .route("/en/verify-email", get(pages::verify_email::page_en))
+        .route("/verify-login", get(pages::verify_login::page))
+        .route("/en/verify-login", get(pages::verify_login::page_en))
 }
 
 #[must_use = "路由必须挂载到服务端才会生效"]
@@ -109,9 +113,8 @@ pub fn console_router() -> Router {
         .route("/", get(pages::console_preview::overview))
         .route("/profile", get(pages::console_preview::profile))
         .route("/devices", get(pages::console_preview::devices))
-        .route("/sync", get(pages::console_preview::sync))
+        .route("/hosts", get(pages::console_preview::sync))
         .route("/models", get(pages::console_preview::models))
-        .route("/vault", get(pages::console_preview::vault))
         .route("/downloads", get(pages::console_preview::downloads))
 }
 
@@ -133,17 +136,12 @@ pub fn console_router_with_state(state: ConsolePageState) -> Router {
             "/devices/{device_id}/revoke",
             post(pages::console::revoke_device),
         )
-        .route("/sync", get(pages::console::sync))
+        .route("/hosts", get(pages::console::hosts))
         .route(
-            "/models",
-            get(pages::console::models).post(pages::console::create_model),
+            "/devices/{device_id}/host-download-allowlist",
+            post(pages::console::update_host_allowlist),
         )
-        .route("/models/{model_id}", post(pages::console::update_model))
-        .route(
-            "/models/{model_id}/delete",
-            post(pages::console::delete_model),
-        )
-        .route("/vault", get(pages::console::vault))
+        .route("/models", get(pages::console::models))
         .route("/downloads", get(pages::console::downloads))
         .with_state(state)
 }
@@ -156,6 +154,8 @@ pub fn admin_router() -> Router {
         .route("/devices", get(pages::admin::static_devices))
         .route("/releases", get(pages::admin::static_releases))
         .route("/assets", get(pages::admin::static_assets))
+        .route("/models", get(pages::admin::static_models))
+        .route("/announcements", get(pages::admin::static_announcements))
         .route("/site", get(pages::admin::static_site))
         .route("/seo", get(pages::admin::static_seo))
         .route("/audit", get(pages::admin::static_audit))
@@ -167,9 +167,10 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
     Router::new()
         .route("/", get(pages::admin::overview::page))
         .route("/users", get(pages::admin::users::page))
+        .route("/users/{account_id}/hosts", get(pages::admin::hosts::page))
         .route(
             "/users/{account_id}",
-            post(pages::admin::users::update::handle),
+            get(pages::admin::user_detail::page).post(pages::admin::users::update::handle),
         )
         .route("/devices", get(pages::admin::devices::page))
         .route(
@@ -190,7 +191,41 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
         )
         .route(
             "/assets",
-            get(pages::admin::assets::page).post(pages::admin::assets::create::handle),
+            get(pages::admin::assets::page)
+                .post(pages::admin::assets::create::handle)
+                .layer(DefaultBodyLimit::disable()),
+        )
+        .route(
+            "/models",
+            get(pages::admin::models::page).post(pages::admin::models::create::handle),
+        )
+        .route(
+            "/models/{model_id}",
+            post(pages::admin::models::update::handle),
+        )
+        .route(
+            "/models/{model_id}/delete",
+            post(pages::admin::models::delete::handle),
+        )
+        .route(
+            "/announcements",
+            get(pages::admin::announcements::page).post(pages::admin::announcements::create),
+        )
+        .route(
+            "/announcements/{announcement_id}",
+            post(pages::admin::announcements::update),
+        )
+        .route(
+            "/announcements/{announcement_id}/publish",
+            post(pages::admin::announcements::publish),
+        )
+        .route(
+            "/announcements/{announcement_id}/hide",
+            post(pages::admin::announcements::hide),
+        )
+        .route(
+            "/announcements/{announcement_id}/delete",
+            post(pages::admin::announcements::delete),
         )
         .route(
             "/assets/{asset_id}",
@@ -221,6 +256,38 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
             get(pages::admin::site::page)
                 .post(pages::admin::site::create::handle)
                 .layer(DefaultBodyLimit::max(2 * 1024 * 1024 + 64 * 1024)),
+        )
+        .route(
+            "/site/content/draft",
+            post(pages::admin::site::content::create),
+        )
+        .route(
+            "/site/content/{content_id}",
+            post(pages::admin::site::content::update),
+        )
+        .route(
+            "/site/content/{content_id}/preview",
+            get(pages::admin::site::content::preview),
+        )
+        .route(
+            "/site/content/{content_id}/publish",
+            post(pages::admin::site::content::publish),
+        )
+        .route(
+            "/site/content/{content_id}/revoke",
+            post(pages::admin::site::content::revoke),
+        )
+        .route(
+            "/site/content/{content_id}/rollback",
+            post(pages::admin::site::content::rollback),
+        )
+        .route(
+            "/site/content/{content_id}/delete",
+            post(pages::admin::site::content::delete),
+        )
+        .route(
+            "/site/auth-settings",
+            post(pages::admin::site::auth_settings::handle),
         )
         .route("/site/{media_id}", post(pages::admin::site::update::handle))
         .route(

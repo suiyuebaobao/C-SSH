@@ -9,6 +9,7 @@ rust-version.workspace = true
 axum.workspace = true
 chrono.workspace = true
 cloud-domain.workspace = true
+cloud-release.workspace = true
 cloud-store.workspace = true
 mime_guess.workspace = true
 serde.workspace = true
@@ -20,6 +21,7 @@ url.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
+serde_json.workspace = true
 tempfile.workspace = true
 tower = { workspace = true, features = ["util"] }
 

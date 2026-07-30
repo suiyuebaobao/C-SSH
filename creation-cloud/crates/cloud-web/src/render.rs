@@ -7,6 +7,7 @@ use cloud_download::{PublicAsset, PublicRelease};
 use cloud_site::{
     DocumentationContent, HomePageContent, Locale, PageId, SiteView, content_service,
 };
+use cloud_site_content::SiteContentPayload;
 
 use crate::seo::{SeoConfig, SeoHead};
 
@@ -17,6 +18,13 @@ struct HomeTemplate {
     home: HomePageContent,
     seo: SeoHead,
     topics: Vec<String>,
+}
+
+#[derive(Template)]
+#[template(path = "home-unavailable.html")]
+struct HomeUnavailableTemplate {
+    view: SiteView,
+    seo: SeoHead,
     is_en: bool,
 }
 
@@ -68,6 +76,8 @@ struct AccountTemplate {
     view: SiteView,
     seo: SeoHead,
     next_path: Option<String>,
+    admin_login: bool,
+    captcha_refresh_href: String,
 }
 
 #[derive(Template)]
@@ -100,7 +110,6 @@ pub(crate) fn home(page: PageId, locale: Locale, config: &SeoConfig) -> AppResul
         home,
         seo,
         topics: Vec::new(),
-        is_en: locale == Locale::En,
     })
 }
 
@@ -109,8 +118,12 @@ pub(crate) fn home_live(
     locale: Locale,
     config: &SeoConfig,
     topics: Vec<String>,
+    documents: Vec<SiteContentPayload>,
 ) -> AppResult<Html<String>> {
-    let view = content_service().view(page, locale);
+    let mut view = content_service().view(page, locale);
+    for document in documents {
+        document.apply(&mut view);
+    }
     let seo = public_head(config, page, locale, &view).with_keywords(&topics);
     let home = view
         .page
@@ -122,6 +135,44 @@ pub(crate) fn home_live(
         home,
         seo,
         topics,
+    })
+}
+
+pub(crate) fn home_preview(
+    page: PageId,
+    locale: Locale,
+    topics: Vec<String>,
+    documents: Vec<SiteContentPayload>,
+) -> AppResult<Html<String>> {
+    let mut view = content_service().view(page, locale);
+    for document in documents {
+        document.apply(&mut view);
+    }
+    let home = view
+        .page
+        .home_page
+        .clone()
+        .ok_or_else(|| AppError::Internal("首页预览内容暂时无法渲染".to_owned()))?;
+    render(&HomeTemplate {
+        view,
+        home,
+        seo: SeoHead::private(),
+        topics,
+    })
+}
+
+pub(crate) fn home_unavailable(
+    page: PageId,
+    locale: Locale,
+    documents: Vec<SiteContentPayload>,
+) -> AppResult<Html<String>> {
+    let mut view = content_service().view(page, locale);
+    for document in documents {
+        document.apply(&mut view);
+    }
+    render(&HomeUnavailableTemplate {
+        view,
+        seo: SeoHead::private(),
         is_en: locale == Locale::En,
     })
 }
@@ -148,8 +199,8 @@ pub(crate) fn published_catalog(
         config,
         page,
         locale,
-        view.page.meta_title,
-        view.page.meta_description,
+        &view.page.meta_title,
+        &view.page.meta_description,
         catalog.has_published(),
     );
     render(&PublishedCatalogTemplate {
@@ -210,10 +261,30 @@ pub(crate) fn account(
     locale: Locale,
     next_path: Option<String>,
 ) -> AppResult<Html<String>> {
+    let admin_login = page == PageId::Login
+        && next_path
+            .as_deref()
+            .is_some_and(|path| path == "/admin" || path.starts_with("/admin/"));
+    let captcha_refresh_href = if admin_login {
+        let path = if locale == Locale::En {
+            "/en/login"
+        } else {
+            "/login"
+        };
+        let mut query = url::form_urlencoded::Serializer::new(String::new());
+        if let Some(next_path) = next_path.as_deref() {
+            query.append_pair("next", next_path);
+        }
+        format!("{path}?{}", query.finish())
+    } else {
+        String::new()
+    };
     render(&AccountTemplate {
         view: content_service().view(page, locale),
         seo: SeoHead::private(),
         next_path,
+        admin_login,
+        captcha_refresh_href,
     })
 }
 
@@ -384,8 +455,8 @@ fn public_head(config: &SeoConfig, page: PageId, locale: Locale, view: &SiteView
         config,
         page,
         locale,
-        view.page.meta_title,
-        view.page.meta_description,
+        &view.page.meta_title,
+        &view.page.meta_description,
     )
 }
 

@@ -11,6 +11,7 @@ mod request_id;
 mod runtime;
 mod services;
 mod shutdown;
+mod smtp_mailer;
 
 use anyhow::Result;
 use cloud_config::CloudConfig;
@@ -24,8 +25,22 @@ async fn main() -> Result<()> {
     let pool = cloud_store::connect(&config.database_url).await?;
     cloud_store::migrate(&pool).await?;
     match command {
+        command::Command::CreateAdmin(admin_login_name) => {
+            let mut password = rpassword::prompt_password("管理员密码：")?;
+            let confirmation = rpassword::prompt_password("再次输入管理员密码：")?;
+            if password != confirmation {
+                anyhow::bail!("两次输入的管理员密码不一致");
+            }
+            let password_hash = cloud_auth::hash_admin_password(&password).await?;
+            password.clear();
+            cloud_admin::create_local_admin(&pool, &admin_login_name, &password_hash).await?;
+            seed_system_model_catalog(&pool).await?;
+            println!("管理员账号已创建");
+            Ok(())
+        }
         command::Command::PromoteAdmin(email) => {
             cloud_admin::promote_registered_admin(&pool, &email).await?;
+            seed_system_model_catalog(&pool).await?;
             println!("管理员角色已更新");
             Ok(())
         }
@@ -39,19 +54,30 @@ async fn main() -> Result<()> {
             Ok(())
         }
         command::Command::Serve => {
-            let services = services::AppServices::new(pool, &config);
+            seed_system_model_catalog(&pool).await?;
+            let services = services::AppServices::new(pool, &config)?;
             runtime::serve(services, config).await
         }
         command::Command::MaintenanceRun(task) => {
             let maintenance_config = config.maintenance.clone();
-            let services = services::AppServices::new(pool, &config);
+            let services = services::AppServices::new(pool, &config)?;
             maintenance_cli::run(services, maintenance_config, task).await
         }
         command::Command::MaintenanceStatus(task) => {
-            let services = services::AppServices::new(pool, &config);
+            let services = services::AppServices::new(pool, &config)?;
             maintenance_cli::status(services, task).await
         }
     }
+}
+
+async fn seed_system_model_catalog(pool: &cloud_store::PgPool) -> Result<()> {
+    let inserted = cloud_model::Service::new(pool.clone())
+        .seed_system_catalog()
+        .await?;
+    if inserted > 0 {
+        tracing::info!(inserted, "已补齐系统默认模型目录");
+    }
+    Ok(())
 }
 
 fn init_tracing() {

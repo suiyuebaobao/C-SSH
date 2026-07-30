@@ -1,0 +1,79 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="models-heading">
+  <div class="admin-section-heading">
+    <div><h2 id="models-heading">{% if is_en %}Models{% else %}模型管理{% endif %}</h2></div>
+  </div>
+  <p class="admin-model-note">
+    {% if is_en %}Only the model catalog is managed here. Users enter their API keys in the Creation-SSH client.{% else %}这里只管理模型目录；API Key 由用户在 Creation-SSH 客户端输入。{% endif %}
+  </p>
+
+  <details class="admin-model-create">
+    <summary>{% if is_en %}Add model{% else %}新增模型{% endif %}</summary>
+    <form class="admin-form-grid admin-model-form" hx-post="/admin/models" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+      {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+      <label class="admin-field">{% if is_en %}Model name / ID{% else %}模型名称 / ID{% endif %}<input name="model_name" required maxlength="128" placeholder="deepseek-v4-pro"></label>
+      <label class="admin-field">{% if is_en %}Vendor{% else %}厂商{% endif %}<input name="provider" required maxlength="64" placeholder="DeepSeek"></label>
+      <label class="admin-field">{% if is_en %}API format{% else %}接口格式{% endif %}
+        <select name="api_format" required>
+          <option value="openai_compatible">{% if is_en %}OpenAI compatible{% else %}OpenAI 兼容{% endif %}</option>
+          <option value="anthropic_compatible">{% if is_en %}Claude (Anthropic) compatible{% else %}Claude（Anthropic）兼容{% endif %}</option>
+        </select>
+      </label>
+      <label class="admin-field">{% if is_en %}API URL{% else %}API 地址{% endif %}<input name="base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1" required></label>
+      <div class="admin-model-options">
+        <label><input name="enabled" type="checkbox" value="true" checked> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
+      </div>
+      <div class="admin-model-form-actions">
+        <button class="button button-primary" type="submit">{% if is_en %}Create{% else %}创建{% endif %}</button>
+      </div>
+    </form>
+  </details>
+
+  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No models yet{% else %}尚未添加模型{% endif %}</strong></div>{% endif %}
+
+  {% if !rows.is_empty() %}
+  <div class="admin-model-list">
+    {% for row in rows %}
+    <details class="admin-model-row" id="model-{{ row.id }}">
+      <summary>
+        <span class="admin-model-name"><strong>{{ row.model_name }}</strong><small>{{ row.provider }} · {{ row.api_format_label }}</small></span>
+        <span class="admin-model-state">
+          <span class="status-badge" data-tone="{% if row.enabled %}success{% else %}warning{% endif %}">{% if row.enabled %}{% if is_en %}Enabled{% else %}已启用{% endif %}{% else %}{% if is_en %}Disabled{% else %}已停用{% endif %}{% endif %}</span>
+        </span>
+        <span class="admin-model-edit">{% if is_en %}Edit{% else %}编辑{% endif %}</span>
+      </summary>
+      <div class="admin-model-editor">
+        <form class="admin-form-grid admin-model-form" hx-post="/admin/models/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <input type="hidden" name="expected_revision" value="{{ row.revision }}">
+          <label class="admin-field">{% if is_en %}Model name / ID{% else %}模型名称 / ID{% endif %}<input name="model_name" value="{{ row.model_name }}" required maxlength="128"></label>
+          <label class="admin-field">{% if is_en %}Vendor{% else %}厂商{% endif %}<input name="provider" value="{{ row.provider }}" required maxlength="64"></label>
+          <label class="admin-field">{% if is_en %}API format{% else %}接口格式{% endif %}
+            <select name="api_format" required>
+              <option value="openai_compatible"{% if row.api_format == "openai_compatible" %} selected{% endif %}>{% if is_en %}OpenAI compatible{% else %}OpenAI 兼容{% endif %}</option>
+              <option value="anthropic_compatible"{% if row.api_format == "anthropic_compatible" %} selected{% endif %}>{% if is_en %}Claude (Anthropic) compatible{% else %}Claude（Anthropic）兼容{% endif %}</option>
+            </select>
+          </label>
+          <label class="admin-field">{% if is_en %}API URL{% else %}API 地址{% endif %}<input name="base_url" type="url" value="{{ row.base_url }}" maxlength="512" required></label>
+          <div class="admin-model-options">
+            <label><input name="enabled" type="checkbox" value="true"{% if row.enabled %} checked{% endif %}> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
+          </div>
+          <div class="admin-model-form-actions">
+            <button class="button button-primary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+          </div>
+        </form>
+        <form class="admin-model-delete" hx-post="/admin/models/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this model?{% else %}确认删除这个模型？{% endif %}">
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <input type="hidden" name="expected_revision" value="{{ row.revision }}">
+          <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
+        </form>
+      </div>
+    </details>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

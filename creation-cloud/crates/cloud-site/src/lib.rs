@@ -2,6 +2,7 @@
 
 mod content;
 mod documentation;
+mod editable;
 mod home;
 mod home_qr;
 mod locale;
@@ -13,6 +14,10 @@ mod tutorial;
 pub use documentation::{
     DocumentationContent, DocumentationGroup, DocumentationItem, DocumentationLink,
     DocumentationNotice, DocumentationScreenshot, DocumentationSection,
+};
+pub use editable::{
+    EditableHomePage, EditableLink, EditableSiteShell, SITE_CONTENT_SCHEMA_VERSION,
+    apply_home_page, apply_site_shell, compiled_home_page, compiled_site_shell,
 };
 pub use home::{
     HomeFaqItem, HomeItem, HomeLayout, HomePageContent, HomePlatform, HomeSection, HomeTone,

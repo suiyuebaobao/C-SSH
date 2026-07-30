@@ -24,7 +24,7 @@ pub(crate) struct UsersQuery {
     page: Option<u32>,
     size: Option<u32>,
     #[serde(default, deserialize_with = "shared::empty_string_as_none")]
-    email: Option<String>,
+    search: Option<String>,
     #[serde(default, deserialize_with = "empty_role_as_none")]
     role: Option<AdminUserRole>,
     #[serde(default, deserialize_with = "empty_status_as_none")]
@@ -34,11 +34,13 @@ pub(crate) struct UsersQuery {
 struct UserRow {
     id: String,
     email: String,
+    login_name: String,
     display_name: String,
     role: &'static str,
     status: &'static str,
     device_count: i64,
-    created_at: String,
+    host_count: i64,
+    updated_at: String,
 }
 
 #[derive(Template)]
@@ -51,7 +53,7 @@ struct UsersTemplate {
     is_en: bool,
     rows: Vec<UserRow>,
     load_error: Option<String>,
-    email_filter: String,
+    search_filter: String,
     role_filter: String,
     status_filter: String,
     page_number: u32,
@@ -74,7 +76,8 @@ pub(crate) async fn page(
     .normalized();
     let request = AdminUserListQuery {
         page: page_query,
-        email: query.email.clone(),
+        search: query.search.clone(),
+        email: None,
         role: query.role,
         status: query.status,
     };
@@ -107,7 +110,7 @@ pub(crate) async fn page(
         is_en: parts.is_en,
         rows,
         load_error,
-        email_filter: query.email.unwrap_or_default(),
+        search_filter: query.search.unwrap_or_default(),
         role_filter: query.role.map_or("", AdminUserRole::as_str).to_owned(),
         status_filter: query.status.map_or("", AdminUserStatus::as_str).to_owned(),
         page_number: page_query.page,
@@ -122,11 +125,13 @@ impl From<AdminUser> for UserRow {
         Self {
             id: value.id.to_string(),
             email: value.masked_email,
+            login_name: value.admin_login_name.unwrap_or_default(),
             display_name: value.display_name,
             role: value.role.as_str(),
             status: value.status.as_str(),
             device_count: value.device_count,
-            created_at: value.created_at.to_rfc3339(),
+            host_count: value.host_count,
+            updated_at: value.updated_at.format("%Y-%m-%d %H:%M UTC").to_string(),
         }
     }
 }
@@ -134,8 +139,8 @@ impl From<AdminUser> for UserRow {
 fn users_href(query: &UsersQuery, page: u32, locale: Locale) -> String {
     let mut params = url::form_urlencoded::Serializer::new(String::new());
     params.append_pair("page", &page.to_string());
-    if let Some(email) = query.email.as_deref().filter(|value| !value.is_empty()) {
-        params.append_pair("email", email);
+    if let Some(search) = query.search.as_deref().filter(|value| !value.is_empty()) {
+        params.append_pair("search", search);
     }
     if let Some(role) = query.role {
         params.append_pair("role", role.as_str());
@@ -167,6 +172,7 @@ where
     let value = Option::<String>::deserialize(deserializer)?;
     match value.as_deref().map(str::trim) {
         None | Some("") => Ok(None),
+        Some("pending_verification") => Ok(Some(AdminUserStatus::PendingVerification)),
         Some("active") => Ok(Some(AdminUserStatus::Active)),
         Some("disabled") => Ok(Some(AdminUserStatus::Disabled)),
         Some(_) => Err(serde::de::Error::custom("invalid user status")),

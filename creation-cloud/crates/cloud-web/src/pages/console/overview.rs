@@ -1,10 +1,9 @@
-//! 从各业务域聚合当前账号控制台总览，不生成占位统计。
+//! 聚合当前账号的主机、设备、模型与下载摘要。
 
 use askama::Template;
 use axum::{Extension, extract::Query, extract::State, response::Html};
 use cloud_domain::{AppResult, AuthenticatedSession};
 use cloud_site::{PageId, SiteView};
-use cloud_sync::AccountSyncSummary;
 use cloud_user::Profile;
 
 use crate::{ConsolePageState, query::LocaleQuery, seo::SeoHead};
@@ -20,9 +19,9 @@ struct OverviewTemplate {
     is_en: bool,
     profile: Profile,
     device_total: i64,
+    host_total: i64,
     model_total: i64,
-    vault_total: i64,
-    sync: AccountSyncSummary,
+    conflict_total: i64,
     release_total: usize,
 }
 
@@ -32,12 +31,12 @@ pub(crate) async fn page(
     Query(query): Query<LocaleQuery>,
 ) -> AppResult<Html<String>> {
     let page = common::first_page();
-    let (profile, devices, models, vault, sync, releases) = tokio::try_join!(
+    let (profile, devices, hosts, models, conflicts, releases) = tokio::try_join!(
         state.user().get(&session, session.account_id),
         state.device().list(&session, page),
-        state.model().list(session.account_id, page),
-        state.vault().list(session.account_id, page),
-        state.sync().account_summary(&session),
+        state.host().list_self(&session, page),
+        state.model().list_public(page),
+        state.host().list_open_conflicts(&session, page),
         state.download().public_manifest(),
     )?;
     let locale = query.locale();
@@ -48,9 +47,9 @@ pub(crate) async fn page(
         is_en: common::is_en(locale),
         profile,
         device_total: devices.total,
+        host_total: hosts.total,
         model_total: models.total,
-        vault_total: vault.total,
-        sync,
+        conflict_total: conflicts.total,
         release_total: releases.len(),
     })
 }

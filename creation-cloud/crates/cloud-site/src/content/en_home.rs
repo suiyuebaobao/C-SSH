@@ -11,18 +11,34 @@ pub(super) fn page_content() -> PageContent {
     let platforms = platforms();
     let sections = sections(&platforms);
     let home_page = HomePageContent {
-        status_note: "Production control plane · Official release published · Client integration pending",
-        platform_label: "I/O MATRIX / PLATFORM",
-        platform_note: "5 SLOTS",
+        status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
+        status_note:
+            "Production control plane · Official release published · Client integration pending"
+                .into(),
+        hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
+        platform_label: "I/O MATRIX / PLATFORM".into(),
+        platform_note: "5 SLOTS".into(),
         platforms,
         sections,
-        faq_code: "08 / FAQ",
-        faq_heading: "Answer the questions that decide adoption",
-        faq_lead: "The home page keeps only high-value decision questions; the FAQ page carries the full explanation.",
+        faq_side_label: "FAQ / DECISION QUESTIONS".into(),
+        faq_item_prefix: "FAQ".into(),
+        faq_code: "08 / FAQ".into(),
+        faq_heading: "Answer the questions that decide adoption".into(),
+        faq_lead:
+            "The home page keeps only high-value decision questions; the FAQ page carries the full explanation."
+                .into(),
         faqs: faqs(),
-        final_code: "NEXT STEP / START HERE",
-        final_heading: "Choose a platform, then start with the first tutorial",
-        final_lead: "Capabilities, platform status, and downloads always follow real implementation, deployment, and release records.",
+        seo_code: "SEARCH TOPICS / CONTENT MAP".into(),
+        seo_heading: "Related SSH topics".into(),
+        seo_topics_label: "Published SEO topics".into(),
+        final_code: "NEXT STEP / START HERE".into(),
+        final_heading: "Choose a platform, then start with the first tutorial".into(),
+        final_lead:
+            "Capabilities, platform status, and downloads always follow real implementation, deployment, and release records."
+                .into(),
+        qr_placeholder_code: "QR".into(),
+        qr_placeholder_waiting: "WAITING".into(),
+        media_slot: None,
         qr_widget: HomeQrWidget::pending(HomeQrLabels {
             code: "MOBILE ACCESS / QR",
             title: "Scan entry",
@@ -399,10 +415,10 @@ fn platform_items(platforms: &[HomePlatform]) -> Vec<HomeItem> {
         .iter()
         .map(|platform| {
             HomeItem::new(
-                platform.state,
-                platform.name,
-                platform.position,
-                platform.shell,
+                &platform.state,
+                &platform.name,
+                &platform.position,
+                &platform.shell,
                 if platform.planned {
                     HomeTone::Planned
                 } else {

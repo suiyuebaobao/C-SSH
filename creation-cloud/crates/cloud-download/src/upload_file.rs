@@ -15,6 +15,45 @@ use uuid::Uuid;
 pub(crate) const MAX_ASSET_BYTES: u64 = 4 * 1024 * 1024 * 1024;
 const MAX_PROVIDER_FIELD_BYTES: usize = 512;
 
+pub struct PreparedLocalUpload {
+    layout: UploadLayout,
+    object_id: Uuid,
+    temp_path: PathBuf,
+    cleanup: CleanupFile,
+    file_name: String,
+    byte_size: i64,
+    sha256: String,
+}
+
+impl PreparedLocalUpload {
+    #[must_use]
+    pub fn file_name(&self) -> &str {
+        &self.file_name
+    }
+
+    #[must_use]
+    pub const fn byte_size(&self) -> i64 {
+        self.byte_size
+    }
+
+    #[must_use]
+    pub fn sha256(&self) -> &str {
+        &self.sha256
+    }
+
+    pub(crate) async fn promote(&mut self) -> AppResult<String> {
+        let (_, relative_path) = self
+            .layout
+            .promote(&self.temp_path, self.object_id, &mut self.cleanup)
+            .await?;
+        Ok(relative_path)
+    }
+
+    pub(crate) fn disarm(&mut self) {
+        self.cleanup.disarm();
+    }
+}
+
 pub(crate) struct ReceivedUpload {
     pub provider_name: String,
 }
@@ -144,6 +183,77 @@ pub(crate) async fn receive(
             "来源名称",
             100,
         )?,
+    })
+}
+
+pub(crate) async fn stage(
+    download_root: &Path,
+    field: &mut Field<'_>,
+) -> AppResult<PreparedLocalUpload> {
+    let file_name = field
+        .file_name()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| AppError::Validation("请选择一个本地文件".into()))?
+        .to_owned();
+    if file_name == "."
+        || file_name == ".."
+        || file_name.contains(['/', '\\'])
+        || file_name.chars().count() > 255
+        || file_name.chars().any(char::is_control)
+    {
+        return Err(AppError::Validation("上传文件名无效".into()));
+    }
+
+    let layout = UploadLayout::prepare(download_root).await?;
+    let object_id = Uuid::now_v7();
+    let temp_path = layout.temp_path(object_id);
+    let cleanup = CleanupFile::new(temp_path.clone());
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&temp_path)
+        .await
+        .map_err(|_| AppError::Conflict("上传临时文件已经存在".into()))?;
+    let mut size = 0_u64;
+    let mut hasher = Sha256::new();
+    while let Some(chunk) = field
+        .chunk()
+        .await
+        .map_err(|_| AppError::Validation("上传文件流提前中断".into()))?
+    {
+        let chunk_size = u64::try_from(chunk.len())
+            .map_err(|_| AppError::Validation("上传分块大小无效".into()))?;
+        size = size
+            .checked_add(chunk_size)
+            .ok_or_else(|| AppError::Validation("上传文件大小溢出".into()))?;
+        if size > MAX_ASSET_BYTES {
+            return Err(AppError::Validation("上传文件超过大小上限".into()));
+        }
+        hasher.update(&chunk);
+        file.write_all(&chunk)
+            .await
+            .map_err(|_| AppError::Internal("写入上传临时文件失败".into()))?;
+    }
+    if size == 0 {
+        return Err(AppError::Validation("上传文件不能为空".into()));
+    }
+    file.flush()
+        .await
+        .map_err(|_| AppError::Internal("刷新上传临时文件失败".into()))?;
+    file.sync_all()
+        .await
+        .map_err(|_| AppError::Internal("同步上传临时文件失败".into()))?;
+    let byte_size =
+        i64::try_from(size).map_err(|_| AppError::Validation("上传文件大小无效".into()))?;
+    Ok(PreparedLocalUpload {
+        layout,
+        object_id,
+        temp_path,
+        cleanup,
+        file_name,
+        byte_size,
+        sha256: format!("{:x}", hasher.finalize()),
     })
 }
 

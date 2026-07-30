@@ -38,8 +38,9 @@ impl TryFrom<&str> for AdminUserRole {
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum AdminUserStatus {
+    PendingVerification,
     Active,
     Disabled,
 }
@@ -48,6 +49,7 @@ impl AdminUserStatus {
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::PendingVerification => "pending_verification",
             Self::Active => "active",
             Self::Disabled => "disabled",
         }
@@ -59,6 +61,7 @@ impl TryFrom<&str> for AdminUserStatus {
 
     fn try_from(value: &str) -> AppResult<Self> {
         match value {
+            "pending_verification" => Ok(Self::PendingVerification),
             "active" => Ok(Self::Active),
             "disabled" => Ok(Self::Disabled),
             _ => Err(AppError::Internal("数据库中的账号状态无效".to_owned())),
@@ -69,6 +72,7 @@ impl TryFrom<&str> for AdminUserStatus {
 #[derive(Debug)]
 pub struct AdminUserListQuery {
     pub page: PageQuery,
+    pub search: Option<String>,
     pub email: Option<String>,
     pub role: Option<AdminUserRole>,
     pub status: Option<AdminUserStatus>,
@@ -81,6 +85,7 @@ struct AdminUserListQueryWire {
     page: u32,
     #[serde(default = "default_size")]
     size: u32,
+    search: Option<String>,
     email: Option<String>,
     role: Option<AdminUserRole>,
     status: Option<AdminUserStatus>,
@@ -97,6 +102,7 @@ impl<'de> Deserialize<'de> for AdminUserListQuery {
                 page: wire.page,
                 size: wire.size,
             },
+            search: wire.search,
             email: wire.email,
             role: wire.role,
             status: wire.status,
@@ -115,6 +121,7 @@ const fn default_size() -> u32 {
 #[derive(Clone, Debug)]
 pub(crate) struct AdminUserListFilter {
     pub page: PageQuery,
+    pub search: Option<String>,
     pub email: Option<String>,
     pub role: Option<AdminUserRole>,
     pub status: Option<AdminUserStatus>,
@@ -131,10 +138,13 @@ pub struct AdminUpdateUserInput {
 pub struct AdminUser {
     pub id: Uuid,
     pub masked_email: String,
+    pub admin_login_name: Option<String>,
+    pub email_verified: bool,
     pub display_name: String,
     pub role: AdminUserRole,
     pub status: AdminUserStatus,
     pub device_count: i64,
+    pub host_count: i64,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -142,11 +152,14 @@ pub struct AdminUser {
 #[derive(Clone, Debug, FromRow)]
 pub(crate) struct AdminUserRow {
     pub id: Uuid,
-    pub email: String,
+    pub email: Option<String>,
+    pub admin_login_name: Option<String>,
+    pub email_verified: bool,
     pub display_name: String,
     pub role: String,
     pub status: String,
     pub device_count: i64,
+    pub host_count: i64,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -157,11 +170,18 @@ impl TryFrom<AdminUserRow> for AdminUser {
     fn try_from(row: AdminUserRow) -> AppResult<Self> {
         Ok(Self {
             id: row.id,
-            masked_email: redaction::email(&row.email),
+            masked_email: row
+                .email
+                .as_deref()
+                .map(redaction::email)
+                .unwrap_or_else(|| "无邮箱".to_owned()),
+            admin_login_name: row.admin_login_name,
+            email_verified: row.email_verified,
             display_name: row.display_name,
             role: AdminUserRole::try_from(row.role.as_str())?,
             status: AdminUserStatus::try_from(row.status.as_str())?,
             device_count: row.device_count,
+            host_count: row.host_count,
             created_at: row.created_at,
             updated_at: row.updated_at,
         })

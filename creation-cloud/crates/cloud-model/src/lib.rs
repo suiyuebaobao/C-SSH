@@ -1,17 +1,22 @@
-//! 提供模型配置非敏感元数据的独立 CRUD 与相对 Axum 路由。
-//! API Key、Token、密码和其它凭据在触及数据库前被明确拒绝。
+//! 管理员全局模型目录与账号级客户端原样密文。
+//!
+//! 普通用户只能读取启用目录；模型元数据写入仅由管理员路由提供。
+//! API Key/Token 密文由客户端生成，服务端没有解密密钥。
 
-mod handler;
 mod repository;
 mod router;
 mod service;
 mod types;
-mod use_case;
 mod validation;
 
-pub use router::router;
-pub use service::Service;
-pub use types::{CreateModelInput, ModelProfile, UpdateModelInput};
-
 #[cfg(test)]
-mod tests;
+mod migration_tests;
+#[cfg(test)]
+mod seed_tests;
+
+pub use router::{management_router, router, secret_router};
+pub use service::Service;
+pub use types::{
+    CreateGlobalModelInput, DeleteGlobalModelInput, DeleteModelSecretInput, GlobalModel,
+    ModelSecret, PutModelSecretInput, ReplaceGlobalModelInput,
+};

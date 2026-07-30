@@ -57,6 +57,28 @@ pub struct Device {
 pub struct CreateDeviceOutcome {
     pub device: Device,
     pub created: bool,
+    pub session: DeviceSessionView,
+    pub(crate) raw_token: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct DeviceSessionView {
+    pub account_id: Uuid,
+    pub email: Option<String>,
+    pub email_verified: bool,
+    pub admin_login_name: Option<String>,
+    pub role: String,
+    pub device_id: Uuid,
+    pub session_kind: String,
+    pub idle_expires_at: DateTime<Utc>,
+    pub absolute_expires_at: DateTime<Utc>,
+    pub csrf_token: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct DeviceSessionResult {
+    pub device: Device,
+    pub session: DeviceSessionView,
 }
 
 impl Device {

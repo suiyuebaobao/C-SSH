@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260729-hosts">{% endblock %}
+{% block scripts %}<script src="/static/js/console.js?v=20260729-hosts" defer></script>{% endblock %}
+
+{% block main %}
+<main id="main-content" class="console-main" data-console-root data-csrf-token="{{ csrf_token }}">
+  <div class="container console-layout">
+    {% include "console-navigation.html" %}
+    <div class="console-content">
+      {% include "console-heading.html" %}
+      <p class="console-boundary">
+        {% if is_en %}
+        The website shows the cloud sync copy only. Upload and download happen only when you explicitly start them in a client; the server never edits local client data.
+        {% else %}
+        网页只展示云端同步副本。上传和下载仅在你于客户端手动触发时发生，服务器不会修改客户端本地数据。
+        {% endif %}
+      </p>
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Cloud hosts{% else %}云端主机{% endif %}</h2><span class="console-status">{{ total }}</span></div>
+        {% if hosts.is_empty() %}
+        <p class="console-empty">{% if is_en %}No hosts have been uploaded.{% else %}尚未上传任何主机。{% endif %}</p>
+        {% else %}
+        <div class="console-list">
+          {% for host in hosts %}
+          <article class="console-record">
+            <div class="console-record-heading">
+              <div><strong>{{ host.name }}</strong><small>{{ host.address }}:{{ host.port }} · {{ host.platform }}</small></div>
+              <span class="console-status">{{ host.status }}</span>
+            </div>
+            <dl class="console-definition-grid console-definition-grid-compact">
+              <div><dt>{% if is_en %}Tags{% else %}标签{% endif %}</dt><dd>{% if host.tags.is_empty() %}—{% else %}{{ host.tags }}{% endif %}</dd></div>
+              <div><dt>{% if is_en %}Revision{% else %}修订号{% endif %}</dt><dd>{{ host.revision }}</dd></div>
+              <div><dt>{% if is_en %}Encrypted fields{% else %}加密字段{% endif %}</dt><dd>{% if host.secret_present %}{% if is_en %}Present{% else %}已保存密文{% endif %}{% else %}—{% endif %}</dd></div>
+              <div><dt>{% if is_en %}Updated{% else %}更新时间{% endif %}</dt><dd>{{ host.updated_at }}</dd></div>
+            </dl>
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </section>
+
+      <section class="console-section">
+        <div class="console-section-heading"><h2>{% if is_en %}Download permissions by device{% else %}按设备设置下载范围{% endif %}</h2></div>
+        <p class="console-boundary">{% if is_en %}The default is empty. A client can download only the checked hosts for its own registered device.{% else %}默认不允许下载任何主机；每台已注册设备只能下载被勾选的主机。{% endif %}</p>
+        {% if device_policies.is_empty() %}
+        <p class="console-empty">{% if is_en %}No active product devices.{% else %}没有有效的产品设备。{% endif %}</p>
+        {% endif %}
+        <div class="console-list">
+          {% for policy in device_policies %}
+          <form class="console-record" action="/console/devices/{{ policy.id }}/host-download-allowlist" method="post" hx-post="/console/devices/{{ policy.id }}/host-download-allowlist" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+            <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+            <div class="console-record-heading"><div><strong>{{ policy.name }}</strong><small>{{ policy.platform }} · {{ policy.id }}</small></div></div>
+            {% if policy.options.is_empty() %}
+            <p class="console-empty">{% if is_en %}No hosts are available.{% else %}当前没有可选主机。{% endif %}</p>
+            {% else %}
+            <div class="console-form">
+              {% for option in policy.options %}
+              <label class="console-check"><input type="checkbox" name="host_id" value="{{ option.id }}"{% if option.selected %} checked{% endif %}><span>{{ option.label }}</span></label>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <button class="button button-primary" type="submit">{% if is_en %}Save download scope{% else %}保存下载范围{% endif %}</button>
+          </form>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

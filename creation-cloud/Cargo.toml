@@ -2,17 +2,20 @@
 members = [
     "apps/server",
     "crates/cloud-admin",
+    "crates/cloud-announcement",
     "crates/cloud-auth",
     "crates/cloud-config",
     "crates/cloud-device",
     "crates/cloud-domain",
     "crates/cloud-download",
     "crates/cloud-feedback",
+    "crates/cloud-host",
     "crates/cloud-model",
     "crates/cloud-maintenance",
     "crates/cloud-release",
     "crates/cloud-seo",
     "crates/cloud-site",
+    "crates/cloud-site-content",
     "crates/cloud-site-media",
     "crates/cloud-store",
     "crates/cloud-sync",
@@ -37,17 +40,20 @@ axum = { version = "0.8.9", features = ["form", "json", "macros", "multipart"] }
 base64 = "0.22.1"
 chrono = { version = "0.4.41", features = ["serde"] }
 cloud-admin = { path = "crates/cloud-admin" }
+cloud-announcement = { path = "crates/cloud-announcement" }
 cloud-auth = { path = "crates/cloud-auth" }
 cloud-config = { path = "crates/cloud-config" }
 cloud-device = { path = "crates/cloud-device" }
 cloud-domain = { path = "crates/cloud-domain" }
 cloud-download = { path = "crates/cloud-download" }
 cloud-feedback = { path = "crates/cloud-feedback" }
+cloud-host = { path = "crates/cloud-host" }
 cloud-model = { path = "crates/cloud-model" }
 cloud-maintenance = { path = "crates/cloud-maintenance" }
 cloud-release = { path = "crates/cloud-release" }
 cloud-seo = { path = "crates/cloud-seo" }
 cloud-site = { path = "crates/cloud-site" }
+cloud-site-content = { path = "crates/cloud-site-content" }
 cloud-site-media = { path = "crates/cloud-site-media" }
 cloud-store = { path = "crates/cloud-store" }
 cloud-sync = { path = "crates/cloud-sync" }
@@ -57,8 +63,10 @@ cloud-web = { path = "crates/cloud-web" }
 hex = "0.4.3"
 http = "1.3.1"
 image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
+lettre = { version = "0.11.19", default-features = false, features = ["builder", "smtp-transport", "tokio1-rustls", "ring", "webpki-roots"] }
 mime_guess = "2.0.5"
 rand = "0.9.1"
+rpassword = "7.5.4"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 sha2 = "0.10.9"

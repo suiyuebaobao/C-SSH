@@ -18,7 +18,7 @@ pub use model::{
     DeviceOverview, ReleaseOverview, SecurityAuditOverview, UserOverview,
 };
 pub use router::{router, router_without_overview};
-pub use service::{Service, promote_registered_admin};
+pub use service::{Service, create_local_admin, promote_registered_admin};
 pub use use_case::set_registered_admin_login;
 
 #[cfg(test)]

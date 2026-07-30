@@ -10,6 +10,8 @@
         <p>{{ view.page.lead }}</p>
       </header>
       <form class="account-form" action="{{ view.page.form_action }}" method="post" hx-post="{{ view.page.form_action }}" hx-target="#auth-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
+        {% if view.page.form_action == "/web/auth/register" %}<input type="hidden" name="locale" value="{{ view.shell.html_lang }}">{% endif %}
+        {% if view.page.form_action == "/web/auth/login" %}<input type="hidden" name="lang" value="{{ view.shell.html_lang }}">{% endif %}
         {% if let Some(next_path) = next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
         {% for field in view.page.fields %}
         <label class="field-label" for="field-{{ field.name }}">
@@ -17,6 +19,17 @@
           <input id="field-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" autocomplete="{{ field.autocomplete }}" placeholder="{{ field.placeholder }}"{% if field.required %} required{% endif %}>
         </label>
         {% endfor %}
+        {% if admin_login %}
+        <div class="admin-captcha">
+          <p><strong>{% if view.shell.html_lang == "en" %}Administrator CAPTCHA{% else %}管理员图形验证码{% endif %}</strong></p>
+          <img src="/api/v1/auth/admin-captcha" width="240" height="80" alt="{% if view.shell.html_lang == "en" %}One-time administrator sign-in CAPTCHA{% else %}一次性管理员登录图形验证码{% endif %}">
+          <label class="field-label" for="field-captcha-code">
+            <span>{% if view.shell.html_lang == "en" %}Enter the six digits shown above{% else %}输入图片中的六位数字{% endif %}</span>
+            <input id="field-captcha-code" name="captcha_code" type="text" autocomplete="off" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
+          </label>
+          <a class="text-link" href="{{ captcha_refresh_href }}">{% if view.shell.html_lang == "en" %}Refresh CAPTCHA{% else %}刷新图形验证码{% endif %}</a>
+        </div>
+        {% endif %}
         <button class="button button-primary button-full" type="submit">{{ view.page.submit_label }}</button>
         <div class="form-feedback" id="auth-feedback" aria-live="polite"></div>
       </form>

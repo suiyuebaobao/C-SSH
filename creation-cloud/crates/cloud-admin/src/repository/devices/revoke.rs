@@ -15,6 +15,7 @@ pub(crate) const REVOKE_SQL: &str = r#"
                   revoked_at, created_at, updated_at
     )
     SELECT updated.id, updated.account_id, accounts.email AS owner_email,
+           accounts.admin_login_name AS owner_admin_login_name,
            updated.name, updated.platform, updated.public_id, updated.last_seen_at,
            updated.revoked_at, updated.created_at, updated.updated_at
     FROM updated

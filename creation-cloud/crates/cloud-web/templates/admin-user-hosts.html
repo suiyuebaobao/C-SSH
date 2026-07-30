@@ -1,0 +1,35 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section" aria-labelledby="user-hosts-heading">
+  <div class="admin-section-heading">
+    <div>
+      <p><a href="/admin/users{% if is_en %}?lang=en{% endif %}">← {% if is_en %}Accounts{% else %}返回账号列表{% endif %}</a></p>
+      <h2 id="user-hosts-heading">{% if is_en %}Hosts for selected account{% else %}所选账号的主机{% endif %}</h2>
+      <p class="admin-mono">{{ account_id }}</p>
+    </div>
+    <span class="status-badge">{{ total }}</span>
+  </div>
+  <p>{% if is_en %}Plain host metadata is visible here. Encrypted account, password and key fields are never decrypted by the server.{% else %}这里显示主机明文元数据；账号、密码和密钥等密文字段不会由服务器解密。{% endif %}</p>
+  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No hosts{% else %}该账号没有云端主机{% endif %}</strong></div>{% endif %}
+  {% if !rows.is_empty() %}
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead><tr><th>{% if is_en %}Host{% else %}主机{% endif %}</th><th>{% if is_en %}Platform / status{% else %}平台 / 状态{% endif %}</th><th>{% if is_en %}Revision{% else %}修订{% endif %}</th><th>{% if is_en %}Source device{% else %}来源设备{% endif %}</th><th>{% if is_en %}Updated{% else %}更新时间{% endif %}</th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td><strong>{{ row.name }}</strong><br>{{ row.address }}:{{ row.port }}<br><span class="admin-mono">{{ row.id }}</span>{% if row.secret_present %}<br><small>{% if is_en %}Encrypted fields present{% else %}含加密字段{% endif %}</small>{% endif %}</td>
+          <td>{{ row.platform }} · {{ row.status }}</td>
+          <td>{{ row.revision }}</td>
+          <td class="admin-mono">{{ row.source_device_id }}</td>
+          <td class="admin-mono">{{ row.updated_at }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

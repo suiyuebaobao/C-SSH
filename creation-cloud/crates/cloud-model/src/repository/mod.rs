@@ -1,40 +1,27 @@
-//! 汇总模型资源按 CRUD 动作拆分的 PostgreSQL 仓储函数。
+//! PostgreSQL 持久化边界。
 
-mod create;
-mod delete;
-mod get;
-mod list;
-mod row;
-mod update;
+mod catalog;
+mod secret;
+mod seed;
 
-pub(crate) use create::create;
-pub(crate) use delete::delete;
-pub(crate) use get::get;
-pub(crate) use list::list;
-pub(crate) use row::{ModelRow, model_from_row};
-pub(crate) use update::update;
+pub(crate) use catalog::{create, delete, get_admin, get_public, list_admin, list_public, replace};
+pub(crate) use secret::{delete_secret, get_secret, put_secret};
+pub(crate) use seed::seed_system_catalog;
+#[cfg(test)]
+pub(crate) use seed::{ACTIVE_ADMIN_SQL, INSERT_SEED_SQL, LOCK_CATALOG_SQL, SYSTEM_MODEL_SEEDS};
 
 use cloud_domain::AppError;
 
-pub(crate) fn storage(message: &'static str) -> impl FnOnce(sqlx::Error) -> AppError {
-    move |_| AppError::Storage(message.to_owned())
-}
-
-pub(crate) fn write_error(error: sqlx::Error) -> AppError {
-    if matches!(
-        &error,
-        sqlx::Error::Database(database)
-            if database.code().as_deref() == Some("23503")
-                && database.constraint() == Some("model_profiles_active_vault_envelope_fkey")
-    ) {
-        return AppError::NotFound("密文信封不存在".to_owned());
-    }
-    if matches!(
-        &error,
-        sqlx::Error::Database(database) if database.code().as_deref() == Some("23505")
-    ) {
-        AppError::Conflict("同一账号下的模型名称已存在".to_owned())
-    } else {
-        AppError::Storage("无法写入模型元数据".to_owned())
+fn storage(context: &'static str) -> impl FnOnce(sqlx::Error) -> AppError {
+    move |error| {
+        if error
+            .as_database_error()
+            .and_then(|database| database.code())
+            .is_some_and(|code| code.as_ref() == "23505")
+        {
+            AppError::Conflict("模型名称或默认项与现有记录冲突".to_owned())
+        } else {
+            AppError::Storage(context.to_owned())
+        }
     }
 }

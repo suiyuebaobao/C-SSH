@@ -1,6 +1,6 @@
 //! 按动作加载资产业务用例及对应独立测试。
 
-mod create;
+pub(crate) mod create;
 mod delete;
 mod get;
 mod list;

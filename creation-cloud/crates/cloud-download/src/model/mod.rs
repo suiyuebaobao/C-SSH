@@ -6,6 +6,7 @@ mod inspection;
 mod public;
 mod source;
 mod target;
+mod update;
 
 pub use aggregation::DownloadAggregationReport;
 pub(crate) use aggregation::{DownloadAggregateBucket, DownloadAudience, PendingDownloadEvent};
@@ -17,3 +18,4 @@ pub use public::{PublicAsset, PublicRelease, PublicSource};
 pub(crate) use source::SourceRow;
 pub use source::{CreateSourceInput, ReleaseSource, SourceKind, UpdateSourceInput};
 pub(crate) use target::{AssetRecord, DownloadTarget, LockedAssetRecord};
+pub use update::{LatestUpdate, UpdateAsset, UpdateCheckQuery, UpdateCheckResponse, UpdateSource};

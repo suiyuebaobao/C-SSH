@@ -7,6 +7,7 @@ use url::Url;
 
 mod maintenance;
 mod public_base_url;
+mod smtp;
 
 #[cfg(test)]
 mod public_base_url_tests;
@@ -27,9 +28,11 @@ pub struct CloudConfig {
     pub session_ttl: Duration,
     pub environment: String,
     pub maintenance: MaintenanceConfig,
+    pub smtp: Option<SmtpConfig>,
 }
 
 pub use maintenance::{MaintenanceConfig, TaskSchedule};
+pub use smtp::{SmtpConfig, SmtpSecurity};
 
 impl CloudConfig {
     pub fn from_env() -> Result<Self> {
@@ -54,6 +57,7 @@ impl CloudConfig {
             bail!("CLOUD_SESSION_TTL_HOURS 必须在 1 到 2160 之间");
         }
         let maintenance = MaintenanceConfig::from_env()?;
+        let smtp = SmtpConfig::from_env()?;
         Ok(Self {
             bind_addr,
             database_url,
@@ -65,6 +69,7 @@ impl CloudConfig {
             session_ttl: Duration::from_secs(ttl_hours * 3600),
             environment,
             maintenance,
+            smtp,
         })
     }
 }

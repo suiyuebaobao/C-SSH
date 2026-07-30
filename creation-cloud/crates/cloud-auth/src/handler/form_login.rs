@@ -4,7 +4,7 @@ use axum::{Form, extract::State, http::HeaderMap, response::Response};
 use cloud_domain::AppResult;
 use serde::Deserialize;
 
-use crate::{Login, Service};
+use crate::{Login, LoginOutcome, Service};
 
 use super::form_response;
 
@@ -14,6 +14,8 @@ pub(crate) struct BrowserLogin {
     identifier: String,
     password: String,
     next: Option<String>,
+    lang: Option<String>,
+    captcha_code: Option<String>,
 }
 
 pub(crate) async fn handle(
@@ -25,12 +27,24 @@ pub(crate) async fn handle(
     let command = Login {
         identifier: form.identifier,
         password: form.password,
+        captcha_id: crate::cookie::read_admin_captcha(&headers),
+        captcha_code: form.captcha_code,
     };
-    let issued = service.login(command).await?;
-    form_response::redirect(
-        &headers,
-        &issued.raw_token,
-        issued.session.expires_at,
-        destination,
-    )
+    match service.login(command).await? {
+        LoginOutcome::Session(issued) => form_response::redirect(
+            &headers,
+            &issued.raw_token,
+            issued.session.expires_at,
+            destination,
+        ),
+        LoginOutcome::VerificationRequired(status) => form_response::redirect_without_session(
+            &headers,
+            &form_response::login_verification_destination(
+                form.lang.as_deref() == Some("en"),
+                status.challenge_id,
+                Some(destination),
+                false,
+            ),
+        ),
+    }
 }
