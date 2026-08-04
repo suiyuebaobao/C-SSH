@@ -6,51 +6,51 @@
 
 ### 手机上也能接着运维：持久化终端、常驻监控、文件管理与 AI 助手
 
-[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/C-SSH_7.0.0_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)
-[![Linux](https://img.shields.io/badge/下载-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)
-[![Stable](https://img.shields.io/badge/stable-v7.0.0-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)
+[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/C-SSH_0.7.1_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)
+[![Linux](https://img.shields.io/badge/下载-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)
+[![Stable](https://img.shields.io/badge/stable-v0.7.1-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)
 
 </div>
 
 Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 与 Linux 桌面端负责更完整的日常运维工作流。
 
-当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v7.0.0`**；旧版本继续保留为历史记录。
+当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.1`**；旧版本继续保留为历史记录。
 
 > Android 升级提示：每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。
 
-## v7.0.0 更新重点
+## v0.7.1 更新重点
 
-- Windows、Linux 与 Android 的服务器业务统一进入共享 Rust `client-runtime`，三端平台层只保留平台适配。
-- 新增 Agent/SSH 两种明确主机模式；SSH 模式无需安装 agent，也可使用原生终端、SFTP 文件管理、在线监控、系统管理和 AI 工具。
-- 主机列表统一显示连接模式、架构与最近采集的 CPU、内存、磁盘、负载和运行时长。
-- 三端主机选择器统一为单选下拉或选择面板，并强化异步切换、删除和页面返回时的 owner 隔离。
-- 修复 SSH 终端退出时丢失尾部输出、忽略扩展数据或重复终态，以及 SSH 监控解析和系统管理兼容问题。
-- AI 保持本地 SQLite 原始事件、五层派生记忆、模型硬窗口编译和每 10 秒真实阶段进度。
+- 新增可选 Creation Cloud 账号、登录设备与手动云同步；主机凭据仅由客户端使用数据保护密码本地加密，Cloud 不接触明文。
+- AI 支持本地多模型账户和多 Key 绑定，可读取匿名 Cloud 模型目录；API Key 只留在本机，不参与云同步。
+- AI 权限收敛为查看、编辑、全权三档；会话、schema 9 原始记录与五层记忆在切换模型后继续保留。
+- 群发执行支持 Agent 与原生 SSH 主机混选，并统一逐机结果、失败隔离和确认流程。
+- 三端新增“联系我们”，可查看微信、QQ 群和 WhatsApp 二维码；移动端 AI 工具栏同步改为紧凑图标布局。
+- 修复数据保护冷启动与忘记密码重置、空云端下载预览、模型配置即时刷新和主机监控状态投影问题。
 
 ## 先看 Android
 
-同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v7.0.0` 只发布 arm64 APK；从本版起不再生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
+同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.1` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
 
 ## 下载
 
 | 平台 | 推荐下载 | 其他正式资产 |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/C-SSH_7.0.0_android-arm64.apk) | 本版不提供 AAB |
-| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v7.0.0/Creation-SSH_7.0.0_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/C-SSH_0.7.1_android-arm64.apk) | 本版不提供 AAB |
+| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_portable-Windows-x64.zip) |
+| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_linux-amd64.deb) |
 
-版本说明和 SHA256 见 [v7.0.0 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v7.0.0)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
+版本说明和 SHA256 见 [v0.7.1 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 已交付平台
 
-| 平台 | `v7.0.0` 已交付范围 |
+| 平台 | `v0.7.1` 已交付范围 |
 | --- | --- |
 | Android | 主机管理、agent 安装与更新/修复、持久化/普通终端、文件上传下载、实时监控、AI、系统管理、本地登录门与“我的”设置 |
 | Windows | 完整桌面工作流；提供 EXE、MSI 与便携 ZIP |
 | Linux 桌面 | 独立 AppImage/deb；提供持久化终端、监控、系统/进程、文件、AI 与失效重连工作流 |
 | Linux agent 部署资源 | `x86_64` 与 `aarch64` 的 agent/静态 tmux 独立配对，经认证 SSH 执行 `uname -m` 后只选择匹配资源；aarch64 真机 no-mock 尚待验证，不宣称完整 ARM64 支持 |
-| iOS / macOS | **尚未发布**，不属于 `v7.0.0` 已交付范围 |
+| iOS / macOS | **尚未发布**，不属于 `v0.7.1` 已交付范围 |
 
 ## 主要页面
 

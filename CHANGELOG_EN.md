@@ -4,6 +4,46 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.1 - Optional Cloud Sync and Local Multi-Model Accounts
+
+> `v7.0.0` remains the historical mistyped version from the previous release; this new release uses the correct `v0.7.1` version. Android ships one arm64 APK and no AAB. Windows artifacts are currently unsigned.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.1_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.1_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.1_portable-Windows-x64.zip`
+- Linux AppImage: `Creation-SSH_0.7.1_linux-x86_64.AppImage`
+- Linux deb: `Creation-SSH_0.7.1_linux-amd64.deb`
+- Android arm64 APK: `C-SSH_0.7.1_android-arm64.apk`
+
+### Added
+- Added optional Cloud accounts, device management, and manual host sync. Host secrets are encrypted locally with the data-protection password; AI API keys are never uploaded.
+- Added multiple local AI accounts and model bindings, including Cloud catalog models and custom OpenAI/Anthropic-compatible endpoints.
+- Simplified AI permissions to View, Edit, and Full; SSH mode now supports SFTP-based file reading, writing, and code editing.
+- Broadcast execution can mix Agent and native SSH hosts with common per-host results, isolation, and confirmation behavior.
+- Added WhatsApp, QQ group, and WeChat contact entries across Windows, Linux, and Android, plus a compact mobile AI toolbar.
+
+### Fixed
+- Fixed Windows startup failures after upgrading with legacy Cloud or data-protection state, and the reset deadlock after forgetting the data-protection password.
+- Fixed empty-cloud download previews showing local hosts, enabled sync actions before data protection was configured, and unclear post-login guidance.
+- Fixed stale AI configuration after returning from Settings, model-switching races, and unclear custom-model fields.
+- Fixed long-term-memory source tracking so shared memories still referenced by other conversations are not removed incorrectly.
+- Fixed host-monitor status projection, broadcast host filtering, and multi-host selector layout issues.
+
+### Verified
+- The Windows production build generated EXE, MSI, and a six-entry portable ZIP. Background UI checks passed on the final EXE for contact cards and multi-model accounts, with the system device-key fingerprint unchanged.
+- Linux AppImage/deb were built in the authorized Linux VM and passed version, architecture, embedded agent/tmux resource, artifact-collection, and SHA256 gates.
+- The Android production arm64 APK passed `0.7.1/7000001`, single-ABI, production-signature, and embedded-resource gates. No AAB was generated or uploaded. The x86_64 MuMu test APK was used only for UI regression and is not a release asset.
+- Protocol remains 13 and SQLite/AI schema remains 9. The release-version gate confirmed `0.7.1` across the root workspace, agent, and all three clients.
+
+### SHA256
+- `FD626D319BC3D4D79B66657327C6933F7E0AEB552C58A91CF929668DD4348482`  `Creation-SSH_0.7.1_x64-setup.exe`
+- `37ABF3883DB14FEA63C441FA7BF6715AF4EE2B1E24728A0C044D4C2D299BB0D2`  `Creation-SSH_0.7.1_x64_en-US.msi`
+- `551CB8321CFD76BA82D158B5A5D37178B421626D243D89F02323925B87F4F8F2`  `Creation-SSH_0.7.1_portable-Windows-x64.zip`
+- `C7C312CF383E644A18D33BF2929BBDE7CA0BA3A8743DD0E2B84A7A1D098D5E54`  `Creation-SSH_0.7.1_linux-x86_64.AppImage`
+- `2A1C30F6C6817CA9766C062F2E41A508C77FD0E356307DB829F18DC3F9EDD764`  `Creation-SSH_0.7.1_linux-amd64.deb`
+- `62DD267B4D56321D825772D7D70B0FA620452452B399431089D390964FBDD3DA`  `C-SSH_0.7.1_android-arm64.apk`
+
 ## v7.0.0 - Shared Client Runtime and Agent/SSH Host Modes
 
 > The first launch after every Android install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained. Windows artifacts are currently unsigned.

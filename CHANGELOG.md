@@ -4,6 +4,46 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.1 - 可选云同步与本地多模型账户
+
+> `v7.0.0` 是上一版误写的历史版本号，原 Release 保持不变；本次正确的新版本为 `v0.7.1`。Android 正式版仅提供 arm64 APK，不生成 AAB。Windows 安装包当前未使用 Authenticode 签名。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.1_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.1_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.1_portable-Windows-x64.zip`
+- Linux AppImage：`Creation-SSH_0.7.1_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.7.1_linux-amd64.deb`
+- Android arm64 APK：`C-SSH_0.7.1_android-arm64.apk`
+
+### 新增
+- 新增可选 Cloud 账号、登录设备管理和手动主机同步；主机凭据只在客户端使用数据保护密码加密，AI API Key 永不上传。
+- 新增本地多模型账户：同一厂商可配置多个 Key，并可绑定 Cloud 模型目录或自定义 OpenAI/Anthropic 兼容接口。
+- AI 权限精简为查看、编辑、全权三档；SSH 模式增加基于 SFTP 的文件读取、写入和代码编辑能力。
+- 群发执行支持 Agent 与原生 SSH 主机混选，并统一逐机结果、失败隔离和确认流程。
+- Windows、Linux、Android 新增 WhatsApp、QQ 群和微信联系方式入口；移动端 AI 工具栏改为紧凑图标布局。
+
+### 修复
+- 修复旧 Cloud 或数据保护状态导致 Windows 升级后无法启动，以及忘记数据保护密码后无法进入重置流程的问题。
+- 修复空云端下载预览误显示本地主机、数据保护未配置时同步按钮仍可操作，以及登录后提示流程不清晰的问题。
+- 修复从设置返回 AI 页面后模型配置不刷新、模型切换并发状态和自定义模型表单不易理解的问题。
+- 修复删除会话时长期记忆来源归属不精确的问题，避免删除仍被其它会话引用的共享记忆。
+- 修复主机监控状态投影、群发主机过滤和多主机选择器显示问题。
+
+### 验证
+- Windows 正式构建生成 EXE、MSI 与规范 6 项便携 ZIP；最终 EXE 的联系方式和多模型账户后台真实 UI 验证通过，系统设备密钥指纹不变。
+- Linux AppImage/deb 在授权 Linux VM 构建，并通过版本、架构、内嵌 agent/tmux 资源、制品收集与 SHA256 门禁。
+- Android 正式 arm64 APK 通过 `0.7.1/7000001`、唯一 ABI、正式签名和内嵌资源门禁；没有生成或上传 AAB。x86_64 MuMu 测试包仅用于 UI 回归，不属于发布资产。
+- 协议保持 13，SQLite/AI schema 保持 9；版本门禁确认根 workspace、agent 与三端元数据均为 `0.7.1`。
+
+### SHA256
+- `FD626D319BC3D4D79B66657327C6933F7E0AEB552C58A91CF929668DD4348482`  `Creation-SSH_0.7.1_x64-setup.exe`
+- `37ABF3883DB14FEA63C441FA7BF6715AF4EE2B1E24728A0C044D4C2D299BB0D2`  `Creation-SSH_0.7.1_x64_en-US.msi`
+- `551CB8321CFD76BA82D158B5A5D37178B421626D243D89F02323925B87F4F8F2`  `Creation-SSH_0.7.1_portable-Windows-x64.zip`
+- `C7C312CF383E644A18D33BF2929BBDE7CA0BA3A8743DD0E2B84A7A1D098D5E54`  `Creation-SSH_0.7.1_linux-x86_64.AppImage`
+- `2A1C30F6C6817CA9766C062F2E41A508C77FD0E356307DB829F18DC3F9EDD764`  `Creation-SSH_0.7.1_linux-amd64.deb`
+- `62DD267B4D56321D825772D7D70B0FA620452452B399431089D390964FBDD3DA`  `C-SSH_0.7.1_android-arm64.apk`
+
 ## v7.0.0 - 统一客户端运行时与 Agent/SSH 双模式
 
 > Android 每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。Windows 安装包当前未使用 Authenticode 签名。
