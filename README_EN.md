@@ -6,21 +6,21 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/C-SSH_0.7.1_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)
-[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?logo=linux&logoColor=black)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)
-[![Stable](https://img.shields.io/badge/stable-v0.7.1-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/C-SSH_0.7.2_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)
+[![Stable](https://img.shields.io/badge/stable-v0.7.2-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.1`**.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.2`**.
 
 > Android upgrade notice: the first launch after every install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained.
 
-## v0.7.1 Highlights
+## v0.7.2 Highlights
 
+- Windows and Android can persistently enable or disable Startup Password Protection. Both changes verify the current data-protection password in a dialog; disabling it auto-enters on the next cold start without changing local or Cloud data. Linux client code remains maintained, but `v0.7.2` does not include a production Linux package.
 - Added optional Creation Cloud accounts, device sessions, and manual cloud sync. Host credentials are encrypted locally with the data-protection password; Cloud never receives plaintext.
 - Added local multi-model accounts and multiple API keys backed by the anonymous Cloud model catalog. API keys remain local and are never synchronized.
 - Consolidated AI permissions into View, Edit, and Full Access while preserving conversations, schema 9 raw events, and five-layer memory when switching models.
@@ -30,27 +30,28 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.1` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.2` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/C-SSH_0.7.1_android-arm64.apk) | No AAB for this release |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_portable-Windows-x64.zip) |
-| Linux x86_64 | [AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_linux-x86_64.AppImage) | [Debian/Ubuntu deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.1/Creation-SSH_0.7.1_linux-amd64.deb) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/C-SSH_0.7.2_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_portable-Windows-x64.zip) |
 
-See the [v0.7.1 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.1) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+Linux client code remains maintained, but production Linux packages are no longer provided starting with `v0.7.2`.
+
+See the [v0.7.2 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.7.1` |
+| Platform | Delivered in `v0.7.2` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| Linux desktop | Independent AppImage/deb with persistent terminals, monitoring, system/process, file, AI, and reconnect workflows |
-| Linux agent deployment resources | Independent `x86_64` and `aarch64` agent/static-tmux pairs selected after authenticated `uname -m`; real aarch64 no-mock validation is pending, so complete ARM64 support is not claimed |
-| iOS / macOS | **Not released** and not part of the `v0.7.1` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.7.2` delivery |
+
+The Linux client implementation remains maintained but is not part of the `v0.7.2` production artifacts or delivered platforms.
 
 ## Main Pages
 

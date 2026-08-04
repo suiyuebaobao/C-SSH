@@ -4,6 +4,37 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.2 - 可持久控制启动密码保护
+
+> Windows 与 Android 的协议继续为 13，SQLite/AI schema 继续为 9。Android 正式版仅提供 arm64 APK，不生成或上传 AAB；Windows 安装包当前未使用 Authenticode 签名。Linux 客户端代码继续维护，但本版不提供 Linux 正式包。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.2_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.2_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.2_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.2_android-arm64.apk`
+
+### 新增
+- Windows 与 Android 均可持久开启或关闭“启动密码保护”；开启和关闭都通过弹窗验证当前数据保护密码。
+- 关闭后，下一次冷启动会使用平台安全存储中的内部凭据自动进入；用户主动重新开启前保持关闭。
+- 开关只控制冷启动时是否需要手工输入密码，不会删除、迁移、重加密或改写本地与 Cloud 数据，也不改变登录状态。
+
+### 修复
+- 修复数据保护设置页以内联输入框切换启动保护、导致操作路径不清晰的问题，统一改为独立密码验证弹窗。
+- 修复关闭启动保护后无法跨冷启动保持选择，以及重新开启时可能没有恢复前置解密门的问题。
+- 错误密码或平台安全存储失败时保持原选择并继续失败关闭，防止绕过解密门。
+
+### 验证
+- Windows 正式 EXE 后台流程通过：默认开启、错误密码不能关闭、正确密码关闭、冷启动自动进入、错误密码不能开启、正确密码开启、再次冷启动恢复前置解密门；系统设备密钥指纹保持不变。
+- Android `0.7.2/7000002` 正式 APK 通过 arm64-only、正式签名与内嵌资源检查；x86_64 MuMu 测试通过首次启动和强制停止后的冷启动，测试包不属于发布资产。
+- 共享启动保护单元测试、Windows/Android 前端构建、版本一致性门禁与 Windows 正式数据保护运行时测试通过。
+
+### SHA256
+- `A68826CBEEA6E04CCE52B37E2464BFA0EA68C69BF14B71F19CA7B9956B03A685`  `Creation-SSH_0.7.2_x64-setup.exe`
+- `4139832B3363E62BD7F581A9F9DFBB49CE2C6229E983DF542412C0C3346BC5AF`  `Creation-SSH_0.7.2_x64_en-US.msi`
+- `56034053754CF9C392B90D1A81CD9769405B8BF9D7888C1769E731E8369DBB53`  `Creation-SSH_0.7.2_portable-Windows-x64.zip`
+- `E10305B8CD2B48E23B033CBE4AB5CFA35238CCBA76D7140F660A00B0216A6B16`  `C-SSH_0.7.2_android-arm64.apk`
+
 ## v0.7.1 - 可选云同步与本地多模型账户
 
 > `v7.0.0` 是上一版误写的历史版本号，原 Release 保持不变；本次正确的新版本为 `v0.7.1`。Android 正式版仅提供 arm64 APK，不生成 AAB。Windows 安装包当前未使用 Authenticode 签名。

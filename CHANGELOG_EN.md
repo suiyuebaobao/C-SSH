@@ -4,6 +4,37 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.2 - Persistent Startup Password Protection Control
+
+> Protocol remains 13 and SQLite/AI schema remains 9 on Windows and Android. Android ships one production arm64 APK with no AAB generated or uploaded. Windows artifacts are currently unsigned. Linux client code remains maintained, but this release does not include a production Linux package.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.2_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.2_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.2_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.7.2_android-arm64.apk`
+
+### Added
+- Windows and Android can persistently enable or disable Startup Password Protection; both changes verify the current data-protection password in a dialog.
+- When protection is disabled, the next cold start auto-enters with an internal credential held by platform-secure storage and stays disabled until the user explicitly enables it again.
+- The setting only controls whether a password must be entered manually at cold start. It never deletes, migrates, re-encrypts, or rewrites local or Cloud data and does not change account login state.
+
+### Fixed
+- Replaced the unclear inline password field in data-protection settings with a dedicated verification dialog for changing startup protection.
+- Fixed the disabled choice not persisting across cold starts and the manual unlock gate not reliably returning after re-enabling protection.
+- A wrong password or secure-storage failure preserves the previous choice and remains fail-closed, preventing an unlock bypass.
+
+### Verified
+- The production Windows EXE passed the background flow for default-on, wrong-password disable rejection, correct-password disable, cold-start auto-entry, wrong-password enable rejection, correct-password enable, and a final cold start with the manual unlock gate restored. The system device-key fingerprint remained unchanged.
+- The production Android APK passed `0.7.2/7000002`, arm64-only, production-signature, and embedded-resource checks. The x86_64 MuMu test passed first launch and a cold start after force-stop; that test package is not a release asset.
+- Shared startup-protection unit tests, the Windows/Android frontend builds, the release-version gate, and the formal Windows data-protection runtime test passed.
+
+### SHA256
+- `A68826CBEEA6E04CCE52B37E2464BFA0EA68C69BF14B71F19CA7B9956B03A685`  `Creation-SSH_0.7.2_x64-setup.exe`
+- `4139832B3363E62BD7F581A9F9DFBB49CE2C6229E983DF542412C0C3346BC5AF`  `Creation-SSH_0.7.2_x64_en-US.msi`
+- `56034053754CF9C392B90D1A81CD9769405B8BF9D7888C1769E731E8369DBB53`  `Creation-SSH_0.7.2_portable-Windows-x64.zip`
+- `E10305B8CD2B48E23B033CBE4AB5CFA35238CCBA76D7140F660A00B0216A6B16`  `C-SSH_0.7.2_android-arm64.apk`
+
 ## v0.7.1 - Optional Cloud Sync and Local Multi-Model Accounts
 
 > `v7.0.0` remains the historical mistyped version from the previous release; this new release uses the correct `v0.7.1` version. Android ships one arm64 APK and no AAB. Windows artifacts are currently unsigned.
