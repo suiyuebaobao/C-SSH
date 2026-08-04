@@ -23,6 +23,8 @@ Download complete installers from [GitHub Releases](../../releases). Each releas
 - Replaced the unclear inline password field in data-protection settings with a dedicated verification dialog for changing startup protection.
 - Fixed the disabled choice not persisting across cold starts and the manual unlock gate not reliably returning after re-enabling protection.
 - A wrong password or secure-storage failure preserves the previous choice and remains fail-closed, preventing an unlock bypass.
+- Fixed Android new-device verification keeping the reminder overlay above the password dialog and intercepting the Verify button.
+- Fixed corrupted Android data-protection copy and added a nine-locale encoding regression check.
 
 ### Verified
 - The production Windows EXE passed the background flow for default-on, wrong-password disable rejection, correct-password disable, cold-start auto-entry, wrong-password enable rejection, correct-password enable, and a final cold start with the manual unlock gate restored. The system device-key fingerprint remained unchanged.
@@ -33,7 +35,7 @@ Download complete installers from [GitHub Releases](../../releases). Each releas
 - `A68826CBEEA6E04CCE52B37E2464BFA0EA68C69BF14B71F19CA7B9956B03A685`  `Creation-SSH_0.7.2_x64-setup.exe`
 - `4139832B3363E62BD7F581A9F9DFBB49CE2C6229E983DF542412C0C3346BC5AF`  `Creation-SSH_0.7.2_x64_en-US.msi`
 - `56034053754CF9C392B90D1A81CD9769405B8BF9D7888C1769E731E8369DBB53`  `Creation-SSH_0.7.2_portable-Windows-x64.zip`
-- `E10305B8CD2B48E23B033CBE4AB5CFA35238CCBA76D7140F660A00B0216A6B16`  `C-SSH_0.7.2_android-arm64.apk`
+- `3D35FDE833FF06F3108FBED44A8BEC29CDF71638F154D274CE14A0B14F023E08`  `C-SSH_0.7.2_android-arm64.apk`
 
 ## v0.7.1 - Optional Cloud Sync and Local Multi-Model Accounts
 

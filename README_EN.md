@@ -27,6 +27,7 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 - Broadcast execution can mix Agent and native SSH hosts with common per-host results, isolation, and confirmation behavior.
 - Added Contact Us cards for WeChat, QQ group, and WhatsApp across all three clients, plus a compact mobile AI toolbar.
 - Fixed data-protection cold start and forgot-password reset, empty-cloud download previews, live AI configuration refresh, and host-monitor status projection.
+- Fixed the Android new-device password dialog being blocked by an invisible reminder overlay and fixed corrupted data-protection copy.
 
 ## Android First
 
