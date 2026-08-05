@@ -7,9 +7,9 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::{
-    HostConflictView, HostDownloadAllowlist, HostView, PullAckRequest, PullRequest, PullResponse,
-    PushOutcome, PushRequest, ReplaceAllowlistRequest, ResolveConflictOutcome,
-    ResolveConflictRequest,
+    AdminSyncRecord, HostConflictView, HostView, PullAckRequest, PullRequest, PullResponse,
+    PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
+    ResetSyncResponse, ResolveConflictOutcome, ResolveConflictRequest, SyncStateView,
     actor::{AccountActor, DeviceActor},
     repository, validation,
 };
@@ -44,27 +44,6 @@ impl Service {
         repository::get(&self.pool, actor.account_id(), host_id).await
     }
 
-    pub async fn get_download_allowlist(
-        &self,
-        session: &AuthenticatedSession,
-        device_id: Uuid,
-    ) -> AppResult<HostDownloadAllowlist> {
-        let actor = AccountActor::from_session(session)?;
-        validation::device_id(device_id)?;
-        repository::get_allowlist(&self.pool, actor.account_id(), device_id).await
-    }
-
-    pub async fn replace_download_allowlist(
-        &self,
-        session: &AuthenticatedSession,
-        device_id: Uuid,
-        request: ReplaceAllowlistRequest,
-    ) -> AppResult<HostDownloadAllowlist> {
-        let actor = AccountActor::from_session(session)?;
-        let host_ids = validation::allowlist(device_id, &request)?;
-        repository::replace_allowlist(&self.pool, actor.account_id(), device_id, &host_ids).await
-    }
-
     pub async fn push(
         &self,
         session: &AuthenticatedSession,
@@ -72,6 +51,7 @@ impl Service {
     ) -> AppResult<PushOutcome> {
         let actor = DeviceActor::from_session(session)?;
         let changes = validation::push(
+            request.sync_generation,
             request.base_revision,
             request.client_mutation_id,
             &request.changes,
@@ -131,6 +111,32 @@ impl Service {
         repository::resolve_conflict(&self.pool, actor, conflict_id, &request, &request_hash).await
     }
 
+    pub async fn sync_state(&self, session: &AuthenticatedSession) -> AppResult<SyncStateView> {
+        let actor = DeviceActor::from_session(session)?;
+        repository::state(&self.pool, actor).await
+    }
+
+    pub async fn reset_sync(
+        &self,
+        session: &AuthenticatedSession,
+        request: ResetSyncRequest,
+    ) -> AppResult<ResetSyncResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        validation::reset(&request)?;
+        repository::reset(&self.pool, actor, &request).await
+    }
+
+    pub async fn rekey_sync(
+        &self,
+        session: &AuthenticatedSession,
+        request: RekeySyncRequest,
+    ) -> AppResult<RekeySyncResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        let hosts = validation::rekey(&request)?;
+        let request_hash = fingerprint("host-sync-rekey-v1", &request)?;
+        repository::rekey(&self.pool, actor, &request, &hosts, &request_hash).await
+    }
+
     pub async fn admin_count_for_user(
         &self,
         actor: &AdminActor,
@@ -162,6 +168,40 @@ impl Service {
         validate_account_id(account_id)?;
         validation::host_id(host_id)?;
         repository::get(&self.pool, account_id, host_id).await
+    }
+
+    pub async fn admin_delete_for_user(
+        &self,
+        actor: &AdminActor,
+        account_id: Uuid,
+        host_id: Uuid,
+    ) -> AppResult<()> {
+        require_admin(actor)?;
+        validate_account_id(account_id)?;
+        validation::host_id(host_id)?;
+        repository::delete_admin_host(&self.pool, actor, account_id, host_id).await
+    }
+
+    pub async fn admin_list_sync_records(
+        &self,
+        actor: &AdminActor,
+        account_id: Uuid,
+        page: PageQuery,
+    ) -> AppResult<Page<AdminSyncRecord>> {
+        require_admin(actor)?;
+        validate_account_id(account_id)?;
+        repository::list_admin_sync_records(&self.pool, account_id, page).await
+    }
+
+    pub async fn admin_delete_sync_record(
+        &self,
+        actor: &AdminActor,
+        account_id: Uuid,
+        record_id: &str,
+    ) -> AppResult<()> {
+        require_admin(actor)?;
+        validate_account_id(account_id)?;
+        repository::delete_admin_sync_record(&self.pool, actor, account_id, record_id).await
     }
 }
 
@@ -224,6 +264,7 @@ mod tests {
             status: HostStatus::Active,
         };
         let request = |ciphertext| PushRequest {
+            sync_generation: 1,
             base_revision: 1,
             client_mutation_id: Uuid::nil(),
             changes: vec![HostChange {

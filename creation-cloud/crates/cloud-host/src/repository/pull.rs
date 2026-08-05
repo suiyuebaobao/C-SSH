@@ -1,4 +1,4 @@
-//! Allowlisted incremental pulls and cloud-side acknowledgement bookkeeping.
+//! Account-scoped incremental pulls and cloud-side acknowledgement bookkeeping.
 
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use chrono::{DateTime, Utc};
@@ -14,7 +14,7 @@ use crate::{
 
 use super::{
     DbTransaction, begin, commit, invalid_stored_value, lock_sync_state, require_active_device,
-    storage,
+    require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
@@ -41,6 +41,7 @@ pub(crate) async fn pull(
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
+    require_sync_generation(state, request.sync_generation)?;
     if request.since_revision < state.compacted_through_revision {
         return Err(AppError::SyncResyncRequired(
             "the requested host revision is no longer available".to_owned(),
@@ -56,19 +57,16 @@ pub(crate) async fn pull(
     let fetch_limit = i64::from(request.limit) + 1;
     let mut rows = sqlx::query_as::<_, PullRow>(
         "WITH latest AS (
-             SELECT DISTINCT ON (allowlist.host_id)
+             SELECT DISTINCT ON (versions.host_id)
                      versions.host_id, versions.revision, versions.address,
                      versions.port, versions.name, versions.platform,
                      versions.tags, versions.status, versions.ciphertext,
                      versions.source_device_id,
-                    versions.is_deleted, versions.recorded_at
-             FROM cloud_host_download_allowlist AS allowlist
-             JOIN cloud_host_versions AS versions
-               ON versions.account_id = allowlist.account_id
-              AND versions.host_id = allowlist.host_id
-              AND versions.revision <= $3
-             WHERE allowlist.account_id = $1 AND allowlist.device_id = $2
-             ORDER BY allowlist.host_id, versions.revision DESC
+                     versions.is_deleted, versions.recorded_at
+             FROM cloud_host_versions AS versions
+             WHERE versions.account_id = $1
+               AND versions.revision <= $3
+             ORDER BY versions.host_id, versions.revision DESC
          )
          SELECT latest.host_id, latest.revision, latest.address, latest.port,
                 latest.name, latest.platform, latest.tags, latest.status,
@@ -117,6 +115,7 @@ pub(crate) async fn pull(
         .collect::<AppResult<Vec<_>>>()?;
     commit(tx).await?;
     Ok(PullResponse {
+        sync_generation: state.sync_generation,
         records,
         snapshot_revision: snapshot,
         next_revision,
@@ -133,6 +132,7 @@ pub(crate) async fn ack(
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
+    require_sync_generation(state, request.sync_generation)?;
     if request.acknowledged_revision < state.compacted_through_revision {
         return Err(AppError::SyncResyncRequired(
             "the acknowledged host revision is no longer available".to_owned(),
@@ -212,7 +212,8 @@ pub(crate) async fn ack(
              acknowledged_revision =
                  GREATEST(cloud_host_device_checkpoints.acknowledged_revision,
                           EXCLUDED.acknowledged_revision),
-             last_manual_sync_at = now(), updated_at = now()",
+             last_manual_sync_at = now(), updated_at = now(),
+             admin_deleted_at = NULL",
     )
     .bind(actor.account_id())
     .bind(actor.device_id())

@@ -36,6 +36,7 @@ pub(crate) async fn execute(
     pool: &PgPool,
     session_ttl: Duration,
     session: &AuthenticatedSession,
+    request_metadata: &crate::TrustedRequestMetadata,
     command: ChangePassword,
 ) -> AppResult<IssuedSession> {
     command.validate()?;
@@ -79,6 +80,7 @@ pub(crate) async fn execute(
         device_id,
         idle_expires_at,
         absolute_expires_at,
+        request_metadata,
     )
     .await?;
     Ok(IssuedSession {
@@ -95,8 +97,19 @@ pub(crate) async fn execute(
         metadata: SessionMetadata {
             email_verified: !session.email.is_empty(),
             session_kind: session_kind.to_owned(),
+            device_name: snapshot.device_name,
+            last_login_ip: request_metadata
+                .last_login_ip
+                .clone()
+                .or(snapshot.last_login_ip),
+            user_agent: request_metadata.user_agent.clone().or(snapshot.user_agent),
+            client_version: snapshot.client_version,
+            device_fingerprint: snapshot.device_fingerprint,
+            created_at: now,
+            last_seen_at: now,
             idle_expires_at,
             absolute_expires_at,
+            revoked_at: None,
         },
         raw_token,
     })

@@ -100,13 +100,16 @@ pub async fn authenticate_page_session(
 /// 在管理审计层之内校验状态变更请求，使失败尝试也留下 failure 事件。
 pub async fn require_csrf(
     Extension(session): Extension<AuthenticatedSession>,
-    request: Request,
+    mut request: Request,
     next: Next,
-) -> AppResult<Response> {
+) -> Response {
     if requires_csrf(request.method()) {
-        validate_csrf(request.headers(), &session.csrf_token)?;
+        request = match validate_page_csrf(request, &session.csrf_token).await {
+            Ok(request) => request,
+            Err(response) => return response,
+        };
     }
-    Ok(next.run(request).await)
+    next.run(request).await
 }
 
 /// 拒绝普通账号进入管理端路由，身份必须先由 `require_session` 注入。

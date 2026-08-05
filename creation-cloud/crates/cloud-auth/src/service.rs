@@ -3,8 +3,9 @@
 use std::{sync::Arc, time::Duration};
 
 use chrono::{DateTime, Utc};
-use cloud_domain::AppResult;
+use cloud_domain::{AdminActor, AppResult};
 use cloud_store::PgPool;
+use rand::RngCore;
 use sqlx::PgConnection;
 
 use crate::{
@@ -13,8 +14,10 @@ use crate::{
     mailer::{UnavailableVerificationMailer, VerificationMailer},
     session::{AuthenticatedSession, IssuedSession, SessionMetadata},
     use_case::{
-        self, ChangePassword, Login, Register, RegistrationStatus, ResendStatus,
-        ResendVerification, VerifyEmail,
+        self, AuthSettings, ChangePassword, ClientLoginConfig, Login, LoginCaptchaSettings,
+        LoginOutcome, LoginVerificationRequired, PasswordResetVerificationRequired, Register,
+        RegistrationOutcome, RequestPasswordReset, ResendLoginVerification, ResendStatus,
+        ResendVerification, ResetPassword, UpdateAuthSettings, VerifyEmail, VerifyLogin,
     },
 };
 
@@ -23,6 +26,7 @@ pub struct Service {
     pool: PgPool,
     session_ttl: Duration,
     verification_key: Arc<[u8]>,
+    captcha_key: Arc<[u8]>,
     verification_mailer: Arc<dyn VerificationMailer>,
     credential_limiter: CredentialLimiter,
     login_limiter: LoginLimiter,
@@ -35,6 +39,7 @@ impl Service {
             pool,
             session_ttl,
             verification_key: Vec::<u8>::new().into(),
+            captcha_key: random_captcha_key(),
             verification_mailer: Arc::new(UnavailableVerificationMailer),
             credential_limiter: CredentialLimiter::default(),
             login_limiter: LoginLimiter::default(),
@@ -48,25 +53,65 @@ impl Service {
         verification_key: Vec<u8>,
         verification_mailer: Arc<dyn VerificationMailer>,
     ) -> Self {
+        let captcha_key = if verification_key.len() >= 32 {
+            Arc::from(verification_key.clone())
+        } else {
+            random_captcha_key()
+        };
         Self {
             pool,
             session_ttl,
             verification_key: Arc::from(verification_key),
+            captcha_key,
             verification_mailer,
             credential_limiter: CredentialLimiter::default(),
             login_limiter: LoginLimiter::default(),
         }
     }
 
-    pub(crate) async fn register(&self, command: Register) -> AppResult<RegistrationStatus> {
+    pub(crate) async fn register_with_metadata(
+        &self,
+        command: Register,
+        request_metadata: &crate::TrustedRequestMetadata,
+    ) -> AppResult<RegistrationOutcome> {
         let _permit = self.credential_limiter.acquire_register(&command.email)?;
         use_case::register::execute(
             &self.pool,
+            self.session_ttl,
             &self.verification_key,
+            &self.captcha_key,
             &self.verification_mailer,
+            request_metadata,
             command,
         )
         .await
+    }
+
+    pub(crate) async fn issue_captcha(
+        &self,
+        purpose: crate::captcha::CaptchaPurpose,
+    ) -> AppResult<use_case::captcha::IssuedCaptcha> {
+        use_case::captcha::issue(&self.pool, &self.captcha_key, purpose).await
+    }
+
+    pub async fn client_login_config(&self) -> AppResult<ClientLoginConfig> {
+        use_case::auth_settings::client_login_config(&self.pool).await
+    }
+
+    pub async fn login_captcha_settings(&self) -> AppResult<LoginCaptchaSettings> {
+        use_case::auth_settings::login_captcha_settings(&self.pool).await
+    }
+
+    pub async fn auth_settings(&self, actor: &AdminActor) -> AppResult<AuthSettings> {
+        use_case::auth_settings::get(&self.pool, actor).await
+    }
+
+    pub async fn update_auth_settings(
+        &self,
+        actor: &AdminActor,
+        input: UpdateAuthSettings,
+    ) -> AppResult<AuthSettings> {
+        use_case::auth_settings::update(&self.pool, actor, input).await
     }
 
     pub(crate) async fn resend_verification(
@@ -83,20 +128,99 @@ impl Service {
         .await
     }
 
-    pub(crate) async fn verify_email(&self, command: VerifyEmail) -> AppResult<IssuedSession> {
+    pub(crate) async fn verify_email_with_metadata(
+        &self,
+        command: VerifyEmail,
+        request_metadata: &crate::TrustedRequestMetadata,
+    ) -> AppResult<IssuedSession> {
         let _permit = self.credential_limiter.acquire_register(&command.email)?;
         use_case::verify_email::execute(
             &self.pool,
             self.session_ttl,
             &self.verification_key,
+            request_metadata,
             command,
         )
         .await
     }
 
-    pub(crate) async fn login(&self, command: Login) -> AppResult<IssuedSession> {
+    pub(crate) async fn login_with_metadata(
+        &self,
+        command: Login,
+        request_metadata: &crate::TrustedRequestMetadata,
+    ) -> AppResult<LoginOutcome> {
         let _permit = self.login_limiter.acquire(&command.identifier)?;
-        use_case::login::execute(&self.pool, self.session_ttl, command).await
+        use_case::login::execute(
+            &self.pool,
+            self.session_ttl,
+            &self.verification_key,
+            &self.captcha_key,
+            &self.verification_mailer,
+            request_metadata,
+            command,
+        )
+        .await
+    }
+
+    pub(crate) async fn verify_login_with_metadata(
+        &self,
+        command: VerifyLogin,
+        request_metadata: &crate::TrustedRequestMetadata,
+    ) -> AppResult<IssuedSession> {
+        let _permit = self
+            .credential_limiter
+            .acquire_login_verification(command.challenge_id)?;
+        use_case::verify_login::execute(
+            &self.pool,
+            self.session_ttl,
+            &self.verification_key,
+            request_metadata,
+            command,
+        )
+        .await
+    }
+
+    pub(crate) async fn resend_login_verification(
+        &self,
+        command: ResendLoginVerification,
+    ) -> AppResult<LoginVerificationRequired> {
+        let _permit = self
+            .credential_limiter
+            .acquire_login_verification(command.challenge_id)?;
+        use_case::resend_login_verification::execute(
+            &self.pool,
+            &self.verification_key,
+            &self.verification_mailer,
+            command,
+        )
+        .await
+    }
+
+    pub(crate) async fn request_password_reset(
+        &self,
+        command: RequestPasswordReset,
+    ) -> AppResult<PasswordResetVerificationRequired> {
+        let _permit = self
+            .credential_limiter
+            .acquire_password_reset_request(&command.email)?;
+        use_case::request_password_reset::execute(
+            &self.pool,
+            &self.verification_key,
+            &self.captcha_key,
+            &self.verification_mailer,
+            command,
+        )
+        .await
+    }
+
+    pub(crate) async fn reset_password(
+        &self,
+        command: ResetPassword,
+    ) -> AppResult<use_case::reset_password::ResetPasswordOutcome> {
+        let _permit = self
+            .credential_limiter
+            .acquire_password_reset_confirm(&command.email)?;
+        use_case::reset_password::execute(&self.pool, &self.verification_key, command).await
     }
 
     pub(crate) async fn logout(&self, session: &AuthenticatedSession) -> AppResult<()> {
@@ -108,10 +232,31 @@ impl Service {
         session: &AuthenticatedSession,
         command: ChangePassword,
     ) -> AppResult<IssuedSession> {
+        self.change_password_with_metadata(
+            session,
+            command,
+            &crate::TrustedRequestMetadata::default(),
+        )
+        .await
+    }
+
+    pub async fn change_password_with_metadata(
+        &self,
+        session: &AuthenticatedSession,
+        command: ChangePassword,
+        request_metadata: &crate::TrustedRequestMetadata,
+    ) -> AppResult<IssuedSession> {
         let _permit = self
             .credential_limiter
             .acquire_password(session.account_id)?;
-        use_case::change_password::execute(&self.pool, self.session_ttl, session, command).await
+        use_case::change_password::execute(
+            &self.pool,
+            self.session_ttl,
+            session,
+            request_metadata,
+            command,
+        )
+        .await
     }
 
     /// 使用 Cookie 中的原始令牌完成会话鉴权。
@@ -151,4 +296,10 @@ impl Service {
         )
         .await
     }
+}
+
+fn random_captcha_key() -> Arc<[u8]> {
+    let mut key = [0_u8; 32];
+    rand::rng().fill_bytes(&mut key);
+    Arc::from(key.to_vec())
 }

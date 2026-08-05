@@ -9,7 +9,7 @@ use super::error;
 use crate::{
     session::{AuthenticatedSession, IssuedSession, SessionMetadata},
     token,
-    verification::{MAX_ATTEMPTS, RESEND_COOLDOWN_SECONDS},
+    verification::MAX_ATTEMPTS,
 };
 
 pub(crate) struct AccountState {
@@ -67,6 +67,7 @@ pub(crate) async fn replace_if_cooled_down(
     challenge_id: Uuid,
     code_digest: &[u8],
     expires_at: DateTime<Utc>,
+    cooldown_seconds: i32,
 ) -> AppResult<bool> {
     let latest = sqlx::query_as::<_, (DateTime<Utc>, Option<DateTime<Utc>>)>(
         "SELECT created_at, sent_at FROM email_verification_challenges \
@@ -77,12 +78,11 @@ pub(crate) async fn replace_if_cooled_down(
     .fetch_optional(&mut **transaction)
     .await
     .map_err(error::storage)?;
-    if latest
-        .and_then(|(_, sent_at)| sent_at)
-        .is_some_and(|sent_at| {
-            Utc::now().signed_duration_since(sent_at).num_seconds() < RESEND_COOLDOWN_SECONDS
-        })
-    {
+    let last_delivery_started_at =
+        latest.map(|(created_at, sent_at)| sent_at.unwrap_or(created_at));
+    if last_delivery_started_at.is_some_and(|started_at| {
+        delivery_cooldown_active(started_at, cooldown_seconds, Utc::now())
+    }) {
         return Ok(false);
     }
     consume_open(transaction, account_id).await?;
@@ -124,12 +124,21 @@ pub(crate) async fn insert(
 
 pub(crate) async fn prepare_resend(
     pool: &PgPool,
+    verification_available: bool,
     email: &str,
     challenge_id: Uuid,
     code_digest: &[u8],
     expires_at: DateTime<Utc>,
 ) -> AppResult<bool> {
     let mut transaction = pool.begin().await.map_err(error::storage)?;
+    let auth_settings = super::settings::lock(&mut transaction).await?;
+    if !auth_settings.email_verification_enabled {
+        transaction.commit().await.map_err(error::storage)?;
+        return Ok(false);
+    }
+    if !verification_available {
+        return Err(AppError::Unavailable("邮箱验证密钥尚未安全配置".to_owned()));
+    }
     lock_email(&mut transaction, email).await?;
     let Some(account) = find_account(&mut transaction, email).await? else {
         transaction.commit().await.map_err(error::storage)?;
@@ -144,6 +153,7 @@ pub(crate) async fn prepare_resend(
             challenge_id,
             code_digest,
             expires_at,
+            auth_settings.email_cooldown_seconds,
         )
         .await?;
     transaction.commit().await.map_err(error::storage)?;
@@ -174,6 +184,7 @@ pub(crate) async fn cancel_unsent(pool: &PgPool, challenge_id: Uuid) -> AppResul
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn verify_and_issue(
     pool: &PgPool,
     email: &str,
@@ -182,6 +193,7 @@ pub(crate) async fn verify_and_issue(
     session_id: Uuid,
     raw_token: String,
     token_hash: Vec<u8>,
+    request_metadata: &crate::TrustedRequestMetadata,
 ) -> AppResult<IssuedSession> {
     let mut transaction = pool.begin().await.map_err(error::storage)?;
     lock_email(&mut transaction, email).await?;
@@ -242,14 +254,16 @@ pub(crate) async fn verify_and_issue(
     sqlx::query(
         "INSERT INTO sessions \
          (id, account_id, token_hash, credential_version, session_kind, \
-          expires_at, absolute_expires_at) \
-         VALUES ($1, $2, $3, $4, 'unbound', $5, $5)",
+          expires_at, absolute_expires_at, last_login_ip, user_agent) \
+         VALUES ($1, $2, $3, $4, 'unbound', $5, $5, $6::inet, $7)",
     )
     .bind(session_id)
     .bind(account.id)
     .bind(token_hash)
     .bind(credential_version)
     .bind(expires_at)
+    .bind(&request_metadata.last_login_ip)
+    .bind(&request_metadata.user_agent)
     .execute(&mut *transaction)
     .await
     .map_err(error::storage)?;
@@ -266,11 +280,11 @@ pub(crate) async fn verify_and_issue(
             expires_at,
             csrf_token: token::csrf(&raw_token),
         },
-        metadata: SessionMetadata::unbound(expires_at, true),
+        metadata: SessionMetadata::unbound_with_request(expires_at, true, request_metadata),
     })
 }
 
-async fn consume_open(
+pub(crate) async fn consume_open(
     transaction: &mut Transaction<'_, Postgres>,
     account_id: Uuid,
 ) -> AppResult<()> {
@@ -287,4 +301,32 @@ async fn consume_open(
 
 fn invalid_code() -> AppError {
     AppError::Unauthorized("验证码无效、已过期或已达到尝试上限".to_owned())
+}
+
+fn delivery_cooldown_active(
+    delivery_started_at: DateTime<Utc>,
+    cooldown_seconds: i32,
+    now: DateTime<Utc>,
+) -> bool {
+    now.signed_duration_since(delivery_started_at).num_seconds()
+        < i64::from(cooldown_seconds.max(1))
+}
+
+#[cfg(test)]
+mod cooldown_tests {
+    use chrono::{Duration, TimeZone, Utc};
+
+    use super::delivery_cooldown_active;
+
+    #[test]
+    fn registration_delivery_cooldown_uses_the_configured_value() {
+        let now = Utc
+            .with_ymd_and_hms(2026, 8, 4, 12, 0, 0)
+            .single()
+            .expect("fixed time");
+        let started_at = now - Duration::seconds(45);
+
+        assert!(delivery_cooldown_active(started_at, 90, now));
+        assert!(!delivery_cooldown_active(started_at, 30, now));
+    }
 }

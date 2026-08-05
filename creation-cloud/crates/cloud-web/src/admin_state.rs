@@ -17,6 +17,9 @@ pub struct AdminHealth {
 #[derive(Clone)]
 pub struct AdminPageState {
     admin: cloud_admin::Service,
+    auth: cloud_auth::Service,
+    device: cloud_device::Service,
+    announcement: cloud_announcement::Service,
     release: cloud_release::Service,
     download: cloud_download::Service,
     feedback: cloud_feedback::Service,
@@ -34,6 +37,8 @@ impl AdminPageState {
     #[must_use]
     pub fn new(
         admin: cloud_admin::Service,
+        auth: cloud_auth::Service,
+        announcement: cloud_announcement::Service,
         release: cloud_release::Service,
         download: cloud_download::Service,
         host: cloud_host::Service,
@@ -45,8 +50,12 @@ impl AdminPageState {
     ) -> Self {
         let feedback = cloud_feedback::Service::new(pool.clone());
         let seo = cloud_seo::Service::new(pool.clone());
+        let device = cloud_device::Service::new(pool.clone());
         Self {
             admin,
+            auth,
+            device,
+            announcement,
             release,
             download,
             feedback,
@@ -62,6 +71,18 @@ impl AdminPageState {
 
     pub(crate) const fn admin(&self) -> &cloud_admin::Service {
         &self.admin
+    }
+
+    pub(crate) const fn auth(&self) -> &cloud_auth::Service {
+        &self.auth
+    }
+
+    pub(crate) const fn device(&self) -> &cloud_device::Service {
+        &self.device
+    }
+
+    pub(crate) const fn announcement(&self) -> &cloud_announcement::Service {
+        &self.announcement
     }
 
     pub(crate) const fn release(&self) -> &cloud_release::Service {

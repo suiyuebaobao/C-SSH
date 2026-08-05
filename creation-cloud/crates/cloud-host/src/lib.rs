@@ -7,13 +7,15 @@ mod service;
 mod types;
 mod validation;
 
-pub use router::{device_router, host_router, management_router, router, sync_router};
+pub use router::{host_router, management_router, router, sync_router};
 pub use service::Service;
 pub use types::{
-    HostChange, HostConflictView, HostDownloadAllowlist, HostMetadataInput, HostOperation,
-    HostStatus, HostView, LocalDecision, PullAckRequest, PullDecision, PullHostRecord, PullRequest,
-    PullResponse, PushOutcome, PushRequest, RemoteResolution, ReplaceAllowlistRequest,
-    ResolveConflictOutcome, ResolveConflictRequest,
+    AdminSyncDirection, AdminSyncRecord, HostChange, HostConflictView, HostMetadataInput,
+    HostOperation, HostStatus, HostView, LocalDecision, PullAckRequest, PullDecision,
+    PullHostRecord, PullRequest, PullResponse, PushOutcome, PushRequest, RekeyHostCandidate,
+    RekeyHostRevision, RekeySyncRequest, RekeySyncResponse, RemoteResolution, ResetConfirmation,
+    ResetSyncRequest, ResetSyncResponse, ResolveConflictOutcome, ResolveConflictRequest,
+    SyncStateView,
 };
 
 #[cfg(test)]

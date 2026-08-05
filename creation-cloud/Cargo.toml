@@ -2,6 +2,7 @@
 members = [
     "apps/server",
     "crates/cloud-admin",
+    "crates/cloud-announcement",
     "crates/cloud-auth",
     "crates/cloud-config",
     "crates/cloud-device",
@@ -39,6 +40,7 @@ axum = { version = "0.8.9", features = ["form", "json", "macros", "multipart"] }
 base64 = "0.22.1"
 chrono = { version = "0.4.41", features = ["serde"] }
 cloud-admin = { path = "crates/cloud-admin" }
+cloud-announcement = { path = "crates/cloud-announcement" }
 cloud-auth = { path = "crates/cloud-auth" }
 cloud-config = { path = "crates/cloud-config" }
 cloud-device = { path = "crates/cloud-device" }

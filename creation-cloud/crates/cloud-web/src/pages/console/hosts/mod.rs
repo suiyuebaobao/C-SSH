@@ -1,8 +1,4 @@
-//! 用户主机列表与逐设备下载白名单。
-
-pub(crate) mod allowlist;
-
-use std::collections::HashSet;
+//! 用户云端主机列表。
 
 use askama::Template;
 use axum::{Extension, extract::Query, extract::State, response::Html};
@@ -50,19 +46,6 @@ fn status(value: HostStatus) -> &'static str {
     }
 }
 
-struct HostOption {
-    id: String,
-    label: String,
-    selected: bool,
-}
-
-struct DevicePolicy {
-    id: String,
-    name: String,
-    platform: String,
-    options: Vec<HostOption>,
-}
-
 #[derive(Template)]
 #[template(path = "console-hosts.html")]
 struct HostsTemplate {
@@ -72,7 +55,6 @@ struct HostsTemplate {
     is_en: bool,
     hosts: Vec<HostRow>,
     total: i64,
-    device_policies: Vec<DevicePolicy>,
 }
 
 pub(crate) async fn page(
@@ -84,36 +66,6 @@ pub(crate) async fn page(
         .host()
         .list_self(&session, common::first_page())
         .await?;
-    let devices = state.device().list(&session, common::first_page()).await?;
-    let mut device_policies = Vec::new();
-    for device in devices
-        .items
-        .into_iter()
-        .filter(|item| item.revoked_at.is_none())
-    {
-        let selected = state
-            .host()
-            .get_download_allowlist(&session, device.id)
-            .await?
-            .host_ids
-            .into_iter()
-            .collect::<HashSet<_>>();
-        let options = host_page
-            .items
-            .iter()
-            .map(|host| HostOption {
-                id: host.id.to_string(),
-                label: format!("{} · {}:{}", host.name, host.address, host.port),
-                selected: selected.contains(&host.id),
-            })
-            .collect();
-        device_policies.push(DevicePolicy {
-            id: device.id.to_string(),
-            name: device.name,
-            platform: device.platform,
-            options,
-        });
-    }
     let locale = query.locale();
     common::render(&HostsTemplate {
         view: common::view(PageId::Sync, locale),
@@ -122,6 +74,5 @@ pub(crate) async fn page(
         is_en: common::is_en(locale),
         total: host_page.total,
         hosts: host_page.items.into_iter().map(HostRow::from).collect(),
-        device_policies,
     })
 }

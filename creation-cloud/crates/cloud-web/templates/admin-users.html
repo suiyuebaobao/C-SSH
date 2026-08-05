@@ -2,33 +2,82 @@
 
 {% block admin_content %}
 <section class="admin-section" aria-labelledby="users-heading">
-  <div class="admin-section-heading"><div><h2 id="users-heading">{% if is_en %}Accounts{% else %}账号列表{% endif %}</h2><p>{% if is_en %}Select an account before viewing its hosts.{% else %}必须先选择账号，才能查看该账号的主机。{% endif %}</p></div></div>
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="users-heading">{% if is_en %}Users{% else %}用户管理{% endif %}</h2>
+      <p>{% if is_en %}Click a user to view account, host, sync and device data.{% else %}点击用户，查看账号、主机、同步和设备数据。{% endif %}</p>
+    </div>
+    <details class="admin-create-panel">
+      <summary class="button button-primary">{% if is_en %}Add user{% else %}新增用户{% endif %}</summary>
+      <form class="admin-form-grid" action="/admin/users" method="post" hx-post="/admin/users" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Create this user with the entered account settings?{% else %}确认按当前账号信息创建用户？{% endif %}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <label class="admin-field">{% if is_en %}Email{% else %}邮箱{% endif %}<input type="email" name="email" maxlength="254" autocomplete="off" required></label>
+        <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="display_name" maxlength="80" autocomplete="off" required></label>
+        <label class="admin-field">{% if is_en %}Initial password{% else %}初始密码{% endif %}<input type="password" name="password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
+        <label class="admin-field">{% if is_en %}Role{% else %}角色{% endif %}<select name="role"><option value="user">{% if is_en %}User{% else %}普通用户{% endif %}</option><option value="admin">{% if is_en %}Administrator{% else %}管理员{% endif %}</option></select></label>
+        <label class="admin-field">{% if is_en %}Status{% else %}状态{% endif %}<select name="status"><option value="active">{% if is_en %}Active{% else %}正常{% endif %}</option><option value="disabled">{% if is_en %}Disabled{% else %}停用{% endif %}</option></select></label>
+        <label class="admin-field">{% if is_en %}Admin login name (optional){% else %}管理员登录名（可选）{% endif %}<input name="admin_login_name" maxlength="64" autocomplete="off"></label>
+        <div class="admin-actions"><button class="button button-primary" type="submit">{% if is_en %}Create user{% else %}创建用户{% endif %}</button></div>
+      </form>
+    </details>
+  </div>
+
   <form class="admin-toolbar" method="get" action="/admin/users">
     {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-    <label class="admin-field">{% if is_en %}Exact email{% else %}精确邮箱{% endif %}<input name="email" type="email" value="{{ email_filter }}" autocomplete="off" placeholder="user@example.com"></label>
-    <label class="admin-field">{% if is_en %}Role{% else %}角色{% endif %}<select name="role"><option value="">{% if is_en %}All{% else %}全部{% endif %}</option><option value="user"{% if role_filter == "user" %} selected{% endif %}>user</option><option value="admin"{% if role_filter == "admin" %} selected{% endif %}>admin</option></select></label>
-    <label class="admin-field">{% if is_en %}Status{% else %}状态{% endif %}<select name="status"><option value="">{% if is_en %}All{% else %}全部{% endif %}</option><option value="pending_verification"{% if status_filter == "pending_verification" %} selected{% endif %}>pending_verification</option><option value="active"{% if status_filter == "active" %} selected{% endif %}>active</option><option value="disabled"{% if status_filter == "disabled" %} selected{% endif %}>disabled</option></select></label>
-    <button class="button button-primary" type="submit">{% if is_en %}Filter{% else %}筛选{% endif %}</button>
+    <label class="admin-field">{% if is_en %}Search{% else %}搜索用户{% endif %}
+      <input name="search" value="{{ search_filter }}" autocomplete="off" placeholder="{% if is_en %}Name, email or login name{% else %}姓名、邮箱或登录名{% endif %}">
+    </label>
+    <label class="admin-field">{% if is_en %}Role{% else %}角色{% endif %}
+      <select name="role">
+        <option value="">{% if is_en %}All roles{% else %}全部角色{% endif %}</option>
+        <option value="user"{% if role_filter == "user" %} selected{% endif %}>{% if is_en %}User{% else %}用户{% endif %}</option>
+        <option value="admin"{% if role_filter == "admin" %} selected{% endif %}>{% if is_en %}Administrator{% else %}管理员{% endif %}</option>
+      </select>
+    </label>
+    <label class="admin-field">{% if is_en %}Status{% else %}状态{% endif %}
+      <select name="status">
+        <option value="">{% if is_en %}All statuses{% else %}全部状态{% endif %}</option>
+        <option value="active"{% if status_filter == "active" %} selected{% endif %}>{% if is_en %}Active{% else %}正常{% endif %}</option>
+        <option value="pending_verification"{% if status_filter == "pending_verification" %} selected{% endif %}>{% if is_en %}Pending verification{% else %}待验证{% endif %}</option>
+        <option value="disabled"{% if status_filter == "disabled" %} selected{% endif %}>{% if is_en %}Disabled{% else %}已停用{% endif %}</option>
+      </select>
+    </label>
+    <button class="button button-primary" type="submit">{% if is_en %}Search{% else %}查询{% endif %}</button>
   </form>
+
   {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
-  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No matching accounts{% else %}没有匹配账号{% endif %}</strong></div>{% endif %}
+  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No matching users{% else %}没有匹配的用户{% endif %}</strong></div>{% endif %}
+
   {% if !rows.is_empty() %}
-  <div class="admin-table-wrap"><table class="admin-table">
-    <thead><tr><th>{% if is_en %}Account{% else %}账号{% endif %}</th><th>{% if is_en %}Role / status{% else %}角色 / 状态{% endif %}</th><th>{% if is_en %}Devices{% else %}设备{% endif %}</th><th>{% if is_en %}Hosts{% else %}主机{% endif %}</th><th>{% if is_en %}Actions{% else %}操作{% endif %}</th></tr></thead>
-    <tbody>{% for row in rows %}<tr>
-      <td><strong>{{ row.display_name }}</strong><br>{{ row.email }}{% if !row.login_name.is_empty() %}<br>@{{ row.login_name }}{% endif %}<br><span class="admin-mono">{{ row.id }}</span></td>
-      <td><span class="status-badge">{{ row.role }}</span> <span class="status-badge" data-tone="{% if row.status == "active" %}success{% else %}danger{% endif %}">{{ row.status }}</span></td>
-      <td>{{ row.device_count }}</td>
-      <td><a class="button button-secondary" href="/admin/users/{{ row.id }}/hosts{% if is_en %}?lang=en{% endif %}">{{ row.host_count }} · {% if is_en %}View{% else %}查看{% endif %}</a></td>
-      <td><div class="admin-actions">
-        {% if row.status != "pending_verification" %}
-        <form hx-post="/admin/users/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Change this account role?{% else %}确认变更账号角色？{% endif %}"><input type="hidden" name="role" value="{% if row.role == "admin" %}user{% else %}admin{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if row.role == "admin" %}{% if is_en %}Set user{% else %}设为用户{% endif %}{% else %}{% if is_en %}Set admin{% else %}设为管理员{% endif %}{% endif %}</button></form>
-        {% endif %}
-        <form hx-post="/admin/users/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Change this account status?{% else %}确认变更账号状态？{% endif %}"><input type="hidden" name="status" value="{% if row.status == "active" %}disabled{% else %}active{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit"{% if row.status == "pending_verification" %} disabled{% endif %}>{% if row.status == "active" %}{% if is_en %}Disable{% else %}停用{% endif %}{% else %}{% if is_en %}Enable{% else %}启用{% endif %}{% endif %}</button></form>
-      </div></td>
-    </tr>{% endfor %}</tbody>
-  </table></div>
+  <div class="admin-table-wrap">
+    <table class="admin-table admin-user-table">
+      <thead><tr>
+        <th>{% if is_en %}User{% else %}用户{% endif %}</th>
+        <th>{% if is_en %}Role{% else %}角色{% endif %}</th>
+        <th>{% if is_en %}Status{% else %}状态{% endif %}</th>
+        <th>{% if is_en %}Devices{% else %}设备{% endif %}</th>
+        <th>{% if is_en %}Hosts{% else %}主机{% endif %}</th>
+        <th>{% if is_en %}Updated{% else %}最近更新{% endif %}</th>
+        <th></th>
+      </tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          <td><a class="admin-user-link" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}"><strong>{% if row.display_name.is_empty() %}{% if !row.login_name.is_empty() %}{{ row.login_name }}{% else %}—{% endif %}{% else %}{{ row.display_name }}{% endif %}</strong><span>{{ row.email }}</span></a></td>
+          <td><a class="admin-user-cell-link" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}">{% if row.role == "admin" %}{% if is_en %}Administrator{% else %}管理员{% endif %}{% else %}{% if is_en %}User{% else %}用户{% endif %}{% endif %}</a></td>
+          <td><a class="admin-user-cell-link" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}"><span class="status-badge" data-tone="{% if row.status == "active" %}success{% else if row.status == "pending_verification" %}warning{% else %}danger{% endif %}">{% if row.status == "active" %}{% if is_en %}Active{% else %}正常{% endif %}{% else if row.status == "pending_verification" %}{% if is_en %}Pending{% else %}待验证{% endif %}{% else %}{% if is_en %}Disabled{% else %}已停用{% endif %}{% endif %}</span></a></td>
+          <td><a class="admin-user-cell-link" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}">{{ row.device_count }}</a></td>
+          <td><a class="admin-user-cell-link" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}">{{ row.host_count }}</a></td>
+          <td><a class="admin-user-cell-link admin-mono" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}">{{ row.updated_at }}</a></td>
+          <td><a class="admin-user-cell-link" href="/admin/users/{{ row.id }}{% if is_en %}?lang=en{% endif %}" aria-label="{% if is_en %}View user details{% else %}查看用户详情{% endif %}">→</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% endif %}
+
   {% if load_error.is_none() %}<nav class="admin-pagination">{% if let Some(href) = previous_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Previous{% else %}上一页{% endif %}</a>{% endif %}<span>{% if is_en %}Page{% else %}第{% endif %} {{ page_number }} · {{ total }}</span>{% if let Some(href) = next_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Next{% else %}下一页{% endif %}</a>{% endif %}</nav>{% endif %}
 </section>
 {% endblock %}

@@ -16,9 +16,16 @@ struct CountRow {
 pub(crate) const COUNT_SQL: &str = r#"
     SELECT count(*)::BIGINT AS total
     FROM accounts
-    WHERE ($1::TEXT IS NULL OR lower(email) = $1)
-      AND ($2::TEXT IS NULL OR role = $2)
-      AND ($3::TEXT IS NULL OR status = $3)
+    LEFT JOIN user_profiles ON user_profiles.account_id = accounts.id
+    WHERE (
+            $1::TEXT IS NULL
+            OR lower(COALESCE(accounts.email, '')) ILIKE $1 ESCAPE '\'
+            OR lower(COALESCE(accounts.admin_login_name, '')) ILIKE $1 ESCAPE '\'
+            OR lower(COALESCE(user_profiles.display_name, '')) ILIKE $1 ESCAPE '\'
+          )
+      AND ($2::TEXT IS NULL OR lower(accounts.email) = $2)
+      AND ($3::TEXT IS NULL OR accounts.role = $3)
+      AND ($4::TEXT IS NULL OR accounts.status = $4)
 "#;
 
 pub(crate) const LIST_SQL: &str = r#"
@@ -34,11 +41,17 @@ pub(crate) const LIST_SQL: &str = r#"
            accounts.created_at, accounts.updated_at
     FROM accounts
     LEFT JOIN user_profiles ON user_profiles.account_id = accounts.id
-    WHERE ($1::TEXT IS NULL OR lower(accounts.email) = $1)
-      AND ($2::TEXT IS NULL OR accounts.role = $2)
-      AND ($3::TEXT IS NULL OR accounts.status = $3)
+    WHERE (
+            $1::TEXT IS NULL
+            OR lower(COALESCE(accounts.email, '')) ILIKE $1 ESCAPE '\'
+            OR lower(COALESCE(accounts.admin_login_name, '')) ILIKE $1 ESCAPE '\'
+            OR lower(COALESCE(user_profiles.display_name, '')) ILIKE $1 ESCAPE '\'
+          )
+      AND ($2::TEXT IS NULL OR lower(accounts.email) = $2)
+      AND ($3::TEXT IS NULL OR accounts.role = $3)
+      AND ($4::TEXT IS NULL OR accounts.status = $4)
     ORDER BY accounts.created_at DESC, accounts.id DESC
-    LIMIT $4 OFFSET $5
+    LIMIT $5 OFFSET $6
 "#;
 
 pub(crate) async fn execute(
@@ -47,7 +60,9 @@ pub(crate) async fn execute(
 ) -> AppResult<Page<AdminUser>> {
     let role = filter.role.map(|value| value.as_str());
     let status = filter.status.map(|value| value.as_str());
+    let search_pattern = filter.search.as_deref().map(search_pattern);
     let count = sqlx::query_as::<_, CountRow>(COUNT_SQL)
+        .bind(search_pattern.as_deref())
         .bind(filter.email.as_deref())
         .bind(role)
         .bind(status)
@@ -55,6 +70,7 @@ pub(crate) async fn execute(
         .await
         .map_err(map_read_error)?;
     let rows = sqlx::query_as::<_, AdminUserRow>(LIST_SQL)
+        .bind(search_pattern.as_deref())
         .bind(filter.email.as_deref())
         .bind(role)
         .bind(status)
@@ -73,4 +89,22 @@ pub(crate) async fn execute(
         size: filter.page.size,
         total: count.total,
     })
+}
+
+fn search_pattern(value: &str) -> String {
+    let escaped = value
+        .replace('\\', r"\\")
+        .replace('%', r"\%")
+        .replace('_', r"\_");
+    format!("%{escaped}%")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::search_pattern;
+
+    #[test]
+    fn search_pattern_escapes_like_wildcards() {
+        assert_eq!(search_pattern(r"a_b%c\d"), r"%a\_b\%c\\d%");
+    }
 }

@@ -25,3 +25,12 @@ pub use model::{
 };
 pub use router::router;
 pub use service::Service;
+
+#[doc(hidden)]
+pub async fn create_asset_in_transaction(
+    actor: &cloud_domain::AdminActor,
+    transaction: &mut cloud_store::Transaction<'_, cloud_store::Postgres>,
+    input: CreateAssetInput,
+) -> cloud_domain::AppResult<ReleaseAsset> {
+    use_case::asset::create::create_in_transaction(actor, transaction, input).await
+}

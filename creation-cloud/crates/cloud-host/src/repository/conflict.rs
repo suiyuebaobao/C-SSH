@@ -17,7 +17,7 @@ use super::{
     hosts::{HostRow, lock_current},
     lock_sync_state,
     push::{WriteValue, from_metadata, same_value, write_host},
-    require_active_device, storage,
+    require_active_device, require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
@@ -51,6 +51,7 @@ pub(crate) async fn resolve(
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
+    require_sync_generation(state, request.sync_generation)?;
     reject_reused_resolution_id(&mut tx, actor, conflict_id, request).await?;
     let row = load_locked(&mut tx, actor.account_id(), conflict_id).await?;
 

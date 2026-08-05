@@ -27,6 +27,8 @@ const DOCUMENTATION_GUIDES_CSS: &str = include_str!("../static/css/documentation
 const ADMIN_FOUNDATION_CSS: &str = include_str!("../static/css/admin-foundation.css");
 const ADMIN_COMPONENTS_CSS: &str = include_str!("../static/css/admin-components.css");
 const ADMIN_PAGES_CSS: &str = include_str!("../static/css/admin-pages.css");
+const ADMIN_RECORD_PAGES_CSS: &str = include_str!("../static/css/admin-record-pages.css");
+const ADMIN_SITE_SIMPLE_CSS: &str = include_str!("../static/css/admin-site-simple.css");
 const ADMIN_SITE_CONTENT_CSS: &str = include_str!("../static/css/admin-site-content.css");
 const CONSOLE_CSS: &str = include_str!("../static/css/console.css");
 const SITE_JS: &str = include_str!("../static/js/site.js");
@@ -78,6 +80,14 @@ pub(crate) fn router() -> Router {
             get(admin_components_css),
         )
         .route("/static/css/admin-pages.css", get(admin_pages_css))
+        .route(
+            "/static/css/admin-record-pages.css",
+            get(admin_record_pages_css),
+        )
+        .route(
+            "/static/css/admin-site-simple.css",
+            get(admin_site_simple_css),
+        )
         .route(
             "/static/css/admin-site-content.css",
             get(admin_site_content_css),
@@ -178,6 +188,14 @@ async fn admin_components_css() -> Response {
 
 async fn admin_pages_css() -> Response {
     text_response(ADMIN_PAGES_CSS, "text/css; charset=utf-8")
+}
+
+async fn admin_record_pages_css() -> Response {
+    text_response(ADMIN_RECORD_PAGES_CSS, "text/css; charset=utf-8")
+}
+
+async fn admin_site_simple_css() -> Response {
+    text_response(ADMIN_SITE_SIMPLE_CSS, "text/css; charset=utf-8")
 }
 
 async fn admin_site_content_css() -> Response {

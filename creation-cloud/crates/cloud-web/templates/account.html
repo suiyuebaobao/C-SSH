@@ -7,10 +7,14 @@
       <header class="account-heading">
         <p class="eyebrow">{{ view.page.eyebrow }}</p>
         <h1 id="account-title">{{ view.page.heading }}</h1>
-        <p>{{ view.page.lead }}</p>
+        {% if view.page.form_action != "/web/auth/login" %}<p>{{ view.page.lead }}</p>{% endif %}
       </header>
+      {% if password_reset %}
+      <p class="form-feedback" data-tone="success">{% if view.shell.html_lang == "en" %}Your password has been reset. Sign in with the new password.{% else %}密码已重置，请使用新密码登录。{% endif %}</p>
+      {% endif %}
       <form class="account-form" action="{{ view.page.form_action }}" method="post" hx-post="{{ view.page.form_action }}" hx-target="#auth-feedback" hx-swap="innerHTML" hx-disabled-elt="find button">
         {% if view.page.form_action == "/web/auth/register" %}<input type="hidden" name="locale" value="{{ view.shell.html_lang }}">{% endif %}
+        {% if view.page.form_action == "/web/auth/login" %}<input type="hidden" name="lang" value="{{ view.shell.html_lang }}">{% endif %}
         {% if let Some(next_path) = next_path %}<input type="hidden" name="next" value="{{ next_path }}">{% endif %}
         {% for field in view.page.fields %}
         <label class="field-label" for="field-{{ field.name }}">
@@ -18,10 +22,25 @@
           <input id="field-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" autocomplete="{{ field.autocomplete }}" placeholder="{{ field.placeholder }}"{% if field.required %} required{% endif %}>
         </label>
         {% endfor %}
+        {% if view.page.form_action == "/web/auth/login" %}
+        <p class="account-form-assist"><a class="text-link account-inline-link" href="{% if view.shell.html_lang == "en" %}/en/forgot-password{% else %}/forgot-password{% endif %}">{% if view.shell.html_lang == "en" %}Forgot password?{% else %}忘记密码？{% endif %}</a></p>
+        {% endif %}
+        {% if captcha_required %}
+        <div class="admin-captcha">
+          <p><strong>{% if admin_login %}{% if view.shell.html_lang == "en" %}Administrator CAPTCHA{% else %}管理员图形验证码{% endif %}{% else %}{% if view.shell.html_lang == "en" %}Visual CAPTCHA{% else %}图形验证码{% endif %}{% endif %}</strong></p>
+          <button class="captcha-image-button" type="button" data-captcha-refresh data-captcha-url="/api/v1/auth/captcha?purpose={{ captcha_purpose }}" aria-label="{% if view.shell.html_lang == "en" %}Refresh the visual CAPTCHA{% else %}点击刷新图形验证码{% endif %}" title="{% if view.shell.html_lang == "en" %}Click to refresh{% else %}点击图片刷新{% endif %}">
+            <img data-captcha-image src="/api/v1/auth/captcha?purpose={{ captcha_purpose }}" width="240" height="80" alt="{% if view.shell.html_lang == "en" %}One-time authentication CAPTCHA{% else %}一次性认证图形验证码{% endif %}">
+          </button>
+          <label class="field-label" for="field-captcha-code">
+            <span>{% if view.shell.html_lang == "en" %}Enter the six digits shown in the image{% else %}输入图片中的六位数字{% endif %}</span>
+            <input id="field-captcha-code" name="captcha_code" type="text" autocomplete="off" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
+          </label>
+        </div>
+        {% endif %}
         <button class="button button-primary button-full" type="submit">{{ view.page.submit_label }}</button>
         <div class="form-feedback" id="auth-feedback" aria-live="polite"></div>
       </form>
-      <p class="form-note">{{ view.page.form_note }}</p>
+      {% if view.page.form_action != "/web/auth/login" %}<p class="form-note">{{ view.page.form_note }}</p>{% endif %}
       <div class="account-alternative">
         {% for action in view.page.actions %}
         <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>

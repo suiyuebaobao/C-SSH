@@ -10,10 +10,12 @@ mod validation;
 
 use axum::{
     Router,
-    routing::{get, post},
+    routing::{delete, get, post},
 };
 
-pub use model::{CreateDeviceOutcome, Device, DeviceSessionResult, DeviceSessionView, Platform};
+pub use model::{
+    CreateDeviceOutcome, Device, DeviceSessionResult, DeviceSessionView, Platform, SessionView,
+};
 pub use service::Service;
 pub use use_case::{CreateDevice, UpdateDevice};
 
@@ -21,6 +23,11 @@ pub use use_case::{CreateDevice, UpdateDevice};
 #[must_use = "路由必须挂载到服务端才会生效"]
 pub fn router(service: Service) -> Router {
     Router::new()
+        .route("/sessions", get(handler::session::list_self))
+        .route(
+            "/sessions/{session_id}",
+            delete(handler::session::revoke_self),
+        )
         .route(
             "/",
             post(handler::create::handle).get(handler::list::handle),
@@ -30,6 +37,22 @@ pub fn router(service: Service) -> Router {
             get(handler::get::handle)
                 .patch(handler::update::handle)
                 .delete(handler::delete::handle),
+        )
+        .with_state(service)
+}
+
+/// Builds administrator session-management routes without an API prefix.
+#[must_use = "the router must be mounted for session management to be available"]
+pub fn management_router(service: Service) -> Router {
+    Router::new()
+        .route("/sessions", get(handler::session::list_admin))
+        .route(
+            "/sessions/{session_id}",
+            delete(handler::session::delete_admin),
+        )
+        .route(
+            "/users/{account_id}/sessions",
+            get(handler::session::list_admin_for_user),
         )
         .with_state(service)
 }

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260721-console">{% endblock %}
+{% block styles %}<link rel="stylesheet" href="/static/css/console.css?v=20260730-session-list">{% endblock %}
 {% block scripts %}<script src="/static/js/console.js?v=20260721-console" defer></script>{% endblock %}
 
 {% block main %}
@@ -10,39 +10,73 @@
     <div class="console-content">
       {% include "console-heading.html" %}
       <section class="console-section">
-        <div class="console-section-heading"><h2>{% if is_en %}Registered product devices{% else %}已登记产品设备{% endif %}</h2><span class="console-status">{{ total }}</span></div>
-        <p class="console-boundary">{% if is_en %}This browser can manage existing devices, but it cannot register itself as a product device.{% else %}浏览器只能管理既有设备，不能把自己登记或伪装成产品设备。{% endif %}</p>
-        {% if devices.is_empty() %}
-        <p class="console-empty">{% if is_en %}No registered devices.{% else %}当前账号没有已登记设备。{% endif %}</p>
+        <div class="console-section-heading">
+          <div>
+            <h2>{% if is_en %}Signed-in devices{% else %}登录设备{% endif %}</h2>
+            <p>{% if is_en %}Review account sessions and revoke any device you no longer use.{% else %}查看账号登录会话，随时撤销不再使用的设备。{% endif %}</p>
+          </div>
+          <span class="console-status console-status-muted">{{ total }}</span>
+        </div>
+
+        {% if rows.is_empty() %}
+        <p class="console-empty">{% if is_en %}No signed-in devices.{% else %}当前账号没有登录设备。{% endif %}</p>
         {% else %}
-        <div class="console-list">
-          {% for device in devices %}
-          <article class="console-record">
-            <div class="console-record-heading">
-              <div><strong>{{ device.name }}</strong><small>{{ device.platform }} · {{ device.id }}</small></div>
-              <span class="console-status{% if device.revoked_at.is_some() %} console-status-muted{% endif %}">{% if device.revoked_at.is_some() %}{% if is_en %}Revoked{% else %}已撤销{% endif %}{% else %}{% if is_en %}Active{% else %}有效{% endif %}{% endif %}</span>
-            </div>
-            <dl class="console-definition-grid console-definition-grid-compact">
-              <div><dt>{% if is_en %}Last active{% else %}最近活动{% endif %}</dt><dd>{% if let Some(value) = device.last_seen_at %}{{ value }}{% else %}—{% endif %}</dd></div>
-              <div><dt>{% if is_en %}Created{% else %}登记时间{% endif %}</dt><dd>{{ device.created_at }}</dd></div>
-            </dl>
-            {% if device.revoked_at.is_none() %}
-            <div class="console-record-actions">
-              <form class="console-inline-form" action="/console/devices/{{ device.id }}" method="post" hx-post="/console/devices/{{ device.id }}" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
-                <label><span class="sr-only">{% if is_en %}New device name{% else %}新设备名称{% endif %}</span><input name="name" value="{{ device.name }}" maxlength="100" required></label>
-                <button class="button button-secondary" type="submit">{% if is_en %}Rename{% else %}重命名{% endif %}</button>
-              </form>
-              <form action="/console/devices/{{ device.id }}/revoke" method="post" hx-post="/console/devices/{{ device.id }}/revoke" hx-swap="none" hx-confirm="{% if is_en %}Revoke this device and all bound sessions?{% else %}撤销此设备及其全部绑定会话？{% endif %}" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
-                <button class="button button-danger" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button>
-              </form>
-            </div>
-            {% endif %}
-          </article>
-          {% endfor %}
+        <div class="console-session-table-wrap">
+          <table class="console-session-table">
+            <thead>
+              <tr>
+                <th>{% if is_en %}Device{% else %}设备{% endif %}</th>
+                <th>{% if is_en %}Status{% else %}状态{% endif %}</th>
+                <th>{% if is_en %}Last login IP{% else %}最近登录 IP{% endif %}</th>
+                <th>{% if is_en %}Client{% else %}客户端{% endif %}</th>
+                <th>{% if is_en %}Last active{% else %}最近活动{% endif %}</th>
+                <th>{% if is_en %}Valid until{% else %}有效期{% endif %}</th>
+                <th>{% if is_en %}Action{% else %}操作{% endif %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr class="console-session-row">
+                <td data-label="{% if is_en %}Device{% else %}设备{% endif %}"><strong>{{ row.device_name }}</strong></td>
+                <td data-label="{% if is_en %}Status{% else %}状态{% endif %}">
+                  <span class="console-status{% if !row.online %} console-status-muted{% endif %}">{% if row.online %}{% if is_en %}Online{% else %}在线{% endif %}{% else %}{% if is_en %}Offline{% else %}不在线{% endif %}{% endif %}</span>
+                  {% if row.is_current %}<span class="console-current-badge">{% if is_en %}Current device{% else %}当前设备{% endif %}</span>{% endif %}
+                </td>
+                <td class="console-mono" data-label="{% if is_en %}Last login IP{% else %}最近登录 IP{% endif %}">{{ row.last_login_ip }}</td>
+                <td data-label="{% if is_en %}Client{% else %}客户端{% endif %}">{{ row.client_version }}</td>
+                <td class="console-mono" data-label="{% if is_en %}Last active{% else %}最近活动{% endif %}">{{ row.last_seen_at }}</td>
+                <td class="console-mono" data-label="{% if is_en %}Valid until{% else %}有效期{% endif %}">{{ row.idle_expires_at }}</td>
+                <td data-label="{% if is_en %}Action{% else %}操作{% endif %}">
+                  {% if row.can_revoke %}
+                  <form action="/console/devices/sessions/{{ row.session_id }}/revoke" method="post" hx-post="/console/devices/sessions/{{ row.session_id }}/revoke" hx-swap="none" hx-confirm="{% if row.is_current %}{% if is_en %}Revoke this current session and sign out?{% else %}撤销当前会话并退出登录？{% endif %}{% else %}{% if is_en %}Revoke this session?{% else %}撤销这个登录会话？{% endif %}{% endif %}" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+                    <button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button>
+                  </form>
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+              <tr class="console-session-detail-row">
+                <td colspan="7">
+                  <details class="session-details">
+                    <summary>{% if is_en %}View details{% else %}查看详情{% endif %}</summary>
+                    <dl class="session-detail-grid">
+                      <div><dt>{% if is_en %}Session ID{% else %}会话 ID{% endif %}</dt><dd>{{ row.session_id }}</dd></div>
+                      <div><dt>{% if is_en %}Device ID{% else %}设备 ID{% endif %}</dt><dd>{{ row.device_id }}</dd></div>
+                      <div><dt>{% if is_en %}Fingerprint{% else %}设备指纹{% endif %}</dt><dd>{{ row.device_fingerprint }}</dd></div>
+                      <div><dt>{% if is_en %}Created{% else %}创建时间{% endif %}</dt><dd>{{ row.created_at }}</dd></div>
+                      <div><dt>{% if is_en %}Last active{% else %}最近活动{% endif %}</dt><dd>{{ row.last_seen_at }}</dd></div>
+                      <div><dt>{% if is_en %}Idle expiry{% else %}闲置过期{% endif %}</dt><dd>{{ row.idle_expires_at }}</dd></div>
+                      <div><dt>{% if is_en %}Absolute expiry{% else %}绝对过期{% endif %}</dt><dd>{{ row.absolute_expires_at }}</dd></div>
+                      <div><dt>{% if is_en %}Revoked at{% else %}撤销时间{% endif %}</dt><dd>{{ row.revoked_at }}</dd></div>
+                      <div class="session-detail-wide"><dt>{% if is_en %}Full user agent{% else %}完整 User-Agent{% endif %}</dt><dd>{{ row.user_agent }}</dd></div>
+                    </dl>
+                  </details>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
         {% endif %}
       </section>

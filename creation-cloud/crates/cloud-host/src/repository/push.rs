@@ -15,7 +15,7 @@ use crate::{
 use super::{
     DbTransaction, begin, commit,
     hosts::{HostRow, lock_current},
-    lock_sync_state, require_active_device, storage,
+    lock_sync_state, require_active_device, require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
@@ -63,11 +63,13 @@ pub(crate) async fn push(
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, account_id, device_id).await?;
     let state = lock_sync_state(&mut tx, account_id).await?;
+    require_sync_generation(state, request.sync_generation)?;
 
     if let Some(outcome) = replay_mutation(
         &mut tx,
         account_id,
         device_id,
+        state.sync_generation,
         request.client_mutation_id,
         request_hash,
     )
@@ -119,6 +121,7 @@ pub(crate) async fn push(
         .await?;
         commit(tx).await?;
         return Ok(PushOutcome::Conflict {
+            sync_generation: state.sync_generation,
             conflict,
             idempotent: false,
         });
@@ -165,11 +168,13 @@ pub(crate) async fn push(
     commit(tx).await?;
     if changed_count == 0 {
         Ok(PushOutcome::Unchanged {
+            sync_generation: state.sync_generation,
             revision,
             idempotent: false,
         })
     } else {
         Ok(PushOutcome::Applied {
+            sync_generation: state.sync_generation,
             revision,
             changed_count,
             idempotent: false,
@@ -315,6 +320,7 @@ async fn replay_mutation(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
     device_id: Uuid,
+    sync_generation: i64,
     mutation_id: Uuid,
     request_hash: &[u8; 32],
 ) -> AppResult<Option<PushOutcome>> {
@@ -339,17 +345,20 @@ async fn replay_mutation(
     }
     let outcome = match row.outcome.as_str() {
         "applied" => PushOutcome::Applied {
+            sync_generation,
             revision: row.result_revision,
             changed_count: u32::try_from(row.changed_count).unwrap_or(0),
             idempotent: true,
         },
         "unchanged" => PushOutcome::Unchanged {
+            sync_generation,
             revision: row.result_revision,
             idempotent: true,
         },
         "conflict" => {
             let id = row.conflict_id.ok_or_else(super::invalid_stored_value)?;
             PushOutcome::Conflict {
+                sync_generation,
                 conflict: load_conflict(tx, account_id, id).await?,
                 idempotent: true,
             }

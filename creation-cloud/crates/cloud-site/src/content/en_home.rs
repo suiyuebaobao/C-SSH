@@ -40,14 +40,14 @@ pub(super) fn page_content() -> PageContent {
         qr_placeholder_waiting: "WAITING".into(),
         media_slot: None,
         qr_widget: HomeQrWidget::pending(HomeQrLabels {
-            code: "MOBILE ACCESS / QR",
-            title: "Scan entry",
-            pending: "QR code awaiting admin upload",
-            ready: "QR code published",
-            note: "Click the card to toggle size",
-            image_alt: "Creation-SSH QR code",
-            open: "Enlarge QR code",
-            close: "Close QR code",
+            code: "QQ COMMUNITY / QR",
+            title: "Join the QQ community",
+            pending: "QQ community QR awaiting upload",
+            ready: "QQ community QR published",
+            note: "Scan to join Creation-SSH users · Click to enlarge",
+            image_alt: "QR code to join the Creation-SSH QQ community",
+            open: "Enlarge QQ community QR",
+            close: "Close QQ community QR",
         }),
     };
 
@@ -328,8 +328,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "MODEL",
                     "Models",
-                    "Sync credential-free model metadata, defaults, and order.",
-                    "API keys reference ciphertext",
+                    "Read administrator-managed global model names, vendors, API formats, and API URLs.",
+                    "API keys and tokens stay client-local",
                 ),
                 item(
                     "VAULT",

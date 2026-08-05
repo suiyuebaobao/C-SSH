@@ -332,6 +332,23 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "cloud-auth",
+ "cloud-domain",
+ "cloud-store",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tower",
+ "uuid",
+]
+
+[[package]]
+name = "cloud-announcement"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
  "cloud-domain",
  "cloud-store",
  "serde",
@@ -360,6 +377,7 @@ dependencies = [
  "subtle",
  "tokio",
  "tower",
+ "tracing",
  "url",
  "uuid",
 ]
@@ -383,8 +401,10 @@ dependencies = [
  "hex",
  "rand 0.9.5",
  "serde",
+ "serde_json",
  "sha2",
  "sqlx",
+ "tokio",
  "uuid",
 ]
 
@@ -408,9 +428,11 @@ dependencies = [
  "axum",
  "chrono",
  "cloud-domain",
+ "cloud-release",
  "cloud-store",
  "mime_guess",
  "serde",
+ "serde_json",
  "sha2",
  "sqlx",
  "tempfile",
@@ -477,7 +499,6 @@ name = "cloud-model"
 version = "0.1.0"
 dependencies = [
  "axum",
- "base64 0.22.1",
  "chrono",
  "cloud-domain",
  "cloud-store",
@@ -485,6 +506,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio",
+ "tower",
  "url",
  "uuid",
 ]
@@ -628,6 +650,7 @@ dependencies = [
  "axum",
  "chrono",
  "cloud-admin",
+ "cloud-announcement",
  "cloud-auth",
  "cloud-device",
  "cloud-domain",
@@ -732,6 +755,7 @@ dependencies = [
  "axum",
  "chrono",
  "cloud-admin",
+ "cloud-announcement",
  "cloud-auth",
  "cloud-config",
  "cloud-device",
@@ -748,7 +772,6 @@ dependencies = [
  "cloud-store",
  "cloud-sync",
  "cloud-user",
- "cloud-vault",
  "cloud-web",
  "lettre",
  "rpassword",

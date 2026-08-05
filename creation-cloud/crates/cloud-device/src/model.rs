@@ -63,16 +63,47 @@ pub struct CreateDeviceOutcome {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct DeviceSessionView {
+    pub session_id: Uuid,
     pub account_id: Uuid,
     pub email: Option<String>,
     pub email_verified: bool,
     pub admin_login_name: Option<String>,
     pub role: String,
+    pub status: String,
+    pub is_current: bool,
     pub device_id: Uuid,
+    pub device_name: Option<String>,
+    pub last_login_ip: Option<String>,
+    pub user_agent: Option<String>,
+    pub client_version: Option<String>,
+    pub device_fingerprint: Option<String>,
     pub session_kind: String,
+    pub created_at: DateTime<Utc>,
+    pub last_seen_at: DateTime<Utc>,
     pub idle_expires_at: DateTime<Utc>,
     pub absolute_expires_at: DateTime<Utc>,
+    pub revoked_at: Option<DateTime<Utc>>,
     pub csrf_token: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct SessionView {
+    pub session_id: Uuid,
+    pub status: String,
+    pub is_current: bool,
+    pub account_id: Uuid,
+    pub account_label: String,
+    pub device_id: Option<Uuid>,
+    pub device_name: Option<String>,
+    pub last_login_ip: Option<String>,
+    pub user_agent: Option<String>,
+    pub client_version: Option<String>,
+    pub device_fingerprint: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub last_seen_at: DateTime<Utc>,
+    pub idle_expires_at: DateTime<Utc>,
+    pub absolute_expires_at: DateTime<Utc>,
+    pub revoked_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Clone, Debug, Serialize)]

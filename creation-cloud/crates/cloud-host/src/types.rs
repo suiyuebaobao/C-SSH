@@ -1,4 +1,4 @@
-//! 定义主机元数据、原样密文、手动同步和白名单的稳定 API 形状。
+//! 定义主机元数据、原样密文、账号同步代次和手动同步的稳定 API 形状。
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -107,6 +107,7 @@ pub struct HostChange {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PushRequest {
+    pub sync_generation: i64,
     pub base_revision: i64,
     pub client_mutation_id: Uuid,
     pub changes: Vec<HostChange>,
@@ -116,15 +117,18 @@ pub struct PushRequest {
 #[serde(tag = "status", rename_all = "snake_case")]
 pub enum PushOutcome {
     Applied {
+        sync_generation: i64,
         revision: i64,
         changed_count: u32,
         idempotent: bool,
     },
     Unchanged {
+        sync_generation: i64,
         revision: i64,
         idempotent: bool,
     },
     Conflict {
+        sync_generation: i64,
         conflict: HostConflictView,
         idempotent: bool,
     },
@@ -161,6 +165,7 @@ impl RemoteResolution {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ResolveConflictRequest {
+    pub sync_generation: i64,
     pub action: RemoteResolution,
     pub resolution_mutation_id: Uuid,
     pub expected_revision: i64,
@@ -176,21 +181,10 @@ pub struct ResolveConflictOutcome {
     pub resolved_at: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct ReplaceAllowlistRequest {
-    pub host_ids: Vec<Uuid>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub struct HostDownloadAllowlist {
-    pub device_id: Uuid,
-    pub host_ids: Vec<Uuid>,
-}
-
 #[derive(Clone, Copy, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PullRequest {
+    pub sync_generation: i64,
     #[serde(default)]
     pub since_revision: i64,
     #[serde(default)]
@@ -206,6 +200,7 @@ pub struct PullRequest {
 impl Default for PullRequest {
     fn default() -> Self {
         Self {
+            sync_generation: 1,
             since_revision: 0,
             snapshot_revision: None,
             after_revision: None,
@@ -233,6 +228,7 @@ pub struct PullHostRecord {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct PullResponse {
+    pub sync_generation: i64,
     pub records: Vec<PullHostRecord>,
     pub snapshot_revision: i64,
     pub next_revision: i64,
@@ -268,8 +264,95 @@ pub struct PullDecision {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PullAckRequest {
+    pub sync_generation: i64,
     pub acknowledged_revision: i64,
     pub decisions: Vec<PullDecision>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+pub struct SyncStateView {
+    pub sync_generation: i64,
+    pub current_revision: i64,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResetConfirmation {
+    ResetEncryptedSyncData,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ResetSyncRequest {
+    pub mutation_id: Uuid,
+    pub confirmation: ResetConfirmation,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct ResetSyncResponse {
+    pub status: String,
+    pub sync_generation: i64,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RekeyHostCandidate {
+    pub host_id: Uuid,
+    pub cloud_revision: i64,
+    pub ciphertext: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RekeySyncRequest {
+    pub mutation_id: Uuid,
+    pub sync_generation: i64,
+    pub hosts: Vec<RekeyHostCandidate>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+pub struct RekeyHostRevision {
+    pub host_id: Uuid,
+    pub cloud_revision: i64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct RekeySyncResponse {
+    pub status: String,
+    pub sync_generation: i64,
+    pub current_revision: i64,
+    pub revisions: Vec<RekeyHostRevision>,
+    pub idempotent: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AdminSyncDirection {
+    Upload,
+    Download,
+}
+
+impl AdminSyncDirection {
+    pub(crate) fn parse(value: &str) -> Option<Self> {
+        match value {
+            "upload" => Some(Self::Upload),
+            "download" => Some(Self::Download),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct AdminSyncRecord {
+    pub record_id: String,
+    pub direction: AdminSyncDirection,
+    pub device_id: Uuid,
+    pub device_name: String,
+    pub device_platform: String,
+    pub outcome: String,
+    pub revision: i64,
+    pub changed_count: i32,
+    pub occurred_at: DateTime<Utc>,
 }
 
 const fn default_pull_limit() -> u32 {

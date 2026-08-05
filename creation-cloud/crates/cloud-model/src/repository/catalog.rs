@@ -4,13 +4,16 @@ use cloud_domain::{AppError, AppResult, Page, PageQuery};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
-use crate::{GlobalModel, types::ValidatedModel};
+use crate::{
+    GlobalModel,
+    types::{PersistedModel, ValidatedModel},
+};
 
 use super::storage;
 
-const MODEL_COLUMNS: &str = "id, name, provider, base_url, model_name, context_length, \
-    capability_tags, default_parameters, enabled, is_default, sort_order, revision, \
-    created_at, updated_at";
+const MODEL_COLUMNS: &str = "id, name, provider, openai_base_url, openai_model_name, \
+    anthropic_base_url, anthropic_model_name, context_length, capability_tags, \
+    default_parameters, enabled, is_default, sort_order, revision, created_at, updated_at";
 
 pub(crate) async fn list_public(pool: &PgPool, page: PageQuery) -> AppResult<Page<GlobalModel>> {
     list(pool, page, true).await
@@ -36,12 +39,15 @@ async fn list(pool: &PgPool, page: PageQuery, public_only: bool) -> AppResult<Pa
         "SELECT {MODEL_COLUMNS} FROM global_model_catalog WHERE {filter} \
          ORDER BY is_default DESC, sort_order ASC, name ASC, id ASC LIMIT $1 OFFSET $2"
     );
-    let items = sqlx::query_as::<_, GlobalModel>(&sql)
+    let items = sqlx::query_as::<_, PersistedModel>(&sql)
         .bind(i64::from(page.size))
         .bind(page.offset())
         .fetch_all(pool)
         .await
-        .map_err(storage("无法读取模型目录"))?;
+        .map_err(storage("无法读取模型目录"))?
+        .into_iter()
+        .map(GlobalModel::from)
+        .collect();
     Ok(Page {
         items,
         page: page.page,
@@ -65,12 +71,13 @@ async fn get(pool: &PgPool, id: Uuid, public_only: bool) -> AppResult<GlobalMode
         "id = $1 AND deleted_at IS NULL"
     };
     let sql = format!("SELECT {MODEL_COLUMNS} FROM global_model_catalog WHERE {filter}");
-    sqlx::query_as::<_, GlobalModel>(&sql)
+    sqlx::query_as::<_, PersistedModel>(&sql)
         .bind(id)
         .fetch_optional(pool)
         .await
         .map_err(storage("无法读取模型"))?
         .ok_or_else(|| AppError::NotFound("模型不存在".to_owned()))
+        .map(GlobalModel::from)
 }
 
 pub(crate) async fn create(
@@ -89,16 +96,20 @@ pub(crate) async fn create(
     let id = Uuid::now_v7();
     let sql = format!(
         "INSERT INTO global_model_catalog \
-         (id, name, provider, base_url, model_name, context_length, capability_tags, \
-          default_parameters, enabled, is_default, sort_order, created_by, updated_by) \
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$12) RETURNING {MODEL_COLUMNS}"
+         (id, name, provider, openai_base_url, openai_model_name, anthropic_base_url, \
+          anthropic_model_name, context_length, capability_tags, default_parameters, enabled, \
+          is_default, sort_order, created_by, updated_by) \
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$14) \
+         RETURNING {MODEL_COLUMNS}"
     );
-    let model = sqlx::query_as::<_, GlobalModel>(&sql)
+    let model = sqlx::query_as::<_, PersistedModel>(&sql)
         .bind(id)
         .bind(value.name)
         .bind(value.provider)
-        .bind(value.base_url)
-        .bind(value.model_name)
+        .bind(value.interfaces.openai_base_url)
+        .bind(value.interfaces.openai_model_name)
+        .bind(value.interfaces.anthropic_base_url)
+        .bind(value.interfaces.anthropic_model_name)
         .bind(value.context_length)
         .bind(value.capability_tags)
         .bind(value.default_parameters)
@@ -110,7 +121,7 @@ pub(crate) async fn create(
         .await
         .map_err(storage("无法创建全局模型"))?;
     tx.commit().await.map_err(storage("无法提交模型创建事务"))?;
-    Ok(model)
+    Ok(model.into())
 }
 
 pub(crate) async fn replace(
@@ -130,17 +141,20 @@ pub(crate) async fn replace(
         clear_default(&mut tx, Some(id), actor_id).await?;
     }
     let sql = format!(
-        "UPDATE global_model_catalog SET name=$2, provider=$3, base_url=$4, model_name=$5, \
-         context_length=$6, capability_tags=$7, default_parameters=$8, enabled=$9, \
-         is_default=$10, sort_order=$11, revision=revision+1, updated_by=$12, updated_at=now() \
+        "UPDATE global_model_catalog SET name=$2, provider=$3, openai_base_url=$4, \
+         openai_model_name=$5, anthropic_base_url=$6, anthropic_model_name=$7, \
+         context_length=$8, capability_tags=$9, default_parameters=$10, enabled=$11, \
+         is_default=$12, sort_order=$13, revision=revision+1, updated_by=$14, updated_at=now() \
          WHERE id=$1 AND deleted_at IS NULL RETURNING {MODEL_COLUMNS}"
     );
-    let model = sqlx::query_as::<_, GlobalModel>(&sql)
+    let model = sqlx::query_as::<_, PersistedModel>(&sql)
         .bind(id)
         .bind(value.name)
         .bind(value.provider)
-        .bind(value.base_url)
-        .bind(value.model_name)
+        .bind(value.interfaces.openai_base_url)
+        .bind(value.interfaces.openai_model_name)
+        .bind(value.interfaces.anthropic_base_url)
+        .bind(value.interfaces.anthropic_model_name)
         .bind(value.context_length)
         .bind(value.capability_tags)
         .bind(value.default_parameters)
@@ -152,7 +166,7 @@ pub(crate) async fn replace(
         .await
         .map_err(storage("无法更新全局模型"))?;
     tx.commit().await.map_err(storage("无法提交模型更新事务"))?;
-    Ok(model)
+    Ok(model.into())
 }
 
 pub(crate) async fn delete(

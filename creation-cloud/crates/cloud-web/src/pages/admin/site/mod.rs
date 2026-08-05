@@ -30,11 +30,9 @@ pub(crate) struct SiteQuery {
 }
 
 struct CurrentMedia {
-    id: String,
     content_url: String,
     alt_zh: String,
     alt_en: String,
-    sha256: String,
     dimensions: String,
     published_at: String,
 }
@@ -53,10 +51,10 @@ struct MediaRow {
 
 struct ContentHistoryRow {
     id: String,
-    document_key: &'static str,
-    document_label: &'static str,
-    locale: String,
-    locale_label: &'static str,
+    document_label_zh: &'static str,
+    document_label_en: &'static str,
+    locale_label_zh: &'static str,
+    locale_label_en: &'static str,
     state: &'static str,
     revision: i64,
     updated_at: String,
@@ -162,11 +160,9 @@ fn content_load_error(locale: Locale) -> String {
 impl From<PublicHomeQr> for CurrentMedia {
     fn from(value: PublicHomeQr) -> Self {
         Self {
-            id: value.id.to_string(),
             content_url: value.content_url,
             alt_zh: value.alt_zh,
             alt_en: value.alt_en,
-            sha256: value.sha256,
             dimensions: format!("{}×{}", value.width, value.height),
             published_at: value.published_at.to_rfc3339(),
         }
@@ -191,17 +187,22 @@ impl From<SiteMedia> for MediaRow {
 
 impl From<SiteContentRevision> for ContentHistoryRow {
     fn from(value: SiteContentRevision) -> Self {
-        let document_key = value.document_key.as_str();
         Self {
             id: value.id.to_string(),
-            document_key,
-            document_label: match value.document_key {
+            document_label_zh: match value.document_key {
                 cloud_site_content::SiteContentDocumentKey::SiteShell => "公共页头与页脚",
                 cloud_site_content::SiteContentDocumentKey::Home => "首页正文",
             },
-            locale: value.locale.code().to_owned(),
-            locale_label: match value.locale {
+            document_label_en: match value.document_key {
+                cloud_site_content::SiteContentDocumentKey::SiteShell => "Shared header and footer",
+                cloud_site_content::SiteContentDocumentKey::Home => "Home page",
+            },
+            locale_label_zh: match value.locale {
                 Locale::ZhCn => "简体中文",
+                Locale::En => "英文",
+            },
+            locale_label_en: match value.locale {
+                Locale::ZhCn => "Chinese",
                 Locale::En => "English",
             },
             state: value.state.as_str(),

@@ -3,6 +3,7 @@
 
 mod admin_overview;
 mod app;
+mod client_config;
 mod command;
 mod http_trace;
 mod maintenance;
@@ -34,11 +35,13 @@ async fn main() -> Result<()> {
             let password_hash = cloud_auth::hash_admin_password(&password).await?;
             password.clear();
             cloud_admin::create_local_admin(&pool, &admin_login_name, &password_hash).await?;
+            seed_system_model_catalog(&pool).await?;
             println!("管理员账号已创建");
             Ok(())
         }
         command::Command::PromoteAdmin(email) => {
             cloud_admin::promote_registered_admin(&pool, &email).await?;
+            seed_system_model_catalog(&pool).await?;
             println!("管理员角色已更新");
             Ok(())
         }
@@ -52,6 +55,7 @@ async fn main() -> Result<()> {
             Ok(())
         }
         command::Command::Serve => {
+            seed_system_model_catalog(&pool).await?;
             let services = services::AppServices::new(pool, &config)?;
             runtime::serve(services, config).await
         }
@@ -65,6 +69,16 @@ async fn main() -> Result<()> {
             maintenance_cli::status(services, task).await
         }
     }
+}
+
+async fn seed_system_model_catalog(pool: &cloud_store::PgPool) -> Result<()> {
+    let changed = cloud_model::Service::new(pool.clone())
+        .seed_system_catalog()
+        .await?;
+    if changed > 0 {
+        tracing::info!(changed, "已同步未编辑的系统默认模型目录");
+    }
+    Ok(())
 }
 
 fn init_tracing() {

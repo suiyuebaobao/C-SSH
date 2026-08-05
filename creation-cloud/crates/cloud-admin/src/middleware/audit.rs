@@ -104,6 +104,7 @@ fn is_known_segment(segment: &str) -> bool {
             | "overview"
             | "users"
             | "devices"
+            | "announcements"
             | "releases"
             | "assets"
             | "downloads"
@@ -113,6 +114,7 @@ fn is_known_segment(segment: &str) -> bool {
             | "seo"
             | "status"
             | "redact"
+            | "hide"
             | "publish"
             | "revoke"
             | "audit-events"
@@ -194,6 +196,20 @@ mod tests {
         assert_eq!(
             resource(&path),
             ("seo".to_owned(), Some(topic_id.to_string()))
+        );
+    }
+
+    #[test]
+    fn recognizes_announcement_hide_as_an_admin_resource() {
+        let announcement_id = Uuid::now_v7();
+        let path = format!("/api/v1/admin/announcements/{announcement_id}/hide");
+        assert_eq!(sanitize_path(&path), path);
+        assert_eq!(
+            resource(&path),
+            (
+                "announcements".to_owned(),
+                Some(announcement_id.to_string())
+            )
         );
     }
 }

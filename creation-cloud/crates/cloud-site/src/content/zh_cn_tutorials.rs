@@ -220,7 +220,7 @@ pub(super) fn content() -> TutorialContent {
                 "使用自己的模型账号，在受控权限下让 AI 对当前主机完成一次只读诊断。",
                 vec![
                     "目标主机 agent 已 READY，并能完成监控或文件只读请求。",
-                    "准备你自己的模型服务、API Key 和模型名；Key 只应保存到客户端加密存储。",
+                    "准备你自己的模型服务、API Key 和模型名；Key 只保存在客户端本地安全存储，不上传 Creation Cloud。",
                 ],
                 vec![
                     step(

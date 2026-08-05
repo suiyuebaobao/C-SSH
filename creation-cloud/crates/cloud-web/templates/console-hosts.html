@@ -39,32 +39,6 @@
         </div>
         {% endif %}
       </section>
-
-      <section class="console-section">
-        <div class="console-section-heading"><h2>{% if is_en %}Download permissions by device{% else %}按设备设置下载范围{% endif %}</h2></div>
-        <p class="console-boundary">{% if is_en %}The default is empty. A client can download only the checked hosts for its own registered device.{% else %}默认不允许下载任何主机；每台已注册设备只能下载被勾选的主机。{% endif %}</p>
-        {% if device_policies.is_empty() %}
-        <p class="console-empty">{% if is_en %}No active product devices.{% else %}没有有效的产品设备。{% endif %}</p>
-        {% endif %}
-        <div class="console-list">
-          {% for policy in device_policies %}
-          <form class="console-record" action="/console/devices/{{ policy.id }}/host-download-allowlist" method="post" hx-post="/console/devices/{{ policy.id }}/host-download-allowlist" hx-swap="none" hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
-            <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
-            <div class="console-record-heading"><div><strong>{{ policy.name }}</strong><small>{{ policy.platform }} · {{ policy.id }}</small></div></div>
-            {% if policy.options.is_empty() %}
-            <p class="console-empty">{% if is_en %}No hosts are available.{% else %}当前没有可选主机。{% endif %}</p>
-            {% else %}
-            <div class="console-form">
-              {% for option in policy.options %}
-              <label class="console-check"><input type="checkbox" name="host_id" value="{{ option.id }}"{% if option.selected %} checked{% endif %}><span>{{ option.label }}</span></label>
-              {% endfor %}
-            </div>
-            {% endif %}
-            <button class="button button-primary" type="submit">{% if is_en %}Save download scope{% else %}保存下载范围{% endif %}</button>
-          </form>
-          {% endfor %}
-        </div>
-      </section>
     </div>
   </div>
 </main>

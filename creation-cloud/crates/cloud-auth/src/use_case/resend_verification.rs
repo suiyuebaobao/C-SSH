@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use chrono::Utc;
-use cloud_domain::{AppError, AppResult};
+use cloud_domain::AppResult;
 use cloud_store::PgPool;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -27,17 +27,21 @@ pub(crate) async fn execute(
     mailer: &Arc<dyn VerificationMailer>,
     command: ResendVerification,
 ) -> AppResult<ResendStatus> {
-    if verification_key.len() < 32 {
-        return Err(AppError::Unavailable("邮箱验证密钥尚未安全配置".to_owned()));
-    }
     let email = validation::normalize_email(&command.email)?;
     let challenge_id = Uuid::now_v7();
     let code = verification::issue_code();
     let digest = verification::digest(verification_key, challenge_id, &email, &code);
     let expires_at = Utc::now() + chrono::Duration::minutes(verification::CODE_TTL_MINUTES);
-    let should_send =
-        repository::verification::prepare_resend(pool, &email, challenge_id, &digest, expires_at)
-            .await?;
+    // Enablement and the configured cooldown are read in the same transaction that replaces the challenge.
+    let should_send = repository::verification::prepare_resend(
+        pool,
+        verification_key.len() >= 32,
+        &email,
+        challenge_id,
+        &digest,
+        expires_at,
+    )
+    .await?;
     if should_send {
         super::register::dispatch(pool, mailer, challenge_id, &email, &code).await?;
     }

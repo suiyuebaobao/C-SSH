@@ -6,5 +6,7 @@ pub(crate) mod console;
 pub(crate) mod console_preview;
 pub(crate) mod documentation;
 pub(crate) mod feedback;
+pub(crate) mod password_reset;
 pub(crate) mod public;
 pub(crate) mod verify_email;
+pub(crate) mod verify_login;

@@ -10,9 +10,9 @@
       {% include "console-heading.html" %}
       <p class="console-boundary">
         {% if is_en %}
-        The model catalog is managed globally by administrators. Configure your own API credential in a Creation-SSH client; the website never asks for plaintext keys.
+        The model catalog is managed globally by administrators. AI provider API keys and tokens stay only in local secure storage in each Creation-SSH client; Cloud never uploads, stores, or displays their status.
         {% else %}
-        模型目录由管理员统一维护。请在 Creation-SSH 客户端中配置自己的 API 凭据，网页不会要求输入明文密钥。
+        模型目录由管理员统一维护。AI provider API Key/Token 只保存在 Creation-SSH 客户端本地安全存储；Cloud 不上传、不保存，也不显示凭据状态。
         {% endif %}
       </p>
       <section class="console-section">
@@ -29,13 +29,16 @@
             <div class="console-record-heading">
               <div>
                 <strong>{{ model.name }}</strong>
-                <small>{{ model.provider }} / {{ model.model_name }}</small>
+                <small>{{ model.provider }}</small>
               </div>
-              <span class="console-status">{% if model.is_default %}{% if is_en %}Default{% else %}默认{% endif %}{% else %}{% if is_en %}Available{% else %}可用{% endif %}{% endif %}</span>
+              <span class="console-status">{% if is_en %}Available{% else %}可用{% endif %}</span>
             </div>
             <dl class="console-definition-grid console-definition-grid-compact">
-              <div><dt>{% if is_en %}Context length{% else %}上下文长度{% endif %}</dt><dd>{{ model.context_length }}</dd></div>
-              <div><dt>{% if is_en %}Capabilities{% else %}能力{% endif %}</dt><dd>{% if model.capabilities.is_empty() %}—{% else %}{{ model.capabilities }}{% endif %}</dd></div>
+              <div><dt>{% if is_en %}Context window{% else %}上下文窗口{% endif %}</dt><dd>{{ model.context_length }}</dd></div>
+              {% for interface in model.interfaces %}
+              <div><dt>{{ interface.api_format }} · Model ID</dt><dd><code>{{ interface.model_name }}</code></dd></div>
+              <div><dt>{{ interface.api_format }} · Base URL</dt><dd><code>{{ interface.base_url }}</code></dd></div>
+              {% endfor %}
             </dl>
           </article>
           {% endfor %}

@@ -3,64 +3,85 @@
 {% block admin_content %}
 <section class="admin-section" aria-labelledby="models-heading">
   <div class="admin-section-heading">
-    <div>
-      <h2 id="models-heading">{% if is_en %}Global model catalog{% else %}全局模型目录{% endif %}</h2>
-      <p>{% if is_en %}Administrators define models once. Users and clients can only read enabled entries.{% else %}模型由管理员统一设置，用户与客户端只能读取已启用的条目。{% endif %}</p>
-    </div>
+    <div><h2 id="models-heading">{% if is_en %}Models{% else %}模型管理{% endif %}</h2></div>
   </div>
-  <div class="admin-feedback" data-tone="success">
-    <p>{% if is_en %}API keys are not entered here. Each account stores only client-encrypted opaque key material for a selected model.{% else %}这里不录入 API Key；每个账号只为所选模型保存客户端加密后的不透明密文。{% endif %}</p>
-  </div>
-</section>
+  <p class="admin-model-note">
+    {% if is_en %}Only the global model catalog is managed here. AI provider API keys and tokens stay in each client's local secure storage; Cloud never receives, stores, or displays their status.{% else %}这里只管理全局模型目录；AI provider API Key/Token 只保存在各客户端本地安全存储，Cloud 不接收、不保存，也不显示凭据状态。{% endif %}
+  </p>
 
-<section class="admin-section" aria-labelledby="create-model-heading">
-  <div class="admin-section-heading"><div><h2 id="create-model-heading">{% if is_en %}Add model{% else %}新增模型{% endif %}</h2></div></div>
-  <form class="admin-form-grid" hx-post="/admin/models" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-    <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="name" required maxlength="100"></label>
-    <label class="admin-field">Provider<input name="provider" required maxlength="64"></label>
-    <label class="admin-field">Model ID<input name="model_name" required maxlength="128"></label>
-    <label class="admin-field">Base URL<input name="base_url" type="url" maxlength="512" placeholder="https://api.example.com"></label>
-    <label class="admin-field">{% if is_en %}Context length{% else %}上下文长度{% endif %}<input name="context_length" type="number" min="256" max="2000000" value="32768" required></label>
-    <label class="admin-field">{% if is_en %}Capability tags{% else %}能力标签{% endif %}<input name="capability_tags" maxlength="512" placeholder="tools, vision"></label>
-    <label class="admin-field">{% if is_en %}Order{% else %}排序{% endif %}<input name="sort_order" type="number" value="0" required></label>
-    <label class="admin-field">{% if is_en %}Default parameters (JSON){% else %}默认参数（JSON）{% endif %}<textarea name="default_parameters" rows="4" required>{}</textarea></label>
-    <label class="admin-field"><span>{% if is_en %}Enabled{% else %}启用{% endif %}</span><input name="enabled" type="checkbox" value="true" checked></label>
-    <label class="admin-field"><span>{% if is_en %}Default{% else %}设为默认{% endif %}</span><input name="is_default" type="checkbox" value="true"></label>
-    <button class="button button-primary" type="submit">{% if is_en %}Create{% else %}创建{% endif %}</button>
-  </form>
-</section>
+  <details class="admin-model-create">
+    <summary>{% if is_en %}Add model{% else %}新增模型{% endif %}</summary>
+    <form class="admin-form-grid admin-model-form" hx-post="/admin/models" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+      {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+      <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="name" required maxlength="100" placeholder="DeepSeek V4 Pro"></label>
+      <label class="admin-field">{% if is_en %}Vendor{% else %}厂商{% endif %}<input name="provider" required maxlength="64" placeholder="DeepSeek"></label>
+      <label class="admin-field">{% if is_en %}Context window{% else %}上下文窗口{% endif %}<input name="context_length" type="number" min="4096" max="2000000" value="128000" required></label>
+      <fieldset class="admin-model-interface" data-api-format="openai_compatible">
+        <legend>{% if is_en %}OpenAI-compatible interface{% else %}OpenAI 兼容接口{% endif %}</legend>
+        <label class="admin-field">{% if is_en %}Base URL{% else %}Base URL{% endif %}<input name="openai_base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1"></label>
+        <label class="admin-field">{% if is_en %}Model ID{% else %}Model ID{% endif %}<input name="openai_model_name" maxlength="128" placeholder="example-model"></label>
+      </fieldset>
+      <fieldset class="admin-model-interface" data-api-format="anthropic_compatible">
+        <legend>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</legend>
+        <label class="admin-field">{% if is_en %}Base URL{% else %}Base URL{% endif %}<input name="anthropic_base_url" type="url" maxlength="512" placeholder="https://api.example.com/anthropic"></label>
+        <label class="admin-field">{% if is_en %}Model ID{% else %}Model ID{% endif %}<input name="anthropic_model_name" maxlength="128" placeholder="example-model"></label>
+      </fieldset>
+      <div class="admin-model-options">
+        <label><input name="enabled" type="checkbox" value="true" checked> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
+      </div>
+      <div class="admin-model-form-actions">
+        <button class="button button-primary" type="submit">{% if is_en %}Create{% else %}创建{% endif %}</button>
+      </div>
+    </form>
+  </details>
 
-<section class="admin-section" aria-labelledby="managed-models-heading">
-  <div class="admin-section-heading"><div><h2 id="managed-models-heading">{% if is_en %}Managed models{% else %}已管理模型{% endif %}</h2></div></div>
   {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
   {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No models yet{% else %}尚未添加模型{% endif %}</strong></div>{% endif %}
-  <div class="admin-seo-list">
+
+  {% if !rows.is_empty() %}
+  <div class="admin-model-list">
     {% for row in rows %}
-    <article class="admin-seo-record">
-      <form class="admin-form-grid" hx-post="/admin/models/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-        <input type="hidden" name="expected_revision" value="{{ row.revision }}">
-        <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="name" value="{{ row.name }}" required maxlength="100"></label>
-        <label class="admin-field">Provider<input name="provider" value="{{ row.provider }}" required maxlength="64"></label>
-        <label class="admin-field">Model ID<input name="model_name" value="{{ row.model_name }}" required maxlength="128"></label>
-        <label class="admin-field">Base URL<input name="base_url" type="url" value="{{ row.base_url }}" maxlength="512"></label>
-        <label class="admin-field">{% if is_en %}Context length{% else %}上下文长度{% endif %}<input name="context_length" type="number" min="256" max="2000000" value="{{ row.context_length }}" required></label>
-        <label class="admin-field">{% if is_en %}Capability tags{% else %}能力标签{% endif %}<input name="capability_tags" value="{{ row.capability_tags }}" maxlength="512"></label>
-        <label class="admin-field">{% if is_en %}Order{% else %}排序{% endif %}<input name="sort_order" type="number" value="{{ row.sort_order }}" required></label>
-        <label class="admin-field">{% if is_en %}Default parameters (JSON){% else %}默认参数（JSON）{% endif %}<textarea name="default_parameters" rows="4" required>{{ row.default_parameters }}</textarea></label>
-        <label class="admin-field"><span>{% if is_en %}Enabled{% else %}启用{% endif %}</span><input name="enabled" type="checkbox" value="true"{% if row.enabled %} checked{% endif %}></label>
-        <label class="admin-field"><span>{% if is_en %}Default{% else %}默认{% endif %}</span><input name="is_default" type="checkbox" value="true"{% if row.is_default %} checked{% endif %}></label>
-        <button class="button button-secondary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
-        <p class="admin-seo-meta">{{ row.id }} · rev {{ row.revision }} · {{ row.updated_at }}</p>
-      </form>
-      <form hx-post="/admin/models/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this global model?{% else %}确认删除这个全局模型？{% endif %}">
-        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-        <input type="hidden" name="expected_revision" value="{{ row.revision }}">
-        <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
-      </form>
-    </article>
+    <details class="admin-model-row" id="model-{{ row.id }}">
+      <summary>
+        <span class="admin-model-name"><strong>{{ row.name }}</strong><small>{{ row.provider }} · {{ row.interface_count }} {% if is_en %}interface(s){% else %}个接口{% endif %} · {{ row.context_length }}</small></span>
+        <span class="admin-model-state">
+          <span class="status-badge" data-tone="{% if row.enabled %}success{% else %}warning{% endif %}">{% if row.enabled %}{% if is_en %}Enabled{% else %}已启用{% endif %}{% else %}{% if is_en %}Disabled{% else %}已停用{% endif %}{% endif %}</span>
+        </span>
+        <span class="admin-model-edit">{% if is_en %}Edit{% else %}编辑{% endif %}</span>
+      </summary>
+      <div class="admin-model-editor">
+        <form class="admin-form-grid admin-model-form" hx-post="/admin/models/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <input type="hidden" name="expected_revision" value="{{ row.revision }}">
+          <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="name" value="{{ row.name }}" required maxlength="100"></label>
+          <label class="admin-field">{% if is_en %}Vendor{% else %}厂商{% endif %}<input name="provider" value="{{ row.provider }}" required maxlength="64"></label>
+          <label class="admin-field">{% if is_en %}Context window{% else %}上下文窗口{% endif %}<input name="context_length" type="number" min="4096" max="2000000" value="{{ row.context_length }}" required></label>
+          <fieldset class="admin-model-interface" data-api-format="openai_compatible">
+            <legend>{% if is_en %}OpenAI-compatible interface{% else %}OpenAI 兼容接口{% endif %}</legend>
+            <label class="admin-field">Base URL<input name="openai_base_url" type="url" value="{{ row.openai_base_url }}" maxlength="512"></label>
+            <label class="admin-field">Model ID<input name="openai_model_name" value="{{ row.openai_model_name }}" maxlength="128"></label>
+          </fieldset>
+          <fieldset class="admin-model-interface" data-api-format="anthropic_compatible">
+            <legend>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</legend>
+            <label class="admin-field">Base URL<input name="anthropic_base_url" type="url" value="{{ row.anthropic_base_url }}" maxlength="512"></label>
+            <label class="admin-field">Model ID<input name="anthropic_model_name" value="{{ row.anthropic_model_name }}" maxlength="128"></label>
+          </fieldset>
+          <div class="admin-model-options">
+            <label><input name="enabled" type="checkbox" value="true"{% if row.enabled %} checked{% endif %}> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
+          </div>
+          <div class="admin-model-form-actions">
+            <button class="button button-primary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
+          </div>
+        </form>
+        <form class="admin-model-delete" hx-post="/admin/models/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this model?{% else %}确认删除这个模型？{% endif %}">
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <input type="hidden" name="expected_revision" value="{{ row.revision }}">
+          <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
+        </form>
+      </div>
+    </details>
     {% endfor %}
   </div>
+  {% endif %}
 </section>
 {% endblock %}

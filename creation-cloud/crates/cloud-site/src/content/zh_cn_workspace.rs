@@ -108,17 +108,17 @@ pub(super) fn models() -> PageContent {
         PageId::Models,
         "模型｜Creation Cloud",
         "模型",
-        "同步模型配置元数据",
-        "名称、provider、模型 ID 与默认参数可同步，API Key 只能作为保险库密文引用。",
-        vec![Metric::new("—", "模型配置", "登录后显示")],
+        "读取全局模型目录",
+        "名称、厂商、模型 ID、接口格式与 API URL 由管理员统一维护；AI provider API Key/Token 只保存在客户端本地安全存储，Cloud 不上传、不保存，也不显示凭据状态。",
+        vec![Metric::new("—", "可用模型", "登录后显示")],
         vec![section(
             "model-list",
             "模型列表",
-            "业务服务接入后支持默认项、排序与启停。",
+            "模型服务只返回管理员启用的全局目录条目，不接收个人凭据。",
             vec![item(
                 "空状态",
                 "尚未载入模型",
-                "不会用示例密钥或虚构配置填充页面。",
+                "不会用示例密钥、密文状态或虚构配置填充页面。",
                 "无模拟数据",
             )],
         )],
@@ -178,7 +178,7 @@ pub(super) fn admin_users() -> PageContent {
         "用户管理｜Creation Cloud",
         "账号治理",
         "管理用户与权限边界",
-        "按脱敏身份查询账号，调整状态与角色，并保护当前和最后一个有效管理员。",
+        "按完整邮箱或管理员登录名查询账号，调整状态与角色，并保护当前和最后一个有效管理员。",
     )
 }
 
@@ -212,13 +212,43 @@ pub(super) fn admin_assets() -> PageContent {
     )
 }
 
+pub(super) fn admin_models() -> PageContent {
+    admin_page(
+        PageId::AdminModels,
+        "模型管理｜Creation Cloud",
+        "模型",
+        "管理客户端可读取的全局模型",
+        "新增、编辑、启停和排序全局模型；后台不接收、保存或显示任何用户的 AI provider API Key/Token 状态。",
+    )
+}
+
+pub(super) fn admin_announcements() -> PageContent {
+    admin_page(
+        PageId::AdminAnnouncements,
+        "公告管理｜Creation Cloud",
+        "公告",
+        "编辑客户端可读取的当前公告",
+        "维护草稿并发布当前公告；匿名接口只返回已经发布的内容。",
+    )
+}
+
+pub(super) fn admin_settings() -> PageContent {
+    admin_page(
+        PageId::AdminSettings,
+        "系统设置｜Creation Cloud",
+        "系统设置",
+        "管理平台全局设置",
+        "集中管理登录验证等全局选项。",
+    )
+}
+
 pub(super) fn admin_site() -> PageContent {
     admin_page(
         PageId::AdminSite,
-        "站点资源｜Creation Cloud",
-        "站点资源",
-        "管理首页二维码发布槽位",
-        "上传受控位图、预览草稿并发布同源版本；没有发布内容时首页继续显示空状态。",
+        "首页内容｜Creation Cloud",
+        "首页内容",
+        "管理官网首页内容与二维码",
+        "逐条编辑并发布中英文首页内容和受控二维码。",
     )
 }
 
@@ -290,14 +320,15 @@ fn admin_page(
 
 fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
-        nav("00 总览", PageId::Admin, current),
-        nav("10 用户", PageId::AdminUsers, current),
-        nav("20 设备", PageId::AdminDevices, current),
-        nav("30 版本", PageId::AdminReleases, current),
-        nav("40 资产", PageId::AdminAssets, current),
-        nav("50 站点", PageId::AdminSite, current),
-        nav("60 SEO", PageId::AdminSeo, current),
-        nav("70 审计", PageId::AdminAudit, current),
-        nav("80 反馈", PageId::AdminFeedback, current),
+        nav("用户管理", PageId::AdminUsers, current),
+        nav("首页内容", PageId::AdminSite, current),
+        nav("客户端更新", PageId::AdminReleases, current),
+        nav("下载", PageId::AdminAssets, current),
+        nav("模型", PageId::AdminModels, current),
+        nav("公告", PageId::AdminAnnouncements, current),
+        nav("问题反馈", PageId::AdminFeedback, current),
+        nav("SEO", PageId::AdminSeo, current),
+        nav("系统设置", PageId::AdminSettings, current),
+        nav("操作记录", PageId::AdminAudit, current),
     ]
 }

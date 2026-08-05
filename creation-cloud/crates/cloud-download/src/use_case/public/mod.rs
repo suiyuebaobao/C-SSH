@@ -3,6 +3,7 @@
 mod distribution;
 mod manifest;
 mod serve;
+mod update;
 
 #[cfg(test)]
 mod tests;

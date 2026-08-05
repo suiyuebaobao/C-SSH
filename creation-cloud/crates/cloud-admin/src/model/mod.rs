@@ -1,4 +1,4 @@
-//! 汇总管理概览、脱敏用户、设备与审计事件模型。
+//! 汇总管理概览、用户、设备与审计事件模型。
 
 mod audit;
 mod device;
@@ -13,6 +13,7 @@ pub use overview::{
     AdminOverview, DeviceOverview, ReleaseOverview, SecurityAuditOverview, UserOverview,
 };
 pub use user::{
-    AdminUpdateUserInput, AdminUser, AdminUserListQuery, AdminUserRole, AdminUserStatus,
+    AdminCreateUserInput, AdminUpdateUserInput, AdminUser, AdminUserListQuery, AdminUserRole,
+    AdminUserStatus,
 };
 pub(crate) use user::{AdminUserListFilter, AdminUserRow};

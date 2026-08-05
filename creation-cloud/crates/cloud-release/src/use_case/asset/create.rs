@@ -1,6 +1,7 @@
 //! 校验资产身份并确保所属版本尚未发布。
 
 use cloud_domain::{AdminActor, AppError, AppResult};
+use cloud_store::{Postgres, Transaction};
 
 use crate::{CreateAssetInput, ReleaseAsset, Service, authorization, repository, validation};
 
@@ -10,25 +11,32 @@ impl Service {
         actor: &AdminActor,
         input: CreateAssetInput,
     ) -> AppResult<ReleaseAsset> {
-        authorization::require(actor)?;
-        let input = normalize(input)?;
         let mut transaction = self
             .pool
             .begin()
             .await
             .map_err(repository::map_transaction_error)?;
-        let release =
-            repository::release::lock::execute(&mut transaction, input.release_id).await?;
-        if !release.status.allows_asset_mutation() {
-            return Err(AppError::Conflict("已发布版本不能新增资产".into()));
-        }
-        let asset = repository::asset::create::execute(&mut transaction, &input).await?;
+        let asset = create_in_transaction(actor, &mut transaction, input).await?;
         transaction
             .commit()
             .await
             .map_err(repository::map_transaction_error)?;
         Ok(asset)
     }
+}
+
+pub(crate) async fn create_in_transaction(
+    actor: &AdminActor,
+    transaction: &mut Transaction<'_, Postgres>,
+    input: CreateAssetInput,
+) -> AppResult<ReleaseAsset> {
+    authorization::require(actor)?;
+    let input = normalize(input)?;
+    let release = repository::release::lock::execute(transaction, input.release_id).await?;
+    if !release.status.allows_asset_mutation() {
+        return Err(AppError::Conflict("已发布版本不能新增资产".into()));
+    }
+    repository::asset::create::execute(transaction, &input).await
 }
 
 pub(crate) fn normalize(input: CreateAssetInput) -> AppResult<CreateAssetInput> {

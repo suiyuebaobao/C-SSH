@@ -7,7 +7,9 @@ use uuid::Uuid;
 
 pub(crate) const CODE_TTL_MINUTES: i64 = 10;
 pub(crate) const MAX_ATTEMPTS: i32 = 5;
-pub(crate) const RESEND_COOLDOWN_SECONDS: i64 = 60;
+const LOGIN_CONTEXT: &[u8] = b"creation-cloud-login-verification-v1\0";
+const PASSWORD_RESET_CONTEXT: &[u8] = b"creation-cloud-password-reset-v1\0";
+const CAPTCHA_CONTEXT: &[u8] = b"creation-cloud-auth-captcha-v2\0";
 
 pub(crate) fn issue_code() -> String {
     format!("{:06}", rand::rng().random_range(0_u32..1_000_000))
@@ -18,6 +20,64 @@ pub(crate) fn digest(key: &[u8], challenge_id: Uuid, email: &str, code: &str) ->
     message.extend_from_slice(challenge_id.as_bytes());
     message.push(0);
     message.extend_from_slice(email.as_bytes());
+    message.push(0);
+    message.extend_from_slice(code.as_bytes());
+    hmac_sha256(key, &message)
+}
+
+pub(crate) fn login_digest(
+    key: &[u8],
+    challenge_id: Uuid,
+    account_id: Uuid,
+    email: &str,
+    credential_version: i64,
+    code: &str,
+) -> [u8; 32] {
+    let mut message =
+        Vec::with_capacity(LOGIN_CONTEXT.len() + 16 + 16 + email.len() + code.len() + 11);
+    message.extend_from_slice(LOGIN_CONTEXT);
+    message.extend_from_slice(challenge_id.as_bytes());
+    message.extend_from_slice(account_id.as_bytes());
+    message.extend_from_slice(&credential_version.to_be_bytes());
+    message.push(0);
+    message.extend_from_slice(email.as_bytes());
+    message.push(0);
+    message.extend_from_slice(code.as_bytes());
+    hmac_sha256(key, &message)
+}
+
+pub(crate) fn password_reset_digest(
+    key: &[u8],
+    challenge_id: Uuid,
+    account_id: Uuid,
+    email: &str,
+    credential_version: i64,
+    code: &str,
+) -> [u8; 32] {
+    let mut message =
+        Vec::with_capacity(PASSWORD_RESET_CONTEXT.len() + 16 + 16 + email.len() + code.len() + 11);
+    message.extend_from_slice(PASSWORD_RESET_CONTEXT);
+    message.extend_from_slice(challenge_id.as_bytes());
+    message.extend_from_slice(account_id.as_bytes());
+    message.extend_from_slice(&credential_version.to_be_bytes());
+    message.push(0);
+    message.extend_from_slice(email.as_bytes());
+    message.push(0);
+    message.extend_from_slice(code.as_bytes());
+    hmac_sha256(key, &message)
+}
+
+pub(crate) fn captcha_digest(
+    key: &[u8],
+    challenge_id: Uuid,
+    purpose: crate::captcha::CaptchaPurpose,
+    code: &str,
+) -> [u8; 32] {
+    let mut message =
+        Vec::with_capacity(CAPTCHA_CONTEXT.len() + 16 + purpose.as_str().len() + code.len() + 1);
+    message.extend_from_slice(CAPTCHA_CONTEXT);
+    message.extend_from_slice(challenge_id.as_bytes());
+    message.extend_from_slice(purpose.as_str().as_bytes());
     message.push(0);
     message.extend_from_slice(code.as_bytes());
     hmac_sha256(key, &message)
@@ -87,5 +147,145 @@ mod tests {
             &expected,
             &digest(b"test-key", id, "other@example.com", "123456")
         ));
+    }
+
+    #[test]
+    fn login_digest_is_domain_separated_and_bound_to_the_account_snapshot() {
+        let challenge_id = Uuid::now_v7();
+        let account_id = Uuid::now_v7();
+        let expected = login_digest(
+            b"test-key",
+            challenge_id,
+            account_id,
+            "user@example.com",
+            7,
+            "123456",
+        );
+        assert!(matches(
+            &expected,
+            &login_digest(
+                b"test-key",
+                challenge_id,
+                account_id,
+                "user@example.com",
+                7,
+                "123456",
+            )
+        ));
+        assert!(!matches(
+            &expected,
+            &login_digest(
+                b"test-key",
+                challenge_id,
+                Uuid::now_v7(),
+                "user@example.com",
+                7,
+                "123456",
+            )
+        ));
+        assert!(!matches(
+            &expected,
+            &login_digest(
+                b"test-key",
+                challenge_id,
+                account_id,
+                "user@example.com",
+                8,
+                "123456",
+            )
+        ));
+        assert_ne!(
+            expected,
+            digest(b"test-key", challenge_id, "user@example.com", "123456")
+        );
+    }
+
+    #[test]
+    fn password_reset_digest_is_separate_from_login_and_bound_to_the_snapshot() {
+        let challenge_id = Uuid::now_v7();
+        let account_id = Uuid::now_v7();
+        let expected = password_reset_digest(
+            b"test-key",
+            challenge_id,
+            account_id,
+            "user@example.com",
+            7,
+            "123456",
+        );
+        assert!(matches(
+            &expected,
+            &password_reset_digest(
+                b"test-key",
+                challenge_id,
+                account_id,
+                "user@example.com",
+                7,
+                "123456",
+            )
+        ));
+        assert_ne!(
+            expected,
+            login_digest(
+                b"test-key",
+                challenge_id,
+                account_id,
+                "user@example.com",
+                7,
+                "123456",
+            )
+        );
+        assert!(!matches(
+            &expected,
+            &password_reset_digest(
+                b"test-key",
+                challenge_id,
+                account_id,
+                "user@example.com",
+                8,
+                "123456",
+            )
+        ));
+    }
+
+    #[test]
+    fn captcha_digest_is_domain_separated_and_bound_to_the_challenge() {
+        let challenge_id = Uuid::now_v7();
+        let expected = captcha_digest(
+            b"test-key",
+            challenge_id,
+            crate::captcha::CaptchaPurpose::Login,
+            "123456",
+        );
+        assert!(matches(
+            &expected,
+            &captcha_digest(
+                b"test-key",
+                challenge_id,
+                crate::captcha::CaptchaPurpose::Login,
+                "123456"
+            )
+        ));
+        assert!(!matches(
+            &expected,
+            &captcha_digest(
+                b"test-key",
+                Uuid::now_v7(),
+                crate::captcha::CaptchaPurpose::Login,
+                "123456"
+            )
+        ));
+        assert!(!matches(
+            &expected,
+            &captcha_digest(
+                b"test-key",
+                challenge_id,
+                crate::captcha::CaptchaPurpose::Register,
+                "123456"
+            )
+        ));
+        assert_ne!(
+            expected,
+            digest(b"test-key", challenge_id, "user@example.com", "123456")
+        );
     }
 }

@@ -11,7 +11,7 @@ use axum::{
 use cloud_config::CloudConfig;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
-use crate::{admin_overview, http_trace, request_id, services::AppServices};
+use crate::{admin_overview, client_config, http_trace, request_id, services::AppServices};
 
 pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let seo = cloud_web::SeoConfig::from_validated_origin(
@@ -21,6 +21,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     );
     let auth_service = services.auth.clone();
     let admin_service = services.admin.clone();
+    let announcement_service = services.announcement.clone();
     let user_service = services.user.clone();
     let device_service = services.device.clone();
     let host_service = services.host.clone();
@@ -30,6 +31,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let site_content_service = services.site_content.clone();
     let public_page_state = cloud_web::PublicPageState::new(
         seo,
+        auth_service.clone(),
         download_service.clone(),
         seo_topic_service.clone(),
         site_content_service.clone(),
@@ -47,6 +49,8 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let site_media_service = services.site_media.clone();
     let admin_page_state = cloud_web::AdminPageState::new(
         admin_service.clone(),
+        auth_service.clone(),
+        announcement_service.clone(),
         release_service.clone(),
         download_service.clone(),
         host_service.clone(),
@@ -65,6 +69,10 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .route("/overview", get(admin_overview::handle))
         .with_state(admin_overview_state)
         .merge(cloud_admin::router_without_overview(admin_service.clone()))
+        .nest(
+            "/announcements",
+            cloud_announcement::management_router(announcement_service.clone()),
+        )
         .nest(
             "/users",
             cloud_host::management_router(host_service.clone()),
@@ -95,6 +103,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/maintenance",
             cloud_maintenance::management_router(services.maintenance.clone()),
         )
+        .merge(cloud_device::management_router(device_service.clone()))
         .layer(middleware::from_fn(cloud_auth::require_csrf))
         .layer(middleware::from_fn_with_state(
             admin_service.clone(),
@@ -107,15 +116,9 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         ));
     let protected = Router::new()
         .nest("/users", cloud_user::router(user_service))
-        .nest(
-            "/devices",
-            cloud_device::router(device_service)
-                .merge(cloud_host::device_router(host_service.clone())),
-        )
+        .nest("/devices", cloud_device::router(device_service))
         .nest("/hosts", cloud_host::host_router(host_service.clone()))
         .nest("/sync", cloud_host::sync_router(host_service))
-        .nest("/models", cloud_model::router(model_service.clone()))
-        .nest("/model-secrets", cloud_model::secret_router(model_service))
         .nest(
             "/downloads",
             cloud_download::account_router(download_service.clone()),
@@ -127,7 +130,23 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             cloud_auth::require_session,
         ));
     let api = Router::new()
+        .nest(
+            "/client",
+            client_config::router(client_config::ClientConfigState::new(
+                announcement_service.clone(),
+                auth_service.clone(),
+                download_service.clone(),
+            )),
+        )
         .nest("/auth", cloud_auth::router(auth_service.clone()))
+        .nest(
+            "/updates",
+            cloud_download::update_router(download_service.clone()),
+        )
+        .nest(
+            "/announcements",
+            cloud_announcement::public_router(announcement_service),
+        )
         .nest(
             "/downloads",
             cloud_download::public_router(download_service),
@@ -136,6 +155,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/site-media",
             cloud_site_media::public_router(site_media_service),
         )
+        .nest("/models", cloud_model::router(model_service))
         .nest("/admin", admin)
         .merge(protected)
         .layer(middleware::from_fn(cloud_web::noindex_response));
@@ -186,13 +206,26 @@ async fn noindex_private_routes(request: Request, next: Next) -> Response {
 }
 
 fn route_requires_noindex(path: &str) -> bool {
-    matches!(path, "/login" | "/en/login" | "/register" | "/en/register")
-        || ["/web/auth", "/console", "/admin", "/api/v1", "/health"]
-            .iter()
-            .any(|prefix| {
-                path.strip_prefix(prefix)
-                    .is_some_and(|suffix| suffix.is_empty() || suffix.starts_with('/'))
-            })
+    matches!(
+        path,
+        "/login"
+            | "/en/login"
+            | "/register"
+            | "/en/register"
+            | "/verify-email"
+            | "/en/verify-email"
+            | "/verify-login"
+            | "/en/verify-login"
+            | "/forgot-password"
+            | "/en/forgot-password"
+            | "/reset-password"
+            | "/en/reset-password"
+    ) || ["/web/auth", "/console", "/admin", "/api/v1", "/health"]
+        .iter()
+        .any(|prefix| {
+            path.strip_prefix(prefix)
+                .is_some_and(|suffix| suffix.is_empty() || suffix.starts_with('/'))
+        })
 }
 
 async fn health_live() -> impl IntoResponse {
@@ -229,6 +262,8 @@ mod tests {
     use tower::ServiceExt;
 
     use super::*;
+
+    mod sync_route_tests;
 
     fn app() -> Router {
         let pool = sqlx::postgres::PgPoolOptions::new()
@@ -274,6 +309,79 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn startup_data_apis_are_mounted_outside_session_authentication() {
+        for path in [
+            "/api/v1/updates/check?platform=invalid&architecture=x86_64&current_version=1.0.0",
+            "/api/v1/announcements/current?locale=invalid",
+        ] {
+            let response = app()
+                .oneshot(
+                    Request::get(path)
+                        .body(Body::empty())
+                        .expect("公开接口请求应可构造"),
+                )
+                .await
+                .expect("公开接口应返回响应");
+            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
+            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        }
+    }
+
+    #[tokio::test]
+    async fn model_catalog_list_and_detail_are_mounted_outside_session_authentication() {
+        for path in [
+            "/api/v1/models?page=not-a-number",
+            "/api/v1/models/not-a-uuid",
+        ] {
+            let response = app()
+                .oneshot(
+                    Request::get(path)
+                        .body(Body::empty())
+                        .expect("公开模型目录请求应可构造"),
+                )
+                .await
+                .expect("公开模型目录应返回响应");
+            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
+            assert_ne!(response.status(), StatusCode::UNAUTHORIZED, "{path}");
+            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        }
+    }
+
+    #[tokio::test]
+    async fn unified_client_config_is_anonymous_and_takes_no_query_parameters() {
+        let response = app()
+            .oneshot(
+                Request::post("/api/v1/client/config")
+                    .body(Body::empty())
+                    .expect("客户端配置请求应可构造"),
+            )
+            .await
+            .expect("客户端配置接口应返回响应");
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+        assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+    }
+
+    #[tokio::test]
+    async fn unified_client_config_rejects_every_query_parameter_before_data_access() {
+        for path in [
+            "/api/v1/client/config?lang=zh-CN",
+            "/api/v1/client/config?platform=windows",
+            "/api/v1/client/config?unexpected=value",
+        ] {
+            let response = app()
+                .oneshot(
+                    Request::get(path)
+                        .body(Body::empty())
+                        .expect("客户端配置请求应可构造"),
+                )
+                .await
+                .expect("客户端配置接口应返回响应");
+            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
+            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        }
+    }
+
+    #[tokio::test]
     async fn maintenance_status_api_uses_the_admin_authentication_chain() {
         let request = Request::builder()
             .uri("/api/v1/admin/maintenance")
@@ -309,22 +417,31 @@ mod tests {
 
     #[tokio::test]
     async fn account_pages_and_form_routes_send_noindex_response_header() {
-        let app = app();
-        for path in ["/login", "/en/login", "/register", "/en/register"] {
-            let response = app
-                .clone()
-                .oneshot(
-                    Request::get(path)
-                        .body(Body::empty())
-                        .expect("账号页面请求应可构造"),
-                )
-                .await
-                .expect("账号页面应返回响应");
-            assert_eq!(response.status(), StatusCode::OK, "{path}");
-            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
+        let paths = [
+            "/login",
+            "/en/login",
+            "/register",
+            "/en/register",
+            "/verify-email",
+            "/en/verify-email",
+            "/verify-login",
+            "/en/verify-login",
+            "/forgot-password",
+            "/en/forgot-password",
+            "/reset-password",
+            "/en/reset-password",
+        ];
+        for path in paths {
+            assert!(route_requires_noindex(path), "{path}");
         }
 
-        for path in ["/web/auth/login", "/web/auth/register"] {
+        let app = app();
+        for path in [
+            "/web/auth/login",
+            "/web/auth/register",
+            "/web/auth/password-reset/request",
+            "/web/auth/password-reset/confirm",
+        ] {
             let response = app
                 .clone()
                 .oneshot(

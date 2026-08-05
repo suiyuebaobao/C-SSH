@@ -1,4 +1,4 @@
-//! 集中处理管理端响应中的邮箱脱敏，禁止任何查询动作直接返回原文邮箱。
+//! 集中处理设备等跨账号管理响应中的邮箱脱敏。
 
 pub(crate) fn email(value: &str) -> String {
     let Some((local, domain)) = value.split_once('@') else {

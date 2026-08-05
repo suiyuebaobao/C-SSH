@@ -76,6 +76,10 @@ struct AccountTemplate {
     view: SiteView,
     seo: SeoHead,
     next_path: Option<String>,
+    admin_login: bool,
+    password_reset: bool,
+    captcha_required: bool,
+    captcha_purpose: &'static str,
 }
 
 #[derive(Template)]
@@ -258,11 +262,34 @@ pub(crate) fn account(
     page: PageId,
     locale: Locale,
     next_path: Option<String>,
+    user_captcha_enabled: bool,
+    admin_captcha_enabled: bool,
+    password_reset: bool,
 ) -> AppResult<Html<String>> {
+    let admin_login = page == PageId::Login
+        && next_path
+            .as_deref()
+            .is_some_and(|path| path == "/admin" || path.starts_with("/admin/"));
+    let captcha_required = if admin_login {
+        admin_captcha_enabled
+    } else {
+        user_captcha_enabled
+    };
+    let captcha_purpose = if admin_login {
+        "admin_login"
+    } else if page == PageId::Register {
+        "register"
+    } else {
+        "login"
+    };
     render(&AccountTemplate {
         view: content_service().view(page, locale),
         seo: SeoHead::private(),
         next_path,
+        admin_login,
+        password_reset: page == PageId::Login && password_reset,
+        captcha_required,
+        captcha_purpose,
     })
 }
 

@@ -1,6 +1,7 @@
 //! 装配管理后台的测试占位入口与生产 SSR/HTMX 页面域。
 //! 生产入口必须携带管理员会话和 `AdminPageState`，无状态入口只供纯页面测试。
 
+pub(crate) mod announcements;
 pub(crate) mod assets;
 pub(crate) mod audit;
 pub(crate) mod devices;
@@ -10,8 +11,10 @@ pub(crate) mod models;
 pub(crate) mod overview;
 pub(crate) mod releases;
 pub(crate) mod seo;
+pub(crate) mod settings;
 pub(crate) mod shared;
 pub(crate) mod site;
+pub(crate) mod user_detail;
 pub(crate) mod users;
 
 use axum::{extract::Query, response::Html};
@@ -44,6 +47,10 @@ pub(crate) async fn static_site(Query(query): Query<LocaleQuery>) -> AppResult<H
     render::admin(PageId::AdminSite, query.locale())
 }
 
+pub(crate) async fn static_settings(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
+    render::admin(PageId::AdminSettings, query.locale())
+}
+
 pub(crate) async fn static_seo(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
     render::admin(PageId::AdminSeo, query.locale())
 }
@@ -57,5 +64,11 @@ pub(crate) async fn static_feedback(Query(query): Query<LocaleQuery>) -> AppResu
 }
 
 pub(crate) async fn static_models(Query(query): Query<LocaleQuery>) -> AppResult<Html<String>> {
-    render::admin(PageId::Admin, query.locale())
+    render::admin(PageId::AdminModels, query.locale())
+}
+
+pub(crate) async fn static_announcements(
+    Query(query): Query<LocaleQuery>,
+) -> AppResult<Html<String>> {
+    render::admin(PageId::AdminAnnouncements, query.locale())
 }

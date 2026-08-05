@@ -10,6 +10,7 @@ use crate::smtp_mailer::SmtpVerificationMailer;
 pub struct AppServices {
     pub pool: PgPool,
     pub admin: cloud_admin::Service,
+    pub announcement: cloud_announcement::Service,
     pub auth: cloud_auth::Service,
     pub device: cloud_device::Service,
     pub download: cloud_download::Service,
@@ -35,12 +36,16 @@ impl AppServices {
                 pool.clone(),
                 config.session_ttl,
                 smtp.verification_key().to_vec(),
-                Arc::new(SmtpVerificationMailer::new(smtp)?),
+                Arc::new(SmtpVerificationMailer::new(
+                    smtp,
+                    config.public_base_url.as_str(),
+                )?),
             ),
             None => cloud_auth::Service::new(pool.clone(), config.session_ttl),
         };
         Ok(Self {
             admin: cloud_admin::Service::new(pool.clone()),
+            announcement: cloud_announcement::Service::new(pool.clone()),
             auth,
             device: cloud_device::Service::new(pool.clone()),
             download: cloud_download::Service::new(pool.clone(), config.download_root.clone()),

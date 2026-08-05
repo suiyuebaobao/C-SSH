@@ -1,5 +1,5 @@
-//! 提供管理端只读概览和不可变审计事件接口。
-//! 本包通过数据库只读投影视图聚合其它领域，不依赖其它业务包。
+//! 提供管理端用户治理、只读概览和不可变审计事件接口。
+//! 用户凭据只复用认证域哈希入口，其余管理动作由本包事务化完成。
 
 mod handler;
 mod middleware;
@@ -13,9 +13,9 @@ mod validation;
 
 pub use middleware::audit::audit_write_requests;
 pub use model::{
-    AdminDevice, AdminDeviceListQuery, AdminDevicePlatform, AdminOverview, AdminUpdateUserInput,
-    AdminUser, AdminUserListQuery, AdminUserRole, AdminUserStatus, AuditEvent, AuditOutcome,
-    DeviceOverview, ReleaseOverview, SecurityAuditOverview, UserOverview,
+    AdminCreateUserInput, AdminDevice, AdminDeviceListQuery, AdminDevicePlatform, AdminOverview,
+    AdminUpdateUserInput, AdminUser, AdminUserListQuery, AdminUserRole, AdminUserStatus,
+    AuditEvent, AuditOutcome, DeviceOverview, ReleaseOverview, SecurityAuditOverview, UserOverview,
 };
 pub use router::{router, router_without_overview};
 pub use service::{Service, create_local_admin, promote_registered_admin};

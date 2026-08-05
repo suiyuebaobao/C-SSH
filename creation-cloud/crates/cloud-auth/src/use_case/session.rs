@@ -20,8 +20,16 @@ pub(crate) async fn authenticate(
     let metadata = SessionMetadata {
         email_verified: row.email_verified,
         session_kind: row.session_kind,
+        device_name: row.device_name,
+        last_login_ip: row.last_login_ip,
+        user_agent: row.user_agent,
+        client_version: row.client_version,
+        device_fingerprint: row.device_fingerprint,
+        created_at: row.created_at,
+        last_seen_at: row.last_seen_at,
         idle_expires_at: row.idle_expires_at,
         absolute_expires_at: row.absolute_expires_at,
+        revoked_at: row.revoked_at,
     };
     Ok((
         AuthenticatedSession {

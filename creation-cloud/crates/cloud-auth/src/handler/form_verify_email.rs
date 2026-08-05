@@ -26,11 +26,15 @@ pub(crate) async fn handle(
     } else {
         "/console"
     };
+    let metadata = crate::TrustedRequestMetadata::from_headers(&headers);
     let issued = service
-        .verify_email(VerifyEmail {
-            email: form.email,
-            code: form.code,
-        })
+        .verify_email_with_metadata(
+            VerifyEmail {
+                email: form.email,
+                code: form.code,
+            },
+            &metadata,
+        )
         .await?;
     form_response::redirect(
         &headers,

@@ -31,10 +31,15 @@ fn routes() -> Router<Service> {
         .route("/overview/devices", get(overview::devices::handle))
         .route("/overview/releases", get(overview::releases::handle))
         .route("/overview/audit", get(overview::audit::handle))
-        .route("/users", get(users::list::handle))
+        .route(
+            "/users",
+            get(users::list::handle).post(users::create::handle),
+        )
         .route(
             "/users/{account_id}",
-            get(users::get::handle).patch(users::update::handle),
+            get(users::get::handle)
+                .patch(users::update::handle)
+                .delete(users::delete::handle),
         )
         .route("/devices", get(devices::list::handle))
         .route("/devices/{device_id}", get(devices::get::handle))

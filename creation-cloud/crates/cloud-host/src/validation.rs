@@ -1,4 +1,4 @@
-//! 在事务前校验主机元数据、base64 密文、手动同步游标和白名单边界。
+//! 在事务前校验主机元数据、base64 密文和手动同步游标边界。
 
 use std::{collections::HashSet, net::IpAddr};
 
@@ -7,13 +7,14 @@ use cloud_domain::{AppError, AppResult};
 use uuid::Uuid;
 
 use crate::{
-    HostChange, HostMetadataInput, HostOperation, PullAckRequest, PullRequest,
-    ReplaceAllowlistRequest, ResolveConflictRequest,
+    HostChange, HostMetadataInput, HostOperation, PullAckRequest, PullRequest, RekeySyncRequest,
+    ResetSyncRequest, ResolveConflictRequest,
 };
 
 pub(crate) const MAX_CIPHERTEXT_BYTES: usize = 256 * 1024;
-const MAX_ALLOWLIST_HOSTS: usize = 2_000;
 const MAX_PULL_DECISIONS: usize = 200;
+pub(crate) const MAX_REKEY_HOSTS: usize = 2_000;
+pub(crate) const MAX_REKEY_CIPHERTEXT_BYTES: usize = 32 * 1024 * 1024;
 
 #[derive(Clone, Debug)]
 pub(crate) struct ValidatedChange {
@@ -25,10 +26,12 @@ pub(crate) struct ValidatedChange {
 }
 
 pub(crate) fn push(
+    sync_generation: i64,
     base_revision: i64,
     mutation_id: Uuid,
     changes: &[HostChange],
 ) -> AppResult<Vec<ValidatedChange>> {
+    generation(sync_generation)?;
     if base_revision < 0 {
         return Err(AppError::Validation("base_revision 不能为负数".to_owned()));
     }
@@ -53,29 +56,8 @@ pub(crate) fn push(
     Ok(validated)
 }
 
-pub(crate) fn allowlist(
-    device_id: Uuid,
-    request: &ReplaceAllowlistRequest,
-) -> AppResult<Vec<Uuid>> {
-    require_uuid(device_id, "device_id")?;
-    if request.host_ids.len() > MAX_ALLOWLIST_HOSTS {
-        return Err(AppError::Validation(format!(
-            "主机白名单不能超过 {MAX_ALLOWLIST_HOSTS} 项"
-        )));
-    }
-    let mut unique = HashSet::with_capacity(request.host_ids.len());
-    for host_id in &request.host_ids {
-        require_uuid(*host_id, "host_id")?;
-        if !unique.insert(*host_id) {
-            return Err(AppError::Validation("主机白名单不得包含重复项".to_owned()));
-        }
-    }
-    let mut host_ids = request.host_ids.clone();
-    host_ids.sort_unstable();
-    Ok(host_ids)
-}
-
 pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
+    generation(request.sync_generation)?;
     if request.since_revision < 0 {
         return Err(AppError::Validation("since_revision 不能为负数".to_owned()));
     }
@@ -111,6 +93,7 @@ pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
 }
 
 pub(crate) fn ack(request: &PullAckRequest) -> AppResult<()> {
+    generation(request.sync_generation)?;
     if request.acknowledged_revision < 0 {
         return Err(AppError::Validation(
             "acknowledged_revision 不能为负数".to_owned(),
@@ -143,6 +126,7 @@ pub(crate) fn ack(request: &PullAckRequest) -> AppResult<()> {
 
 pub(crate) fn resolve(conflict_id: Uuid, request: &ResolveConflictRequest) -> AppResult<()> {
     require_uuid(conflict_id, "conflict_id")?;
+    generation(request.sync_generation)?;
     require_uuid(request.resolution_mutation_id, "resolution_mutation_id")?;
     if request.expected_revision < 0 {
         return Err(AppError::Validation(
@@ -152,16 +136,75 @@ pub(crate) fn resolve(conflict_id: Uuid, request: &ResolveConflictRequest) -> Ap
     Ok(())
 }
 
+#[derive(Clone, Debug)]
+pub(crate) struct ValidatedRekeyHost {
+    pub host_id: Uuid,
+    pub cloud_revision: i64,
+    pub ciphertext: Vec<u8>,
+}
+
+pub(crate) fn reset(request: &ResetSyncRequest) -> AppResult<()> {
+    require_uuid(request.mutation_id, "mutation_id")
+}
+
+pub(crate) fn rekey(request: &RekeySyncRequest) -> AppResult<Vec<ValidatedRekeyHost>> {
+    generation(request.sync_generation)?;
+    require_uuid(request.mutation_id, "mutation_id")?;
+    if request.hosts.len() > MAX_REKEY_HOSTS {
+        return Err(AppError::Validation(format!(
+            "hosts 不能超过 {MAX_REKEY_HOSTS} 项"
+        )));
+    }
+    let mut unique = HashSet::with_capacity(request.hosts.len());
+    let mut total = 0_usize;
+    let mut validated = Vec::with_capacity(request.hosts.len());
+    for host in &request.hosts {
+        require_uuid(host.host_id, "host_id")?;
+        if !unique.insert(host.host_id) {
+            return Err(AppError::Validation(
+                "rekey hosts 不得包含重复主机".to_owned(),
+            ));
+        }
+        if host.cloud_revision <= 0 {
+            return Err(AppError::Validation("cloud_revision 必须大于 0".to_owned()));
+        }
+        let ciphertext = decode_ciphertext(Some(&Some(host.ciphertext.clone())))?
+            .and_then(|value| value)
+            .ok_or_else(|| AppError::Validation("ciphertext 不能为空".to_owned()))?;
+        total = total
+            .checked_add(ciphertext.len())
+            .ok_or_else(|| AppError::Validation("rekey ciphertext 总量过大".to_owned()))?;
+        if total > MAX_REKEY_CIPHERTEXT_BYTES {
+            return Err(AppError::Validation(
+                "rekey ciphertext 总量超过 32 MiB".to_owned(),
+            ));
+        }
+        validated.push(ValidatedRekeyHost {
+            host_id: host.host_id,
+            cloud_revision: host.cloud_revision,
+            ciphertext,
+        });
+    }
+    validated.sort_unstable_by_key(|host| host.host_id);
+    Ok(validated)
+}
+
 pub(crate) fn host_id(host_id: Uuid) -> AppResult<()> {
     require_uuid(host_id, "host_id")
 }
 
-pub(crate) fn device_id(device_id: Uuid) -> AppResult<()> {
-    require_uuid(device_id, "device_id")
-}
-
 pub(crate) fn conflict_id(conflict_id: Uuid) -> AppResult<()> {
     require_uuid(conflict_id, "conflict_id")
+}
+
+fn generation(value: i64) -> AppResult<()> {
+    if value <= 0 {
+        Err(AppError::Validation(
+            "sync_generation 必须大于 0".to_owned(),
+        ))
+    } else {
+        Ok(())
+    }
 }
 
 fn change_value(change: &HostChange) -> AppResult<ValidatedChange> {

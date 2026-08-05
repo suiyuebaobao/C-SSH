@@ -12,21 +12,34 @@ use super::common;
 struct ConsoleModelRow {
     name: String,
     provider: String,
-    model_name: String,
     context_length: i32,
-    capabilities: String,
-    is_default: bool,
+    interfaces: Vec<ConsoleModelInterface>,
 }
 
-impl From<cloud_model::GlobalModel> for ConsoleModelRow {
-    fn from(value: cloud_model::GlobalModel) -> Self {
+struct ConsoleModelInterface {
+    api_format: &'static str,
+    model_name: String,
+    base_url: String,
+}
+
+impl From<cloud_model::PublicGlobalModel> for ConsoleModelRow {
+    fn from(value: cloud_model::PublicGlobalModel) -> Self {
         Self {
             name: value.name,
             provider: value.provider,
-            model_name: value.model_name,
             context_length: value.context_length,
-            capabilities: value.capability_tags.join(", "),
-            is_default: value.is_default,
+            interfaces: value
+                .interfaces
+                .into_iter()
+                .map(|item| ConsoleModelInterface {
+                    api_format: match item.api_format.as_str() {
+                        "anthropic_compatible" => "Claude / Anthropic",
+                        _ => "OpenAI",
+                    },
+                    model_name: item.model_name,
+                    base_url: item.base_url,
+                })
+                .collect(),
         }
     }
 }
@@ -61,4 +74,40 @@ pub(crate) async fn page(
             .collect(),
         total: models.total,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cloud_site::{Locale, content_service};
+
+    #[test]
+    fn template_keeps_ai_credentials_client_local() {
+        for (locale, expected) in [
+            (
+                Locale::ZhCn,
+                "API Key/Token 只保存在 Creation-SSH 客户端本地安全存储",
+            ),
+            (Locale::En, "stay only in local secure storage"),
+        ] {
+            let body = ModelsTemplate {
+                view: content_service().view(PageId::Models, locale),
+                seo: SeoHead::private(),
+                csrf_token: "csrf-example".to_owned(),
+                is_en: locale == Locale::En,
+                models: Vec::new(),
+                total: 0,
+            }
+            .render()
+            .expect("模型目录模板应可渲染");
+
+            assert!(body.contains(expected));
+            assert!(!body.contains("API Key 只能作为保险库密文引用"));
+            assert!(
+                !body
+                    .to_ascii_lowercase()
+                    .contains("api keys remain vault ciphertext references")
+            );
+        }
+    }
 }

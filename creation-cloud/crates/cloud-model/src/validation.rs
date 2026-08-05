@@ -1,17 +1,18 @@
-//! 校验全局模型元数据与不透明客户端密文。
+//! 校验全局模型元数据。
 
 use std::collections::HashSet;
 
-use base64::{Engine as _, engine::general_purpose::STANDARD};
 use cloud_domain::{AppError, AppResult};
 use serde_json::Value;
 use url::Url;
 use uuid::Uuid;
 
-use crate::types::{CreateGlobalModelInput, ReplaceGlobalModelInput, ValidatedModel};
+use crate::types::{
+    CreateGlobalModelInput, ModelInterface, ReplaceGlobalModelInput, ValidatedInterfaces,
+    ValidatedModel,
+};
 
 const MAX_PARAMETERS_BYTES: usize = 16 * 1024;
-const MAX_SECRET_BYTES: usize = 1024 * 1024;
 
 pub(crate) fn model_id(value: Uuid) -> AppResult<Uuid> {
     if value.is_nil() {
@@ -35,9 +36,8 @@ pub(crate) fn create(input: CreateGlobalModelInput) -> AppResult<ValidatedModel>
     validate_model(
         input.name,
         input.provider,
-        input.base_url,
-        input.model_name,
         input.context_length,
+        input.interfaces,
         input.capability_tags,
         input.default_parameters,
         input.enabled,
@@ -51,9 +51,8 @@ pub(crate) fn replace(input: ReplaceGlobalModelInput) -> AppResult<(i64, Validat
     let model = validate_model(
         input.name,
         input.provider,
-        input.base_url,
-        input.model_name,
         input.context_length,
+        input.interfaces,
         input.capability_tags,
         input.default_parameters,
         input.enabled,
@@ -67,9 +66,8 @@ pub(crate) fn replace(input: ReplaceGlobalModelInput) -> AppResult<(i64, Validat
 fn validate_model(
     name: String,
     provider: String,
-    base_url: Option<String>,
-    model_name: String,
     context_length: i32,
+    interfaces: Vec<ModelInterface>,
     capability_tags: Vec<String>,
     default_parameters: Value,
     enabled: bool,
@@ -78,11 +76,10 @@ fn validate_model(
 ) -> AppResult<ValidatedModel> {
     let name = bounded_text(name, "name", 100)?;
     let provider = slug(provider, "provider", 64)?;
-    let model_name = bounded_text(model_name, "model_name", 128)?;
-    let base_url = optional_url(base_url)?;
-    if !(256..=2_000_000).contains(&context_length) {
+    let interfaces = validate_interfaces(interfaces)?;
+    if !(4_096..=2_000_000).contains(&context_length) {
         return Err(AppError::Validation(
-            "context_length 必须在 256 到 2000000 之间".to_owned(),
+            "context_length 必须在 4096 到 2000000 之间".to_owned(),
         ));
     }
     if !enabled && is_default {
@@ -93,9 +90,8 @@ fn validate_model(
     Ok(ValidatedModel {
         name,
         provider,
-        base_url,
-        model_name,
         context_length,
+        interfaces,
         capability_tags,
         default_parameters,
         enabled,
@@ -104,21 +100,52 @@ fn validate_model(
     })
 }
 
-pub(crate) fn ciphertext(value: &str) -> AppResult<Vec<u8>> {
-    let decoded = STANDARD
-        .decode(value)
-        .map_err(|_| AppError::Validation("ciphertext 必须是规范 base64".to_owned()))?;
-    if !(16..=MAX_SECRET_BYTES).contains(&decoded.len()) {
+fn validate_interfaces(values: Vec<ModelInterface>) -> AppResult<ValidatedInterfaces> {
+    if !(1..=2).contains(&values.len()) {
         return Err(AppError::Validation(
-            "ciphertext 解码后必须在 16 字节到 1 MiB 之间".to_owned(),
+            "interfaces 必须包含 1 到 2 个接口".to_owned(),
         ));
     }
-    if STANDARD.encode(&decoded) != value {
-        return Err(AppError::Validation(
-            "ciphertext 必须使用规范 base64 编码".to_owned(),
-        ));
+    let mut seen = HashSet::new();
+    let mut result = ValidatedInterfaces {
+        openai_base_url: None,
+        openai_model_name: None,
+        anthropic_base_url: None,
+        anthropic_model_name: None,
+    };
+    for value in values {
+        let api_format = validate_api_format(value.api_format)?;
+        if !seen.insert(api_format.clone()) {
+            return Err(AppError::Validation(
+                "interfaces 中的 api_format 不得重复".to_owned(),
+            ));
+        }
+        let base_url = strict_https_url(value.base_url)?;
+        let model_name = bounded_text(value.model_name, "interfaces.model_name", 128)?;
+        match api_format.as_str() {
+            "openai_compatible" => {
+                result.openai_base_url = Some(base_url);
+                result.openai_model_name = Some(model_name);
+            }
+            "anthropic_compatible" => {
+                result.anthropic_base_url = Some(base_url);
+                result.anthropic_model_name = Some(model_name);
+            }
+            _ => unreachable!("api_format 已由白名单验证"),
+        }
     }
-    Ok(decoded)
+    Ok(result)
+}
+
+fn validate_api_format(value: String) -> AppResult<String> {
+    let value = value.trim().to_ascii_lowercase();
+    if matches!(value.as_str(), "openai_compatible" | "anthropic_compatible") {
+        Ok(value)
+    } else {
+        Err(AppError::Validation(
+            "api_format 只能是 openai_compatible 或 anthropic_compatible".to_owned(),
+        ))
+    }
 }
 
 fn bounded_text(value: String, field: &str, max: usize) -> AppResult<String> {
@@ -144,20 +171,17 @@ fn slug(value: String, field: &str, max: usize) -> AppResult<String> {
     Ok(value)
 }
 
-fn optional_url(value: Option<String>) -> AppResult<Option<String>> {
-    let Some(value) = value else {
-        return Ok(None);
-    };
+fn strict_https_url(value: String) -> AppResult<String> {
     let value = value.trim();
     if value.is_empty() {
-        return Ok(None);
+        return Err(AppError::Validation("base_url 不能为空".to_owned()));
     }
     if value.len() > 512 {
         return Err(AppError::Validation("base_url 过长".to_owned()));
     }
     let parsed =
         Url::parse(value).map_err(|_| AppError::Validation("base_url 格式无效".to_owned()))?;
-    if !matches!(parsed.scheme(), "http" | "https")
+    if parsed.scheme() != "https"
         || !parsed.username().is_empty()
         || parsed.password().is_some()
         || parsed.query().is_some()
@@ -165,10 +189,10 @@ fn optional_url(value: Option<String>) -> AppResult<Option<String>> {
         || parsed.host_str().is_none()
     {
         return Err(AppError::Validation(
-            "base_url 只能是无凭据、query 和 fragment 的 HTTP(S) 地址".to_owned(),
+            "base_url 只能是无凭据、query 和 fragment 的 HTTPS 地址".to_owned(),
         ));
     }
-    Ok(Some(parsed.to_string().trim_end_matches('/').to_owned()))
+    Ok(parsed.to_string().trim_end_matches('/').to_owned())
 }
 
 fn tags(values: Vec<String>) -> AppResult<Vec<String>> {
@@ -239,12 +263,112 @@ fn integer_in(value: &Value, minimum: i64, maximum: i64) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
-    fn ciphertext_is_canonical_and_bounded() {
-        let encoded = STANDARD.encode([7_u8; 32]);
-        assert_eq!(ciphertext(&encoded).expect("密文应有效"), vec![7_u8; 32]);
-        assert!(ciphertext("not base64").is_err());
-        assert!(ciphertext(&STANDARD.encode([0_u8; 4])).is_err());
+    fn api_format_accepts_only_the_two_supported_interfaces() {
+        assert_eq!(
+            validate_api_format(" OpenAI_Compatible ".to_owned()).expect("OpenAI 兼容格式应有效"),
+            "openai_compatible"
+        );
+        assert_eq!(
+            validate_api_format("anthropic_compatible".to_owned())
+                .expect("Anthropic 兼容格式应有效"),
+            "anthropic_compatible"
+        );
+        assert!(validate_api_format("claude".to_owned()).is_err());
+        assert!(validate_api_format("custom".to_owned()).is_err());
+    }
+
+    fn input(interfaces: Vec<ModelInterface>) -> CreateGlobalModelInput {
+        CreateGlobalModelInput {
+            name: "Example".to_owned(),
+            provider: "Example".to_owned(),
+            context_length: 128_000,
+            interfaces,
+            capability_tags: Vec::new(),
+            default_parameters: json!({}),
+            enabled: true,
+            is_default: false,
+            sort_order: 0,
+        }
+    }
+
+    fn interface(api_format: &str, base_url: &str, model_name: &str) -> ModelInterface {
+        ModelInterface {
+            api_format: api_format.to_owned(),
+            base_url: base_url.to_owned(),
+            model_name: model_name.to_owned(),
+        }
+    }
+
+    #[test]
+    fn model_requires_one_or_two_unique_interfaces() {
+        assert!(create(input(Vec::new())).is_err());
+        let duplicate = interface(
+            "openai_compatible",
+            "https://second.example.test/v1",
+            "example-two",
+        );
+        assert!(
+            create(input(vec![
+                interface(
+                    "openai_compatible",
+                    "https://api.example.test/v1",
+                    "example-one",
+                ),
+                duplicate,
+            ]))
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn model_accepts_distinct_model_ids_for_the_two_interfaces() {
+        let validated = create(input(vec![
+            interface(
+                "openai_compatible",
+                "https://api.example.test/v1/",
+                "example-openai",
+            ),
+            interface(
+                "anthropic_compatible",
+                "https://api.example.test/anthropic",
+                "example-anthropic",
+            ),
+        ]))
+        .expect("两个独立接口应有效");
+        assert_eq!(
+            validated.interfaces.openai_model_name.as_deref(),
+            Some("example-openai")
+        );
+        assert_eq!(
+            validated.interfaces.anthropic_model_name.as_deref(),
+            Some("example-anthropic")
+        );
+        assert_eq!(
+            validated.interfaces.openai_base_url.as_deref(),
+            Some("https://api.example.test/v1")
+        );
+    }
+
+    #[test]
+    fn interface_url_is_https_and_contains_no_credentials_query_or_fragment() {
+        for invalid in [
+            "http://api.example.test/v1",
+            "https://user@example.test/v1",
+            "https://api.example.test/v1?key=value",
+            "https://api.example.test/v1#fragment",
+        ] {
+            assert!(
+                create(input(vec![interface(
+                    "openai_compatible",
+                    invalid,
+                    "example"
+                )]))
+                .is_err(),
+                "{invalid} 应被拒绝"
+            );
+        }
     }
 }

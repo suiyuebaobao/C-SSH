@@ -25,6 +25,9 @@ pub enum PageId {
     AdminDevices,
     AdminReleases,
     AdminAssets,
+    AdminModels,
+    AdminAnnouncements,
+    AdminSettings,
     AdminSite,
     AdminSeo,
     AdminAudit,
@@ -32,7 +35,7 @@ pub enum PageId {
 }
 
 impl PageId {
-    pub const ALL: [Self; 25] = [
+    pub const ALL: [Self; 28] = [
         Self::Home,
         Self::Documentation,
         Self::Security,
@@ -54,6 +57,9 @@ impl PageId {
         Self::AdminDevices,
         Self::AdminReleases,
         Self::AdminAssets,
+        Self::AdminModels,
+        Self::AdminAnnouncements,
+        Self::AdminSettings,
         Self::AdminSite,
         Self::AdminSeo,
         Self::AdminAudit,
@@ -92,6 +98,9 @@ impl PageId {
             Self::AdminDevices => "/admin/devices",
             Self::AdminReleases => "/admin/releases",
             Self::AdminAssets => "/admin/assets",
+            Self::AdminModels => "/admin/models",
+            Self::AdminAnnouncements => "/admin/announcements",
+            Self::AdminSettings => "/admin/settings",
             Self::AdminSite => "/admin/site",
             Self::AdminSeo => "/admin/seo",
             Self::AdminAudit => "/admin/audit",

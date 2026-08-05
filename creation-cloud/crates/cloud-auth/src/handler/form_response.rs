@@ -6,7 +6,10 @@ use axum::{
 };
 use chrono::{DateTime, Utc};
 use cloud_domain::AppResult;
+use url::form_urlencoded::Serializer;
+use uuid::Uuid;
 
+use crate::captcha::CaptchaPurpose;
 use crate::cookie;
 
 const HX_REQUEST: &str = "hx-request";
@@ -16,6 +19,18 @@ pub(crate) fn redirect(
     headers: &HeaderMap,
     raw_token: &str,
     expires_at: DateTime<Utc>,
+    destination: &str,
+) -> AppResult<Response> {
+    let mut response = redirect_without_session(headers, destination)?;
+    response.headers_mut().insert(
+        header::SET_COOKIE,
+        cookie::session_header(raw_token, expires_at)?,
+    );
+    Ok(response)
+}
+
+pub(crate) fn redirect_without_session(
+    headers: &HeaderMap,
     destination: &str,
 ) -> AppResult<Response> {
     let htmx_request = headers
@@ -41,10 +56,6 @@ pub(crate) fn redirect(
                 .map_err(|_| cloud_domain::AppError::Validation("登录返回地址无效".to_owned()))?,
         );
     }
-    response.headers_mut().insert(
-        header::SET_COOKIE,
-        cookie::session_header(raw_token, expires_at)?,
-    );
     Ok(response)
 }
 
@@ -68,6 +79,36 @@ pub(crate) fn safe_destination(value: Option<&str>) -> &str {
     } else {
         value
     }
+}
+
+pub(crate) fn captcha_purpose_for_destination(destination: &str) -> CaptchaPurpose {
+    if destination == "/admin" || destination.starts_with("/admin/") {
+        CaptchaPurpose::AdminLogin
+    } else {
+        CaptchaPurpose::Login
+    }
+}
+
+pub(crate) fn login_verification_destination(
+    is_en: bool,
+    challenge_id: Uuid,
+    next: Option<&str>,
+    resent: bool,
+) -> String {
+    let mut query = Serializer::new(String::new());
+    query.append_pair("challenge_id", &challenge_id.to_string());
+    if let Some(next) = next {
+        query.append_pair("next", next);
+    }
+    if resent {
+        query.append_pair("resent", "1");
+    }
+    let path = if is_en {
+        "/en/verify-login"
+    } else {
+        "/verify-login"
+    };
+    format!("{path}?{}", query.finish())
 }
 
 #[cfg(test)]
@@ -116,5 +157,35 @@ mod tests {
             "/admin/audit?lang=en"
         );
         assert_eq!(safe_destination(Some("/feedback")), "/feedback");
+    }
+
+    #[test]
+    fn captcha_purpose_follows_the_server_rendered_login_destination() {
+        assert_eq!(
+            captcha_purpose_for_destination("/admin"),
+            CaptchaPurpose::AdminLogin
+        );
+        assert_eq!(
+            captcha_purpose_for_destination("/admin/site"),
+            CaptchaPurpose::AdminLogin
+        );
+        assert_eq!(
+            captcha_purpose_for_destination("/console"),
+            CaptchaPurpose::Login
+        );
+    }
+
+    #[test]
+    fn verification_destination_preserves_language_and_safe_next() {
+        let challenge_id = Uuid::now_v7();
+        let destination = login_verification_destination(
+            true,
+            challenge_id,
+            Some("/admin/releases?lang=en"),
+            true,
+        );
+        assert!(destination.starts_with("/en/verify-login?challenge_id="));
+        assert!(destination.contains("next=%2Fadmin%2Freleases%3Flang%3Den"));
+        assert!(destination.ends_with("resent=1"));
     }
 }

@@ -17,6 +17,12 @@ pub(crate) fn issue() -> (String, Vec<u8>) {
     (raw, hash)
 }
 
+pub(crate) fn clear_cookie() -> HeaderValue {
+    HeaderValue::from_static(
+        "creation_session=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict",
+    )
+}
+
 pub(crate) fn csrf(raw: &str) -> String {
     let mut digest = Sha256::new();
     digest.update(CSRF_CONTEXT);

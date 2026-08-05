@@ -34,6 +34,7 @@ pub(crate) async fn execute(
     pool: &PgPool,
     session_ttl: Duration,
     verification_key: &[u8],
+    request_metadata: &crate::TrustedRequestMetadata,
     command: VerifyEmail,
 ) -> AppResult<IssuedSession> {
     if verification_key.len() < 32 {
@@ -60,6 +61,7 @@ pub(crate) async fn execute(
         session_id,
         raw_token,
         token_hash,
+        request_metadata,
     )
     .await
 }

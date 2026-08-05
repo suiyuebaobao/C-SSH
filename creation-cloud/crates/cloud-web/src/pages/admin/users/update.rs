@@ -18,8 +18,18 @@ use super::super::shared;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct UpdateUserForm {
+    #[serde(default, deserialize_with = "shared::empty_string_as_none")]
+    email: Option<String>,
+    #[serde(default, deserialize_with = "shared::empty_string_as_none")]
+    display_name: Option<String>,
+    #[serde(default, deserialize_with = "shared::empty_string_as_none")]
+    admin_login_name: Option<String>,
+    clear_admin_login_name: Option<String>,
     role: Option<AdminUserRole>,
+    #[serde(default, deserialize_with = "super::empty_status_as_none")]
     status: Option<AdminUserStatus>,
+    #[serde(default, deserialize_with = "shared::empty_string_as_none")]
+    new_password: Option<String>,
     lang: Option<String>,
 }
 
@@ -41,13 +51,22 @@ pub(crate) async fn handle(
             &actor,
             account_id,
             AdminUpdateUserInput {
+                email: form.email,
+                display_name: form.display_name,
+                admin_login_name: form.admin_login_name,
+                clear_admin_login_name: form.clear_admin_login_name.is_some(),
                 role: form.role,
                 status: form.status,
+                new_password: form.new_password,
             },
         )
         .await
     {
-        Ok(_) => shared::action_success(&headers, "/admin/users", locale),
+        Ok(_) => shared::action_success(
+            &headers,
+            &format!("/admin/users/{account_id}?tab=basic"),
+            locale,
+        ),
         Err(error) => shared::action_error(locale, error),
     }
 }

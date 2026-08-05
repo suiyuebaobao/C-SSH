@@ -1,12 +1,10 @@
-//! 定义管理端脱敏用户响应、筛选条件以及角色和状态变更输入。
+//! 定义管理端脱敏 API 用户响应及页面完整邮箱投影。
 
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppError, AppResult, PageQuery};
 use serde::{Deserialize, Deserializer, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-
-use crate::redaction;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -72,6 +70,7 @@ impl TryFrom<&str> for AdminUserStatus {
 #[derive(Debug)]
 pub struct AdminUserListQuery {
     pub page: PageQuery,
+    pub search: Option<String>,
     pub email: Option<String>,
     pub role: Option<AdminUserRole>,
     pub status: Option<AdminUserStatus>,
@@ -84,6 +83,7 @@ struct AdminUserListQueryWire {
     page: u32,
     #[serde(default = "default_size")]
     size: u32,
+    search: Option<String>,
     email: Option<String>,
     role: Option<AdminUserRole>,
     status: Option<AdminUserStatus>,
@@ -100,6 +100,7 @@ impl<'de> Deserialize<'de> for AdminUserListQuery {
                 page: wire.page,
                 size: wire.size,
             },
+            search: wire.search,
             email: wire.email,
             role: wire.role,
             status: wire.status,
@@ -118,22 +119,42 @@ const fn default_size() -> u32 {
 #[derive(Clone, Debug)]
 pub(crate) struct AdminUserListFilter {
     pub page: PageQuery,
+    pub search: Option<String>,
     pub email: Option<String>,
     pub role: Option<AdminUserRole>,
     pub status: Option<AdminUserStatus>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AdminUpdateUserInput {
+pub struct AdminCreateUserInput {
+    pub email: String,
+    pub password: String,
+    pub display_name: String,
     pub role: Option<AdminUserRole>,
     pub status: Option<AdminUserStatus>,
+    pub admin_login_name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AdminUpdateUserInput {
+    pub email: Option<String>,
+    pub display_name: Option<String>,
+    pub admin_login_name: Option<String>,
+    #[serde(default)]
+    pub clear_admin_login_name: bool,
+    pub role: Option<AdminUserRole>,
+    pub status: Option<AdminUserStatus>,
+    pub new_password: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
 pub struct AdminUser {
     pub id: Uuid,
     pub masked_email: String,
+    #[serde(skip_serializing)]
+    full_email: Option<String>,
     pub admin_login_name: Option<String>,
     pub email_verified: bool,
     pub display_name: String,
@@ -169,8 +190,9 @@ impl TryFrom<AdminUserRow> for AdminUser {
             masked_email: row
                 .email
                 .as_deref()
-                .map(redaction::email)
-                .unwrap_or_else(|| "无邮箱".to_owned()),
+                .map(crate::redaction::email)
+                .unwrap_or_else(|| "—".to_owned()),
+            full_email: row.email,
             admin_login_name: row.admin_login_name,
             email_verified: row.email_verified,
             display_name: row.display_name,
@@ -181,5 +203,66 @@ impl TryFrom<AdminUserRow> for AdminUser {
             created_at: row.created_at,
             updated_at: row.updated_at,
         })
+    }
+}
+
+impl AdminUser {
+    #[must_use]
+    pub fn email_for_admin_page(&self) -> &str {
+        self.full_email.as_deref().unwrap_or("—")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{AdminUser, AdminUserRow};
+    use chrono::Utc;
+    use uuid::Uuid;
+
+    #[test]
+    fn admin_user_keeps_the_complete_email() {
+        let email = "person@example.com";
+        let user = AdminUser::try_from(AdminUserRow {
+            id: Uuid::nil(),
+            email: Some(email.to_owned()),
+            admin_login_name: None,
+            email_verified: true,
+            display_name: "Person".to_owned(),
+            role: "user".to_owned(),
+            status: "active".to_owned(),
+            device_count: 1,
+            host_count: 2,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        })
+        .expect("有效用户投影应转换成功");
+
+        assert_eq!(user.email_for_admin_page(), email);
+        assert_eq!(user.masked_email, "p***@e***.com");
+        let json = serde_json::to_value(user).expect("管理用户应可序列化");
+        assert_eq!(json["masked_email"], "p***@e***.com");
+        assert!(json.get("full_email").is_none());
+        assert!(json.get("email").is_none());
+    }
+
+    #[test]
+    fn admin_user_without_email_uses_a_neutral_marker() {
+        let user = AdminUser::try_from(AdminUserRow {
+            id: Uuid::nil(),
+            email: None,
+            admin_login_name: Some("ops-admin".to_owned()),
+            email_verified: false,
+            display_name: "Administrator".to_owned(),
+            role: "admin".to_owned(),
+            status: "active".to_owned(),
+            device_count: 0,
+            host_count: 0,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        })
+        .expect("无邮箱管理员投影应转换成功");
+
+        assert_eq!(user.email_for_admin_page(), "—");
+        assert_eq!(user.masked_email, "—");
     }
 }

@@ -1,11 +1,11 @@
-//! 全局模型目录与个人客户端密文用例。
+//! 全局模型目录用例。
 
-use cloud_domain::{AdminActor, AppError, AppResult, AuthenticatedSession, Page, PageQuery};
+use cloud_domain::{AdminActor, AppError, AppResult, Page, PageQuery};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    CreateGlobalModelInput, GlobalModel, ModelSecret, ReplaceGlobalModelInput, repository,
+    CreateGlobalModelInput, GlobalModel, PublicGlobalModel, ReplaceGlobalModelInput, repository,
     validation,
 };
 
@@ -20,12 +20,32 @@ impl Service {
         Self { pool }
     }
 
-    pub async fn list_public(&self, page: PageQuery) -> AppResult<Page<GlobalModel>> {
-        repository::list_public(&self.pool, page).await
+    pub async fn list_public(&self, page: PageQuery) -> AppResult<Page<PublicGlobalModel>> {
+        let page = repository::list_public(&self.pool, page).await?;
+        Ok(Page {
+            items: page
+                .items
+                .into_iter()
+                .map(PublicGlobalModel::from)
+                .collect(),
+            page: page.page,
+            size: page.size,
+            total: page.total,
+        })
     }
 
-    pub async fn get_public(&self, id: Uuid) -> AppResult<GlobalModel> {
-        repository::get_public(&self.pool, validation::model_id(id)?).await
+    pub async fn get_public(&self, id: Uuid) -> AppResult<PublicGlobalModel> {
+        repository::get_public(&self.pool, validation::model_id(id)?)
+            .await
+            .map(PublicGlobalModel::from)
+    }
+
+    /// 补齐系统预置模型，并修订从未被管理员编辑的旧预置。
+    ///
+    /// 该操作只更新 `system_seeded=true + revision=1` 的活动记录；
+    /// 不覆盖管理员编辑/停用，不复活删除项。没有有效管理员时保持原状。
+    pub async fn seed_system_catalog(&self) -> AppResult<u64> {
+        repository::seed_system_catalog(&self.pool).await
     }
 
     pub async fn list_admin(
@@ -78,56 +98,6 @@ impl Service {
         )
         .await
     }
-
-    pub async fn get_secret(
-        &self,
-        session: &AuthenticatedSession,
-        model_id: Uuid,
-    ) -> AppResult<ModelSecret> {
-        repository::get_secret(
-            &self.pool,
-            require_account(session)?,
-            validation::model_id(model_id)?,
-        )
-        .await
-    }
-
-    pub async fn put_secret(
-        &self,
-        session: &AuthenticatedSession,
-        model_id: Uuid,
-        ciphertext: &str,
-        expected_revision: Option<i64>,
-    ) -> AppResult<ModelSecret> {
-        let (account_id, device_id) = require_device(session)?;
-        let expected_revision = expected_revision.map(validation::revision).transpose()?;
-        repository::put_secret(
-            &self.pool,
-            account_id,
-            device_id,
-            validation::model_id(model_id)?,
-            validation::ciphertext(ciphertext)?,
-            expected_revision,
-        )
-        .await
-    }
-
-    pub async fn delete_secret(
-        &self,
-        session: &AuthenticatedSession,
-        model_id: Uuid,
-        expected_revision: i64,
-    ) -> AppResult<ModelSecret> {
-        let (account_id, device_id) = require_device(session)?;
-        repository::delete_secret(
-            &self.pool,
-            account_id,
-            device_id,
-            validation::model_id(model_id)?,
-            validation::revision(expected_revision)?,
-        )
-        .await
-    }
 }
 
 fn require_actor(actor: &AdminActor) -> AppResult<Uuid> {
@@ -137,21 +107,4 @@ fn require_actor(actor: &AdminActor) -> AppResult<Uuid> {
     } else {
         Ok(id)
     }
-}
-
-fn require_account(session: &AuthenticatedSession) -> AppResult<Uuid> {
-    if session.account_id.is_nil() {
-        Err(AppError::Unauthorized("账号身份无效".to_owned()))
-    } else {
-        Ok(session.account_id)
-    }
-}
-
-fn require_device(session: &AuthenticatedSession) -> AppResult<(Uuid, Uuid)> {
-    let account_id = require_account(session)?;
-    let device_id = session
-        .device_id
-        .filter(|id| !id.is_nil())
-        .ok_or_else(|| AppError::Forbidden("需要绑定有效设备".to_owned()))?;
-    Ok((account_id, device_id))
 }

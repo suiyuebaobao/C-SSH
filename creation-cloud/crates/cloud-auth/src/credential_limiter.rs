@@ -16,6 +16,7 @@ use crate::validation;
 
 const MAX_CONCURRENT_OPERATIONS: usize = 4;
 const MAX_ATTEMPTS_PER_WINDOW: u16 = 5;
+const PASSWORD_RESET_CONFIRM_GLOBAL_ATTEMPTS_PER_WINDOW: u16 = 120;
 const MAX_BUCKETS: usize = 2_048;
 const WINDOW: Duration = Duration::from_secs(60);
 const INVALID_EMAIL: &str = "invalid-email";
@@ -24,12 +25,22 @@ const OVERFLOW_BUCKET: &str = "overflow-bucket";
 #[derive(Clone)]
 pub(crate) struct CredentialLimiter {
     register: FixedWindowLimiter,
+    login_verification: FixedWindowLimiter,
     password: FixedWindowLimiter,
+    password_reset_request: FixedWindowLimiter,
+    password_reset_confirm: FixedWindowLimiter,
+    password_reset_confirm_global: GlobalWindowLimiter,
 }
 
 #[derive(Clone)]
 struct FixedWindowLimiter {
     inner: Arc<Inner>,
+    message: &'static str,
+}
+
+#[derive(Clone)]
+struct GlobalWindowLimiter {
+    window: Arc<Mutex<AttemptWindow>>,
     message: &'static str,
 }
 
@@ -52,7 +63,13 @@ impl Default for CredentialLimiter {
     fn default() -> Self {
         Self {
             register: FixedWindowLimiter::new("注册请求过于频繁，请稍后重试"),
+            login_verification: FixedWindowLimiter::new("登录验证码操作过于频繁，请稍后重试"),
             password: FixedWindowLimiter::new("密码操作过于频繁，请稍后重试"),
+            password_reset_request: FixedWindowLimiter::new("密码重置请求过于频繁，请稍后重试"),
+            password_reset_confirm: FixedWindowLimiter::new("密码重置验证过于频繁，请稍后重试"),
+            password_reset_confirm_global: GlobalWindowLimiter::new(
+                "密码重置验证请求过于频繁，请稍后重试",
+            ),
         }
     }
 }
@@ -69,6 +86,77 @@ impl CredentialLimiter {
 
     pub(crate) fn acquire_password(&self, account_id: Uuid) -> AppResult<CredentialPermit> {
         self.password.acquire(account_id.as_bytes())
+    }
+
+    pub(crate) fn acquire_login_verification(
+        &self,
+        challenge_id: Uuid,
+    ) -> AppResult<CredentialPermit> {
+        self.login_verification.acquire(challenge_id.as_bytes())
+    }
+
+    pub(crate) fn acquire_password_reset_request(
+        &self,
+        raw_email: &str,
+    ) -> AppResult<CredentialPermit> {
+        let canonical = if raw_email.len() <= 254 {
+            validation::normalize_email(raw_email).unwrap_or_else(|_| INVALID_EMAIL.to_owned())
+        } else {
+            INVALID_EMAIL.to_owned()
+        };
+        self.password_reset_request.acquire(canonical.as_bytes())
+    }
+
+    pub(crate) fn acquire_password_reset_confirm(
+        &self,
+        raw_email: &str,
+    ) -> AppResult<CredentialPermit> {
+        let canonical = canonical_email(raw_email);
+        self.password_reset_confirm_global.charge()?;
+        self.password_reset_confirm.acquire(canonical.as_bytes())
+    }
+}
+
+fn canonical_email(raw_email: &str) -> String {
+    if raw_email.len() <= 254 {
+        validation::normalize_email(raw_email).unwrap_or_else(|_| INVALID_EMAIL.to_owned())
+    } else {
+        INVALID_EMAIL.to_owned()
+    }
+}
+
+impl GlobalWindowLimiter {
+    fn new(message: &'static str) -> Self {
+        Self {
+            window: Arc::new(Mutex::new(AttemptWindow {
+                started_at: Instant::now(),
+                attempts: 0,
+            })),
+            message,
+        }
+    }
+
+    fn charge(&self) -> AppResult<()> {
+        let now = Instant::now();
+        let mut window = self
+            .window
+            .lock()
+            .map_err(|_| AppError::Internal("凭据操作全局限速状态不可用".to_owned()))?;
+        if now.duration_since(window.started_at) >= WINDOW {
+            *window = AttemptWindow {
+                started_at: now,
+                attempts: 0,
+            };
+        }
+        if window.attempts >= PASSWORD_RESET_CONFIRM_GLOBAL_ATTEMPTS_PER_WINDOW {
+            let remaining = WINDOW.saturating_sub(now.duration_since(window.started_at));
+            return Err(AppError::RateLimitedAfter {
+                message: self.message.to_owned(),
+                retry_after_seconds: retry_after_seconds(remaining),
+            });
+        }
+        window.attempts += 1;
+        Ok(())
     }
 }
 
@@ -202,6 +290,37 @@ mod tests {
         }
         assert!(matches!(
             limiter.acquire_register("overflow@example.com"),
+            Err(AppError::RateLimitedAfter { .. })
+        ));
+    }
+
+    #[test]
+    fn password_reset_confirmation_has_a_global_rotation_resistant_budget() {
+        let limiter = CredentialLimiter::default();
+        for _ in 0..PASSWORD_RESET_CONFIRM_GLOBAL_ATTEMPTS_PER_WINDOW {
+            limiter
+                .acquire_password_reset_confirm(&format!("user-{}@example.com", Uuid::now_v7()))
+                .expect("全局窗口额度内应放行不同挑战");
+        }
+        assert!(matches!(
+            limiter.acquire_password_reset_confirm("another@example.com"),
+            Err(AppError::RateLimitedAfter {
+                retry_after_seconds: 1..,
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn password_reset_confirmation_uses_the_normalized_email_bucket() {
+        let limiter = CredentialLimiter::default();
+        for _ in 0..MAX_ATTEMPTS_PER_WINDOW {
+            limiter
+                .acquire_password_reset_confirm(" User@Example.COM ")
+                .expect("confirmation budget");
+        }
+        assert!(matches!(
+            limiter.acquire_password_reset_confirm("user@example.com"),
             Err(AppError::RateLimitedAfter { .. })
         ));
     }

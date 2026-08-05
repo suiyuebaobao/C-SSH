@@ -11,6 +11,7 @@ use crate::seo::SeoConfig;
 #[derive(Clone)]
 pub struct PublicPageState {
     seo: SeoConfig,
+    auth: cloud_auth::Service,
     download: cloud_download::Service,
     topics: cloud_seo::Service,
     content: cloud_site_content::Service,
@@ -20,16 +21,24 @@ impl PublicPageState {
     #[must_use]
     pub const fn new(
         seo: SeoConfig,
+        auth: cloud_auth::Service,
         download: cloud_download::Service,
         topics: cloud_seo::Service,
         content: cloud_site_content::Service,
     ) -> Self {
         Self {
             seo,
+            auth,
             download,
             topics,
             content,
         }
+    }
+
+    pub(crate) async fn login_captcha_settings(
+        &self,
+    ) -> AppResult<cloud_auth::LoginCaptchaSettings> {
+        self.auth.login_captcha_settings().await
     }
 
     pub(crate) const fn seo(&self) -> &SeoConfig {

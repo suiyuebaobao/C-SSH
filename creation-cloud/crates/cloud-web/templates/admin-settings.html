@@ -1,0 +1,123 @@
+{% extends "admin.html" %}
+
+{% block admin_content %}
+<section class="admin-section admin-settings-section" aria-labelledby="login-settings-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="login-settings-heading">{% if is_en %}Login verification{% else %}登录验证{% endif %}</h2>
+      <p>{% if is_en %}Choose the checks required for users and administrators.{% else %}设置普通用户和管理员登录时需要的验证方式。{% endif %}</p>
+    </div>
+  </div>
+
+  {% if let Some(message) = load_error %}
+  <div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>
+  {% endif %}
+
+  {% if let Some(settings) = settings %}
+  <form class="admin-settings-form" action="/admin/settings/auth-settings" method="post" hx-post="/admin/settings/auth-settings" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="lang" value="{% if is_en %}en{% else %}zh-CN{% endif %}">
+    <input type="hidden" name="expected_revision" value="{{ settings.revision }}">
+
+    <section class="admin-settings-group" aria-labelledby="user-settings-heading">
+      <header class="admin-settings-group-heading">
+        <strong id="user-settings-heading">{% if is_en %}Users{% else %}普通用户{% endif %}</strong>
+        <small>{% if is_en %}Registration and new sign-ins{% else %}注册与新登录{% endif %}</small>
+      </header>
+      <label class="admin-setting-row">
+        <span class="admin-setting-copy">
+          <strong>{% if is_en %}Email verification code{% else %}邮箱验证码{% endif %}</strong>
+          <small>{% if is_en %}Required for account activation and each new sign-in.{% else %}用于账号激活和每次新登录。{% endif %}</small>
+        </span>
+        <span class="admin-switch">
+          <input type="checkbox" name="email_verification_enabled" value="true"{% if settings.email_verification_enabled %} checked{% endif %}>
+          <span class="admin-switch-track" aria-hidden="true"></span>
+        </span>
+      </label>
+      <label class="admin-setting-row">
+        <span class="admin-setting-copy">
+          <strong>{% if is_en %}Visual CAPTCHA{% else %}图形验证码{% endif %}</strong>
+          <small>{% if is_en %}Required before registration and sign-in.{% else %}注册和登录前需要识别图形验证码。{% endif %}</small>
+        </span>
+        <span class="admin-switch">
+          <input type="checkbox" name="user_captcha_enabled" value="true"{% if settings.user_captcha_enabled %} checked{% endif %}>
+          <span class="admin-switch-track" aria-hidden="true"></span>
+        </span>
+      </label>
+    </section>
+
+    <section class="admin-settings-group" aria-labelledby="admin-settings-heading">
+      <header class="admin-settings-group-heading">
+        <strong id="admin-settings-heading">{% if is_en %}Administrators{% else %}管理员{% endif %}</strong>
+        <small>{% if is_en %}Administrator sign-in{% else %}管理员登录{% endif %}</small>
+      </header>
+      <label class="admin-setting-row">
+        <span class="admin-setting-copy">
+          <strong>{% if is_en %}Email verification code{% else %}邮箱验证码{% endif %}</strong>
+          <small>{% if is_en %}Send a one-time code after the password check.{% else %}密码验证后发送一次性邮箱验证码。{% endif %}</small>
+        </span>
+        <span class="admin-switch">
+          <input type="checkbox" name="admin_email_verification_enabled" value="true"{% if settings.admin_email_verification_enabled %} checked{% endif %}>
+          <span class="admin-switch-track" aria-hidden="true"></span>
+        </span>
+      </label>
+      <label class="admin-setting-row">
+        <span class="admin-setting-copy">
+          <strong>{% if is_en %}Visual CAPTCHA{% else %}图形验证码{% endif %}</strong>
+          <small>{% if is_en %}Require a CAPTCHA on the administrator sign-in page.{% else %}管理员登录页需要输入图形验证码。{% endif %}</small>
+        </span>
+        <span class="admin-switch">
+          <input type="checkbox" name="admin_captcha_enabled" value="true"{% if settings.admin_captcha_enabled %} checked{% endif %}>
+          <span class="admin-switch-track" aria-hidden="true"></span>
+        </span>
+      </label>
+    </section>
+
+    <section class="admin-settings-group" aria-labelledby="security-policy-heading">
+      <header class="admin-settings-group-heading">
+        <strong id="security-policy-heading">{% if is_en %}Security policy{% else %}安全策略{% endif %}</strong>
+        <small>{% if is_en %}Email cooldown and sign-in lockout{% else %}邮件间隔与登录锁定{% endif %}</small>
+      </header>
+      <div class="admin-policy-grid">
+        <label class="admin-policy-field">
+          <span class="admin-setting-copy">
+            <strong>{% if is_en %}Email request interval{% else %}邮件获取间隔{% endif %}</strong>
+            <small>{% if is_en %}30–3600 seconds between verification emails.{% else %}两次验证码邮件之间需等待 30–3600 秒。{% endif %}</small>
+          </span>
+          <span class="admin-number-control">
+            <input type="number" name="email_cooldown_seconds" value="{{ settings.email_cooldown_seconds }}" min="30" max="3600" step="1" required>
+            <span>{% if is_en %}sec{% else %}秒{% endif %}</span>
+          </span>
+        </label>
+        <label class="admin-policy-field">
+          <span class="admin-setting-copy">
+            <strong>{% if is_en %}Failed sign-in limit{% else %}连续失败次数{% endif %}</strong>
+            <small>{% if is_en %}Lock the account after 3–20 failed attempts.{% else %}连续失败 3–20 次后锁定账号。{% endif %}</small>
+          </span>
+          <span class="admin-number-control">
+            <input type="number" name="login_failure_threshold" value="{{ settings.login_failure_threshold }}" min="3" max="20" step="1" required>
+            <span>{% if is_en %}times{% else %}次{% endif %}</span>
+          </span>
+        </label>
+        <label class="admin-policy-field">
+          <span class="admin-setting-copy">
+            <strong>{% if is_en %}Account lockout duration{% else %}锁定时长{% endif %}</strong>
+            <small>{% if is_en %}Keep the account locked for 1–1440 minutes.{% else %}账号锁定后等待 1–1440 分钟。{% endif %}</small>
+          </span>
+          <span class="admin-number-control">
+            <input type="number" name="login_lockout_minutes" value="{{ settings.login_lockout_minutes }}" min="1" max="1440" step="1" required>
+            <span>{% if is_en %}min{% else %}分钟{% endif %}</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <p class="admin-settings-note">{% if is_en %}Administrator email verification and visual CAPTCHA cannot both be disabled. All active administrators must have a verified email before email verification can be enabled.{% else %}管理员邮箱验证码和图形验证码不能同时关闭。启用管理员邮箱验证码前，所有有效管理员必须已验证邮箱。{% endif %}</p>
+    <footer class="admin-settings-footer">
+      <button class="button button-primary" type="submit">{% if is_en %}Save settings{% else %}保存设置{% endif %}</button>
+      <small>{% if is_en %}Last updated{% else %}最后更新{% endif %}：{{ settings.updated_at }}</small>
+    </footer>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

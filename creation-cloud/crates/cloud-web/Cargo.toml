@@ -10,6 +10,7 @@ askama.workspace = true
 axum.workspace = true
 chrono.workspace = true
 cloud-admin.workspace = true
+cloud-announcement.workspace = true
 cloud-auth.workspace = true
 cloud-device.workspace = true
 cloud-download.workspace = true

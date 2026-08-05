@@ -25,7 +25,11 @@ pub(crate) async fn handle(
         Ok(actor) => actor,
         Err(error) => return shared::action_error(locale, error),
     };
-    let input = match form.into_replace() {
+    let current = match state.model().get_admin(&actor, model_id).await {
+        Ok(current) => current,
+        Err(error) => return shared::action_error(locale, error),
+    };
+    let input = match form.into_replace(&current) {
         Ok(input) => input,
         Err(error) => return shared::action_error(locale, error),
     };

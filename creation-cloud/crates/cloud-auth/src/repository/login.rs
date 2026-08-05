@@ -17,6 +17,8 @@ type LoginAccountRow = (
     String,
     String,
     i64,
+    i32,
+    Option<DateTime<Utc>>,
 );
 
 #[derive(Clone)]
@@ -29,18 +31,22 @@ pub(crate) struct LoginAccount {
     pub role: String,
     pub status: String,
     pub credential_version: i64,
+    pub consecutive_login_failures: i32,
+    pub login_locked_until: Option<DateTime<Utc>>,
 }
 
 pub(crate) const FIND_BY_EMAIL_SQL: &str = r#"
     SELECT id, email, email_verified_at, admin_login_name, password_hash,
-           role, status, credential_version
+           role, status, credential_version, consecutive_login_failures,
+           login_locked_until
     FROM accounts
     WHERE email = $1
 "#;
 
 pub(crate) const FIND_ADMIN_BY_LOGIN_NAME_SQL: &str = r#"
     SELECT id, email, email_verified_at, admin_login_name, password_hash,
-           role, status, credential_version
+           role, status, credential_version, consecutive_login_failures,
+           login_locked_until
     FROM accounts
     WHERE admin_login_name = $1
       AND role = 'admin'
@@ -49,15 +55,25 @@ pub(crate) const FIND_ADMIN_BY_LOGIN_NAME_SQL: &str = r#"
 
 pub(crate) const LOCK_ACCOUNT_BY_ID_SQL: &str = r#"
     SELECT id, email, email_verified_at, admin_login_name, password_hash,
-           role, status, credential_version
+           role, status, credential_version, consecutive_login_failures,
+           login_locked_until
     FROM accounts
     WHERE id = $1
     FOR UPDATE
 "#;
 
 pub(crate) const INSERT_SESSION_SQL: &str = "INSERT INTO sessions \
-     (id, account_id, token_hash, expires_at, absolute_expires_at, credential_version, session_kind) \
-     VALUES ($1, $2, $3, $4, $4, $5, 'unbound')";
+     (id, account_id, token_hash, expires_at, absolute_expires_at, credential_version, \
+      session_kind, last_login_ip, user_agent) \
+     VALUES ($1, $2, $3, $4, $4, $5, 'unbound', $6::inet, $7)";
+
+pub(crate) const UPDATE_LOGIN_FAILURES_SQL: &str = "UPDATE accounts SET \
+     consecutive_login_failures = $2, login_locked_until = $3 \
+     WHERE id = $1";
+
+pub(crate) const CLEAR_LOGIN_FAILURES_SQL: &str = "UPDATE accounts SET \
+     consecutive_login_failures = 0, login_locked_until = NULL \
+     WHERE id = $1";
 
 pub(crate) async fn find_by_email(pool: &PgPool, email: &str) -> AppResult<Option<LoginAccount>> {
     find(pool, FIND_BY_EMAIL_SQL, email).await
@@ -101,7 +117,37 @@ fn into_account(row: Option<LoginAccountRow>) -> Option<LoginAccount> {
         role: value.5,
         status: value.6,
         credential_version: value.7,
+        consecutive_login_failures: value.8,
+        login_locked_until: value.9,
     })
+}
+
+pub(crate) async fn update_login_failures(
+    transaction: &mut Transaction<'_, Postgres>,
+    account_id: Uuid,
+    consecutive_failures: i32,
+    locked_until: Option<DateTime<Utc>>,
+) -> AppResult<()> {
+    sqlx::query(UPDATE_LOGIN_FAILURES_SQL)
+        .bind(account_id)
+        .bind(consecutive_failures)
+        .bind(locked_until)
+        .execute(&mut **transaction)
+        .await
+        .map_err(error::storage)?;
+    Ok(())
+}
+
+pub(crate) async fn clear_login_failures(
+    transaction: &mut Transaction<'_, Postgres>,
+    account_id: Uuid,
+) -> AppResult<()> {
+    sqlx::query(CLEAR_LOGIN_FAILURES_SQL)
+        .bind(account_id)
+        .execute(&mut **transaction)
+        .await
+        .map_err(error::storage)?;
+    Ok(())
 }
 
 pub(crate) async fn insert_session(
@@ -111,6 +157,7 @@ pub(crate) async fn insert_session(
     token_hash: &[u8],
     expires_at: DateTime<Utc>,
     credential_version: i64,
+    metadata: &crate::TrustedRequestMetadata,
 ) -> AppResult<()> {
     sqlx::query(INSERT_SESSION_SQL)
         .bind(session_id)
@@ -118,6 +165,8 @@ pub(crate) async fn insert_session(
         .bind(token_hash)
         .bind(expires_at)
         .bind(credential_version)
+        .bind(&metadata.last_login_ip)
+        .bind(&metadata.user_agent)
         .execute(&mut **transaction)
         .await
         .map_err(error::storage)?;

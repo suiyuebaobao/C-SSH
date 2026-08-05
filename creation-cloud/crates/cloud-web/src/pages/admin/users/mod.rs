@@ -1,6 +1,10 @@
-//! 读取、筛选并分页展示脱敏用户账号。
+//! 读取、筛选并分页展示管理员可见的完整用户邮箱。
 //! 角色与状态变更交由独立写处理器调用管理领域用例。
 
+pub(crate) mod create;
+pub(crate) mod delete;
+pub(crate) mod host_delete;
+pub(crate) mod sync_record_delete;
 pub(crate) mod update;
 
 use askama::Template;
@@ -24,7 +28,7 @@ pub(crate) struct UsersQuery {
     page: Option<u32>,
     size: Option<u32>,
     #[serde(default, deserialize_with = "shared::empty_string_as_none")]
-    email: Option<String>,
+    search: Option<String>,
     #[serde(default, deserialize_with = "empty_role_as_none")]
     role: Option<AdminUserRole>,
     #[serde(default, deserialize_with = "empty_status_as_none")]
@@ -40,6 +44,7 @@ struct UserRow {
     status: &'static str,
     device_count: i64,
     host_count: i64,
+    updated_at: String,
 }
 
 #[derive(Template)]
@@ -52,7 +57,7 @@ struct UsersTemplate {
     is_en: bool,
     rows: Vec<UserRow>,
     load_error: Option<String>,
-    email_filter: String,
+    search_filter: String,
     role_filter: String,
     status_filter: String,
     page_number: u32,
@@ -75,7 +80,8 @@ pub(crate) async fn page(
     .normalized();
     let request = AdminUserListQuery {
         page: page_query,
-        email: query.email.clone(),
+        search: query.search.clone(),
+        email: None,
         role: query.role,
         status: query.status,
     };
@@ -108,7 +114,7 @@ pub(crate) async fn page(
         is_en: parts.is_en,
         rows,
         load_error,
-        email_filter: query.email.unwrap_or_default(),
+        search_filter: query.search.unwrap_or_default(),
         role_filter: query.role.map_or("", AdminUserRole::as_str).to_owned(),
         status_filter: query.status.map_or("", AdminUserStatus::as_str).to_owned(),
         page_number: page_query.page,
@@ -120,15 +126,17 @@ pub(crate) async fn page(
 
 impl From<AdminUser> for UserRow {
     fn from(value: AdminUser) -> Self {
+        let email = value.email_for_admin_page().to_owned();
         Self {
             id: value.id.to_string(),
-            email: value.masked_email,
+            email,
             login_name: value.admin_login_name.unwrap_or_default(),
             display_name: value.display_name,
             role: value.role.as_str(),
             status: value.status.as_str(),
             device_count: value.device_count,
             host_count: value.host_count,
+            updated_at: value.updated_at.format("%Y-%m-%d %H:%M UTC").to_string(),
         }
     }
 }
@@ -136,8 +144,8 @@ impl From<AdminUser> for UserRow {
 fn users_href(query: &UsersQuery, page: u32, locale: Locale) -> String {
     let mut params = url::form_urlencoded::Serializer::new(String::new());
     params.append_pair("page", &page.to_string());
-    if let Some(email) = query.email.as_deref().filter(|value| !value.is_empty()) {
-        params.append_pair("email", email);
+    if let Some(search) = query.search.as_deref().filter(|value| !value.is_empty()) {
+        params.append_pair("search", search);
     }
     if let Some(role) = query.role {
         params.append_pair("role", role.as_str());
@@ -162,7 +170,9 @@ where
     }
 }
 
-fn empty_status_as_none<'de, D>(deserializer: D) -> Result<Option<AdminUserStatus>, D::Error>
+pub(crate) fn empty_status_as_none<'de, D>(
+    deserializer: D,
+) -> Result<Option<AdminUserStatus>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -173,5 +183,47 @@ where
         Some("active") => Ok(Some(AdminUserStatus::Active)),
         Some("disabled") => Ok(Some(AdminUserStatus::Disabled)),
         Some(_) => Err(serde::de::Error::custom("invalid user status")),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use askama::Template;
+    use cloud_site::{Locale, PageId, content_service};
+
+    use super::UsersTemplate;
+    use crate::seo::SeoHead;
+
+    #[test]
+    fn user_list_exposes_real_create_form_with_csrf_and_confirmation() {
+        let body = (UsersTemplate {
+            view: content_service().view(PageId::AdminUsers, Locale::ZhCn),
+            seo: SeoHead::private(),
+            session_identity: Some("admin".to_owned()),
+            csrf_token: "csrf-create".to_owned(),
+            is_en: false,
+            rows: Vec::new(),
+            load_error: None,
+            search_filter: String::new(),
+            role_filter: String::new(),
+            status_filter: String::new(),
+            page_number: 1,
+            total: 0,
+            previous_href: None,
+            next_href: None,
+        })
+        .render()
+        .expect("users page should render");
+
+        assert!(body.contains("action=\"/admin/users\" method=\"post\""));
+        assert!(body.contains("hx-post=\"/admin/users\""));
+        assert!(body.contains("name=\"csrf_token\" value=\"csrf-create\""));
+        assert!(body.contains("hx-confirm="));
+        for field in ["email", "display_name", "password", "role", "status"] {
+            assert!(
+                body.contains(&format!("name=\"{field}\"")),
+                "missing {field}"
+            );
+        }
     }
 }

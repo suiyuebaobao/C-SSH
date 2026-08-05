@@ -12,10 +12,26 @@ pub(crate) struct PasswordSnapshot {
     pub credential_version: i64,
     pub session_kind: String,
     pub device_id: Option<Uuid>,
+    pub device_name: Option<String>,
+    pub last_login_ip: Option<String>,
+    pub user_agent: Option<String>,
+    pub client_version: Option<String>,
+    pub device_fingerprint: Option<String>,
     pub absolute_expires_at: DateTime<Utc>,
 }
 
-type SnapshotRow = (String, i64, String, Option<Uuid>, DateTime<Utc>);
+type SnapshotRow = (
+    String,
+    i64,
+    String,
+    Option<Uuid>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    DateTime<Utc>,
+);
 
 pub(crate) const UPDATE_CREDENTIAL_SQL: &str = "UPDATE accounts SET password_hash = $2, credential_version = $3, \
      updated_at = now() WHERE id = $1";
@@ -23,8 +39,13 @@ pub(crate) const REVOKE_ACCOUNT_SESSIONS_SQL: &str = "UPDATE sessions SET revoke
      WHERE account_id = $1 AND revoked_at IS NULL";
 pub(crate) const INSERT_ROTATED_SESSION_SQL: &str = "INSERT INTO sessions \
      (id, account_id, token_hash, credential_version, session_kind, device_id, \
-      expires_at, absolute_expires_at, rotated_from_id) \
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
+      expires_at, absolute_expires_at, rotated_from_id, last_login_ip, user_agent, \
+      client_version, device_fingerprint) \
+     SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, \
+            COALESCE($10::inet, source.last_login_ip), \
+            COALESCE($11, source.user_agent), source.client_version, \
+            source.device_fingerprint \
+     FROM sessions AS source WHERE source.id = $9";
 
 pub(crate) async fn current_snapshot(
     pool: &PgPool,
@@ -33,9 +54,13 @@ pub(crate) async fn current_snapshot(
 ) -> AppResult<Option<PasswordSnapshot>> {
     sqlx::query_as::<_, SnapshotRow>(
         "SELECT account.password_hash, account.credential_version, \
-                session.session_kind, session.device_id, session.absolute_expires_at \
+                session.session_kind, session.device_id, device.name, \
+                host(session.last_login_ip), session.user_agent, session.client_version, \
+                session.device_fingerprint, session.absolute_expires_at \
          FROM accounts AS account \
          JOIN sessions AS session ON session.account_id = account.id \
+         LEFT JOIN devices AS device ON device.account_id = session.account_id \
+            AND device.id = session.device_id \
          WHERE account.id = $1 AND session.id = $2 \
            AND account.status = 'active' \
            AND session.revoked_at IS NULL \
@@ -53,7 +78,12 @@ pub(crate) async fn current_snapshot(
             credential_version: value.1,
             session_kind: value.2,
             device_id: value.3,
-            absolute_expires_at: value.4,
+            device_name: value.4,
+            last_login_ip: value.5,
+            user_agent: value.6,
+            client_version: value.7,
+            device_fingerprint: value.8,
+            absolute_expires_at: value.9,
         })
     })
     .map_err(error::storage)
@@ -73,6 +103,7 @@ pub(crate) async fn update_and_rotate(
     device_id: Option<Uuid>,
     idle_expires_at: DateTime<Utc>,
     absolute_expires_at: DateTime<Utc>,
+    request_metadata: &crate::TrustedRequestMetadata,
 ) -> AppResult<i64> {
     let mut transaction = pool.begin().await.map_err(error::storage)?;
     let current = sqlx::query_as::<_, (String, i64)>(
@@ -128,6 +159,8 @@ pub(crate) async fn update_and_rotate(
         .bind(idle_expires_at)
         .bind(absolute_expires_at)
         .bind(current_session_id)
+        .bind(&request_metadata.last_login_ip)
+        .bind(&request_metadata.user_agent)
         .execute(&mut *transaction)
         .await
         .map_err(error::storage)?;

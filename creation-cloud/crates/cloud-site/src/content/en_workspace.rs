@@ -108,21 +108,21 @@ pub(super) fn models() -> PageContent {
         PageId::Models,
         "Models | Creation Cloud",
         "Models",
-        "Sync model configuration metadata",
-        "Names, providers, model IDs, and defaults can sync; API keys remain vault ciphertext references.",
+        "Read the global model catalog",
+        "Names, vendors, model IDs, API formats, and API URLs are administered globally. AI provider API keys and tokens stay only in local secure client storage; Cloud never uploads, stores, or displays their status.",
         vec![Metric::new(
             "—",
-            "Model profiles",
+            "Available models",
             "Available after sign-in",
         )],
         vec![section(
             "model-list",
-            "Model profiles",
-            "Defaults, order, and enablement arrive through the model service.",
+            "Model catalog",
+            "The model service returns administrator-enabled global catalog entries and never accepts personal credentials.",
             vec![item(
                 "Empty",
                 "Models are not loaded",
-                "The page never inserts sample keys or invented profiles.",
+                "The page never inserts sample keys, ciphertext status, or invented profiles.",
                 "No mock data",
             )],
         )],
@@ -182,7 +182,7 @@ pub(super) fn admin_users() -> PageContent {
         "Users | Creation Cloud Admin",
         "Account governance",
         "Manage users and authorization boundaries",
-        "Find accounts by redacted identity, update status and role, and protect both the current and last active administrator.",
+        "Find accounts by full email or administrator login, update status and role, and protect both the current and last active administrator.",
     )
 }
 
@@ -216,13 +216,43 @@ pub(super) fn admin_assets() -> PageContent {
     )
 }
 
+pub(super) fn admin_models() -> PageContent {
+    admin_page(
+        PageId::AdminModels,
+        "Models | Creation Cloud Admin",
+        "Models",
+        "Manage the global model catalog for clients",
+        "Add, edit, enable, and order global models. The admin service never receives, stores, or displays any user's AI provider API key or token status.",
+    )
+}
+
+pub(super) fn admin_announcements() -> PageContent {
+    admin_page(
+        PageId::AdminAnnouncements,
+        "Announcements | Creation Cloud Admin",
+        "Announcements",
+        "Edit the current announcement available to clients",
+        "Maintain drafts and publish the current announcement. The anonymous API returns published content only.",
+    )
+}
+
+pub(super) fn admin_settings() -> PageContent {
+    admin_page(
+        PageId::AdminSettings,
+        "System settings | Creation Cloud Admin",
+        "System settings",
+        "Manage global platform settings",
+        "Manage sign-in verification and other global options in one place.",
+    )
+}
+
 pub(super) fn admin_site() -> PageContent {
     admin_page(
         PageId::AdminSite,
-        "Site media | Creation Cloud Admin",
-        "Site media",
-        "Manage the home QR publication slot",
-        "Upload controlled bitmaps, review drafts, and publish same-origin media while the home page retains its honest empty state when none is live.",
+        "Home content | Creation Cloud Admin",
+        "Home content",
+        "Manage home-page content and QR media",
+        "Edit and publish Chinese and English home-page content and controlled QR media.",
     )
 }
 
@@ -294,14 +324,15 @@ fn admin_page(
 
 fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
-        nav("00 Overview", PageId::Admin, current),
-        nav("10 Users", PageId::AdminUsers, current),
-        nav("20 Devices", PageId::AdminDevices, current),
-        nav("30 Releases", PageId::AdminReleases, current),
-        nav("40 Assets", PageId::AdminAssets, current),
-        nav("50 Site", PageId::AdminSite, current),
-        nav("60 SEO", PageId::AdminSeo, current),
-        nav("70 Audit", PageId::AdminAudit, current),
-        nav("80 Feedback", PageId::AdminFeedback, current),
+        nav("Users", PageId::AdminUsers, current),
+        nav("Home content", PageId::AdminSite, current),
+        nav("Client updates", PageId::AdminReleases, current),
+        nav("Downloads", PageId::AdminAssets, current),
+        nav("Models", PageId::AdminModels, current),
+        nav("Announcements", PageId::AdminAnnouncements, current),
+        nav("Feedback", PageId::AdminFeedback, current),
+        nav("SEO", PageId::AdminSeo, current),
+        nav("System settings", PageId::AdminSettings, current),
+        nav("Activity", PageId::AdminAudit, current),
     ]
 }

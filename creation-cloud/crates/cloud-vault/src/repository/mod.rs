@@ -21,15 +21,6 @@ pub(crate) fn storage(message: &'static str) -> impl FnOnce(sqlx::Error) -> AppE
     move |_| AppError::Storage(message.to_owned())
 }
 
-pub(crate) fn delete_error(error: sqlx::Error) -> AppError {
-    if matches!(
-        &error,
-        sqlx::Error::Database(database)
-            if database.code().as_deref() == Some("23503")
-                && database.constraint() == Some("model_profiles_active_vault_envelope_fkey")
-    ) {
-        AppError::Conflict("密文信封仍被模型引用".to_owned())
-    } else {
-        AppError::Storage("无法删除密文信封".to_owned())
-    }
+pub(crate) fn delete_error(_: sqlx::Error) -> AppError {
+    AppError::Storage("无法删除密文信封".to_owned())
 }

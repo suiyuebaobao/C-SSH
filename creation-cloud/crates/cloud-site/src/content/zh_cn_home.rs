@@ -34,14 +34,14 @@ pub(super) fn page_content() -> PageContent {
         qr_placeholder_waiting: "WAITING".into(),
         media_slot: None,
         qr_widget: HomeQrWidget::pending(HomeQrLabels {
-            code: "MOBILE ACCESS / QR",
-            title: "扫码入口",
-            pending: "二维码待后台上传",
-            ready: "二维码已发布",
-            note: "点击卡片切换大小",
-            image_alt: "Creation-SSH 二维码",
-            open: "放大查看二维码",
-            close: "收起二维码",
+            code: "QQ COMMUNITY / QR",
+            title: "加入 QQ 交流群",
+            pending: "QQ 群二维码待上传",
+            ready: "QQ 群二维码已发布",
+            note: "扫码加入 Creation-SSH 用户群 · 点击可放大",
+            image_alt: "加入 Creation-SSH QQ 交流群的二维码",
+            open: "放大 QQ 群二维码",
+            close: "收起 QQ 群二维码",
         }),
     };
 
@@ -322,8 +322,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "MODEL",
                     "模型",
-                    "同步无凭据的模型元数据、默认项与排序。",
-                    "API Key 只引用密文",
+                    "读取管理员维护的全局模型名称、厂商、接口格式与 API URL。",
+                    "API Key/Token 仅存客户端本地",
                 ),
                 item(
                     "VAULT",
