@@ -6,17 +6,24 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/C-SSH_0.7.2_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)
-[![Stable](https://img.shields.io/badge/stable-v0.7.2-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/C-SSH_0.7.3_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)
+[![Stable](https://img.shields.io/badge/stable-v0.7.3-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)
 
 </div>
 
 Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.2`**.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.3`**.
 
 > Android upgrade notice: the first launch after every install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained.
+
+## v0.7.3 Highlights
+
+- Fixed the account reminder remaining above the data-protection password dialog and intercepting verification input.
+- Startup-protection state now refreshes immediately after setting or changing the data-protection password.
+- Replaced question-mark placeholders and broken Traditional Chinese text, with a shared cross-client regression check.
+- Production assets remain Windows NSIS, MSI, portable ZIP, and one Android arm64 APK. No Linux package or AAB is published.
 
 ## v0.7.2 Highlights
 

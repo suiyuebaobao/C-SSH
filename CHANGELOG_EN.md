@@ -4,6 +4,21 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.3 - Data-Protection Verification Fixes
+
+> Protocol remains 13 and SQLite/AI schema remains 9. Production assets are limited to three Windows packages and one Android arm64 APK. No Linux package or AAB is published.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.3_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.3_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.3_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.7.3_android-arm64.apk`
+
+### Fixed
+- Fixed the account reminder remaining above the data-protection password dialog and making Immediate Verification appear unresponsive.
+- Startup-protection state now refreshes immediately after setting or changing the data-protection password.
+- Removed question-mark placeholders and broken Traditional Chinese data-protection text, with a shared cross-client regression gate.
+
 ## v0.7.2 - Persistent Startup Password Protection Control
 
 > Protocol remains 13 and SQLite/AI schema remains 9 on Windows and Android. Android ships one production arm64 APK with no AAB generated or uploaded. Windows artifacts are currently unsigned. Linux client code remains maintained, but this release does not include a production Linux package.

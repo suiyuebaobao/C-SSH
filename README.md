@@ -6,17 +6,24 @@
 
 ### 手机上也能接着运维：持久化终端、常驻监控、文件管理与 AI 助手
 
-[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/C-SSH_0.7.2_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)
-[![Stable](https://img.shields.io/badge/stable-v0.7.2-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)
+[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/C-SSH_0.7.3_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)
+[![Stable](https://img.shields.io/badge/stable-v0.7.3-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)
 
 </div>
 
 Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 与 Linux 桌面端负责更完整的日常运维工作流。
 
-当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.2`**；旧版本继续保留为历史记录。
+当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.3`**；旧版本继续保留为历史记录。
 
 > Android 升级提示：每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。
+
+## v0.7.3 更新重点
+
+- 修复账号页“立即验证”打开密码弹窗后仍被提醒层遮挡、导致按钮无响应的问题。
+- 设置或修改数据保护密码后立即刷新启动保护状态，不再需要关闭并重开页面。
+- 修复数据保护说明中的问号占位和繁体中文乱码，并增加三端共享防回归检查。
+- 正式资产仍为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK；不发布 Linux 包，不生成 AAB。
 
 ## v0.7.2 更新重点
 

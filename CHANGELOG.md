@@ -4,6 +4,21 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.3 - 数据保护验证交互修复
+
+> 协议继续为 13，SQLite/AI schema 继续为 9。正式资产仅包含 Windows 三项和 Android arm64 APK；不发布 Linux 包，不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.3_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.3_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.3_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.3_android-arm64.apk`
+
+### 修复
+- 修复账号提醒在数据保护密码弹窗打开后仍处于顶层、导致“立即验证”看似无响应的问题。
+- 设置或修改数据保护密码后立即刷新启动保护状态。
+- 清除数据保护页面问号占位与繁体中文乱码，并以三端共享门禁防止回归。
+
 ## v0.7.2 - 可持久控制启动密码保护
 
 > Windows 与 Android 的协议继续为 13，SQLite/AI schema 继续为 9。Android 正式版仅提供 arm64 APK，不生成或上传 AAB；Windows 安装包当前未使用 Authenticode 签名。Linux 客户端代码继续维护，但本版不提供 Linux 正式包。
