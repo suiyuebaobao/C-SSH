@@ -25,9 +25,9 @@ Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控
 - 修复数据保护说明中的问号占位和繁体中文乱码，并增加三端共享防回归检查。
 - 正式资产仍为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK；不发布 Linux 包，不生成 AAB。
 
-## v0.7.2 更新重点
+## 当前主要能力
 
-- Windows 与 Android 可持久开启或关闭“启动密码保护”；启停都通过弹窗验证当前数据保护密码，关闭后下次冷启动自动进入，且不会改动本地或云端数据。Linux 客户端代码继续维护，但 `v0.7.2` 不提供 Linux 正式包。
+- Windows 与 Android 可持久开启或关闭“启动密码保护”；启停都通过弹窗验证当前数据保护密码，关闭后下次冷启动自动进入，且不会改动本地或云端数据。
 - 新增可选 Creation Cloud 账号、登录设备与手动云同步；主机凭据仅由客户端使用数据保护密码本地加密，Cloud 不接触明文。
 - AI 支持本地多模型账户和多 Key 绑定，可读取匿名 Cloud 模型目录；API Key 只留在本机，不参与云同步。
 - AI 权限收敛为查看、编辑、全权三档；会话、schema 9 原始记录与五层记忆在切换模型后继续保留。
@@ -38,28 +38,28 @@ Creation-SSH 是一套跨平台 SSH 运维客户端。Android 不是只读遥控
 
 ## 先看 Android
 
-同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.2` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
+同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.3` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
 
 ## 下载
 
 | 平台 | 推荐下载 | 其他正式资产 |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/C-SSH_0.7.2_android-arm64.apk) | 本版不提供 AAB |
-| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/C-SSH_0.7.3_android-arm64.apk) | 本版不提供 AAB |
+| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_portable-Windows-x64.zip) |
 
-Linux 客户端代码继续维护，但从 `v0.7.2` 起不再提供 Linux 正式安装包。
+Linux 客户端代码继续维护，但当前不提供 Linux 正式安装包。
 
-版本说明和 SHA256 见 [v0.7.2 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
+版本说明和 SHA256 见 [v0.7.3 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 已交付平台
 
-| 平台 | `v0.7.2` 已交付范围 |
+| 平台 | `v0.7.3` 已交付范围 |
 | --- | --- |
 | Android | 主机管理、agent 安装与更新/修复、持久化/普通终端、文件上传下载、实时监控、AI、系统管理、本地登录门与“我的”设置 |
 | Windows | 完整桌面工作流；提供 EXE、MSI 与便携 ZIP |
-| iOS / macOS | **尚未发布**，不属于 `v0.7.2` 已交付范围 |
+| iOS / macOS | **尚未发布**，不属于 `v0.7.3` 已交付范围 |
 
-Linux 客户端实现继续维护，但不属于 `v0.7.2` 正式制品与已交付平台。
+Linux 客户端实现继续维护，但不属于 `v0.7.3` 正式制品与已交付平台。
 
 ## 主要页面
 

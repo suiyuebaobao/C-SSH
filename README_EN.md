@@ -25,9 +25,9 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 - Replaced question-mark placeholders and broken Traditional Chinese text, with a shared cross-client regression check.
 - Production assets remain Windows NSIS, MSI, portable ZIP, and one Android arm64 APK. No Linux package or AAB is published.
 
-## v0.7.2 Highlights
+## Current Capabilities
 
-- Windows and Android can persistently enable or disable Startup Password Protection. Both changes verify the current data-protection password in a dialog; disabling it auto-enters on the next cold start without changing local or Cloud data. Linux client code remains maintained, but `v0.7.2` does not include a production Linux package.
+- Windows and Android can persistently enable or disable Startup Password Protection. Both changes verify the current data-protection password in a dialog; disabling it auto-enters on the next cold start without changing local or Cloud data.
 - Added optional Creation Cloud accounts, device sessions, and manual cloud sync. Host credentials are encrypted locally with the data-protection password; Cloud never receives plaintext.
 - Added local multi-model accounts and multiple API keys backed by the anonymous Cloud model catalog. API keys remain local and are never synchronized.
 - Consolidated AI permissions into View, Edit, and Full Access while preserving conversations, schema 9 raw events, and five-layer memory when switching models.
@@ -38,28 +38,28 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.2` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.3` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/C-SSH_0.7.2_android-arm64.apk) | No AAB for this release |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.2/Creation-SSH_0.7.2_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/C-SSH_0.7.3_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_portable-Windows-x64.zip) |
 
-Linux client code remains maintained, but production Linux packages are no longer provided starting with `v0.7.2`.
+Linux client code remains maintained, but no production Linux package is provided in the current release.
 
-See the [v0.7.2 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.2) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.7.3 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.7.2` |
+| Platform | Delivered in `v0.7.3` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| iOS / macOS | **Not released** and not part of the `v0.7.2` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.7.3` delivery |
 
-The Linux client implementation remains maintained but is not part of the `v0.7.2` production artifacts or delivered platforms.
+The Linux client implementation remains maintained but is not part of the `v0.7.3` production artifacts or delivered platforms.
 
 ## Main Pages
 
