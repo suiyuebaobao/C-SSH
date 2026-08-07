@@ -14,6 +14,9 @@ pub struct RetentionReport {
     pub applied_mutations_deleted: u64,
     pub resolved_conflicts_deleted: u64,
     pub conflict_mutations_deleted: u64,
+    pub encrypted_tombstones_deleted: u64,
+    pub encrypted_versions_deleted: u64,
+    pub encrypted_mutations_deleted: u64,
 }
 
 impl RetentionReport {
@@ -23,6 +26,9 @@ impl RetentionReport {
             && self.applied_mutations_deleted == 0
             && self.resolved_conflicts_deleted == 0
             && self.conflict_mutations_deleted == 0
+            && self.encrypted_tombstones_deleted == 0
+            && self.encrypted_versions_deleted == 0
+            && self.encrypted_mutations_deleted == 0
     }
 
     pub(crate) fn absorb(&mut self, batch: Self) {
@@ -31,7 +37,17 @@ impl RetentionReport {
         self.applied_mutations_deleted += batch.applied_mutations_deleted;
         self.resolved_conflicts_deleted += batch.resolved_conflicts_deleted;
         self.conflict_mutations_deleted += batch.conflict_mutations_deleted;
+        self.encrypted_tombstones_deleted += batch.encrypted_tombstones_deleted;
+        self.encrypted_versions_deleted += batch.encrypted_versions_deleted;
+        self.encrypted_mutations_deleted += batch.encrypted_mutations_deleted;
     }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct V2RetentionReport {
+    pub tombstones_deleted: u64,
+    pub versions_deleted: u64,
+    pub mutations_deleted: u64,
 }
 
 pub(crate) struct RetentionRequest {

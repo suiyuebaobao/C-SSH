@@ -24,7 +24,6 @@ cloud-site.workspace = true
 cloud-site-content.workspace = true
 cloud-site-media.workspace = true
 cloud-store.workspace = true
-cloud-sync.workspace = true
 cloud-user.workspace = true
 cloud-vault.workspace = true
 serde.workspace = true

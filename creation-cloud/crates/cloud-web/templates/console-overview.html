@@ -12,7 +12,6 @@
         <article><strong>{{ device_total }}</strong><span>{% if is_en %}Devices{% else %}设备{% endif %}</span></article>
         <article><strong>{{ host_total }}</strong><span>{% if is_en %}Cloud hosts{% else %}云端主机{% endif %}</span></article>
         <article><strong>{{ model_total }}</strong><span>{% if is_en %}Models{% else %}模型{% endif %}</span></article>
-        <article><strong>{{ conflict_total }}</strong><span>{% if is_en %}Open conflicts{% else %}待处理冲突{% endif %}</span></article>
       </section>
       <section class="console-section">
         <div class="console-section-heading"><h2>{% if is_en %}Current account{% else %}当前账号{% endif %}</h2><span class="console-status">{{ profile.locale }}</span></div>
@@ -20,7 +19,7 @@
           <div><dt>{% if is_en %}Display name{% else %}显示名称{% endif %}</dt><dd>{{ profile.display_name }}</dd></div>
           <div><dt>{% if is_en %}Published releases{% else %}已发布版本{% endif %}</dt><dd>{{ release_total }}</dd></div>
           <div><dt>{% if is_en %}Sync mode{% else %}同步方式{% endif %}</dt><dd>{% if is_en %}Manual upload / download{% else %}手动上传 / 下载{% endif %}</dd></div>
-          <div><dt>{% if is_en %}Conflict choices{% else %}冲突选择{% endif %}</dt><dd>{% if is_en %}Replace or keep{% else %}替换或保留{% endif %}</dd></div>
+          <div><dt>{% if is_en %}Revision safety{% else %}修订安全{% endif %}</dt><dd>{% if is_en %}Refresh before retry{% else %}刷新后重试{% endif %}</dd></div>
         </dl>
       </section>
     </div>

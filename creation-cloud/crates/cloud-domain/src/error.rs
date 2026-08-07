@@ -13,6 +13,13 @@ use crate::current_request_id;
 
 pub type AppResult<T> = Result<T, AppError>;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SyncResyncReason {
+    GenerationChanged,
+    HistoryCompacted,
+}
+
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("{0}")]
@@ -25,8 +32,15 @@ pub enum AppError {
     NotFound(String),
     #[error("{0}")]
     Conflict(String),
+    #[error("{message}")]
+    SyncResyncRequired {
+        reason: SyncResyncReason,
+        message: String,
+    },
     #[error("{0}")]
-    SyncResyncRequired(String),
+    SyncStateChanged(String),
+    #[error("{0}")]
+    SyncCapacityExceeded(String),
     #[error("{0}")]
     RateLimited(String),
     #[error("{message}")]
@@ -48,6 +62,24 @@ struct ErrorBody {
     message_key: &'static str,
     message: String,
     request_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    reason: Option<SyncResyncReason>,
+}
+
+impl AppError {
+    pub fn sync_generation_changed(message: impl Into<String>) -> Self {
+        Self::SyncResyncRequired {
+            reason: SyncResyncReason::GenerationChanged,
+            message: message.into(),
+        }
+    }
+
+    pub fn sync_history_compacted(message: impl Into<String>) -> Self {
+        Self::SyncResyncRequired {
+            reason: SyncResyncReason::HistoryCompacted,
+            message: message.into(),
+        }
+    }
 }
 
 impl IntoResponse for AppError {
@@ -59,6 +91,10 @@ impl IntoResponse for AppError {
             } => Some((*retry_after_seconds).max(1)),
             _ => None,
         };
+        let resync_reason = match &self {
+            Self::SyncResyncRequired { reason, .. } => Some(*reason),
+            _ => None,
+        };
         let message = self.to_string();
         let (status, code) = match self {
             Self::Validation(_) => (StatusCode::BAD_REQUEST, "validation_error"),
@@ -66,7 +102,9 @@ impl IntoResponse for AppError {
             Self::Forbidden(_) => (StatusCode::FORBIDDEN, "forbidden"),
             Self::NotFound(_) => (StatusCode::NOT_FOUND, "not_found"),
             Self::Conflict(_) => (StatusCode::CONFLICT, "conflict"),
-            Self::SyncResyncRequired(_) => (StatusCode::CONFLICT, "sync_resync_required"),
+            Self::SyncResyncRequired { .. } => (StatusCode::CONFLICT, "sync_resync_required"),
+            Self::SyncStateChanged(_) => (StatusCode::CONFLICT, "sync_state_changed"),
+            Self::SyncCapacityExceeded(_) => (StatusCode::CONFLICT, "sync_capacity_exceeded"),
             Self::RateLimited(_) | Self::RateLimitedAfter { .. } => {
                 (StatusCode::TOO_MANY_REQUESTS, "rate_limited")
             }
@@ -80,6 +118,7 @@ impl IntoResponse for AppError {
             message_key: code,
             message,
             request_id: current_request_id().unwrap_or_else(|| Uuid::now_v7().to_string()),
+            reason: resync_reason,
         };
         let mut response = (status, Json(body)).into_response();
         if let Some(seconds) = retry_after_seconds
@@ -155,7 +194,7 @@ mod tests {
 
     #[tokio::test]
     async fn sync_resync_required_has_a_stable_conflict_boundary() {
-        let response = AppError::SyncResyncRequired("需要全量重建".to_owned()).into_response();
+        let response = AppError::sync_generation_changed("需要重新读取同步状态").into_response();
         assert_eq!(response.status(), StatusCode::CONFLICT);
         let body = to_bytes(response.into_body(), 4096)
             .await
@@ -163,5 +202,43 @@ mod tests {
         let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
         assert_eq!(value["code"], "sync_resync_required");
         assert_eq!(value["message_key"], "sync_resync_required");
+        assert_eq!(value["reason"], "generation_changed");
+    }
+
+    #[tokio::test]
+    async fn compacted_history_has_a_distinct_stable_reason() {
+        let response = AppError::sync_history_compacted("同步历史已压缩").into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        let body = to_bytes(response.into_body(), 4096)
+            .await
+            .expect("错误正文应可读取");
+        let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
+        assert_eq!(value["code"], "sync_resync_required");
+        assert_eq!(value["reason"], "history_compacted");
+    }
+
+    #[tokio::test]
+    async fn sync_state_changed_has_a_stable_conflict_boundary() {
+        let response = AppError::SyncStateChanged("同步状态已变化".to_owned()).into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        let body = to_bytes(response.into_body(), 4096)
+            .await
+            .expect("错误正文应可读取");
+        let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
+        assert_eq!(value["code"], "sync_state_changed");
+        assert_eq!(value["message_key"], "sync_state_changed");
+    }
+
+    #[tokio::test]
+    async fn sync_capacity_exceeded_has_a_stable_conflict_boundary() {
+        let response =
+            AppError::SyncCapacityExceeded("同步密文容量已满".to_owned()).into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        let body = to_bytes(response.into_body(), 4096)
+            .await
+            .expect("错误正文应可读取");
+        let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
+        assert_eq!(value["code"], "sync_capacity_exceeded");
+        assert_eq!(value["message_key"], "sync_capacity_exceeded");
     }
 }

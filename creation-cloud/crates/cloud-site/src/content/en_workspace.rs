@@ -10,11 +10,11 @@ pub(super) fn console_overview() -> PageContent {
         "Console | Creation Cloud",
         "Overview",
         "Your Creation Cloud control plane",
-        "Device state, sync revisions, and vault wrappers appear within explicit boundaries.",
+        "Device state, manual-sync revisions, and client-encrypted resources appear within explicit boundaries.",
         vec![
             Metric::new("—", "Registered devices", "Available after sign-in"),
             Metric::new("—", "Sync revision", "Available after sign-in"),
-            Metric::new("—", "Vault entries", "Ciphertext metadata only"),
+            Metric::new("—", "Encrypted sync resources", "Ciphertext metadata only"),
         ],
         vec![section(
             "overview",
@@ -30,13 +30,13 @@ pub(super) fn console_overview() -> PageContent {
                 item(
                     "Sync",
                     "Sync state",
-                    "Review revisions, conflicts, and recent sync.",
+                    "Review revisions, generations, and the latest manual sync.",
                     "Awaiting session",
                 ),
                 item(
-                    "Vault",
+                    "Encrypted resources",
                     "Ciphertext state",
-                    "Review entry versions and device wrappers without plaintext.",
+                    "Review Host and AI account ciphertext state without plaintext.",
                     "Awaiting session",
                 ),
             ],
@@ -83,11 +83,11 @@ pub(super) fn sync() -> PageContent {
         PageId::Sync,
         "Sync | Creation Cloud",
         "Sync",
-        "Inspect revisions and conflicts",
-        "Only allowlisted, non-sensitive preferences sync; unknown fields are rejected.",
+        "Inspect manual-sync revisions",
+        "Host and AI provider accounts sync only after user confirmation; the service creates no persistent conflicts.",
         vec![
             Metric::new("—", "Current revision", "Available after sign-in"),
-            Metric::new("—", "Open conflicts", "Available after sign-in"),
+            Metric::new("—", "Sync generation", "Available after sign-in"),
         ],
         vec![section(
             "sync-state",
@@ -109,7 +109,7 @@ pub(super) fn models() -> PageContent {
         "Models | Creation Cloud",
         "Models",
         "Read the global model catalog",
-        "Names, vendors, model IDs, API formats, and API URLs are administered globally. AI provider API keys and tokens stay only in local secure client storage; Cloud never uploads, stores, or displays their status.",
+        "Names, vendors, model IDs, API formats, and API URLs are administered globally. Keys normally stay in client secure storage; manual sync uploads only client-encrypted opaque account records that the website cannot decrypt or display.",
         vec![Metric::new(
             "—",
             "Available models",
@@ -134,16 +134,16 @@ pub(super) fn vault() -> PageContent {
         PageId::Vault,
         "Vault | Creation Cloud",
         "Vault",
-        "Manage versioned ciphertext only",
-        "Encryption and decryption happen on trusted clients; the server cannot read vault content or passwords.",
+        "Manage versioned opaque ciphertext only",
+        "Encryption and decryption happen on trusted clients; the server cannot read data-protection passwords or resource plaintext.",
         vec![
             Metric::new("—", "Ciphertext entries", "Available after sign-in"),
-            Metric::new("—", "Wrapped devices", "Available after sign-in"),
+            Metric::new("—", "Sync generation", "Available after sign-in"),
         ],
         vec![section(
             "vault-state",
             "Vault state",
-            "Show only entry count, version, and device wrapping state.",
+            "Show only resource count, version, generation, and required ciphertext metadata.",
             vec![item(
                 "Zero knowledge",
                 "Vault state is not loaded",
@@ -222,7 +222,7 @@ pub(super) fn admin_models() -> PageContent {
         "Models | Creation Cloud Admin",
         "Models",
         "Manage the global model catalog for clients",
-        "Add, edit, enable, and order global models. The admin service never receives, stores, or displays any user's AI provider API key or token status.",
+        "Add, edit, enable, and order global models. The catalog never receives plaintext keys or credential fields and cannot decrypt, use, or display opaque account records from manual sync.",
     )
 }
 

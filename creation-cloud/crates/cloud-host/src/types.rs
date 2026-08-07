@@ -1,4 +1,4 @@
-//! 定义主机元数据、原样密文、账号同步代次和手动同步的稳定 API 形状。
+//! 定义主机与 AI provider 账号密文共享的同步 API 形状。
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -68,23 +68,36 @@ pub enum HostOperation {
     Delete,
 }
 
-impl HostOperation {
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResourceKind {
+    Host,
+    AiProviderAccount,
+}
+
+impl ResourceKind {
     pub(crate) const fn as_str(self) -> &'static str {
         match self {
-            Self::Insert => "insert",
-            Self::Update => "update",
-            Self::Delete => "delete",
+            Self::Host => "host",
+            Self::AiProviderAccount => "ai_provider_account",
         }
     }
 
     pub(crate) fn parse(value: &str) -> Option<Self> {
         match value {
-            "insert" => Some(Self::Insert),
-            "update" => Some(Self::Update),
-            "delete" => Some(Self::Delete),
+            "host" => Some(Self::Host),
+            "ai_provider_account" => Some(Self::AiProviderAccount),
             _ => None,
         }
     }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AiProviderOperation {
+    Insert,
+    Update,
+    Delete,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -106,11 +119,38 @@ pub struct HostChange {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
+pub struct AiProviderPayloadInput {
+    pub ciphertext: String,
+    pub nonce: String,
+    pub envelope_metadata: serde_json::Value,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiProviderChange {
+    pub resource_id: Uuid,
+    pub operation: AiProviderOperation,
+    #[serde(default)]
+    pub payload: Option<AiProviderPayloadInput>,
+    #[serde(default)]
+    pub expected_revision: Option<i64>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct PushRequest {
     pub sync_generation: i64,
     pub base_revision: i64,
     pub client_mutation_id: Uuid,
-    pub changes: Vec<HostChange>,
+    pub host_changes: Vec<HostChange>,
+    pub ai_changes: Vec<AiProviderChange>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+pub struct ResourceRevision {
+    pub resource_kind: ResourceKind,
+    pub resource_id: Uuid,
+    pub cloud_revision: i64,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -120,65 +160,23 @@ pub enum PushOutcome {
         sync_generation: i64,
         revision: i64,
         changed_count: u32,
+        revisions: Vec<ResourceRevision>,
         idempotent: bool,
     },
     Unchanged {
         sync_generation: i64,
         revision: i64,
-        idempotent: bool,
-    },
-    Conflict {
-        sync_generation: i64,
-        conflict: HostConflictView,
+        revisions: Vec<ResourceRevision>,
         idempotent: bool,
     },
 }
 
-#[derive(Clone, Debug, Serialize)]
-pub struct HostConflictView {
-    pub id: Uuid,
-    pub host_id: Uuid,
-    pub client_mutation_id: Uuid,
-    pub base_revision: i64,
-    pub remote_revision: i64,
-    pub proposed_operation: HostOperation,
-    pub source_device_id: Uuid,
-    pub created_at: DateTime<Utc>,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum RemoteResolution {
-    ReplaceRemote,
-    KeepRemote,
-}
-
-impl RemoteResolution {
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::ReplaceRemote => "replace_remote",
-            Self::KeepRemote => "keep_remote",
-        }
-    }
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-pub struct ResolveConflictRequest {
-    pub sync_generation: i64,
-    pub action: RemoteResolution,
-    pub resolution_mutation_id: Uuid,
-    pub expected_revision: i64,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub struct ResolveConflictOutcome {
-    pub conflict_id: Uuid,
-    pub resolution_mutation_id: Uuid,
-    pub action: RemoteResolution,
-    pub revision: i64,
-    pub idempotent: bool,
-    pub resolved_at: DateTime<Utc>,
+pub enum PullMode {
+    #[default]
+    Incremental,
+    Full,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize)]
@@ -188,11 +186,11 @@ pub struct PullRequest {
     #[serde(default)]
     pub since_revision: i64,
     #[serde(default)]
+    pub mode: PullMode,
+    #[serde(default)]
     pub snapshot_revision: Option<i64>,
     #[serde(default)]
     pub after_revision: Option<i64>,
-    #[serde(default)]
-    pub after_host_id: Option<Uuid>,
     #[serde(default = "default_pull_limit")]
     pub limit: u32,
 }
@@ -202,9 +200,9 @@ impl Default for PullRequest {
         Self {
             sync_generation: 1,
             since_revision: 0,
+            mode: PullMode::Incremental,
             snapshot_revision: None,
             after_revision: None,
-            after_host_id: None,
             limit: default_pull_limit(),
         }
     }
@@ -227,13 +225,25 @@ pub struct PullHostRecord {
 }
 
 #[derive(Clone, Debug, Serialize)]
+pub struct PullAiProviderRecord {
+    pub resource_id: Uuid,
+    pub revision: i64,
+    pub ciphertext: Option<String>,
+    pub nonce: Option<String>,
+    pub envelope_metadata: Option<serde_json::Value>,
+    pub source_device_id: Uuid,
+    pub deleted: bool,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Clone, Debug, Serialize)]
 pub struct PullResponse {
     pub sync_generation: i64,
-    pub records: Vec<PullHostRecord>,
+    pub mode: PullMode,
+    pub host_records: Vec<PullHostRecord>,
+    pub ai_records: Vec<PullAiProviderRecord>,
     pub snapshot_revision: i64,
     pub next_revision: i64,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub next_after_host_id: Option<Uuid>,
     pub has_more: bool,
 }
 
@@ -256,7 +266,8 @@ impl LocalDecision {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PullDecision {
-    pub host_id: Uuid,
+    pub resource_kind: ResourceKind,
+    pub resource_id: Uuid,
     pub cloud_revision: i64,
     pub action: LocalDecision,
 }
@@ -270,9 +281,20 @@ pub struct PullAckRequest {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SyncGenerationTransition {
+    Initial,
+    Rekey,
+    Reset,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 pub struct SyncStateView {
     pub sync_generation: i64,
     pub current_revision: i64,
+    pub compacted_through_revision: i64,
+    pub generation_transition: SyncGenerationTransition,
+    pub secret_present: bool,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -285,6 +307,7 @@ pub enum ResetConfirmation {
 #[serde(deny_unknown_fields)]
 pub struct ResetSyncRequest {
     pub mutation_id: Uuid,
+    pub sync_generation: i64,
     pub confirmation: ResetConfirmation,
 }
 
@@ -295,25 +318,28 @@ pub struct ResetSyncResponse {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(deny_unknown_fields)]
-pub struct RekeyHostCandidate {
-    pub host_id: Uuid,
-    pub cloud_revision: i64,
-    pub ciphertext: String,
+#[serde(tag = "resource_kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum RekeyResourceCandidate {
+    Host {
+        resource_id: Uuid,
+        cloud_revision: i64,
+        ciphertext: String,
+    },
+    AiProviderAccount {
+        resource_id: Uuid,
+        cloud_revision: i64,
+        ciphertext: String,
+        nonce: String,
+        envelope_metadata: serde_json::Value,
+    },
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RekeySyncRequest {
     pub mutation_id: Uuid,
     pub sync_generation: i64,
-    pub hosts: Vec<RekeyHostCandidate>,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
-pub struct RekeyHostRevision {
-    pub host_id: Uuid,
-    pub cloud_revision: i64,
+    pub resources: Vec<RekeyResourceCandidate>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -321,7 +347,7 @@ pub struct RekeySyncResponse {
     pub status: String,
     pub sync_generation: i64,
     pub current_revision: i64,
-    pub revisions: Vec<RekeyHostRevision>,
+    pub revisions: Vec<ResourceRevision>,
     pub idempotent: bool,
 }
 

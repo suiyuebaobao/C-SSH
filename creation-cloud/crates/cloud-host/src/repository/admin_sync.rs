@@ -1,4 +1,4 @@
-//! Administrator projection of explicit upload and download synchronization.
+//! 为管理员投影不含密文的显式上传与下载同步记录。
 
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppResult, Page, PageQuery};
@@ -37,31 +37,31 @@ pub(crate) const RECORDS_SQL: &str = r#"
            outcome,
            result_revision AS revision,
            changed_count,
-           cloud_host_mutations.created_at AS occurred_at
-    FROM cloud_host_mutations
+           cloud_sync_push_mutations.created_at AS occurred_at
+    FROM cloud_sync_push_mutations
     JOIN devices
-      ON devices.account_id = cloud_host_mutations.account_id
-     AND devices.id = cloud_host_mutations.source_device_id
-    WHERE cloud_host_mutations.account_id = $1
-      AND cloud_host_mutations.admin_deleted_at IS NULL
+      ON devices.account_id = cloud_sync_push_mutations.account_id
+     AND devices.id = cloud_sync_push_mutations.source_device_id
+    WHERE cloud_sync_push_mutations.account_id = $1
+      AND cloud_sync_push_mutations.admin_deleted_at IS NULL
 
     UNION ALL
 
-    SELECT concat('download:', cloud_host_device_checkpoints.device_id::TEXT) AS record_id,
+    SELECT concat('download:', cloud_sync_device_checkpoints.device_id::TEXT) AS record_id,
            'download'::TEXT AS direction,
-           cloud_host_device_checkpoints.device_id,
+           cloud_sync_device_checkpoints.device_id,
            devices.name AS device_name,
            devices.platform AS device_platform,
            'acknowledged'::TEXT AS outcome,
-           cloud_host_device_checkpoints.acknowledged_revision AS revision,
+           cloud_sync_device_checkpoints.acknowledged_revision AS revision,
            0::INTEGER AS changed_count,
-           cloud_host_device_checkpoints.last_manual_sync_at AS occurred_at
-    FROM cloud_host_device_checkpoints
+           cloud_sync_device_checkpoints.last_manual_sync_at AS occurred_at
+    FROM cloud_sync_device_checkpoints
     JOIN devices
-      ON devices.account_id = cloud_host_device_checkpoints.account_id
-     AND devices.id = cloud_host_device_checkpoints.device_id
-    WHERE cloud_host_device_checkpoints.account_id = $1
-      AND cloud_host_device_checkpoints.admin_deleted_at IS NULL
+      ON devices.account_id = cloud_sync_device_checkpoints.account_id
+     AND devices.id = cloud_sync_device_checkpoints.device_id
+    WHERE cloud_sync_device_checkpoints.account_id = $1
+      AND cloud_sync_device_checkpoints.admin_deleted_at IS NULL
 "#;
 
 pub(crate) async fn list(

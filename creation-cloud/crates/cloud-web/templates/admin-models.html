@@ -6,7 +6,7 @@
     <div><h2 id="models-heading">{% if is_en %}Models{% else %}模型管理{% endif %}</h2></div>
   </div>
   <p class="admin-model-note">
-    {% if is_en %}Only the global model catalog is managed here. AI provider API keys and tokens stay in each client's local secure storage; Cloud never receives, stores, or displays their status.{% else %}这里只管理全局模型目录；AI provider API Key/Token 只保存在各客户端本地安全存储，Cloud 不接收、不保存，也不显示凭据状态。{% endif %}
+    {% if is_en %}Only the global model catalog is managed here. API keys and tokens normally stay in each client's secure storage; manual sync may upload only client-encrypted opaque account records. This catalog cannot receive, decrypt, or display credentials.{% else %}这里只管理全局模型目录；API Key/Token 平时保存在各客户端安全存储，手动同步也只能上传客户端加密的不透明账户记录。本目录不能接收明文、解密或回显凭据。{% endif %}
   </p>
 
   <details class="admin-model-create">

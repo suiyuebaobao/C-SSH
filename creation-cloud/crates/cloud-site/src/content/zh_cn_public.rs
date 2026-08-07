@@ -46,14 +46,14 @@ pub(super) fn security() -> PageContent {
             vec![
                 item(
                     "同步",
-                    "非敏感白名单",
-                    "只同步明确允许的偏好与模型元数据。",
-                    "默认拒绝",
+                    "Host+AI 手动同步",
+                    "秘密只以可信客户端加密的不透明密文上传。",
+                    "用户确认",
                 ),
                 item(
                     "保险库",
                     "客户端加密",
-                    "服务端仅保存密文信封和密钥包装元数据。",
+                    "服务端仅保存版本化不透明密文与必要非秘密元数据。",
                     "零知识",
                 ),
                 item(
@@ -70,8 +70,8 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "下载 Creation-SSH｜Windows、Linux 与 Android",
-        "下载 Creation-SSH SSH 终端与服务器运维客户端的 Windows、Linux、Android 最新正式版本；macOS 与 iOS 尚未开发。",
+        "下载 Creation-SSH｜Windows 与 Android",
+        "下载 Creation-SSH SSH 终端与服务器运维客户端的 Windows、Android 最新正式版本；Linux 客户端已停止开发，不提供安装包。",
         "DOWNLOADS / DIRECT",
         "下载 Creation-SSH",
         "选择平台和包型，点击即可下载。",
@@ -84,12 +84,6 @@ pub(super) fn downloads() -> PageContent {
             item(
                 "桌面",
                 "Windows",
-                "提供可用包型，按钮直达下载。",
-                "等待发布数据",
-            ),
-            item(
-                "桌面",
-                "Linux",
                 "提供可用包型，按钮直达下载。",
                 "等待发布数据",
             ),
@@ -176,7 +170,7 @@ pub(super) fn faq() -> PageContent {
     .with_faqs(vec![
         FaqItem::new("Creation Cloud 会代理 SSH 连接吗？", "不会。SSH 数据面保持客户端直连用户服务器，云端只做账号、设备与可选同步等控制面能力。"),
         FaqItem::new("没有安装 agent 还能使用吗？", "普通 SSH 终端和端口映射当前可走原生 SSH；跳板机属于同类架构例外，但本阶段仍延期。持久会话、监控和结构化管理能力依赖 agent。"),
-        FaqItem::new("主机地址和私钥会同步到云端吗？", "不会明文同步。主机资料、密码、私钥、known_hosts、终端内容和命令历史都不属于允许上云的数据。"),
+        FaqItem::new("主机地址和私钥会同步到云端吗？", "主机名称、IP 和端口等非秘密元数据可以同步；SSH 账号、密码、私钥及 AI Key/API/模型绑定只以客户端加密密文手动同步。known_hosts、终端内容和命令历史不上云。"),
         FaqItem::new("保险库密码和账号密码相同吗？", "不同。账号密码只负责登录；保险库密码只在可信客户端派生加密密钥，不上传服务端。"),
         FaqItem::new("如何确认下载文件未被替换？", "正式下载条目会展示平台、架构、文件大小与 SHA256；请在安装前核对。"),
         FaqItem::new("移动端是桌面端的完整复制吗？", "不是。Android 定位为移动伴侣，优先覆盖查看、轻量操作和与桌面工作流衔接的场景。"),

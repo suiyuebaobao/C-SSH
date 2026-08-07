@@ -174,7 +174,10 @@ fn error_status(error: &AppError) -> StatusCode {
         AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
         AppError::Forbidden(_) => StatusCode::FORBIDDEN,
         AppError::NotFound(_) => StatusCode::NOT_FOUND,
-        AppError::Conflict(_) | AppError::SyncResyncRequired(_) => StatusCode::CONFLICT,
+        AppError::Conflict(_)
+        | AppError::SyncResyncRequired { .. }
+        | AppError::SyncStateChanged(_)
+        | AppError::SyncCapacityExceeded(_) => StatusCode::CONFLICT,
         AppError::RateLimited(_) | AppError::RateLimitedAfter { .. } => {
             StatusCode::TOO_MANY_REQUESTS
         }

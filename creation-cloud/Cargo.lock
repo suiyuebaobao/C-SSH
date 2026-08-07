@@ -664,7 +664,6 @@ dependencies = [
  "cloud-site-content",
  "cloud-site-media",
  "cloud-store",
- "cloud-sync",
  "cloud-user",
  "cloud-vault",
  "serde",

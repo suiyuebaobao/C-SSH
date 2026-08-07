@@ -14,7 +14,7 @@ pub use admin_login_name::{
     ADMIN_LOGIN_NAME_MAX_LEN, ADMIN_LOGIN_NAME_MIN_LEN, normalize_admin_login_name,
 };
 pub use auth::AuthenticatedSession;
-pub use error::{AppError, AppResult};
+pub use error::{AppError, AppResult, SyncResyncReason};
 pub use page::{Page, PageQuery};
 pub use request_context::{
     current_request_id, mark_semantic_audit_recorded, with_request_id, with_semantic_audit_tracking,

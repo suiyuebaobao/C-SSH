@@ -21,7 +21,6 @@ struct OverviewTemplate {
     device_total: i64,
     host_total: i64,
     model_total: i64,
-    conflict_total: i64,
     release_total: usize,
 }
 
@@ -31,12 +30,11 @@ pub(crate) async fn page(
     Query(query): Query<LocaleQuery>,
 ) -> AppResult<Html<String>> {
     let page = common::first_page();
-    let (profile, devices, hosts, models, conflicts, releases) = tokio::try_join!(
+    let (profile, devices, hosts, models, releases) = tokio::try_join!(
         state.user().get(&session, session.account_id),
         state.device().list(&session, page),
         state.host().list_self(&session, page),
         state.model().list_public(page),
-        state.host().list_open_conflicts(&session, page),
         state.download().public_manifest(),
     )?;
     let locale = query.locale();
@@ -49,7 +47,6 @@ pub(crate) async fn page(
         device_total: devices.total,
         host_total: hosts.total,
         model_total: models.total,
-        conflict_total: conflicts.total,
         release_total: releases.len(),
     })
 }

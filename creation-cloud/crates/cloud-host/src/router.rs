@@ -1,24 +1,24 @@
-//! Relative Axum routers for account hosts, sync, and admin reads.
+//! 提供账号主机、统一密文同步和管理员只读路由。
 
 use axum::{
     Extension, Json, Router,
     extract::{DefaultBodyLimit, Path, Query, State},
     http::StatusCode,
-    response::{IntoResponse, Response},
     routing::{delete, get, post},
 };
 use cloud_domain::{AdminActor, AppResult, AuthenticatedSession, Page, PageQuery};
 use uuid::Uuid;
 
 use crate::{
-    AdminSyncRecord, HostConflictView, HostView, PullAckRequest, PullRequest, PullResponse,
-    PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
-    ResetSyncResponse, ResolveConflictOutcome, ResolveConflictRequest, Service, SyncStateView,
+    AdminSyncRecord, HostView, PullAckRequest, PullRequest, PullResponse, PushOutcome, PushRequest,
+    RekeySyncRequest, RekeySyncResponse, ResetSyncRequest, ResetSyncResponse, Service,
+    SyncStateView,
 };
 
 /// 32 MiB decoded ciphertext expands to at most 42.67 MiB of canonical
-/// Base64. The remaining space covers the bounded 2,000-host JSON envelope.
-pub(crate) const REKEY_REQUEST_BODY_LIMIT_BYTES: usize = 45 * 1024 * 1024;
+/// Base64. The remaining space covers the bounded opaque envelope and JSON.
+pub(crate) const SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES: usize = 45 * 1024 * 1024;
+pub(crate) const SYNC_ACK_REQUEST_BODY_LIMIT_BYTES: usize = 2 * 1024 * 1024;
 
 #[must_use = "the router must be mounted by the server"]
 pub fn router(service: Service) -> Router {
@@ -39,17 +39,20 @@ pub fn host_router(service: Service) -> Router {
 pub fn sync_router(service: Service) -> Router {
     Router::new()
         .route("/state", get(sync_state))
-        .route("/push", post(push))
+        .route(
+            "/push",
+            post(push).layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
+        )
         .route("/pull", get(pull))
-        .route("/pull/ack", post(ack_pull))
+        .route(
+            "/pull/ack",
+            post(ack_pull).layer(DefaultBodyLimit::max(SYNC_ACK_REQUEST_BODY_LIMIT_BYTES)),
+        )
         .route(
             "/rekey",
-            post(rekey_sync).layer(DefaultBodyLimit::max(REKEY_REQUEST_BODY_LIMIT_BYTES)),
+            post(rekey_sync).layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
         )
         .route("/reset", post(reset_sync))
-        .route("/conflicts", get(list_conflicts))
-        .route("/conflicts/{conflict_id}", get(get_conflict))
-        .route("/conflicts/{conflict_id}/resolve", post(resolve_conflict))
         .with_state(service)
 }
 
@@ -100,14 +103,8 @@ async fn push(
     State(service): State<Service>,
     Extension(session): Extension<AuthenticatedSession>,
     Json(request): Json<PushRequest>,
-) -> AppResult<Response> {
-    let outcome = service.push(&session, request).await?;
-    let status = if matches!(outcome, PushOutcome::Conflict { .. }) {
-        StatusCode::CONFLICT
-    } else {
-        StatusCode::OK
-    };
-    Ok((status, Json(outcome)).into_response())
+) -> AppResult<Json<PushOutcome>> {
+    service.push(&session, request).await.map(Json)
 }
 
 async fn pull(
@@ -141,34 +138,6 @@ async fn rekey_sync(
     Json(request): Json<RekeySyncRequest>,
 ) -> AppResult<Json<RekeySyncResponse>> {
     service.rekey_sync(&session, request).await.map(Json)
-}
-
-async fn list_conflicts(
-    State(service): State<Service>,
-    Extension(session): Extension<AuthenticatedSession>,
-    Query(page): Query<PageQuery>,
-) -> AppResult<Json<Page<HostConflictView>>> {
-    service.list_open_conflicts(&session, page).await.map(Json)
-}
-
-async fn get_conflict(
-    State(service): State<Service>,
-    Extension(session): Extension<AuthenticatedSession>,
-    Path(conflict_id): Path<Uuid>,
-) -> AppResult<Json<HostConflictView>> {
-    service.get_conflict(&session, conflict_id).await.map(Json)
-}
-
-async fn resolve_conflict(
-    State(service): State<Service>,
-    Extension(session): Extension<AuthenticatedSession>,
-    Path(conflict_id): Path<Uuid>,
-    Json(request): Json<ResolveConflictRequest>,
-) -> AppResult<Json<ResolveConflictOutcome>> {
-    service
-        .resolve_conflict(&session, conflict_id, request)
-        .await
-        .map(Json)
 }
 
 async fn admin_list_for_user(

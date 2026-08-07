@@ -10,9 +10,9 @@
       {% include "console-heading.html" %}
       <p class="console-boundary">
         {% if is_en %}
-        The model catalog is managed globally by administrators. AI provider API keys and tokens stay only in local secure storage in each Creation-SSH client; Cloud never uploads, stores, or displays their status.
+        The model catalog is managed globally by administrators. API keys and tokens normally stay in each Creation-SSH client's secure storage; manual sync may upload only client-encrypted opaque account records, which the website cannot decrypt or display.
         {% else %}
-        模型目录由管理员统一维护。AI provider API Key/Token 只保存在 Creation-SSH 客户端本地安全存储；Cloud 不上传、不保存，也不显示凭据状态。
+        模型目录由管理员统一维护。API Key/Token 平时只保存在 Creation-SSH 客户端安全存储；用户手动同步时也只上传客户端加密的不透明账户记录，网页不能解密或显示凭据。
         {% endif %}
       </p>
       <section class="console-section">

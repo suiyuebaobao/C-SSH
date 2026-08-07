@@ -1,4 +1,4 @@
-//! Account-scoped host metadata reads. Ciphertext never leaves this module here.
+//! 读取账号主机元数据；此路径只投影密文存在性而不返回密文正文。
 
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppError, AppResult, Page, PageQuery};

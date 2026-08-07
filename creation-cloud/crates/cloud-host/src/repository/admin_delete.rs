@@ -1,4 +1,4 @@
-//! Atomic administrator deletion for account-scoped hosts and sync history.
+//! 原子执行管理员发起的账号主机删除与同步历史隐藏。
 
 use cloud_domain::{
     AdminActor, AppError, AppResult, current_request_id, mark_semantic_audit_recorded,
@@ -45,14 +45,10 @@ pub(crate) async fn host(
         .ok_or_else(|| AppError::Storage("host revision is exhausted".to_owned()))?;
 
     for statement in [
-        "DELETE FROM cloud_host_pull_decisions
-         WHERE account_id = $1 AND host_id = $2",
-        "DELETE FROM cloud_host_device_deliveries
-         WHERE account_id = $1 AND host_id = $2",
-        "DELETE FROM cloud_sync_rekey_results
-         WHERE account_id = $1 AND host_id = $2",
-        "DELETE FROM cloud_host_conflicts
-         WHERE account_id = $1 AND host_id = $2",
+        "DELETE FROM cloud_sync_pull_decisions
+         WHERE account_id = $1 AND resource_kind = 'host' AND resource_id = $2",
+        "DELETE FROM cloud_sync_resource_deliveries
+         WHERE account_id = $1 AND resource_kind = 'host' AND resource_id = $2",
         "DELETE FROM cloud_host_versions
          WHERE account_id = $1 AND host_id = $2",
     ] {
@@ -135,7 +131,7 @@ pub(crate) async fn sync_record(
     let mut tx = begin(pool).await?;
     let affected = match record {
         SyncRecordId::Upload(mutation_id) => sqlx::query(
-            "UPDATE cloud_host_mutations
+            "UPDATE cloud_sync_push_mutations
              SET admin_deleted_at = now()
              WHERE account_id = $1 AND client_mutation_id = $2
                AND admin_deleted_at IS NULL",
@@ -146,7 +142,7 @@ pub(crate) async fn sync_record(
         .await
         .map_err(storage)?,
         SyncRecordId::Download(device_id) => sqlx::query(
-            "UPDATE cloud_host_device_checkpoints
+            "UPDATE cloud_sync_device_checkpoints
              SET admin_deleted_at = now()
              WHERE account_id = $1 AND device_id = $2
                AND admin_deleted_at IS NULL",

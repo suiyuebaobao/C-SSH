@@ -17,7 +17,7 @@ pub(super) fn page_content() -> PageContent {
                 .into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
-        platform_note: "5 SLOTS".into(),
+        platform_note: "4 SLOTS".into(),
         platforms,
         sections,
         faq_side_label: "FAQ / DECISION QUESTIONS".into(),
@@ -78,14 +78,6 @@ fn platforms() -> Vec<HomePlatform> {
             "Windows",
             "Desktop client",
             "Complete desktop operations",
-            "Independent native client",
-            "See downloads for live records",
-        ),
-        HomePlatform::current(
-            "L",
-            "Linux",
-            "Independent client",
-            "Desktop operations and local builds",
             "Independent native client",
             "See downloads for live records",
         ),
@@ -277,8 +269,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
         section(
             "platforms",
             HomeLayout::Platforms,
-            "Five platforms with independent positions",
-            "Public Windows, Linux, and Android status comes from real release records. macOS and iOS keep separate, explicitly planned positions.",
+            "Four platforms with independent positions",
+            "Public Windows and Android status comes from real release records. The Linux client is discontinued; macOS and iOS keep separate planned positions.",
             platform_items(platforms),
         ),
         section(
@@ -296,7 +288,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "CLOUD CONTROL PLANE",
                     "Accounts, devices, and optional sync",
-                    "Only a non-sensitive allowlist can sync. Vault encryption stays on trusted clients and the service stores versioned ciphertext envelopes only.",
+                    "Host and AI provider accounts sync only when the user asks. Trusted clients encrypt secrets, and the service stores versioned opaque ciphertext only.",
                     "No plaintext sensitive data",
                 ),
             ],
@@ -322,19 +314,19 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "SYNC",
                     "Sync",
-                    "Revisions, conflicts, and non-sensitive allowlist results.",
-                    "Unknown fields denied",
+                    "Host and AI resource revisions, generations, and manual-sync outcomes.",
+                    "No persistent conflicts",
                 ),
                 item(
                     "MODEL",
                     "Models",
                     "Read administrator-managed global model names, vendors, API formats, and API URLs.",
-                    "API keys and tokens stay client-local",
+                    "Client-encrypted manual sync only",
                 ),
                 item(
                     "VAULT",
                     "Vault",
-                    "Show ciphertext versions and device-wrapper status only.",
+                    "Show resource ciphertext versions, generations, and required metadata only.",
                     "Server cannot decrypt",
                 ),
                 item(
@@ -360,7 +352,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "Are host addresses and private keys uploaded?",
-            "Not in plaintext. Host records, passwords, private keys, known_hosts, terminal content, and command history are outside the sync allowlist.",
+            "Non-secret host metadata such as names, IP addresses, and ports may sync. SSH accounts, passwords, private keys, and AI keys, APIs, and model bindings sync only as client-encrypted ciphertext. known_hosts, terminal content, and command history never upload.",
         ),
         HomeFaqItem::new(
             "Is the vault password the account password?",

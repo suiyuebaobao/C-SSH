@@ -15,7 +15,7 @@ pub(super) fn page_content() -> PageContent {
         status_note: "生产控制面 · 正式版本已发布 · 客户端接入筹备中".into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
-        platform_note: "5 SLOTS".into(),
+        platform_note: "4 SLOTS".into(),
         platforms,
         sections,
         faq_side_label: "FAQ / DECISION QUESTIONS".into(),
@@ -72,14 +72,6 @@ fn platforms() -> Vec<HomePlatform> {
             "Windows",
             "桌面客户端",
             "完整桌面运维体验",
-            "独立原生客户端",
-            "以下载页真实记录为准",
-        ),
-        HomePlatform::current(
-            "L",
-            "Linux",
-            "独立客户端",
-            "桌面运维与独立构建",
             "独立原生客户端",
             "以下载页真实记录为准",
         ),
@@ -271,8 +263,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
         section(
             "platforms",
             HomeLayout::Platforms,
-            "五个平台，各自独立，不合并占位",
-            "Windows、Linux、Android 的公开状态以真实发布记录为准；macOS 与 iOS 始终保留独立产品位。",
+            "四个平台，各自独立，不合并占位",
+            "Windows 与 Android 的公开状态以真实发布记录为准；Linux 客户端已停止开发，macOS 与 iOS 保留独立规划位。",
             platform_items(platforms),
         ),
         section(
@@ -290,7 +282,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "CLOUD CONTROL PLANE",
                     "账号、设备与可选同步",
-                    "只同步非敏感白名单；保险库加解密留在可信客户端，服务端只保存版本化密文信封。",
+                    "Host 与 AI provider 账户只由用户手动同步；秘密由可信客户端加密，服务端只保存版本化不透明密文。",
                     "敏感资料不明文上云",
                 ),
             ],
@@ -316,19 +308,19 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "SYNC",
                     "同步",
-                    "revision、冲突与非敏感白名单结果。",
-                    "默认拒绝未知字段",
+                    "Host+AI 资源 revision、代次与手动同步结果。",
+                    "无持久冲突",
                 ),
                 item(
                     "MODEL",
                     "模型",
                     "读取管理员维护的全局模型名称、厂商、接口格式与 API URL。",
-                    "API Key/Token 仅存客户端本地",
+                    "仅手动同步客户端加密密文",
                 ),
                 item(
                     "VAULT",
                     "保险库",
-                    "只显示密文版本与设备包装状态。",
+                    "只显示资源密文版本、代次与必要元数据。",
                     "服务端不可解密",
                 ),
                 item(
@@ -354,7 +346,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "主机地址和私钥会上云吗？",
-            "不会明文上云。主机资料、密码、私钥、known_hosts、终端内容和命令历史均不在允许同步的白名单内。",
+            "主机名称、IP 和端口等非秘密元数据可以同步；SSH 账号、密码、私钥以及 AI Key/API/模型绑定只以客户端加密密文手动同步。known_hosts、终端内容和命令历史不上云。",
         ),
         HomeFaqItem::new(
             "保险库密码与账号密码相同吗？",

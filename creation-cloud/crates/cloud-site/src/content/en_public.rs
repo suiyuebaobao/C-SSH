@@ -29,8 +29,8 @@ pub(super) fn security() -> PageContent {
             "Cloud data classification",
             "Unknown fields are rejected and sensitive material does not enter the cloud in plaintext.",
             vec![
-                item("Sync", "Non-sensitive allowlist", "Only explicitly allowed preferences and model metadata can sync.", "Default deny"),
-                item("Vault", "Client-side encryption", "The server stores ciphertext envelopes and key-wrapper metadata only.", "Zero knowledge"),
+                item("Sync", "Host and AI manual sync", "Secrets upload only as opaque ciphertext encrypted by a trusted client.", "User confirmed"),
+                item("Vault", "Client-side encryption", "The server stores versioned opaque ciphertext and required non-secret metadata only.", "Zero knowledge"),
                 item("Logs", "Redacted records", "Passwords, tokens, cookies, ciphertext bodies, and SSH details stay out of logs.", "Minimum record"),
             ],
         ),
@@ -40,8 +40,8 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "Download Creation-SSH for Windows, Linux, and Android",
-        "Download the latest Creation-SSH SSH terminal and server operations client for Windows, Linux, and Android; macOS and iOS are not developed yet.",
+        "Download Creation-SSH for Windows and Android",
+        "Download the latest Creation-SSH SSH terminal and server operations client for Windows and Android. The Linux client is discontinued and is not offered for download.",
         "DOWNLOADS / DIRECT",
         "Download Creation-SSH",
         "Choose a platform and package, then download.",
@@ -52,7 +52,6 @@ pub(super) fn downloads() -> PageContent {
         "Only actionable download buttons are shown; platforms not developed yet keep a short status.",
         vec![
             item("Desktop", "Windows", "Available package buttons start the download directly.", "Awaiting release data"),
-            item("Desktop", "Linux", "Available package buttons start the download directly.", "Awaiting release data"),
             item("Mobile", "Android", "Available package buttons start the download directly.", "Awaiting release data"),
             item("Planned", "macOS", "The independent macOS client has not been developed yet; no download is offered.", "Not developed yet"),
             item("Planned", "iOS", "The independent iOS companion has not been developed yet; no download is offered.", "Not developed yet"),
@@ -96,7 +95,7 @@ pub(super) fn faq() -> PageContent {
     .with_faqs(vec![
         FaqItem::new("Does Creation Cloud proxy SSH connections?", "No. The SSH data plane stays direct from the client to your server; the cloud only provides account, device, and optional sync controls."),
         FaqItem::new("Can I use it without the agent?", "A standard SSH terminal and port forwarding currently use native SSH. Jump hosts share that architectural exception but remain deferred. Persistent sessions, monitoring, and structured management use the agent."),
-        FaqItem::new("Are host addresses and private keys synced?", "Not in plaintext. Host details, passwords, private keys, known_hosts, terminal content, and command history are outside the cloud allowlist."),
+        FaqItem::new("Are host addresses and private keys synced?", "Non-secret host metadata such as names, IP addresses, and ports may sync. SSH accounts, passwords, private keys, and AI keys, APIs, and model bindings sync only as client-encrypted ciphertext. known_hosts, terminal content, and command history never upload."),
         FaqItem::new("Is the vault password my account password?", "No. The account password signs you in. The vault password derives encryption keys only on trusted clients and is never uploaded."),
         FaqItem::new("How can I verify a download?", "Formal download entries show platform, architecture, file size, and SHA256 for verification before installation."),
         FaqItem::new("Is mobile a full copy of desktop?", "No. Android is a mobile companion focused on inspection, lightweight actions, and continuity with desktop workflows."),

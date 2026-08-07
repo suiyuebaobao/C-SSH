@@ -1,8 +1,9 @@
-//! Database boundary for account-owned hosts and explicit manual synchronization.
+//! 封装账号主机、AI provider 密文与统一 revision 流的数据库边界。
 
 mod admin_delete;
 mod admin_sync;
-mod conflict;
+mod ai;
+mod capacity;
 mod hosts;
 mod pull;
 mod push;
@@ -16,9 +17,6 @@ use uuid::Uuid;
 
 pub(crate) use admin_delete::{host as delete_admin_host, sync_record as delete_admin_sync_record};
 pub(crate) use admin_sync::list as list_admin_sync_records;
-pub(crate) use conflict::{
-    get as get_conflict, list_open as list_open_conflicts, resolve as resolve_conflict,
-};
 pub(crate) use hosts::{count, get, list};
 pub(crate) use pull::{ack, pull};
 pub(crate) use push::push;
@@ -73,8 +71,28 @@ pub(crate) fn require_sync_generation(state: SyncState, requested: i64) -> AppRe
     if requested == state.sync_generation {
         Ok(())
     } else {
-        Err(AppError::SyncResyncRequired(
-            "sync_generation does not match the current account generation".to_owned(),
+        Err(AppError::sync_generation_changed(
+            "sync_generation does not match the current account generation",
+        ))
+    }
+}
+
+pub(crate) fn require_retained_revision(state: SyncState, requested: i64) -> AppResult<()> {
+    if requested >= state.compacted_through_revision {
+        Ok(())
+    } else {
+        Err(AppError::sync_history_compacted(
+            "the requested sync revision is below the compaction floor",
+        ))
+    }
+}
+
+pub(crate) fn require_base_revision(state: SyncState, requested: i64) -> AppResult<()> {
+    if requested == state.current_revision {
+        Ok(())
+    } else {
+        Err(AppError::SyncStateChanged(
+            "base_revision does not match the current account revision".to_owned(),
         ))
     }
 }

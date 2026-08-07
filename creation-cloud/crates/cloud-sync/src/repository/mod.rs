@@ -10,6 +10,7 @@ pub(crate) mod pull;
 mod push;
 mod resolve_conflict;
 pub(crate) mod retention;
+pub(crate) mod retention_v2;
 mod row;
 mod state;
 

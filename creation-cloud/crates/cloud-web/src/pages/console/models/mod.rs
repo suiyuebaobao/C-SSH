@@ -82,13 +82,10 @@ mod tests {
     use cloud_site::{Locale, content_service};
 
     #[test]
-    fn template_keeps_ai_credentials_client_local() {
+    fn template_keeps_ai_credentials_out_of_the_catalog() {
         for (locale, expected) in [
-            (
-                Locale::ZhCn,
-                "API Key/Token 只保存在 Creation-SSH 客户端本地安全存储",
-            ),
-            (Locale::En, "stay only in local secure storage"),
+            (Locale::ZhCn, "手动同步时也只上传客户端加密的不透明账户记录"),
+            (Locale::En, "client-encrypted opaque account records"),
         ] {
             let body = ModelsTemplate {
                 view: content_service().view(PageId::Models, locale),

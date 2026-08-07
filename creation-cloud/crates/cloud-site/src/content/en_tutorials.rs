@@ -220,7 +220,7 @@ pub(super) fn content() -> TutorialContent {
                 "Use your own model account to perform one read-only diagnosis against the selected host under controlled permissions.",
                 vec![
                     "The host agent is READY and can complete a monitoring or read-only file request.",
-                    "Have your own model service, API key, and model name. The key stays only in local secure client storage and is never uploaded to Creation Cloud.",
+                    "Have your own model service, API key, and model name. The key normally stays in client secure storage; only manual sync can upload a client-encrypted opaque account record.",
                 ],
                 vec![
                     step(

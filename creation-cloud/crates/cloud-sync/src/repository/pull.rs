@@ -78,8 +78,8 @@ async fn incremental(
     if request.since_revision < bounds.compacted_through_revision {
         checkpoint::touch(&mut transaction, actor).await?;
         commit(transaction).await?;
-        return Err(AppError::SyncResyncRequired(
-            "增量游标早于服务端保留边界，请执行全量重建".to_owned(),
+        return Err(AppError::sync_history_compacted(
+            "增量游标早于服务端保留边界，请执行全量重建",
         ));
     }
 
@@ -122,8 +122,8 @@ async fn full(
     }
     if snapshot_revision < bounds.compacted_through_revision {
         commit(transaction).await?;
-        return Err(AppError::SyncResyncRequired(
-            "全量快照早于服务端保留边界，请重新开始全量重建".to_owned(),
+        return Err(AppError::sync_history_compacted(
+            "全量快照早于服务端保留边界，请重新开始全量重建",
         ));
     }
 

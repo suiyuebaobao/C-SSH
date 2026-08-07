@@ -1,6 +1,5 @@
-//! Atomic explicit push, account revision allocation, idempotency, and tombstones.
+//! 先完整预检 Host 与 AI 资源 CAS，再在一个事务中整批写入统一 revision 流。
 
-use chrono::{DateTime, Utc};
 use cloud_domain::{AppError, AppResult};
 use cloud_store::PgPool;
 use serde_json::Value;
@@ -8,36 +7,46 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    HostConflictView, HostMetadataInput, HostOperation, PushOutcome, PushRequest,
-    actor::DeviceActor, validation::ValidatedChange,
+    AiProviderOperation, HostMetadataInput, HostOperation, PushOutcome, PushRequest, ResourceKind,
+    ResourceRevision,
+    actor::DeviceActor,
+    validation::{ValidatedAiChange, ValidatedChange, ValidatedPush},
 };
 
 use super::{
-    DbTransaction, begin, commit,
+    DbTransaction,
+    ai::{self, AiRow, AiWriteValue},
+    begin,
+    capacity::enforce_encrypted_resource_limit,
+    commit,
     hosts::{HostRow, lock_current},
-    lock_sync_state, require_active_device, require_sync_generation, storage,
+    lock_sync_state,
+    pull::{safe_checkpoint_revision, save_checkpoint},
+    require_active_device, require_base_revision, require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
 struct MutationRow {
     source_device_id: Uuid,
+    request_generation: i64,
     request_hash: Vec<u8>,
     outcome: String,
     result_revision: i64,
     changed_count: i32,
-    conflict_id: Option<Uuid>,
 }
 
 #[derive(FromRow)]
-struct ConflictRow {
-    id: Uuid,
-    host_id: Uuid,
-    client_mutation_id: Uuid,
-    base_revision: i64,
-    remote_revision: i64,
-    proposed_operation: String,
-    source_device_id: Uuid,
-    created_at: DateTime<Utc>,
+struct RevisionRow {
+    resource_kind: String,
+    resource_id: Uuid,
+    result_revision: i64,
+}
+
+struct MutationResult<'a> {
+    outcome: &'a str,
+    revision: i64,
+    changed_count: usize,
+    revisions: &'a [ResourceRevision],
 }
 
 pub(super) struct WriteValue {
@@ -55,21 +64,19 @@ pub(crate) async fn push(
     pool: &PgPool,
     actor: DeviceActor,
     request: &PushRequest,
-    changes: &[ValidatedChange],
+    changes: &ValidatedPush,
     request_hash: &[u8; 32],
 ) -> AppResult<PushOutcome> {
     let account_id = actor.account_id();
-    let device_id = actor.device_id();
     let mut tx = begin(pool).await?;
-    require_active_device(&mut tx, account_id, device_id).await?;
+    require_active_device(&mut tx, account_id, actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, account_id).await?;
     require_sync_generation(state, request.sync_generation)?;
 
     if let Some(outcome) = replay_mutation(
         &mut tx,
-        account_id,
-        device_id,
-        state.sync_generation,
+        actor,
+        request.sync_generation,
         request.client_mutation_id,
         request_hash,
     )
@@ -78,65 +85,62 @@ pub(crate) async fn push(
         commit(tx).await?;
         return Ok(outcome);
     }
-    if request.base_revision < state.compacted_through_revision {
-        return Err(AppError::SyncResyncRequired(
-            "the requested host revision is no longer available".to_owned(),
-        ));
-    }
-    if request.base_revision > state.current_revision {
-        return Err(AppError::Conflict(
-            "base_revision is newer than the account host revision".to_owned(),
-        ));
-    }
+    require_base_revision(state, request.base_revision)?;
 
-    let mut current_rows = Vec::with_capacity(changes.len());
-    let mut first_conflict = None;
-    for change in changes {
-        let current = lock_current(&mut tx, account_id, change.host_id).await?;
-        if first_conflict.is_none() && conflicts(change, current.as_ref()) {
-            first_conflict = Some((change, current.as_ref().map_or(0, |row| row.revision)));
-        }
-        current_rows.push(current);
-    }
-    if let Some((change, remote_revision)) = first_conflict {
-        let conflict = insert_conflict(
-            &mut tx,
-            actor,
-            request,
-            change,
-            remote_revision,
-            request_hash,
-        )
-        .await?;
-        insert_mutation(
-            &mut tx,
-            actor,
-            request.client_mutation_id,
-            request_hash,
-            "conflict",
-            state.current_revision,
-            0,
-            Some(conflict.id),
-        )
-        .await?;
-        commit(tx).await?;
-        return Ok(PushOutcome::Conflict {
-            sync_generation: state.sync_generation,
-            conflict,
-            idempotent: false,
-        });
-    }
+    // 所有行锁与 expected revision 检查必须在任何业务写入之前完成。
+    let host_rows = precheck_hosts(&mut tx, account_id, &changes.host_changes).await?;
+    let ai_rows = precheck_ai(&mut tx, account_id, &changes.ai_changes).await?;
+    enforce_encrypted_resource_limit(
+        &mut tx,
+        account_id,
+        &changes.host_changes,
+        &host_rows,
+        &changes.ai_changes,
+        &ai_rows,
+    )
+    .await?;
 
     let mut revision = state.current_revision;
-    let mut changed_count = 0_u32;
-    for (change, current) in changes.iter().zip(current_rows.into_iter()) {
-        let Some(value) = write_value(change, current.as_ref()) else {
-            continue;
+    let mut changed_count = 0_usize;
+    let mut revisions = Vec::with_capacity(changes.host_changes.len() + changes.ai_changes.len());
+    for (change, current) in changes.host_changes.iter().zip(host_rows.iter()) {
+        let result_revision = if let Some(value) = host_write_value(change, current.as_ref()) {
+            revision = next_revision(revision)?;
+            write_host(&mut tx, actor, change.host_id, revision, value).await?;
+            changed_count += 1;
+            revision
+        } else {
+            current
+                .as_ref()
+                .map(|row| row.revision)
+                .ok_or_else(super::invalid_stored_value)?
         };
-        revision += 1;
-        changed_count += 1;
-        write_host(&mut tx, actor, change.host_id, revision, value).await?;
+        revisions.push(ResourceRevision {
+            resource_kind: ResourceKind::Host,
+            resource_id: change.host_id,
+            cloud_revision: result_revision,
+        });
     }
+    for (change, current) in changes.ai_changes.iter().zip(ai_rows.iter()) {
+        let result_revision = if let Some(value) = ai_write_value(change, current.as_ref()) {
+            revision = next_revision(revision)?;
+            ai::write(&mut tx, actor, change.resource_id, revision, value).await?;
+            changed_count += 1;
+            revision
+        } else {
+            current
+                .as_ref()
+                .map(|row| row.revision)
+                .ok_or_else(super::invalid_stored_value)?
+        };
+        revisions.push(ResourceRevision {
+            resource_kind: ResourceKind::AiProviderAccount,
+            resource_id: change.resource_id,
+            cloud_revision: result_revision,
+        });
+    }
+    revisions.sort_unstable_by_key(|result| result.cloud_revision);
+
     if changed_count > 0 {
         sqlx::query(
             "UPDATE cloud_host_sync_states
@@ -149,49 +153,105 @@ pub(crate) async fn push(
         .await
         .map_err(storage)?;
     }
-    let label = if changed_count == 0 {
+    let outcome = if changed_count == 0 {
         "unchanged"
     } else {
         "applied"
     };
-    insert_mutation(
-        &mut tx,
-        actor,
-        request.client_mutation_id,
-        request_hash,
-        label,
+    settle_source_device_resources(&mut tx, actor, &revisions).await?;
+    let safe_revision = safe_checkpoint_revision(&mut tx, actor, revision).await?;
+    save_checkpoint(&mut tx, actor, safe_revision).await?;
+    let mutation = MutationResult {
+        outcome,
         revision,
         changed_count,
-        None,
-    )
-    .await?;
+        revisions: &revisions,
+    };
+    insert_mutation(&mut tx, actor, request, request_hash, &mutation).await?;
     commit(tx).await?;
-    if changed_count == 0 {
-        Ok(PushOutcome::Unchanged {
-            sync_generation: state.sync_generation,
-            revision,
-            idempotent: false,
-        })
-    } else {
-        Ok(PushOutcome::Applied {
-            sync_generation: state.sync_generation,
-            revision,
-            changed_count,
-            idempotent: false,
-        })
-    }
+    Ok(response(
+        request.sync_generation,
+        revision,
+        changed_count,
+        revisions,
+        false,
+    ))
 }
 
-fn conflicts(change: &ValidatedChange, current: Option<&HostRow>) -> bool {
-    match change.operation {
-        HostOperation::Insert => current.is_some(),
-        HostOperation::Update | HostOperation::Delete => {
-            current.map(|row| row.revision) != change.expected_revision
+pub(super) async fn settle_source_device_resources(
+    tx: &mut DbTransaction<'_>,
+    actor: DeviceActor,
+    revisions: &[ResourceRevision],
+) -> AppResult<()> {
+    for revision in revisions {
+        sqlx::query(
+            "INSERT INTO cloud_sync_pull_decisions
+                 (account_id, device_id, resource_kind, resource_id, revision, action)
+             VALUES ($1,$2,$3,$4,$5,'keep_local')
+             ON CONFLICT (account_id, device_id, resource_kind, resource_id, revision)
+             DO NOTHING",
+        )
+        .bind(actor.account_id())
+        .bind(actor.device_id())
+        .bind(revision.resource_kind.as_str())
+        .bind(revision.resource_id)
+        .bind(revision.cloud_revision)
+        .execute(&mut **tx)
+        .await
+        .map_err(storage)?;
+    }
+    Ok(())
+}
+
+async fn precheck_hosts(
+    tx: &mut DbTransaction<'_>,
+    account_id: Uuid,
+    changes: &[ValidatedChange],
+) -> AppResult<Vec<Option<HostRow>>> {
+    let mut rows = Vec::with_capacity(changes.len());
+    for change in changes {
+        let current = lock_current(tx, account_id, change.host_id).await?;
+        let matches = match change.operation {
+            HostOperation::Insert => current.is_none(),
+            HostOperation::Update | HostOperation::Delete => {
+                current.as_ref().map(|row| row.revision) == change.expected_revision
+            }
+        };
+        if !matches {
+            return Err(AppError::SyncStateChanged(
+                "host expected_revision no longer matches cloud state".to_owned(),
+            ));
         }
+        rows.push(current);
     }
+    Ok(rows)
 }
 
-fn write_value(change: &ValidatedChange, current: Option<&HostRow>) -> Option<WriteValue> {
+async fn precheck_ai(
+    tx: &mut DbTransaction<'_>,
+    account_id: Uuid,
+    changes: &[ValidatedAiChange],
+) -> AppResult<Vec<Option<AiRow>>> {
+    let mut rows = Vec::with_capacity(changes.len());
+    for change in changes {
+        let current = ai::lock_current(tx, account_id, change.resource_id).await?;
+        let matches = match change.operation {
+            AiProviderOperation::Insert => current.is_none(),
+            AiProviderOperation::Update | AiProviderOperation::Delete => {
+                current.as_ref().map(|row| row.revision) == change.expected_revision
+            }
+        };
+        if !matches {
+            return Err(AppError::SyncStateChanged(
+                "AI provider expected_revision no longer matches cloud state".to_owned(),
+            ));
+        }
+        rows.push(current);
+    }
+    Ok(rows)
+}
+
+fn host_write_value(change: &ValidatedChange, current: Option<&HostRow>) -> Option<WriteValue> {
     match change.operation {
         HostOperation::Insert | HostOperation::Update => {
             let metadata = change.metadata.as_ref()?;
@@ -203,28 +263,33 @@ fn write_value(change: &ValidatedChange, current: Option<&HostRow>) -> Option<Wr
                 None => None,
             };
             let value = from_metadata(metadata, ciphertext);
-            if current.is_some_and(|row| same_value(row, &value)) {
-                None
-            } else {
-                Some(value)
-            }
+            (!current.is_some_and(|row| same_value(row, &value))).then_some(value)
         }
         HostOperation::Delete => {
             let current = current?;
-            if current.is_deleted {
-                None
-            } else {
-                Some(WriteValue {
-                    address: current.address.clone(),
-                    port: current.port,
-                    name: current.name.clone(),
-                    platform: current.platform.clone(),
-                    tags: current.tags.clone(),
-                    status: current.status.clone(),
-                    ciphertext: None,
-                    deleted: true,
-                })
-            }
+            (!current.is_deleted).then(|| WriteValue {
+                address: current.address.clone(),
+                port: current.port,
+                name: current.name.clone(),
+                platform: current.platform.clone(),
+                tags: current.tags.clone(),
+                status: current.status.clone(),
+                ciphertext: None,
+                deleted: true,
+            })
+        }
+    }
+}
+
+fn ai_write_value(change: &ValidatedAiChange, current: Option<&AiRow>) -> Option<AiWriteValue> {
+    match change.operation {
+        AiProviderOperation::Insert | AiProviderOperation::Update => {
+            let value = AiWriteValue::from_payload(change.payload.as_ref()?);
+            (!current.is_some_and(|row| ai::same_value(row, &value))).then_some(value)
+        }
+        AiProviderOperation::Delete => {
+            let current = current?;
+            (!current.is_deleted).then(AiWriteValue::tombstone)
         }
     }
 }
@@ -271,8 +336,8 @@ pub(super) async fn write_host(
          ON CONFLICT (account_id, id) DO UPDATE SET
              address = EXCLUDED.address, port = EXCLUDED.port,
              name = EXCLUDED.name, platform = EXCLUDED.platform,
-             tags = EXCLUDED.tags,
-             status = EXCLUDED.status, ciphertext = EXCLUDED.ciphertext,
+             tags = EXCLUDED.tags, status = EXCLUDED.status,
+             ciphertext = EXCLUDED.ciphertext,
              source_device_id = EXCLUDED.source_device_id,
              revision = EXCLUDED.revision, is_deleted = EXCLUDED.is_deleted,
              updated_at = now()",
@@ -318,19 +383,18 @@ pub(super) async fn write_host(
 
 async fn replay_mutation(
     tx: &mut DbTransaction<'_>,
-    account_id: Uuid,
-    device_id: Uuid,
+    actor: DeviceActor,
     sync_generation: i64,
     mutation_id: Uuid,
     request_hash: &[u8; 32],
 ) -> AppResult<Option<PushOutcome>> {
     let row = sqlx::query_as::<_, MutationRow>(
-        "SELECT source_device_id, request_hash, outcome, result_revision,
-                changed_count, conflict_id
-         FROM cloud_host_mutations
+        "SELECT source_device_id, request_generation, request_hash, outcome,
+                result_revision, changed_count
+         FROM cloud_sync_push_mutations
          WHERE account_id = $1 AND client_mutation_id = $2",
     )
-    .bind(account_id)
+    .bind(actor.account_id())
     .bind(mutation_id)
     .fetch_optional(&mut **tx)
     .await
@@ -338,135 +402,139 @@ async fn replay_mutation(
     let Some(row) = row else {
         return Ok(None);
     };
-    if row.source_device_id != device_id || row.request_hash.as_slice() != request_hash {
+    if row.source_device_id != actor.device_id()
+        || row.request_generation != sync_generation
+        || row.request_hash.as_slice() != request_hash
+    {
         return Err(AppError::Conflict(
             "client_mutation_id was already used for another request".to_owned(),
         ));
     }
+    let revisions = load_results(tx, actor.account_id(), mutation_id).await?;
     let outcome = match row.outcome.as_str() {
         "applied" => PushOutcome::Applied {
             sync_generation,
             revision: row.result_revision,
-            changed_count: u32::try_from(row.changed_count).unwrap_or(0),
+            changed_count: u32::try_from(row.changed_count)
+                .map_err(|_| super::invalid_stored_value())?,
+            revisions,
             idempotent: true,
         },
         "unchanged" => PushOutcome::Unchanged {
             sync_generation,
             revision: row.result_revision,
+            revisions,
             idempotent: true,
         },
-        "conflict" => {
-            let id = row.conflict_id.ok_or_else(super::invalid_stored_value)?;
-            PushOutcome::Conflict {
-                sync_generation,
-                conflict: load_conflict(tx, account_id, id).await?,
-                idempotent: true,
-            }
-        }
         _ => return Err(super::invalid_stored_value()),
     };
     Ok(Some(outcome))
 }
 
-async fn insert_conflict(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    request: &PushRequest,
-    change: &ValidatedChange,
-    remote_revision: i64,
-    request_hash: &[u8; 32],
-) -> AppResult<HostConflictView> {
-    let metadata = change.metadata.as_ref();
-    let id = Uuid::now_v7();
-    sqlx::query(
-        "INSERT INTO cloud_host_conflicts
-             (id, account_id, host_id, client_mutation_id, source_device_id,
-              base_revision, remote_revision, proposed_operation,
-              proposed_address, proposed_port, proposed_name, proposed_platform,
-              proposed_tags, proposed_status, proposed_ciphertext_is_set,
-              proposed_ciphertext, proposed_expected_revision, request_hash)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)",
-    )
-    .bind(id)
-    .bind(actor.account_id())
-    .bind(change.host_id)
-    .bind(request.client_mutation_id)
-    .bind(actor.device_id())
-    .bind(request.base_revision)
-    .bind(remote_revision)
-    .bind(change.operation.as_str())
-    .bind(metadata.map(|value| value.address.as_str()))
-    .bind(metadata.map(|value| i32::from(value.port)))
-    .bind(metadata.map(|value| value.name.as_str()))
-    .bind(metadata.map(|value| value.platform.as_str()))
-    .bind(metadata.map(|value| serde_json::json!(value.tags)))
-    .bind(metadata.map(|value| value.status.as_str()))
-    .bind(change.ciphertext.is_some())
-    .bind(change.ciphertext.as_ref().and_then(|value| value.as_ref()))
-    .bind(change.expected_revision)
-    .bind(request_hash.as_slice())
-    .execute(&mut **tx)
-    .await
-    .map_err(storage)?;
-    load_conflict(tx, actor.account_id(), id).await
-}
-
-async fn load_conflict(
+async fn load_results(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
-    id: Uuid,
-) -> AppResult<HostConflictView> {
-    let row = sqlx::query_as::<_, ConflictRow>(
-        "SELECT id, host_id, client_mutation_id, base_revision, remote_revision,
-                proposed_operation, source_device_id, created_at
-         FROM cloud_host_conflicts
-         WHERE account_id = $1 AND id = $2",
+    mutation_id: Uuid,
+) -> AppResult<Vec<ResourceRevision>> {
+    let rows = sqlx::query_as::<_, RevisionRow>(
+        "SELECT resource_kind, resource_id, result_revision
+         FROM cloud_sync_push_results
+         WHERE account_id = $1 AND client_mutation_id = $2
+         ORDER BY result_revision",
     )
     .bind(account_id)
-    .bind(id)
-    .fetch_one(&mut **tx)
+    .bind(mutation_id)
+    .fetch_all(&mut **tx)
     .await
     .map_err(storage)?;
-    Ok(HostConflictView {
-        id: row.id,
-        host_id: row.host_id,
-        client_mutation_id: row.client_mutation_id,
-        base_revision: row.base_revision,
-        remote_revision: row.remote_revision,
-        proposed_operation: HostOperation::parse(&row.proposed_operation)
-            .ok_or_else(super::invalid_stored_value)?,
-        source_device_id: row.source_device_id,
-        created_at: row.created_at,
-    })
+    rows.into_iter()
+        .map(|row| {
+            Ok(ResourceRevision {
+                resource_kind: ResourceKind::parse(&row.resource_kind)
+                    .ok_or_else(super::invalid_stored_value)?,
+                resource_id: row.resource_id,
+                cloud_revision: row.result_revision,
+            })
+        })
+        .collect()
 }
 
-#[allow(clippy::too_many_arguments)]
 async fn insert_mutation(
     tx: &mut DbTransaction<'_>,
     actor: DeviceActor,
-    mutation_id: Uuid,
+    request: &PushRequest,
     request_hash: &[u8; 32],
-    outcome: &str,
-    revision: i64,
-    changed_count: u32,
-    conflict_id: Option<Uuid>,
+    result: &MutationResult<'_>,
 ) -> AppResult<()> {
     sqlx::query(
-        "INSERT INTO cloud_host_mutations
-             (account_id, client_mutation_id, source_device_id, request_hash,
-              outcome, result_revision, changed_count, conflict_id)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+        "INSERT INTO cloud_sync_push_mutations
+             (account_id, client_mutation_id, source_device_id,
+              request_generation, base_revision, request_hash, outcome,
+              result_revision, changed_count)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
     )
     .bind(actor.account_id())
-    .bind(mutation_id)
+    .bind(request.client_mutation_id)
     .bind(actor.device_id())
+    .bind(request.sync_generation)
+    .bind(request.base_revision)
     .bind(request_hash.as_slice())
-    .bind(outcome)
-    .bind(revision)
-    .bind(i32::try_from(changed_count).unwrap_or(i32::MAX))
-    .bind(conflict_id)
+    .bind(result.outcome)
+    .bind(result.revision)
+    .bind(
+        i32::try_from(result.changed_count).map_err(|_| {
+            AppError::Validation("push changed_count exceeds storage limit".to_owned())
+        })?,
+    )
     .execute(&mut **tx)
     .await
     .map_err(storage)?;
+    for revision in result.revisions {
+        sqlx::query(
+            "INSERT INTO cloud_sync_push_results
+                 (account_id, client_mutation_id, resource_kind,
+                  resource_id, result_revision)
+             VALUES ($1,$2,$3,$4,$5)",
+        )
+        .bind(actor.account_id())
+        .bind(request.client_mutation_id)
+        .bind(revision.resource_kind.as_str())
+        .bind(revision.resource_id)
+        .bind(revision.cloud_revision)
+        .execute(&mut **tx)
+        .await
+        .map_err(storage)?;
+    }
     Ok(())
+}
+
+fn response(
+    sync_generation: i64,
+    revision: i64,
+    changed_count: usize,
+    revisions: Vec<ResourceRevision>,
+    idempotent: bool,
+) -> PushOutcome {
+    if changed_count == 0 {
+        PushOutcome::Unchanged {
+            sync_generation,
+            revision,
+            revisions,
+            idempotent,
+        }
+    } else {
+        PushOutcome::Applied {
+            sync_generation,
+            revision,
+            changed_count: u32::try_from(changed_count).unwrap_or(u32::MAX),
+            revisions,
+            idempotent,
+        }
+    }
+}
+
+fn next_revision(current: i64) -> AppResult<i64> {
+    current
+        .checked_add(1)
+        .ok_or_else(|| AppError::Conflict("account revision is exhausted".to_owned()))
 }

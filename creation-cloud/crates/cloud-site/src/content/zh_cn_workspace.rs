@@ -10,11 +10,11 @@ pub(super) fn console_overview() -> PageContent {
         "用户中心｜Creation Cloud",
         "总览",
         "你的 Creation Cloud 控制面",
-        "从设备状态、同步修订到保险库包装状态，都在明确边界内呈现。",
+        "设备状态、手动同步修订和客户端加密资源都在明确边界内呈现。",
         vec![
             Metric::new("—", "已登记设备", "登录后显示"),
             Metric::new("—", "同步修订", "登录后显示"),
-            Metric::new("—", "保险库条目", "仅显示密文元数据"),
+            Metric::new("—", "加密同步资源", "仅显示密文元数据"),
         ],
         vec![section(
             "overview",
@@ -30,13 +30,13 @@ pub(super) fn console_overview() -> PageContent {
                 item(
                     "同步",
                     "同步状态",
-                    "查看 revision、冲突与最近同步。",
+                    "查看 revision、代次与最近一次手动同步。",
                     "等待账号会话",
                 ),
                 item(
-                    "保险库",
+                    "加密资源",
                     "密文状态",
-                    "查看条目版本与设备包装状态，不显示明文。",
+                    "查看 Host 与 AI 账户密文状态，不显示明文。",
                     "等待账号会话",
                 ),
             ],
@@ -83,11 +83,11 @@ pub(super) fn sync() -> PageContent {
         PageId::Sync,
         "同步｜Creation Cloud",
         "同步",
-        "查看同步修订与冲突",
-        "只同步白名单内的非敏感偏好，未知字段默认拒绝。",
+        "查看手动同步修订",
+        "Host 与 AI provider 账户只在用户确认后手动同步；服务端不建立持久冲突。",
         vec![
             Metric::new("—", "当前 revision", "登录后显示"),
-            Metric::new("—", "待处理冲突", "登录后显示"),
+            Metric::new("—", "同步代次", "登录后显示"),
         ],
         vec![section(
             "sync-state",
@@ -109,7 +109,7 @@ pub(super) fn models() -> PageContent {
         "模型｜Creation Cloud",
         "模型",
         "读取全局模型目录",
-        "名称、厂商、模型 ID、接口格式与 API URL 由管理员统一维护；AI provider API Key/Token 只保存在客户端本地安全存储，Cloud 不上传、不保存，也不显示凭据状态。",
+        "名称、厂商、模型 ID、接口格式与 API URL 由管理员统一维护；API Key/Token 平时保存在客户端安全存储，手动同步时只上传客户端加密的不透明账户记录，网页不能解密或显示。",
         vec![Metric::new("—", "可用模型", "登录后显示")],
         vec![section(
             "model-list",
@@ -130,16 +130,16 @@ pub(super) fn vault() -> PageContent {
         PageId::Vault,
         "保险库｜Creation Cloud",
         "保险库",
-        "只管理版本化密文",
-        "加密与解密发生在可信客户端；服务端看不到保险库明文和密码。",
+        "只管理版本化不透明密文",
+        "加密与解密发生在可信客户端；服务端看不到数据保护密码或资源明文。",
         vec![
             Metric::new("—", "密文条目", "登录后显示"),
-            Metric::new("—", "包装设备", "登录后显示"),
+            Metric::new("—", "同步代次", "登录后显示"),
         ],
         vec![section(
             "vault-state",
             "保险库状态",
-            "仅展示条目数量、版本与设备包装状态。",
+            "仅展示资源数量、版本、代次与必要密文元数据。",
             vec![item(
                 "零知识",
                 "尚未载入保险库",
@@ -218,7 +218,7 @@ pub(super) fn admin_models() -> PageContent {
         "模型管理｜Creation Cloud",
         "模型",
         "管理客户端可读取的全局模型",
-        "新增、编辑、启停和排序全局模型；后台不接收、保存或显示任何用户的 AI provider API Key/Token 状态。",
+        "新增、编辑、启停和排序全局模型；后台目录不接收 Key 明文或凭据字段，也不能解密、使用或显示手动同步的不透明账户密文。",
     )
 }
 

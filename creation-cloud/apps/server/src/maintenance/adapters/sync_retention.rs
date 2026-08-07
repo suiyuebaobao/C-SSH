@@ -30,7 +30,10 @@ pub async fn execute(
             .saturating_add(report.record_versions_deleted)
             .saturating_add(report.applied_mutations_deleted)
             .saturating_add(report.resolved_conflicts_deleted)
-            .saturating_add(report.conflict_mutations_deleted);
+            .saturating_add(report.conflict_mutations_deleted)
+            .saturating_add(report.encrypted_tombstones_deleted)
+            .saturating_add(report.encrypted_versions_deleted)
+            .saturating_add(report.encrypted_mutations_deleted);
         progress.add(TaskExecutionReport {
             examined_count: changed,
             changed_count: changed,

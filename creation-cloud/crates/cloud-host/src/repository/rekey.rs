@@ -1,4 +1,4 @@
-//! Atomic full-candidate ciphertext rekey with generation compare-and-swap.
+//! 对 Host 与 AI provider 账号的完整密文集合执行原子 rekey 和 generation CAS。
 
 use cloud_domain::{AppError, AppResult, current_request_id, mark_semantic_audit_recorded};
 use cloud_store::PgPool;
@@ -7,12 +7,17 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    RekeyHostRevision, RekeySyncRequest, RekeySyncResponse, actor::DeviceActor,
-    validation::ValidatedRekeyHost,
+    RekeySyncRequest, RekeySyncResponse, ResourceKind, ResourceRevision, actor::DeviceActor,
+    validation::ValidatedRekeyResource,
 };
 
 use super::{
-    DbTransaction, begin, commit, lock_sync_state,
+    DbTransaction,
+    ai::{self, AiWriteValue},
+    begin,
+    capacity::require_current_within_limit,
+    commit, lock_sync_state,
+    pull::record_rekey_snapshot,
     push::{WriteValue, write_host},
     require_active_device, require_sync_generation, storage,
 };
@@ -30,6 +35,40 @@ struct CurrentEncryptedHost {
 }
 
 #[derive(FromRow)]
+struct CurrentEncryptedAi {
+    id: Uuid,
+    revision: i64,
+}
+
+enum CurrentEncryptedResource {
+    Host(CurrentEncryptedHost),
+    AiProviderAccount(CurrentEncryptedAi),
+}
+
+impl CurrentEncryptedResource {
+    const fn kind(&self) -> ResourceKind {
+        match self {
+            Self::Host(_) => ResourceKind::Host,
+            Self::AiProviderAccount(_) => ResourceKind::AiProviderAccount,
+        }
+    }
+
+    const fn id(&self) -> Uuid {
+        match self {
+            Self::Host(value) => value.id,
+            Self::AiProviderAccount(value) => value.id,
+        }
+    }
+
+    const fn revision(&self) -> i64 {
+        match self {
+            Self::Host(value) => value.revision,
+            Self::AiProviderAccount(value) => value.revision,
+        }
+    }
+}
+
+#[derive(FromRow)]
 struct PriorRekey {
     source_device_id: Uuid,
     request_generation: i64,
@@ -38,11 +77,18 @@ struct PriorRekey {
     result_revision: i64,
 }
 
+#[derive(FromRow)]
+struct RekeyResultRow {
+    resource_kind: String,
+    resource_id: Uuid,
+    result_revision: i64,
+}
+
 pub(crate) async fn rekey(
     pool: &PgPool,
     actor: DeviceActor,
     request: &RekeySyncRequest,
-    candidates: &[ValidatedRekeyHost],
+    candidates: &[ValidatedRekeyResource],
     request_hash: &[u8; 32],
 ) -> AppResult<RekeySyncResponse> {
     let mut tx = begin(pool).await?;
@@ -50,17 +96,17 @@ pub(crate) async fn rekey(
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
 
     if let Some(prior) = load_prior(&mut tx, actor.account_id(), request.mutation_id).await? {
-        let matches = prior.source_device_id == actor.device_id()
-            && prior.request_generation == request.sync_generation
-            && prior.request_hash.as_slice() == request_hash;
-        if !matches {
+        if prior.source_device_id != actor.device_id()
+            || prior.request_generation != request.sync_generation
+            || prior.request_hash.as_slice() != request_hash
+        {
             return Err(AppError::Conflict(
                 "mutation_id was already used by a different rekey request".to_owned(),
             ));
         }
         if state.sync_generation != prior.result_generation {
-            return Err(AppError::SyncResyncRequired(
-                "the rekey result belongs to an older sync generation".to_owned(),
+            return Err(AppError::sync_generation_changed(
+                "the rekey result belongs to an older sync generation",
             ));
         }
         let revisions = load_results(&mut tx, actor.account_id(), request.mutation_id).await?;
@@ -74,42 +120,71 @@ pub(crate) async fn rekey(
     }
 
     require_sync_generation(state, request.sync_generation)?;
-    let current = lock_encrypted_hosts(&mut tx, actor.account_id()).await?;
+    require_current_within_limit(&mut tx, actor.account_id()).await?;
+    let current = lock_encrypted_resources(&mut tx, actor.account_id()).await?;
     require_complete_candidate(&current, candidates)?;
-
     let next_generation = state
         .sync_generation
         .checked_add(1)
         .ok_or_else(|| AppError::Conflict("sync_generation cannot advance".to_owned()))?;
+
     let mut revision = state.current_revision;
     let mut revisions = Vec::with_capacity(current.len());
-    for (host, candidate) in current.into_iter().zip(candidates) {
+    let mut changed_hosts = 0_usize;
+    let mut changed_ai = 0_usize;
+    for (stored, candidate) in current.into_iter().zip(candidates) {
         revision = revision
             .checked_add(1)
-            .ok_or_else(|| AppError::Conflict("host revision cannot advance".to_owned()))?;
-        write_host(
-            &mut tx,
-            actor,
-            host.id,
-            revision,
-            WriteValue {
-                address: host.address,
-                port: host.port,
-                name: host.name,
-                platform: host.platform,
-                tags: host.tags,
-                status: host.status,
-                ciphertext: Some(candidate.ciphertext.clone()),
-                deleted: false,
-            },
-        )
-        .await?;
+            .ok_or_else(|| AppError::Conflict("account revision cannot advance".to_owned()))?;
+        let kind = stored.kind();
+        let resource_id = stored.id();
+        match (stored, candidate) {
+            (
+                CurrentEncryptedResource::Host(host),
+                ValidatedRekeyResource::Host { ciphertext, .. },
+            ) => {
+                write_host(
+                    &mut tx,
+                    actor,
+                    host.id,
+                    revision,
+                    WriteValue {
+                        address: host.address,
+                        port: host.port,
+                        name: host.name,
+                        platform: host.platform,
+                        tags: host.tags,
+                        status: host.status,
+                        ciphertext: Some(ciphertext.clone()),
+                        deleted: false,
+                    },
+                )
+                .await?;
+                changed_hosts += 1;
+            }
+            (
+                CurrentEncryptedResource::AiProviderAccount(_),
+                ValidatedRekeyResource::AiProviderAccount { payload, .. },
+            ) => {
+                ai::write(
+                    &mut tx,
+                    actor,
+                    resource_id,
+                    revision,
+                    AiWriteValue::from_payload(payload),
+                )
+                .await?;
+                changed_ai += 1;
+            }
+            _ => return Err(super::invalid_stored_value()),
+        }
         revisions.push((
-            RekeyHostRevision {
-                host_id: host.id,
+            ResourceRevision {
+                resource_kind: kind,
+                resource_id,
                 cloud_revision: revision,
             },
-            candidate.cloud_revision,
+            candidate.cloud_revision(),
         ));
     }
 
@@ -126,40 +201,23 @@ pub(crate) async fn rekey(
     .execute(&mut *tx)
     .await
     .map_err(storage)?;
-
-    sqlx::query(
-        "INSERT INTO cloud_sync_rekey_mutations
-             (account_id, mutation_id, source_device_id, request_generation,
-              result_generation, request_hash, result_revision, changed_count)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+    let settled_revisions = revisions
+        .iter()
+        .map(|(result, _)| *result)
+        .collect::<Vec<_>>();
+    // rekey 响应只证明新密文已投递给来源设备；本地是否采用仍必须由客户端 ACK，
+    // 因此这里不得写 keep_local，也不得推进该设备 checkpoint。
+    record_rekey_snapshot(&mut tx, actor, &settled_revisions, revision).await?;
+    persist_rekey(
+        &mut tx,
+        actor,
+        request,
+        request_hash,
+        next_generation,
+        revision,
+        &revisions,
     )
-    .bind(actor.account_id())
-    .bind(request.mutation_id)
-    .bind(actor.device_id())
-    .bind(request.sync_generation)
-    .bind(next_generation)
-    .bind(request_hash.as_slice())
-    .bind(revision)
-    .bind(i32::try_from(revisions.len()).unwrap_or(i32::MAX))
-    .execute(&mut *tx)
-    .await
-    .map_err(storage)?;
-    for (result, previous_revision) in &revisions {
-        sqlx::query(
-            "INSERT INTO cloud_sync_rekey_results
-                 (account_id, mutation_id, host_id,
-                  previous_revision, result_revision)
-             VALUES ($1,$2,$3,$4,$5)",
-        )
-        .bind(actor.account_id())
-        .bind(request.mutation_id)
-        .bind(result.host_id)
-        .bind(previous_revision)
-        .bind(result.cloud_revision)
-        .execute(&mut *tx)
-        .await
-        .map_err(storage)?;
-    }
+    .await?;
     audit_rekey(
         &mut tx,
         actor,
@@ -167,7 +225,8 @@ pub(crate) async fn rekey(
         state.sync_generation,
         next_generation,
         revision,
-        revisions.len(),
+        changed_hosts,
+        changed_ai,
     )
     .await?;
     commit(tx).await?;
@@ -202,77 +261,136 @@ async fn load_results(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
     mutation_id: Uuid,
-) -> AppResult<Vec<RekeyHostRevision>> {
-    sqlx::query_as::<_, RekeyResultRow>(
-        "SELECT host_id, result_revision
-         FROM cloud_sync_rekey_results
+) -> AppResult<Vec<ResourceRevision>> {
+    let rows = sqlx::query_as::<_, RekeyResultRow>(
+        "SELECT resource_kind, resource_id, result_revision
+         FROM cloud_sync_rekey_resource_results
          WHERE account_id = $1 AND mutation_id = $2
-         ORDER BY host_id",
+         ORDER BY result_revision",
     )
     .bind(account_id)
     .bind(mutation_id)
     .fetch_all(&mut **tx)
     .await
-    .map_err(storage)
-    .map(|rows| rows.into_iter().map(RekeyResultRow::view).collect())
+    .map_err(storage)?;
+    rows.into_iter()
+        .map(|row| {
+            Ok(ResourceRevision {
+                resource_kind: ResourceKind::parse(&row.resource_kind)
+                    .ok_or_else(super::invalid_stored_value)?,
+                resource_id: row.resource_id,
+                cloud_revision: row.result_revision,
+            })
+        })
+        .collect()
 }
 
-#[derive(FromRow)]
-struct RekeyResultRow {
-    host_id: Uuid,
-    result_revision: i64,
-}
-
-impl RekeyResultRow {
-    fn view(self) -> RekeyHostRevision {
-        RekeyHostRevision {
-            host_id: self.host_id,
-            cloud_revision: self.result_revision,
-        }
-    }
-}
-
-async fn lock_encrypted_hosts(
+async fn lock_encrypted_resources(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
-) -> AppResult<Vec<CurrentEncryptedHost>> {
-    sqlx::query_as::<_, CurrentEncryptedHost>(
+) -> AppResult<Vec<CurrentEncryptedResource>> {
+    let hosts = sqlx::query_as::<_, CurrentEncryptedHost>(
         "SELECT id, address, port, name, platform, tags, status, revision
          FROM cloud_hosts
          WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL
-         ORDER BY id
-         FOR UPDATE",
+         ORDER BY id FOR UPDATE",
     )
     .bind(account_id)
     .fetch_all(&mut **tx)
     .await
-    .map_err(storage)
+    .map_err(storage)?;
+    let ai = sqlx::query_as::<_, CurrentEncryptedAi>(
+        "SELECT id, revision FROM cloud_ai_provider_configs
+         WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL
+         ORDER BY id FOR UPDATE",
+    )
+    .bind(account_id)
+    .fetch_all(&mut **tx)
+    .await
+    .map_err(storage)?;
+    let mut resources = hosts
+        .into_iter()
+        .map(CurrentEncryptedResource::Host)
+        .chain(
+            ai.into_iter()
+                .map(CurrentEncryptedResource::AiProviderAccount),
+        )
+        .collect::<Vec<_>>();
+    resources.sort_unstable_by_key(|resource| (resource.kind().as_str(), resource.id()));
+    Ok(resources)
 }
 
 fn require_complete_candidate(
-    current: &[CurrentEncryptedHost],
-    candidates: &[ValidatedRekeyHost],
+    current: &[CurrentEncryptedResource],
+    candidates: &[ValidatedRekeyResource],
 ) -> AppResult<()> {
     let matches = current.len() == candidates.len()
         && current.iter().zip(candidates).all(|(stored, candidate)| {
-            stored.id == candidate.host_id && stored.revision == candidate.cloud_revision
+            stored.kind() == candidate.resource_kind()
+                && stored.id() == candidate.resource_id()
+                && stored.revision() == candidate.cloud_revision()
         });
     if matches {
         Ok(())
     } else {
-        Err(AppError::Conflict(
-            "rekey candidate does not match the complete encrypted host snapshot".to_owned(),
+        Err(AppError::SyncStateChanged(
+            "rekey candidate does not match the complete encrypted resource snapshot".to_owned(),
         ))
     }
 }
 
+async fn persist_rekey(
+    tx: &mut DbTransaction<'_>,
+    actor: DeviceActor,
+    request: &RekeySyncRequest,
+    request_hash: &[u8; 32],
+    next_generation: i64,
+    revision: i64,
+    revisions: &[(ResourceRevision, i64)],
+) -> AppResult<()> {
+    sqlx::query(
+        "INSERT INTO cloud_sync_rekey_mutations
+             (account_id, mutation_id, source_device_id, request_generation,
+              result_generation, request_hash, result_revision, changed_count)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+    )
+    .bind(actor.account_id())
+    .bind(request.mutation_id)
+    .bind(actor.device_id())
+    .bind(request.sync_generation)
+    .bind(next_generation)
+    .bind(request_hash.as_slice())
+    .bind(revision)
+    .bind(i32::try_from(revisions.len()).unwrap_or(i32::MAX))
+    .execute(&mut **tx)
+    .await
+    .map_err(storage)?;
+    for (result, previous_revision) in revisions {
+        sqlx::query(
+            "INSERT INTO cloud_sync_rekey_resource_results
+                 (account_id, mutation_id, resource_kind, resource_id,
+                  previous_revision, result_revision)
+             VALUES ($1,$2,$3,$4,$5,$6)",
+        )
+        .bind(actor.account_id())
+        .bind(request.mutation_id)
+        .bind(result.resource_kind.as_str())
+        .bind(result.resource_id)
+        .bind(previous_revision)
+        .bind(result.cloud_revision)
+        .execute(&mut **tx)
+        .await
+        .map_err(storage)?;
+    }
+    Ok(())
+}
+
 async fn clear_stale_sync_state(tx: &mut DbTransaction<'_>, account_id: Uuid) -> AppResult<()> {
     for statement in [
-        "DELETE FROM cloud_host_pull_decisions WHERE account_id = $1",
-        "DELETE FROM cloud_host_device_deliveries WHERE account_id = $1",
-        "DELETE FROM cloud_host_pull_watermarks WHERE account_id = $1",
-        "DELETE FROM cloud_host_device_checkpoints WHERE account_id = $1",
-        "DELETE FROM cloud_host_conflicts WHERE account_id = $1",
+        "DELETE FROM cloud_sync_pull_decisions WHERE account_id = $1",
+        "DELETE FROM cloud_sync_resource_deliveries WHERE account_id = $1",
+        "DELETE FROM cloud_sync_pull_watermarks WHERE account_id = $1",
+        "DELETE FROM cloud_sync_device_checkpoints WHERE account_id = $1",
     ] {
         sqlx::query(statement)
             .bind(account_id)
@@ -286,22 +404,25 @@ async fn clear_stale_sync_state(tx: &mut DbTransaction<'_>, account_id: Uuid) ->
 async fn purge_prior_ciphertext_versions(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
-    previous_current_revision: i64,
+    previous_revision: i64,
 ) -> AppResult<()> {
-    sqlx::query(
+    for statement in [
         "DELETE FROM cloud_host_versions
-         WHERE account_id = $1
-           AND revision <= $2
-           AND ciphertext IS NOT NULL",
-    )
-    .bind(account_id)
-    .bind(previous_current_revision)
-    .execute(&mut **tx)
-    .await
-    .map_err(storage)?;
+         WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
+        "DELETE FROM cloud_ai_provider_config_versions
+         WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
+    ] {
+        sqlx::query(statement)
+            .bind(account_id)
+            .bind(previous_revision)
+            .execute(&mut **tx)
+            .await
+            .map_err(storage)?;
+    }
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn audit_rekey(
     tx: &mut DbTransaction<'_>,
     actor: DeviceActor,
@@ -310,12 +431,14 @@ async fn audit_rekey(
     next_generation: i64,
     result_revision: i64,
     changed_hosts: usize,
+    changed_ai: usize,
 ) -> AppResult<()> {
     let request_id = current_request_id().unwrap_or_else(|| Uuid::now_v7().to_string());
     let details = json!({
         "mutation_id": mutation_id,
         "device_id": actor.device_id(),
         "changed_hosts": i64::try_from(changed_hosts).unwrap_or(i64::MAX),
+        "changed_ai_providers": i64::try_from(changed_ai).unwrap_or(i64::MAX),
         "result_revision": result_revision,
         "previous_sync_generation": previous_generation,
         "sync_generation": next_generation
@@ -324,8 +447,8 @@ async fn audit_rekey(
         "INSERT INTO audit_events
              (id, actor_account_id, action, resource_kind, resource_id,
               outcome, request_id, details)
-         VALUES ($1, $2, 'sync.encrypted_data_rekey', 'sync_account', $3,
-                 'success', $4, $5)",
+         VALUES ($1,$2,'sync.encrypted_data_rekey_v2','sync_account',$3,
+                 'success',$4,$5)",
     )
     .bind(Uuid::now_v7())
     .bind(actor.account_id())
@@ -341,7 +464,7 @@ async fn audit_rekey(
 fn response(
     sync_generation: i64,
     current_revision: i64,
-    revisions: Vec<RekeyHostRevision>,
+    revisions: Vec<ResourceRevision>,
     idempotent: bool,
 ) -> RekeySyncResponse {
     RekeySyncResponse {
@@ -357,45 +480,29 @@ fn response(
 mod tests {
     use super::*;
 
-    fn current(id: Uuid, revision: i64) -> CurrentEncryptedHost {
-        CurrentEncryptedHost {
-            id,
-            address: "node.example.com".to_owned(),
-            port: 22,
-            name: "node".to_owned(),
-            platform: "linux".to_owned(),
-            tags: json!([]),
-            status: "active".to_owned(),
-            revision,
-        }
+    fn current_ai(id: Uuid, revision: i64) -> CurrentEncryptedResource {
+        CurrentEncryptedResource::AiProviderAccount(CurrentEncryptedAi { id, revision })
     }
 
-    fn candidate(id: Uuid, revision: i64) -> ValidatedRekeyHost {
-        ValidatedRekeyHost {
-            host_id: id,
+    fn candidate_ai(id: Uuid, revision: i64) -> ValidatedRekeyResource {
+        ValidatedRekeyResource::AiProviderAccount {
+            resource_id: id,
             cloud_revision: revision,
-            ciphertext: vec![1; 32],
+            payload: crate::validation::ValidatedAiPayload {
+                ciphertext: vec![1],
+                nonce: vec![2],
+                envelope_metadata: json!({"v": 1}),
+            },
         }
     }
 
     #[test]
-    fn candidate_must_cover_the_exact_encrypted_snapshot() {
-        let first = Uuid::now_v7();
-        let second = Uuid::now_v7();
-        let mut ids = [first, second];
-        ids.sort_unstable();
-        let stored = vec![current(ids[0], 4), current(ids[1], 8)];
-        assert!(
-            require_complete_candidate(&stored, &[candidate(ids[0], 4), candidate(ids[1], 8)])
-                .is_ok()
-        );
+    fn candidate_must_cover_exact_typed_snapshot() {
+        let id = Uuid::now_v7();
+        assert!(require_complete_candidate(&[current_ai(id, 4)], &[candidate_ai(id, 4)]).is_ok());
         assert!(matches!(
-            require_complete_candidate(&stored, &[candidate(ids[0], 4)]),
-            Err(AppError::Conflict(_))
-        ));
-        assert!(matches!(
-            require_complete_candidate(&stored, &[candidate(ids[0], 4), candidate(ids[1], 7)]),
-            Err(AppError::Conflict(_))
+            require_complete_candidate(&[current_ai(id, 4)], &[candidate_ai(id, 3)]),
+            Err(AppError::SyncStateChanged(_))
         ));
     }
 }

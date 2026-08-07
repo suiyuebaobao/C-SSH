@@ -147,7 +147,7 @@ fn validate_home(document: &EditableHomePage, locale: Locale) -> AppResult<()> {
 
     let content = &document.content;
     let expected = &baseline.content;
-    exact_len(content.platforms.len(), 5, "平台矩阵")?;
+    exact_len(content.platforms.len(), 4, "平台矩阵")?;
     exact_len(
         content.sections.len(),
         expected.sections.len(),

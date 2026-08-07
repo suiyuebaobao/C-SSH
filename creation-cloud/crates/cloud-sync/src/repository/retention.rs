@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::model::retention::{RetentionReport, RetentionRequest};
 
-use super::storage;
+use super::{retention_v2, storage};
 
 pub(crate) const LOCK_CANDIDATE_ACCOUNTS_SQL: &str = r#"
 SELECT account.id
@@ -278,13 +278,16 @@ pub(crate) async fn run_batch_on_connection(
         .begin()
         .await
         .map_err(storage("无法开始同步保留事务"))?;
-    let account_ids = sqlx::query_scalar::<_, Uuid>(LOCK_CANDIDATE_ACCOUNTS_SQL)
+    let mut account_ids = sqlx::query_scalar::<_, Uuid>(LOCK_CANDIDATE_ACCOUNTS_SQL)
         .bind(request.retention_cutoff())
         .bind(request.active_cutoff())
         .bind(request.batch_size())
         .fetch_all(&mut *transaction)
         .await
         .map_err(storage("无法锁定同步保留账号"))?;
+    account_ids.extend(retention_v2::lock_candidate_accounts(&mut transaction, request).await?);
+    account_ids.sort_unstable();
+    account_ids.dedup();
     if account_ids.is_empty() {
         transaction
             .commit()
@@ -344,6 +347,7 @@ pub(crate) async fn run_batch_on_connection(
         .fetch_one(&mut *transaction)
         .await
         .map_err(storage("无法删除已解决同步冲突"))?;
+    let encrypted = retention_v2::run(&mut transaction, &account_ids, request).await?;
 
     transaction
         .commit()
@@ -355,6 +359,9 @@ pub(crate) async fn run_batch_on_connection(
         applied_mutations_deleted: deleted_applied.len() as u64,
         resolved_conflicts_deleted: deleted_resolved.0 as u64,
         conflict_mutations_deleted: deleted_resolved.1 as u64,
+        encrypted_tombstones_deleted: encrypted.tombstones_deleted,
+        encrypted_versions_deleted: encrypted.versions_deleted,
+        encrypted_mutations_deleted: encrypted.mutations_deleted,
     })
 }
 

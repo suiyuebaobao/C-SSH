@@ -299,7 +299,7 @@ mod tests {
         assert!(!body.contains("name=\"api_key\""));
         assert!(!body.contains("admin-seo-record"));
         assert!(body.contains("Only the global model catalog is managed here."));
-        assert!(body.contains("Cloud never receives, stores, or displays their status."));
+        assert!(body.contains("client-encrypted opaque account records"));
         assert!(
             !body
                 .to_ascii_lowercase()

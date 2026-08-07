@@ -1,4 +1,4 @@
-//! Use-case boundary. Identity is always derived from the authenticated session.
+//! 同步用例边界；账号与设备身份始终来自已认证会话。
 
 use cloud_domain::{AdminActor, AppError, AppResult, AuthenticatedSession, Page, PageQuery};
 use cloud_store::PgPool;
@@ -7,9 +7,8 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::{
-    AdminSyncRecord, HostConflictView, HostView, PullAckRequest, PullRequest, PullResponse,
-    PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
-    ResetSyncResponse, ResolveConflictOutcome, ResolveConflictRequest, SyncStateView,
+    AdminSyncRecord, HostView, PullAckRequest, PullRequest, PullResponse, PushOutcome, PushRequest,
+    RekeySyncRequest, RekeySyncResponse, ResetSyncRequest, ResetSyncResponse, SyncStateView,
     actor::{AccountActor, DeviceActor},
     repository, validation,
 };
@@ -50,13 +49,8 @@ impl Service {
         request: PushRequest,
     ) -> AppResult<PushOutcome> {
         let actor = DeviceActor::from_session(session)?;
-        let changes = validation::push(
-            request.sync_generation,
-            request.base_revision,
-            request.client_mutation_id,
-            &request.changes,
-        )?;
-        let request_hash = fingerprint("host-sync-push-v1", &request)?;
+        let changes = validation::push(&request)?;
+        let request_hash = fingerprint("encrypted-sync-push-v2", &request)?;
         repository::push(&self.pool, actor, &request, &changes, &request_hash).await
     }
 
@@ -77,38 +71,6 @@ impl Service {
         let actor = DeviceActor::from_session(session)?;
         validation::ack(&request)?;
         repository::ack(&self.pool, actor, &request).await
-    }
-
-    pub async fn list_open_conflicts(
-        &self,
-        session: &AuthenticatedSession,
-        page: PageQuery,
-    ) -> AppResult<Page<HostConflictView>> {
-        let actor = AccountActor::from_session(session)?;
-        repository::list_open_conflicts(&self.pool, actor.account_id(), page).await
-    }
-
-    pub async fn get_conflict(
-        &self,
-        session: &AuthenticatedSession,
-        conflict_id: Uuid,
-    ) -> AppResult<HostConflictView> {
-        let actor = AccountActor::from_session(session)?;
-        validation::conflict_id(conflict_id)?;
-        repository::get_conflict(&self.pool, actor.account_id(), conflict_id).await
-    }
-
-    pub async fn resolve_conflict(
-        &self,
-        session: &AuthenticatedSession,
-        conflict_id: Uuid,
-        request: ResolveConflictRequest,
-    ) -> AppResult<ResolveConflictOutcome> {
-        let actor = DeviceActor::from_session(session)?;
-        validation::resolve(conflict_id, &request)?;
-        let request_hash =
-            fingerprint("host-sync-conflict-resolution-v1", &(conflict_id, &request))?;
-        repository::resolve_conflict(&self.pool, actor, conflict_id, &request, &request_hash).await
     }
 
     pub async fn sync_state(&self, session: &AuthenticatedSession) -> AppResult<SyncStateView> {
@@ -133,7 +95,7 @@ impl Service {
     ) -> AppResult<RekeySyncResponse> {
         let actor = DeviceActor::from_session(session)?;
         let hosts = validation::rekey(&request)?;
-        let request_hash = fingerprint("host-sync-rekey-v1", &request)?;
+        let request_hash = fingerprint("encrypted-sync-rekey-v2", &request)?;
         repository::rekey(&self.pool, actor, &request, &hosts, &request_hash).await
     }
 
@@ -267,20 +229,24 @@ mod tests {
             sync_generation: 1,
             base_revision: 1,
             client_mutation_id: Uuid::nil(),
-            changes: vec![HostChange {
+            host_changes: vec![HostChange {
                 host_id,
                 operation: HostOperation::Update,
                 metadata: Some(metadata.clone()),
                 ciphertext,
                 expected_revision: Some(1),
             }],
+            ai_changes: vec![],
         };
         let missing =
-            fingerprint("host-sync-push-v1", &request(None)).expect("missing fingerprint");
-        let clear = fingerprint("host-sync-push-v1", &request(Some(None)))
+            fingerprint("encrypted-sync-push-v2", &request(None)).expect("missing fingerprint");
+        let clear = fingerprint("encrypted-sync-push-v2", &request(Some(None)))
             .expect("explicit null fingerprint");
-        let replace = fingerprint("host-sync-push-v1", &request(Some(Some("AA==".to_owned()))))
-            .expect("replacement fingerprint");
+        let replace = fingerprint(
+            "encrypted-sync-push-v2",
+            &request(Some(Some("AA==".to_owned()))),
+        )
+        .expect("replacement fingerprint");
         assert_ne!(missing, clear);
         assert_ne!(clear, replace);
         assert_ne!(missing, replace);
