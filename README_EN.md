@@ -6,60 +6,62 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/C-SSH_0.7.3_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)
-[![Stable](https://img.shields.io/badge/stable-v0.7.3-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/C-SSH_0.7.4_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)
+[![Stable](https://img.shields.io/badge/stable-v0.7.4-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)
 
 </div>
 
-Creation-SSH is a cross-platform SSH operations client. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows and Linux desktop clients cover broader day-to-day operations.
+Creation-SSH is an SSH operations client for Windows PCs and Android. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows client covers broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.3`**.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.4`**.
 
 > Android upgrade notice: the first launch after every install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained.
 
-## v0.7.3 Highlights
+## v0.7.4 Highlights
 
-- Fixed the account reminder remaining above the data-protection password dialog and intercepting verification input.
-- Startup-protection state now refreshes immediately after setting or changing the data-protection password.
-- Replaced question-mark placeholders and broken Traditional Chinese text, with a shared cross-client regression check.
-- Production assets remain Windows NSIS, MSI, portable ZIP, and one Android arm64 APK. No Linux package or AAB is published.
+- Manual Cloud sync now covers hosts and credentials plus AI configuration and keys. Trusted clients encrypt Key/Token values, API endpoints, and model bindings with the data-protection password; Creation Cloud stores only opaque ciphertext.
+- AI conversations, attachments, tool results, memories, and vectors never enter Cloud. Users inspect changes and explicitly choose upload or download.
+- Removed the persistent conflict area and conflict resources. A resource changed on both sides is resolved directly in the normal change list, while revision, generation, local change-token, and digest checks remain enforced by the backend.
+- Fixed `sync_resync_required` being presented as a legacy data-clear flow. It now asks the user to re-verify data protection and check changes again without clearing local business data.
+- Host rows in Cloud changes show `IP:port`, and the admin console has a stable [`/admin`](https://c-ssh.com/admin) entry.
+- Production assets are exactly three Windows packages and one Android arm64 APK. Linux client development is discontinued and frozen; no Linux artifact or AAB is published.
 
 ## Current Capabilities
 
 - Windows and Android can persistently enable or disable Startup Password Protection. Both changes verify the current data-protection password in a dialog; disabling it auto-enters on the next cold start without changing local or Cloud data.
-- Added optional Creation Cloud accounts, device sessions, and manual cloud sync. Host credentials are encrypted locally with the data-protection password; Cloud never receives plaintext.
-- Added local multi-model accounts and multiple API keys backed by the anonymous Cloud model catalog. API keys remain local and are never synchronized.
+- Creation Cloud provides accounts, device sessions, and manual sync. Host credentials and AI-provider Key/Token values, API endpoints, and model bindings are encrypted only by trusted clients; Cloud cannot read or use them.
+- AI supports multiple local provider accounts and model bindings. Conversations and five-layer memory remain local and are never synchronized.
 - Consolidated AI permissions into View, Edit, and Full Access while preserving conversations, schema 9 raw events, and five-layer memory when switching models.
 - Broadcast execution can mix Agent and native SSH hosts with common per-host results, isolation, and confirmation behavior.
-- Added Contact Us cards for WeChat, QQ group, and WhatsApp across all three clients, plus a compact mobile AI toolbar.
+- Windows and Android provide Contact Us cards for WeChat, QQ group, and WhatsApp, plus a compact mobile AI toolbar.
 - Fixed data-protection cold start and forgot-password reset, empty-cloud download previews, live AI configuration refresh, and host-monitor status projection.
 - Fixed the Android new-device password dialog being blocked by an invisible reminder overlay and fixed corrupted data-protection copy.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.3` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.4` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/C-SSH_0.7.3_android-arm64.apk) | No AAB for this release |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.3/Creation-SSH_0.7.3_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/C-SSH_0.7.4_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_portable-Windows-x64.zip) |
 
-Linux client code remains maintained, but no production Linux package is provided in the current release.
+Linux client development is discontinued and frozen. Historical source and historical releases remain available only as records.
 
-See the [v0.7.3 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.3) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.7.4 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.7.3` |
+| Platform | Delivered in `v0.7.4` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| iOS / macOS | **Not released** and not part of the `v0.7.3` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.7.4` delivery |
 
-The Linux client implementation remains maintained but is not part of the `v0.7.3` production artifacts or delivered platforms.
+The Linux client is no longer developed, tested, built, or released. The server-side Linux agent is not a Linux client.
 
 ## Main Pages
 
@@ -119,9 +121,9 @@ Monitor CPU, memory, load, network, disk usage, disk I/O, and top processes in r
 
 Select a target host, model, and permission profile before chatting with the AI, with controls for context, history, and settings. The screenshot shows a real read-only response, while tool execution remains governed by permissions and confirmation.
 
-### Windows And Linux Desktop
+### Windows Desktop
 
-Windows exposes the complete desktop navigation below, and Linux has its own desktop client. Both use the same host hard-delete and lifecycle-isolation contract.
+Windows exposes the complete desktop navigation below and follows the host hard-delete and lifecycle-isolation contract.
 
 | Page | What it does |
 | --- | --- |
@@ -139,7 +141,7 @@ Windows exposes the complete desktop navigation below, and Linux has its own des
 
 ### Desktop Product Screenshots
 
-Windows and Linux share the same desktop experience. Each screenshot below is paired with one feature description and has been reviewed for redaction.
+Each Windows screenshot below is paired with one feature description and has been reviewed for redaction.
 
 #### Host Management
 

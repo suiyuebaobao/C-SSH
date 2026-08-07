@@ -4,6 +4,37 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.4 - 主机与 AI 配置加密手动云同步
+
+> 协议保持 13，SQLite/AI schema 保持 9。正式资产恰好为 Windows 三项和 Android arm64 APK。Linux 客户端停止开发并冻结，不发布 Linux 制品，也不生成或上传 AAB。Windows EXE/MSI 当前未使用 Authenticode 签名。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.4_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.4_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.4_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.4_android-arm64.apk`
+
+### 新增
+- 手动云同步覆盖主机与凭据、AI provider 账户及其 Key/Token、API 地址和模型绑定；秘密只由可信客户端使用数据保护密码加密，Creation Cloud 仅保存不透明密文。
+- 云同步先检查本机与云端变化，再由用户逐项选择上传或下载；主机行显示 `IP:端口`，便于区分同名主机。
+- 管理后台增加稳定入口 [`/admin`](https://c-ssh.com/admin)。
+
+### 修复
+- 删除持久冲突区及冲突资源；双边变化直接在普通变化列表中互斥选择方向，后端继续严格校验 revision、generation、本机 change token 和摘要。
+- 修复 `sync_resync_required` 被显示为旧数据清除流程的问题；现在重新验证数据保护状态并重新检查变化，不会清除本地业务数据。
+- AI 对话、附件、工具结果、usage、原始事件、任务、记忆和向量明确保持本地，不参与 Cloud 同步。
+
+### 验证
+- Windows NSIS、MSI 与便携 ZIP 通过正式安装、启动、退出、卸载、隔离 WebView2 与清理门禁；NSIS/MSI 当前为未签名制品。
+- Android `0.7.4/7000004` arm64 正式签名 APK 通过真实主机、真实 AI provider 只读工具和 Host+AI 加密同步验证；x86_64 MuMu 测试包不属于发布资产。
+- Creation Cloud 的 Host+AI、generation、rekey、reset、并发校验和备份恢复门禁通过；部署及测试未修改用户业务数据。
+
+### SHA256
+- `ACC5716B4E54AB0802173F78EE42BA91B546D976AB7DA4E2CC79914379E64B52`  `Creation-SSH_0.7.4_x64-setup.exe`
+- `F1EE2DF1E741975597C5EC9C2AEB598C39E4B4E6E61C649E453CE73EA42CA623`  `Creation-SSH_0.7.4_x64_en-US.msi`
+- `6B407FC6870EB8BFC1011504DBDB90DCA17D69FD44CFC84B260E93D8E66111A1`  `Creation-SSH_0.7.4_portable-Windows-x64.zip`
+- `DAE8D93F431BEFDBAA036DA4D5377FD92821AAA2CAA0AEA005BA1719C7038A40`  `C-SSH_0.7.4_android-arm64.apk`
+
 ## v0.7.3 - 数据保护验证交互修复
 
 > 协议继续为 13，SQLite/AI schema 继续为 9。正式资产仅包含 Windows 三项和 Android arm64 APK；不发布 Linux 包，不生成或上传 AAB。

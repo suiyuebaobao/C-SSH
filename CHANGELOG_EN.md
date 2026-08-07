@@ -4,6 +4,37 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.4 - Encrypted Manual Sync for Hosts and AI Configuration
+
+> Protocol remains 13 and SQLite/AI schema remains 9. Production assets are exactly three Windows packages and one Android arm64 APK. Linux client development is discontinued and frozen; no Linux artifact or AAB is produced or uploaded. The Windows EXE/MSI currently have no Authenticode signature.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.4_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.4_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.4_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.7.4_android-arm64.apk`
+
+### Added
+- Manual Cloud sync now covers hosts and credentials, AI provider accounts, Key/Token values, API endpoints, and model bindings. Trusted clients encrypt secrets with the data-protection password; Creation Cloud stores only opaque ciphertext.
+- Sync first compares local and Cloud changes, then lets the user explicitly choose upload or download per resource. Host rows show `IP:port` to distinguish similarly named machines.
+- Added a stable [`/admin`](https://c-ssh.com/admin) entry for the management console.
+
+### Fixed
+- Removed the persistent conflict area and conflict resources. A two-sided change is resolved directly in the normal change list while the backend continues enforcing revision, generation, local change-token, and digest checks.
+- Fixed `sync_resync_required` being presented as a legacy data-clear flow. It now re-verifies data protection and checks changes again without clearing local business data.
+- Explicitly kept AI conversations, attachments, tool results, usage, raw events, tasks, memories, and vectors local and outside Cloud sync.
+
+### Verified
+- Windows NSIS, MSI, and portable ZIP passed production install, launch, exit, uninstall, isolated-WebView2, and cleanup gates. The NSIS and MSI artifacts are currently unsigned.
+- The signed Android `0.7.4/7000004` arm64 production APK passed real-host, real AI-provider read-only tool, and encrypted Host+AI sync verification. The x86_64 MuMu test package is not a release asset.
+- Creation Cloud passed Host+AI, generation, rekey, reset, concurrency, and backup-restore gates. Deployment and tests did not modify user business data.
+
+### SHA256
+- `ACC5716B4E54AB0802173F78EE42BA91B546D976AB7DA4E2CC79914379E64B52`  `Creation-SSH_0.7.4_x64-setup.exe`
+- `F1EE2DF1E741975597C5EC9C2AEB598C39E4B4E6E61C649E453CE73EA42CA623`  `Creation-SSH_0.7.4_x64_en-US.msi`
+- `6B407FC6870EB8BFC1011504DBDB90DCA17D69FD44CFC84B260E93D8E66111A1`  `Creation-SSH_0.7.4_portable-Windows-x64.zip`
+- `DAE8D93F431BEFDBAA036DA4D5377FD92821AAA2CAA0AEA005BA1719C7038A40`  `C-SSH_0.7.4_android-arm64.apk`
+
 ## v0.7.3 - Data-Protection Verification Fixes
 
 > Protocol remains 13 and SQLite/AI schema remains 9. Production assets are limited to three Windows packages and one Android arm64 APK. No Linux package or AAB is published.
