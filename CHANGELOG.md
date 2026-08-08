@@ -4,6 +4,37 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.5 - Windows 数据隔离、文件恢复与 AI 瞬时重试
+
+> 协议保持 13，SQLite/AI schema 保持 9。正式资产恰好为 Windows 三项和 Android arm64 APK；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.5_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.5_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.5_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.5_android-arm64.apk`
+
+### 新增与调整
+- Windows 在 Tauri/Runtime 初始化前将真实 `<EXE目录>\data` 设为唯一数据与状态根；SQLite、known_hosts、AI/Cloud 本地文件、日志、WebView2 数据和传输临时文件不再分散到 AppData、工作目录或系统临时目录。
+- Windows 主密钥、Cloud 会话和自动解锁材料继续保存在 Credential Manager，不因“随 EXE”数据布局降级为普通文件。
+- 文件页补强拖出会话与下载恢复；中断后的恢复继续受目标身份、分块完整性和原子采用门禁约束。
+- Issue #41 的终端右键只在 xterm 当前确有选区时显示“复制”并恢复焦点；无选区时不接管，继续交给远端 TUI 或鼠标模式。
+
+### AI 可靠性
+- 网络、连接、读取超时及 408/429/500/502/503/504 等可证明瞬时失败，在首次失败后按固定 5 秒间隔最多重试 5 次；只有只读且幂等的 Agent/SSH 读取可自动重放。
+- 写入、编辑、命令、终端等请求一旦可能送达就不会自动重放，而是返回未知终态并保留恢复门禁，避免重复副作用。
+- 每次重试排程先持久化再显示；停止可以取消等待，最终错误会说明失败类别和重试是否用尽。
+
+### 截图证据边界
+- 更新 Windows 8 张与 Android 5 张公开产品截图；全部使用 RFC 5737、`example.com` 和明确标注的模拟数据，未连接真实主机、Cloud 或 AI provider。
+- 13 张截图均完成逐图目检与脱敏复核。Android 截图来自 x86_64 模拟器测试界面；这些截图不代表物理 arm64 设备验收，也不等同于完整人工 GUI 覆盖。
+
+### SHA256
+- `8E6D4CDF05CD84521C1C4D06CE90F429732F45147871FEF92D6C436A4D159E58`  `Creation-SSH_0.7.5_x64-setup.exe`
+- `D5EEBB641DA594998E449F9B86C119BA3A3F40E1541A26E09772FC9B10FA67D6`  `Creation-SSH_0.7.5_x64_en-US.msi`
+- `07200FBD5D10861300469FAD2AED51DF4F419665188F8093C62BD8BDDAD21EE6`  `Creation-SSH_0.7.5_portable-Windows-x64.zip`
+- `4C9F67096A8855FDC85D2ACCE1EF84D2A4D56C0FABBB74F32B1396E5E5DC5C1C`  `C-SSH_0.7.5_android-arm64.apk`
+
 ## v0.7.4 - 主机与 AI 配置加密手动云同步
 
 > 协议保持 13，SQLite/AI schema 保持 9。正式资产恰好为 Windows 三项和 Android arm64 APK。Linux 客户端停止开发并冻结，不发布 Linux 制品，也不生成或上传 AAB。Windows EXE/MSI 当前未使用 Authenticode 签名。

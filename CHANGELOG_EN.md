@@ -4,6 +4,37 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.5 - Windows Data Isolation, File Recovery, And Transient AI Retries
+
+> Protocol remains 13 and SQLite/AI schema remains 9. Production assets are exactly three Windows packages and one Android arm64 APK. Linux client development stays frozen, with no Linux artifact or AAB produced or uploaded.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.5_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.5_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.5_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.7.5_android-arm64.apk`
+
+### Added And Changed
+- Before Tauri/runtime initialization, Windows makes the real `<EXE directory>\data` the sole data and state root. SQLite, known_hosts, local AI/Cloud files, logs, WebView2 data, and transfer temporaries no longer scatter across AppData, the working directory, or the system temporary directory.
+- The Windows master key, Cloud session, and automatic-unlock material remain in Credential Manager instead of being downgraded to ordinary files for the adjacent-data layout.
+- File drag-out sessions and download recovery are more robust. Recovery after interruption remains guarded by destination identity, chunk integrity, and atomic adoption.
+- For Issue #41, terminal right-click shows Copy and restores focus only when xterm currently has a selection. With no selection, the client does not intercept the event, leaving it to the remote TUI or mouse mode.
+
+### AI Reliability
+- Provably transient network, connection, read-timeout, and 408/429/500/502/503/504 failures wait a fixed five seconds after each failure and retry at most five times. Only read-only, idempotent Agent/SSH reads may be replayed automatically.
+- Writes, edits, commands, terminals, and other requests are never replayed automatically once they may have been delivered. They return an unknown outcome and retain the recovery gate instead of risking duplicate side effects.
+- Each retry schedule is persisted before it is shown. Stop can cancel the wait, and the final error reports the failure category and whether retries were exhausted.
+
+### Screenshot Evidence Boundary
+- Refreshed eight Windows and five Android public product screenshots. Every image uses RFC 5737, `example.com`, and explicitly labeled simulated data; none connected to a real host, Cloud, or AI provider.
+- All 13 screenshots passed per-image visual and redaction review. Android screenshots came from an x86_64 emulator test UI; these images are not evidence of physical-arm64 acceptance or complete manual GUI coverage.
+
+### SHA256
+- `8E6D4CDF05CD84521C1C4D06CE90F429732F45147871FEF92D6C436A4D159E58`  `Creation-SSH_0.7.5_x64-setup.exe`
+- `D5EEBB641DA594998E449F9B86C119BA3A3F40E1541A26E09772FC9B10FA67D6`  `Creation-SSH_0.7.5_x64_en-US.msi`
+- `07200FBD5D10861300469FAD2AED51DF4F419665188F8093C62BD8BDDAD21EE6`  `Creation-SSH_0.7.5_portable-Windows-x64.zip`
+- `4C9F67096A8855FDC85D2ACCE1EF84D2A4D56C0FABBB74F32B1396E5E5DC5C1C`  `C-SSH_0.7.5_android-arm64.apk`
+
 ## v0.7.4 - Encrypted Manual Sync for Hosts and AI Configuration
 
 > Protocol remains 13 and SQLite/AI schema remains 9. Production assets are exactly three Windows packages and one Android arm64 APK. Linux client development is discontinued and frozen; no Linux artifact or AAB is produced or uploaded. The Windows EXE/MSI currently have no Authenticode signature.

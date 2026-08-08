@@ -6,26 +6,26 @@
 
 ### 手机上也能接着运维：持久化终端、常驻监控、文件管理与 AI 助手
 
-[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/C-SSH_0.7.4_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)
-[![Stable](https://img.shields.io/badge/stable-v0.7.4-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)
+[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
+[![Stable](https://img.shields.io/badge/stable-v0.7.5-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
 
 </div>
 
 Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 端负责更完整的日常运维工作流。
 
-当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.4`**；旧版本继续保留为历史记录。
+当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.5`**；旧版本继续保留为历史记录。
 
 > Android 升级提示：每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。
 
-## v0.7.4 更新重点
+## v0.7.5 更新重点
 
-- 手动云同步扩展为“主机与凭据 + AI 配置与 Key”：Key/Token、API 地址和模型绑定均由可信客户端使用数据保护密码加密后上传，Creation Cloud 只保存不透明密文。
-- AI 对话、附件、工具结果、记忆和向量不进入 Cloud；同步前先检查变化，再由用户明确选择上传或下载。
-- 删除持久冲突区和冲突资源；同一条目双边变化直接在普通变化列表选择方向，后端仍以 revision、generation、本机 change token 和摘要执行整批并发校验。
-- 修复 `sync_resync_required` 被错误呈现为旧数据清除流程的问题；现在只要求重新验证数据保护状态并重新检查变化，不会清除本地业务数据。
-- 云端变化中的主机行显示 `IP:端口`，管理后台提供固定入口 [`/admin`](https://c-ssh.com/admin)。
-- 正式资产固定为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK；Linux 客户端停止开发并冻结，不发布 Linux 制品，也不生成 AAB。
+- AI 对网络、连接、读取超时及 408/429/500/502/503/504 等可证明瞬时失败，在首次失败后按固定 5 秒间隔最多重试 5 次；只有只读且幂等的工具请求可自动重放。
+- 写入、编辑、命令、终端等副作用请求一旦可能送达就不会自动重放，而是明确返回未知终态并保留恢复门禁，避免重复执行。
+- Windows 在程序运行前将 `<EXE目录>\data` 设为唯一数据与状态根；主密钥、Cloud 会话和自动解锁材料仍留在 Windows Credential Manager，不降级为普通文件。
+- Windows 文件页补强拖出与下载恢复，终端右键仅在 xterm 当前确有选区时显示“复制”；无选区时继续交给远端 TUI 或鼠标模式。
+- 本版公开截图更新为 Windows 8 张、Android 5 张，全部使用 RFC 5737、`example.com` 和明确标注的模拟数据，不代表真实主机、Cloud 或 AI provider 联机验证。
+- 正式资产仍恰好为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK；Linux 客户端保持冻结，不发布 Linux 制品，也不生成 AAB。
 
 ## 当前主要能力
 
@@ -33,33 +33,36 @@ Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。An
 - Creation Cloud 提供账号、登录设备与手动云同步；主机凭据以及 AI provider 的 Key/Token、API 地址和模型绑定仅由客户端加密，Cloud 不接触明文或使用这些秘密。
 - AI 支持本地多 provider 账户和模型绑定；对话与五层记忆只保存在设备本地，不参与云同步。
 - AI 权限收敛为查看、编辑、全权三档；会话、schema 9 原始记录与五层记忆在切换模型后继续保留。
+- AI 瞬时失败重试由共享 Rust 层统一编排，并先持久化每次重试排程；停止操作可以取消等待。
 - 群发执行支持 Agent 与原生 SSH 主机混选，并统一逐机结果、失败隔离和确认流程。
+- Windows 安装版、便携版和直接运行都使用程序同目录 `data`，文件拖出和下载恢复也受同一隔离数据根约束。
+- Windows 终端右键菜单只接管现有选区的复制，无选区时不改变远端终端的右键交互。
 - Windows 与 Android 提供“联系我们”，可查看微信、QQ 群和 WhatsApp 二维码；移动端 AI 工具栏使用紧凑图标布局。
 - 修复数据保护冷启动与忘记密码重置、空云端下载预览、模型配置即时刷新和主机监控状态投影问题。
 - 修复 Android 新设备验证弹窗被上层透明提醒遮罩截获触摸，以及数据保护说明出现问号乱码的问题。
 
 ## 先看 Android
 
-同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.4` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
+同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.5` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
 
 ## 下载
 
 | 平台 | 推荐下载 | 其他正式资产 |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/C-SSH_0.7.4_android-arm64.apk) | 本版不提供 AAB |
-| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk) | 本版不提供 AAB |
+| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_portable-Windows-x64.zip) |
 
 Linux 客户端已停止开发并冻结；历史源码和历史 Release 仅作为既有记录保留。
 
-版本说明和 SHA256 见 [v0.7.4 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
+版本说明和 SHA256 见 [v0.7.5 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 已交付平台
 
-| 平台 | `v0.7.4` 已交付范围 |
+| 平台 | `v0.7.5` 已交付范围 |
 | --- | --- |
 | Android | 主机管理、agent 安装与更新/修复、持久化/普通终端、文件上传下载、实时监控、AI、系统管理、本地登录门与“我的”设置 |
 | Windows | 完整桌面工作流；提供 EXE、MSI 与便携 ZIP |
-| iOS / macOS | **尚未发布**，不属于 `v0.7.4` 已交付范围 |
+| iOS / macOS | **尚未发布**，不属于 `v0.7.5` 已交付范围 |
 
 Linux 客户端不再开发、测试、构建或发布；服务器侧 Linux agent 不属于 Linux 客户端。
 
@@ -79,7 +82,7 @@ Linux 客户端不再开发、测试、构建或发布；服务器侧 Linux agen
 
 ### Android 产品截图
 
-以下每张截图都对应一段清晰的功能说明，并已在公开前完成脱敏核对。
+以下截图来自 `v0.7.5` Android 测试界面，只使用 RFC 5737、`example.com` 与明确标注的离线模拟数据；未连接真实主机、Cloud 或 AI provider，截图证据不等同于物理 arm64 设备验收或完整人工 GUI 覆盖。
 
 #### 主机管理
 
@@ -116,10 +119,10 @@ Linux 客户端不再开发、测试、构建或发布；服务器侧 Linux agen
 #### AI 助手
 
 <div align="center">
-<img width="360" src="screenshots/mobile-ai.png" alt="Android AI 助手真实响应" />
+<img width="360" src="screenshots/mobile-ai.png" alt="Android AI 助手模拟演示" />
 </div>
 
-选择目标主机、模型和权限档后与 AI 对话，并管理上下文、历史和设置。截图展示真实只读权限问答，工具执行仍受权限与确认控制。
+选择目标主机、模型和权限档后与 AI 对话，并管理上下文、历史和设置。截图展示明确标注为模拟数据的离线时间线；实际工具执行仍受权限与确认控制。
 
 ### Windows 桌面
 
@@ -141,7 +144,7 @@ Windows 提供下列完整桌面入口，并遵循主机硬删除与生命周期
 
 ### 桌面产品截图
 
-以下 Windows 截图都对应一段功能说明，并已完成脱敏核对。
+以下截图来自 `v0.7.5` Windows 候选程序界面，只使用 RFC 5737、`example.com` 与明确标注的离线模拟数据；未连接真实主机、Cloud 或 AI provider，8 张页面截图不代表完整人工 GUI 验收。
 
 #### 主机管理
 
@@ -157,7 +160,7 @@ Windows 提供下列完整桌面入口，并遵循主机硬删除与生命周期
 <img width="920" src="screenshots/terminal.png" alt="桌面持久化与普通终端" />
 </div>
 
-选择主机后，可在 tmux 持久化会话与普通 SSH PTY 之间切换。普通终端在菜单往返期间保留现场，持久化窗口则可在断线或更换设备后重新附加；独立窗口入口可用于并行操作多个终端。
+选择主机后，可在 tmux 持久化会话与普通 SSH PTY 之间切换。普通终端在菜单往返期间保留现场，持久化窗口则可在断线或更换设备后重新附加；右键只在当前确有选区时显示“复制”，无选区时继续交给远端 TUI 或鼠标模式。
 
 #### 跨主机监控概览
 
@@ -181,7 +184,7 @@ Windows 提供下列完整桌面入口，并遵循主机硬删除与生命周期
 <img width="920" src="screenshots/files.png" alt="桌面文件管理" />
 </div>
 
-浏览和搜索远端目录，显示隐藏文件，并执行新建、上传、下载、编辑和刷新。文件列表提供大小、修改时间以及逐项操作入口。
+浏览和搜索远端目录，显示隐藏文件，并执行新建、上传、下载、编辑和刷新。文件拖出与下载支持中断恢复和完整性核对，文件列表提供大小、修改时间以及逐项操作入口。
 
 #### AI 助手
 
@@ -189,7 +192,7 @@ Windows 提供下列完整桌面入口，并遵循主机硬删除与生命周期
 <img width="920" src="screenshots/ai.png" alt="桌面 AI 助手" />
 </div>
 
-选择主机、模型和权限档，让 AI 在明确授权范围内读取指标与系统信息并给出结果。页面同时提供历史记录、上下文配置和独立 AI 窗口入口。
+选择主机、模型和权限档，让 AI 在明确授权范围内读取指标与系统信息并给出结果。可证明的瞬时只读失败按固定 5 秒间隔最多重试 5 次；可能产生副作用的请求不会自动重放。
 
 #### 群发执行
 
@@ -209,7 +212,7 @@ Windows 提供下列完整桌面入口，并遵循主机硬删除与生命周期
 <img width="920" src="screenshots/settings.png" alt="桌面设置" />
 </div>
 
-集中配置跟随系统语言、本地登录与保险库密码、AI provider、外观和监控采集。关于页面提供当前版本与更新检查，所有持久设置保存在本地。
+集中配置跟随系统语言、本地登录与保险库密码、AI provider、外观和监控采集。关于页面提供当前版本与更新检查；Windows 业务状态进入程序同目录 `data`，主密钥等平台材料仍留在 Credential Manager。
 
 ## 安全边界
 

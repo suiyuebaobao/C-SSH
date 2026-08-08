@@ -6,26 +6,26 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/C-SSH_0.7.4_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)
-[![Stable](https://img.shields.io/badge/stable-v0.7.4-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
+[![Stable](https://img.shields.io/badge/stable-v0.7.5-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
 
 </div>
 
 Creation-SSH is an SSH operations client for Windows PCs and Android. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows client covers broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.4`**.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.5`**.
 
 > Android upgrade notice: the first launch after every install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained.
 
-## v0.7.4 Highlights
+## v0.7.5 Highlights
 
-- Manual Cloud sync now covers hosts and credentials plus AI configuration and keys. Trusted clients encrypt Key/Token values, API endpoints, and model bindings with the data-protection password; Creation Cloud stores only opaque ciphertext.
-- AI conversations, attachments, tool results, memories, and vectors never enter Cloud. Users inspect changes and explicitly choose upload or download.
-- Removed the persistent conflict area and conflict resources. A resource changed on both sides is resolved directly in the normal change list, while revision, generation, local change-token, and digest checks remain enforced by the backend.
-- Fixed `sync_resync_required` being presented as a legacy data-clear flow. It now asks the user to re-verify data protection and check changes again without clearing local business data.
-- Host rows in Cloud changes show `IP:port`, and the admin console has a stable [`/admin`](https://c-ssh.com/admin) entry.
-- Production assets are exactly three Windows packages and one Android arm64 APK. Linux client development is discontinued and frozen; no Linux artifact or AAB is published.
+- For provably transient network, connection, read-timeout, and 408/429/500/502/503/504 failures, AI waits a fixed five seconds after each failure and retries at most five times. Only read-only, idempotent tool requests may be replayed automatically.
+- Writes, edits, commands, terminals, and other side-effecting requests are never replayed automatically once they may have been delivered. They return an explicit unknown outcome and retain the recovery gate instead of risking duplicate execution.
+- Before the Windows runtime starts, `<EXE directory>\data` becomes the sole data and state root. The master key, Cloud session, and automatic-unlock material remain in Windows Credential Manager rather than ordinary files.
+- Windows file drag-out and download recovery are more robust. Terminal right-click shows Copy only when xterm currently has a selection; with no selection, the event remains available to the remote TUI or mouse mode.
+- This release refreshes eight Windows and five Android screenshots. Every image uses RFC 5737, `example.com`, and explicitly labeled simulated data; none is evidence of a live host, Cloud, or AI-provider integration.
+- Production assets remain exactly three Windows packages and one Android arm64 APK. Linux client development stays frozen, with no Linux artifact or AAB.
 
 ## Current Capabilities
 
@@ -33,33 +33,36 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 - Creation Cloud provides accounts, device sessions, and manual sync. Host credentials and AI-provider Key/Token values, API endpoints, and model bindings are encrypted only by trusted clients; Cloud cannot read or use them.
 - AI supports multiple local provider accounts and model bindings. Conversations and five-layer memory remain local and are never synchronized.
 - Consolidated AI permissions into View, Edit, and Full Access while preserving conversations, schema 9 raw events, and five-layer memory when switching models.
+- Shared Rust orchestration handles transient AI retries and durably records each retry schedule before emitting it. A stop request can cancel the wait.
 - Broadcast execution can mix Agent and native SSH hosts with common per-host results, isolation, and confirmation behavior.
+- Windows installers, portable builds, and direct execution all use the adjacent `data` directory; file drag-out and download recovery remain inside the same isolated data root.
+- Windows terminal right-click takes over only to copy an existing selection. With no selection, it preserves the remote terminal's right-click behavior.
 - Windows and Android provide Contact Us cards for WeChat, QQ group, and WhatsApp, plus a compact mobile AI toolbar.
 - Fixed data-protection cold start and forgot-password reset, empty-cloud download previews, live AI configuration refresh, and host-monitor status projection.
 - Fixed the Android new-device password dialog being blocked by an invisible reminder overlay and fixed corrupted data-protection copy.
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.4` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.5` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/C-SSH_0.7.4_android-arm64.apk) | No AAB for this release |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.4/Creation-SSH_0.7.4_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_portable-Windows-x64.zip) |
 
 Linux client development is discontinued and frozen. Historical source and historical releases remain available only as records.
 
-See the [v0.7.4 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.4) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.7.5 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.7.4` |
+| Platform | Delivered in `v0.7.5` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| iOS / macOS | **Not released** and not part of the `v0.7.4` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.7.5` delivery |
 
 The Linux client is no longer developed, tested, built, or released. The server-side Linux agent is not a Linux client.
 
@@ -79,7 +82,7 @@ The Linux client is no longer developed, tested, built, or released. The server-
 
 ### Android Product Screenshots
 
-Each screenshot below is paired with one clear feature description and was reviewed for redaction before publication.
+These screenshots come from the `v0.7.5` Android test UI and use only RFC 5737, `example.com`, and explicitly labeled offline simulated data. They did not connect to a real host, Cloud, or AI provider, and they are not evidence of physical-arm64 acceptance or complete manual GUI coverage.
 
 #### Host Management
 
@@ -116,10 +119,10 @@ Monitor CPU, memory, load, network, disk usage, disk I/O, and top processes in r
 #### AI Assistant
 
 <div align="center">
-<img width="360" src="screenshots/mobile-ai.png" alt="Android AI assistant real response" />
+<img width="360" src="screenshots/mobile-ai.png" alt="Android AI assistant simulated demo" />
 </div>
 
-Select a target host, model, and permission profile before chatting with the AI, with controls for context, history, and settings. The screenshot shows a real read-only response, while tool execution remains governed by permissions and confirmation.
+Select a target host, model, and permission profile before chatting with the AI, with controls for context, history, and settings. The screenshot shows an offline timeline explicitly labeled as simulated data; real tool execution remains governed by permissions and confirmation.
 
 ### Windows Desktop
 
@@ -141,7 +144,7 @@ Windows exposes the complete desktop navigation below and follows the host hard-
 
 ### Desktop Product Screenshots
 
-Each Windows screenshot below is paired with one feature description and has been reviewed for redaction.
+These screenshots come from the `v0.7.5` Windows candidate UI and use only RFC 5737, `example.com`, and explicitly labeled offline simulated data. They did not connect to a real host, Cloud, or AI provider, and the eight captured pages are not a complete manual GUI acceptance run.
 
 #### Host Management
 
@@ -157,7 +160,7 @@ Manage SSH hosts through groups, favorites, and search while reviewing agent sta
 <img width="920" src="screenshots/terminal.png" alt="Desktop persistent and standard terminals" />
 </div>
 
-Select a host and switch between persistent tmux sessions and a standard SSH PTY. Standard terminals keep their live state across menu navigation, while persistent windows can be reattached after disconnects or device changes; a separate-window action supports parallel terminal work.
+Select a host and switch between persistent tmux sessions and a standard SSH PTY. Standard terminals keep their live state across menu navigation, while persistent windows can be reattached after disconnects or device changes. Right-click shows Copy only when a selection exists; otherwise, it remains available to the remote TUI or mouse mode.
 
 #### Multi-host Monitoring Overview
 
@@ -181,7 +184,7 @@ Inspect CPU, memory, disk, swap, load, network, and disk I/O for one host. Trend
 <img width="920" src="screenshots/files.png" alt="Desktop file manager" />
 </div>
 
-Browse and search remote directories, show hidden files, and create, upload, download, edit, or refresh items. The listing includes sizes, modification times, and per-item actions.
+Browse and search remote directories, show hidden files, and create, upload, download, edit, or refresh items. File drag-out and downloads support interruption recovery and integrity verification, while the listing includes sizes, modification times, and per-item actions.
 
 #### AI Assistant
 
@@ -189,7 +192,7 @@ Browse and search remote directories, show hidden files, and create, upload, dow
 <img width="920" src="screenshots/ai.png" alt="Desktop AI assistant" />
 </div>
 
-Select a host, model, and permission profile so the AI can read authorized metrics and system information and return a result. The page also provides history, context settings, and a separate AI window.
+Select a host, model, and permission profile so the AI can read authorized metrics and system information and return a result. Provably transient read-only failures wait a fixed five seconds and retry at most five times; requests that may have side effects are never replayed automatically.
 
 #### Broadcast Execution
 
@@ -209,7 +212,7 @@ Create an independent temporary SSH access key for a selected host, with the pri
 <img width="920" src="screenshots/settings.png" alt="Desktop settings" />
 </div>
 
-Configure system-language following, local login and vault protection, AI providers, appearance, and monitoring collection in one place. The About view exposes the current version and update check, while persistent settings stay local.
+Configure system-language following, local login and vault protection, AI providers, appearance, and monitoring collection in one place. Windows business state uses the adjacent `data` directory, while the master key and related platform material remain in Credential Manager.
 
 ## Security Boundaries
 
