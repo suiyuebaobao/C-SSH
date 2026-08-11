@@ -6,36 +6,41 @@
 
 ### 手机上也能接着运维：持久化终端、常驻监控、文件管理与 AI 助手
 
-[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
-[![Stable](https://img.shields.io/badge/stable-v0.7.5-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
+[![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/C-SSH_0.7.6_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)
+[![Stable](https://img.shields.io/badge/stable-v0.7.6-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)
 
 </div>
 
 Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 端负责更完整的日常运维工作流。
 
-当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.5`**；旧版本继续保留为历史记录。
+当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.7.6`**；旧版本继续保留为历史记录。
 
-> Android 升级提示：每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。
+> Windows 安全提示：本版 NSIS 与 MSI 尚未使用 Authenticode 签名，Windows SmartScreen 可能显示“未知发布者”或额外确认。请只从本仓库 Release 下载，并用下方 SHA256 核对文件。
 
-## v0.7.5 更新重点
+> Android `v0.7.6` 升级提示：本版只建立 fresh schema 10，不打开或迁移旧 schema 9。安装代变化时，上一代本地数据库、主机、设置、凭据引用和 AI 数据不会保留。
 
-- AI 对网络、连接、读取超时及 408/429/500/502/503/504 等可证明瞬时失败，在首次失败后按固定 5 秒间隔最多重试 5 次；只有只读且幂等的工具请求可自动重放。
-- 写入、编辑、命令、终端等副作用请求一旦可能送达就不会自动重放，而是明确返回未知终态并保留恢复门禁，避免重复执行。
-- Windows 在程序运行前将 `<EXE目录>\data` 设为唯一数据与状态根；主密钥、Cloud 会话和自动解锁材料仍留在 Windows Credential Manager，不降级为普通文件。
-- Windows 文件页补强拖出与下载恢复，终端右键仅在 xterm 当前确有选区时显示“复制”；无选区时继续交给远端 TUI 或鼠标模式。
-- 本版公开截图更新为 Windows 8 张、Android 5 张，全部使用 RFC 5737、`example.com` 和明确标注的模拟数据，不代表真实主机、Cloud 或 AI provider 联机验证。
-- 正式资产仍恰好为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK；Linux 客户端保持冻结，不发布 Linux 制品，也不生成 AAB。
+## v0.7.6 更新重点
+
+- Windows 数据库升为 schema 11，并将数据保护归属绑定到当前 `data` 实例。fresh 目录或只复制 EXE 会建立独立的未配置实例；完整复制受保护的 `data` 才继续要求原密码。数据库只保存包裹后的主密钥与必要参数，不保存数据保护密码或裸主密钥。
+- AI 助手固定为 Global、Project、Host 三种作用域。普通总结由共享 `ScopeCognitionSnapshot` 提供有界、相关的当前认知：Global 可覆盖可见项目与主机，Project 覆盖当前项目及成员主机，Host 只覆盖自身，不再为了总结逐个重读全部会话。
+- 完整 canonical 原始事件仍是唯一事实源。普通总结不会开放逐会话目录/正文工具；只有 Windows 调用方显式进入精确取证模式时，才按当前权限有界读取原始对话证据。
+- Windows 新增灰白色 Frost 主题、紧凑但信息完整的主机状态列，以及来自真实 Agent 指标请求或 SSH channel 往返的延迟显示；未知延迟显示为 `—`，不由前端估算。
+- Windows 与 Android 都会从已持久化消息恢复并显示用户图片。仅渲染本地 base64 图片 data URL；单图和多图均适配各自聊天区域，不因损坏数据发起外部图片请求。
+- Android 只建立 fresh schema 10，并把 Global/Project/Host 薄壳接到同一共享认知业务层；普通移动运行固定使用 ScopeCognition，不开放精确取证工具，也不复制 Windows 记忆实现。
+- 正式资产恰好为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK 四项。Linux 客户端保持冻结，不提供 Linux 制品；Android 不生成或上传 AAB。
 
 ## 当前主要能力
 
 - Windows 与 Android 可持久开启或关闭“启动密码保护”；启停都通过弹窗验证当前数据保护密码，关闭后下次冷启动自动进入，且不会改动本地或云端数据。
 - Creation Cloud 提供账号、登录设备与手动云同步；主机凭据以及 AI provider 的 Key/Token、API 地址和模型绑定仅由客户端加密，Cloud 不接触明文或使用这些秘密。
 - AI 支持本地多 provider 账户和模型绑定；对话与五层记忆只保存在设备本地，不参与云同步。
-- AI 权限收敛为查看、编辑、全权三档；会话、schema 9 原始记录与五层记忆在切换模型后继续保留。
+- AI 权限收敛为查看、编辑、全权三档，并与 Global、Project、Host 三种作用域相互独立；canonical 原始记录与五层记忆在切换模型后继续保留。
+- 普通三作用域总结直接使用共享认知快照；只有显式精确取证才按权限读取完整原始对话，认知召回本身不授予远程执行权限。
 - AI 瞬时失败重试由共享 Rust 层统一编排，并先持久化每次重试排程；停止操作可以取消等待。
 - 群发执行支持 Agent 与原生 SSH 主机混选，并统一逐机结果、失败隔离和确认流程。
 - Windows 安装版、便携版和直接运行都使用程序同目录 `data`，文件拖出和下载恢复也受同一隔离数据根约束。
+- Windows 的 Frost 主题、紧凑主机状态列、真实延迟和图片消息，以及 Android 的三作用域与图片消息，均已进入 `v0.7.6`。
 - Windows 终端右键菜单只接管现有选区的复制，无选区时不改变远端终端的右键交互。
 - Windows 与 Android 提供“联系我们”，可查看微信、QQ 群和 WhatsApp 二维码；移动端 AI 工具栏使用紧凑图标布局。
 - 修复数据保护冷启动与忘记密码重置、空云端下载预览、模型配置即时刷新和主机监控状态投影问题。
@@ -43,26 +48,33 @@ Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。An
 
 ## 先看 Android
 
-同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.5` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
+同一套主机和 tmux 会话可以在桌面与手机之间继续使用。Android `v0.7.6` 只发布 arm64 APK；本版不生成或上传 AAB，公开 Release 也不提供 x86_64 模拟器测试包。
 
 ## 下载
 
 | 平台 | 推荐下载 | 其他正式资产 |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk) | 本版不提供 AAB |
-| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/C-SSH_0.7.6_android-arm64.apk) | 本版不提供 AAB |
+| Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_x64_en-US.msi) · [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_portable-Windows-x64.zip) |
+
+### SHA256
+
+- `E996FEE3EABDBFA4EBEF1C6E429264B17FFB51972CD807E8AFF764F9432C4D48`  `Creation-SSH_0.7.6_x64-setup.exe`
+- `BF246971DBE5C0A1190EC940E715D9D1752E66D35FF141E76AADB1E427379627`  `Creation-SSH_0.7.6_x64_en-US.msi`
+- `C43A7006524F5E0C0AC53C9720F7945160D39614969E05B413329F9FDAC8230B`  `Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- `84A9CA3C71582AC28C6A3468502290611788F2B281AB0A49C32A516626D4996D`  `C-SSH_0.7.6_android-arm64.apk`
 
 Linux 客户端已停止开发并冻结；历史源码和历史 Release 仅作为既有记录保留。
 
-版本说明和 SHA256 见 [v0.7.5 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
+版本说明和下载见 [v0.7.6 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 已交付平台
 
-| 平台 | `v0.7.5` 已交付范围 |
+| 平台 | `v0.7.6` 已交付范围 |
 | --- | --- |
 | Android | 主机管理、agent 安装与更新/修复、持久化/普通终端、文件上传下载、实时监控、AI、系统管理、本地登录门与“我的”设置 |
 | Windows | 完整桌面工作流；提供 EXE、MSI 与便携 ZIP |
-| iOS / macOS | **尚未发布**，不属于 `v0.7.5` 已交付范围 |
+| iOS / macOS | **尚未发布**，不属于 `v0.7.6` 已交付范围 |
 
 Linux 客户端不再开发、测试、构建或发布；服务器侧 Linux agent 不属于 Linux 客户端。
 

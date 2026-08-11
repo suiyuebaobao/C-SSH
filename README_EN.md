@@ -6,36 +6,41 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
-[![Stable](https://img.shields.io/badge/stable-v0.7.5-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/C-SSH_0.7.6_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)
+[![Stable](https://img.shields.io/badge/stable-v0.7.6-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)
 
 </div>
 
 Creation-SSH is an SSH operations client for Windows PCs and Android. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows client covers broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.5`**.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.6`**. Older versions remain available as historical records.
 
-> Android upgrade notice: the first launch after every install or in-place update clears the previous installation-generation database and creates a fresh schema 9 database. Previous Android hosts, settings, credential references, and AI data are not retained.
+> Windows security notice: the NSIS and MSI packages in this release are not Authenticode-signed. Windows SmartScreen may show Unknown Publisher or require an extra confirmation. Download only from this repository's Release and verify the SHA256 values below.
 
-## v0.7.5 Highlights
+> Android `v0.7.6` upgrade notice: this release creates only a fresh schema 10 database and does not open or migrate schema 9. When the installation generation changes, the previous local database, hosts, settings, credential references, and AI data are not retained.
 
-- For provably transient network, connection, read-timeout, and 408/429/500/502/503/504 failures, AI waits a fixed five seconds after each failure and retries at most five times. Only read-only, idempotent tool requests may be replayed automatically.
-- Writes, edits, commands, terminals, and other side-effecting requests are never replayed automatically once they may have been delivered. They return an explicit unknown outcome and retain the recovery gate instead of risking duplicate execution.
-- Before the Windows runtime starts, `<EXE directory>\data` becomes the sole data and state root. The master key, Cloud session, and automatic-unlock material remain in Windows Credential Manager rather than ordinary files.
-- Windows file drag-out and download recovery are more robust. Terminal right-click shows Copy only when xterm currently has a selection; with no selection, the event remains available to the remote TUI or mouse mode.
-- This release refreshes eight Windows and five Android screenshots. Every image uses RFC 5737, `example.com`, and explicitly labeled simulated data; none is evidence of a live host, Cloud, or AI-provider integration.
-- Production assets remain exactly three Windows packages and one Android arm64 APK. Linux client development stays frozen, with no Linux artifact or AAB.
+## v0.7.6 Highlights
+
+- Windows moves to schema 11 and binds data protection to the current `data` instance. A fresh directory or an EXE copied without its data creates a separate unconfigured instance; only a complete copy of protected `data` continues to require the original password. The database stores only wrapped master-key material and required parameters, never the data-protection password or a plaintext master key.
+- The AI assistant now has fixed Global, Project, and Host scopes. Ordinary summaries receive bounded, relevant cognition from the shared `ScopeCognitionSnapshot`: Global can cover visible projects and hosts, Project covers the current project and its member hosts, and Host covers only itself, without rereading every full conversation.
+- Canonical raw events remain the sole source of truth. Ordinary summaries do not expose per-conversation catalog/body tools. Only an explicit Windows exact-evidence mode can read bounded original-conversation evidence under the current visibility rules.
+- Windows adds the gray-white Frost theme, a compact but complete host-status rail, and latency measured from real Agent metrics requests or SSH channel round trips. Unknown latency is shown as `—` and is never estimated by the frontend.
+- Windows and Android restore and display user images from persisted messages. Rendering accepts only local base64 image data URLs, adapts single and multiple images to each chat layout, and never turns corrupt data into an external image request.
+- Android creates only fresh schema 10 and connects its Global/Project/Host shell to the same shared cognition layer. Ordinary mobile runs use ScopeCognition, do not expose exact-evidence tools, and do not duplicate the Windows memory implementation.
+- Production assets are exactly three Windows packages—NSIS, MSI, and portable ZIP—and one Android arm64 APK. The Linux client remains frozen with no Linux artifact, and Android produces or uploads no AAB.
 
 ## Current Capabilities
 
 - Windows and Android can persistently enable or disable Startup Password Protection. Both changes verify the current data-protection password in a dialog; disabling it auto-enters on the next cold start without changing local or Cloud data.
 - Creation Cloud provides accounts, device sessions, and manual sync. Host credentials and AI-provider Key/Token values, API endpoints, and model bindings are encrypted only by trusted clients; Cloud cannot read or use them.
 - AI supports multiple local provider accounts and model bindings. Conversations and five-layer memory remain local and are never synchronized.
-- Consolidated AI permissions into View, Edit, and Full Access while preserving conversations, schema 9 raw events, and five-layer memory when switching models.
+- AI permissions remain View, Edit, and Full Access and are independent from Global, Project, and Host scope. Canonical raw events and five-layer memory remain available when switching models.
+- Ordinary scoped summaries use the shared cognition snapshot directly. Full original conversations are read only in explicit exact-evidence mode, and cognition recall never grants remote execution authority.
 - Shared Rust orchestration handles transient AI retries and durably records each retry schedule before emitting it. A stop request can cancel the wait.
 - Broadcast execution can mix Agent and native SSH hosts with common per-host results, isolation, and confirmation behavior.
 - Windows installers, portable builds, and direct execution all use the adjacent `data` directory; file drag-out and download recovery remain inside the same isolated data root.
+- Windows Frost, the compact host rail, real latency, and image messages, plus Android scoped AI and image messages, are included in `v0.7.6`.
 - Windows terminal right-click takes over only to copy an existing selection. With no selection, it preserves the remote terminal's right-click behavior.
 - Windows and Android provide Contact Us cards for WeChat, QQ group, and WhatsApp, plus a compact mobile AI toolbar.
 - Fixed data-protection cold start and forgot-password reset, empty-cloud download previews, live AI configuration refresh, and host-monitor status projection.
@@ -43,26 +48,33 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.5` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.6` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/C-SSH_0.7.5_android-arm64.apk) | No AAB for this release |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.5/Creation-SSH_0.7.5_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/C-SSH_0.7.6_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_portable-Windows-x64.zip) |
+
+### SHA256
+
+- `E996FEE3EABDBFA4EBEF1C6E429264B17FFB51972CD807E8AFF764F9432C4D48`  `Creation-SSH_0.7.6_x64-setup.exe`
+- `BF246971DBE5C0A1190EC940E715D9D1752E66D35FF141E76AADB1E427379627`  `Creation-SSH_0.7.6_x64_en-US.msi`
+- `C43A7006524F5E0C0AC53C9720F7945160D39614969E05B413329F9FDAC8230B`  `Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- `84A9CA3C71582AC28C6A3468502290611788F2B281AB0A49C32A516626D4996D`  `C-SSH_0.7.6_android-arm64.apk`
 
 Linux client development is discontinued and frozen. Historical source and historical releases remain available only as records.
 
-See the [v0.7.5 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.5) for release notes and SHA256 values, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.7.6 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6) for downloads and release notes, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.7.5` |
+| Platform | Delivered in `v0.7.6` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| iOS / macOS | **Not released** and not part of the `v0.7.5` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.7.6` delivery |
 
 The Linux client is no longer developed, tested, built, or released. The server-side Linux agent is not a Linux client.
 

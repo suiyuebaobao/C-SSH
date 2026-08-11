@@ -4,6 +4,44 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.6 - 数据实例保护与三作用域 AI
+
+> 协议保持 13；Windows SQLite 为 schema 11，Android 只建立 fresh schema 10。正式资产恰好为 Windows 三项与 Android arm64 APK 一项；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.6_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.6_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.6_android-arm64.apk`
+- 本版只包含以上四项资产；不提供 Linux 客户端制品，不生成或上传 AAB。
+
+### Windows 数据保护
+- 当前 `data` 数据库中的单例 vault 记录成为本副本的数据保护权威。fresh 目录或只复制 EXE 会创建新的未配置实例，不会继承其它程序副本的密码。
+- 完整复制受保护的 `data` 会保留原实例及密码要求。数据库只保存 DPAPI 或密码 KEK 包裹的主密钥与必要参数，不保存数据保护密码、裸主密钥或自动解锁材料。
+- 普通 WebView2 profile 使用系统应用数据目录；业务 SQLite、known_hosts、AI/Cloud 本地状态、日志与传输临时文件仍位于 EXE 同级 `data`。
+
+### 三作用域 AI 与记忆
+- AI 助手固定为 Global、Project、Host 三种作用域，并与查看、编辑、全权三档权限相互独立。
+- 普通总结使用共享 `ScopeCognitionSnapshot`：Global 从可见项目与主机召回相关的有界认知，Project 覆盖当前项目及成员 Host，Host 只覆盖自身；同一 run 复用同一快照，不逐个重读全部会话。
+- canonical 原始事件仍是唯一事实源。普通总结不注册完整会话目录/正文工具；只有 Windows 调用方显式开启精确取证时，才按当前可见范围有界读取原始证据。
+- Android 三作用域薄壳复用同一共享认知业务层，普通运行固定关闭精确取证，并保持既有 scope、owner、history 与 replay 门禁。
+
+### 界面与消息
+- Windows 新增 Frost 灰白主题，保持玻璃层次、深灰正文与危险红色；主题在本地持久化并跨窗口同步。
+- Host 状态列在宽窗保持九项指标但更紧凑，窄窗继续折叠为按钮/浮层。延迟只显示真实 Agent 指标请求或 SSH channel 往返，未知值为 `—`，不由前端估算。
+- Windows assistant 正文使用完整聊天区宽度；Windows 与 Android 都会从持久化消息恢复并显示用户图片。图片只接受本地 base64 image data URL，单图和多图分别适配桌面与窄屏布局。
+
+### 验证与安全提示
+- 四项资产已按同一发布版本核对名称与 SHA256；Windows 与 Android 之外没有其它正式制品。
+- Windows NSIS 与 MSI 未使用 Authenticode 签名，SmartScreen 可能显示“未知发布者”或要求额外确认；请从本仓库 Release 下载并核对 SHA256。
+- Android `v0.7.6` 只建立 fresh schema 10，不打开或迁移旧 schema 9；安装代变化时不会保留上一代本地数据库及其主机、设置、凭据引用和 AI 数据。
+
+### SHA256
+- `E996FEE3EABDBFA4EBEF1C6E429264B17FFB51972CD807E8AFF764F9432C4D48`  `Creation-SSH_0.7.6_x64-setup.exe`
+- `BF246971DBE5C0A1190EC940E715D9D1752E66D35FF141E76AADB1E427379627`  `Creation-SSH_0.7.6_x64_en-US.msi`
+- `C43A7006524F5E0C0AC53C9720F7945160D39614969E05B413329F9FDAC8230B`  `Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- `84A9CA3C71582AC28C6A3468502290611788F2B281AB0A49C32A516626D4996D`  `C-SSH_0.7.6_android-arm64.apk`
+
 ## v0.7.5 - Windows 数据隔离、文件恢复与 AI 瞬时重试
 
 > 协议保持 13，SQLite/AI schema 保持 9。正式资产恰好为 Windows 三项和 Android arm64 APK；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。

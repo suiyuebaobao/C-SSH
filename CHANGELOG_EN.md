@@ -4,6 +4,44 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.6 - Per-Data Protection And Three-Scope AI
+
+> Protocol remains 13. Windows uses SQLite schema 11, while Android creates only fresh schema 10. Production assets are exactly three Windows packages and one Android arm64 APK. The Linux client remains frozen with no Linux artifact, and no AAB is generated or uploaded.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.6_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.6_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.7.6_android-arm64.apk`
+- These are the only four assets. There is no Linux client artifact, and no AAB is generated or uploaded.
+
+### Windows Data Protection
+- The singleton vault record in the current `data` database becomes the data-protection authority for that copy. A fresh directory or an EXE copied without its data creates a new unconfigured instance and does not inherit another program copy's password.
+- A complete copy of protected `data` retains the original instance and password requirement. The database stores only master-key material wrapped by DPAPI or a password KEK plus required parameters, never the data-protection password, a plaintext master key, or automatic-unlock material.
+- The ordinary WebView2 profile uses the system application-data location. Business SQLite, known_hosts, local AI/Cloud state, logs, and transfer temporaries remain under the adjacent `data` directory.
+
+### Three-Scope AI And Memory
+- The AI assistant has fixed Global, Project, and Host scopes, independent from View, Edit, and Full Access permissions.
+- Ordinary summaries use the shared `ScopeCognitionSnapshot`: Global recalls bounded, relevant cognition from visible projects and hosts, Project covers the current project and member hosts, and Host covers only itself. One run reuses one snapshot instead of rereading every conversation.
+- Canonical raw events remain the sole source of truth. Ordinary summaries do not register full-conversation catalog/body tools. Only an explicit Windows exact-evidence request can read bounded original evidence within current visibility.
+- The Android three-scope shell reuses the same shared cognition business layer. Ordinary mobile runs keep exact evidence disabled and retain the existing scope, owner, history, and replay gates.
+
+### Interface And Messages
+- Windows adds the gray-white Frost theme while retaining glass depth, dark-gray text, and danger red. Theme choice persists locally and synchronizes across windows.
+- The Host status rail retains all nine metrics in a tighter wide-window layout and still collapses to the existing button/popover on narrow windows. Latency comes only from real Agent metrics requests or SSH channel round trips; unknown values show `—` and are never estimated by the frontend.
+- Windows assistant text uses the full chat width. Both Windows and Android restore and display user images from persisted messages. Images accept only local base64 image data URLs, with single and multiple images adapted to desktop and narrow-screen layouts.
+
+### Verification And Security Notice
+- All four assets use the same release version and have been checked by filename and SHA256. There are no other production artifacts for Windows or Android.
+- The Windows NSIS and MSI packages are not Authenticode-signed. SmartScreen may show Unknown Publisher or require an extra confirmation; download from this repository's Release and verify SHA256.
+- Android `v0.7.6` creates only fresh schema 10 and does not open or migrate schema 9. When the installation generation changes, the previous local database and its hosts, settings, credential references, and AI data are not retained.
+
+### SHA256
+- `E996FEE3EABDBFA4EBEF1C6E429264B17FFB51972CD807E8AFF764F9432C4D48`  `Creation-SSH_0.7.6_x64-setup.exe`
+- `BF246971DBE5C0A1190EC940E715D9D1752E66D35FF141E76AADB1E427379627`  `Creation-SSH_0.7.6_x64_en-US.msi`
+- `C43A7006524F5E0C0AC53C9720F7945160D39614969E05B413329F9FDAC8230B`  `Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- `84A9CA3C71582AC28C6A3468502290611788F2B281AB0A49C32A516626D4996D`  `C-SSH_0.7.6_android-arm64.apk`
+
 ## v0.7.5 - Windows Data Isolation, File Recovery, And Transient AI Retries
 
 > Protocol remains 13 and SQLite/AI schema remains 9. Production assets are exactly three Windows packages and one Android arm64 APK. Linux client development stays frozen, with no Linux artifact or AAB produced or uploaded.
