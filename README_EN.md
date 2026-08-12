@@ -6,41 +6,42 @@
 
 ### Keep operating from your phone: persistent terminals, monitoring, files, and an AI assistant
 
-[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/C-SSH_0.7.6_android-arm64.apk)
-[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)
-[![Stable](https://img.shields.io/badge/stable-v0.7.6-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6)
+[![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.7/C-SSH_0.7.7_android-arm64.apk)
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.7)
+[![Stable](https://img.shields.io/badge/stable-v0.7.7-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.7)
 
 </div>
 
 Creation-SSH is an SSH operations client for Windows PCs and Android. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows client covers broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.6`**. Older versions remain available as historical records.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.7.7`**. Older versions remain available as historical records.
 
 > Windows security notice: the NSIS and MSI packages in this release are not Authenticode-signed. Windows SmartScreen may show Unknown Publisher or require an extra confirmation. Download only from this repository's Release and verify the SHA256 values below.
 
-> Android `v0.7.6` upgrade notice: this release creates only a fresh schema 10 database and does not open or migrate schema 9. When the installation generation changes, the previous local database, hosts, settings, credential references, and AI data are not retained.
+> Android `v0.7.7` upgrade notice: this release creates only fresh schema 12. Before `1.0.0`, older Android data is not migrated. When the installation generation changes, the previous local database, hosts, settings, credential references, and AI data are not retained.
 
-## v0.7.6 Highlights
+## v0.7.7 Highlights
 
-- Windows moves to schema 11 and binds data protection to the current `data` instance. A fresh directory or an EXE copied without its data creates a separate unconfigured instance; only a complete copy of protected `data` continues to require the original password. The database stores only wrapped master-key material and required parameters, never the data-protection password or a plaintext master key.
-- The AI assistant now has fixed Global, Project, and Host scopes. Ordinary summaries receive bounded, relevant cognition from the shared `ScopeCognitionSnapshot`: Global can cover visible projects and hosts, Project covers the current project and its member hosts, and Host covers only itself, without rereading every full conversation.
-- Canonical raw events remain the sole source of truth. Ordinary summaries do not expose per-conversation catalog/body tools. Only an explicit Windows exact-evidence mode can read bounded original-conversation evidence under the current visibility rules.
-- Windows adds the gray-white Frost theme, a compact but complete host-status rail, and latency measured from real Agent metrics requests or SSH channel round trips. Unknown latency is shown as `—` and is never estimated by the frontend.
-- Windows and Android restore and display user images from persisted messages. Rendering accepts only local base64 image data URLs, adapts single and multiple images to each chat layout, and never turns corrupt data into an external image request.
-- Android creates only fresh schema 10 and connects its Global/Project/Host shell to the same shared cognition layer. Ordinary mobile runs use ScopeCognition, do not expose exact-evidence tools, and do not duplicate the Windows memory implementation.
-- Production assets are exactly three Windows packages—NSIS, MSI, and portable ZIP—and one Android arm64 APK. The Linux client remains frozen with no Linux artifact, and Android produces or uploads no AAB.
+- Windows and Android now share SQLite schema 12. Local keys use transparent platform device wrapping, and ordinary startup no longer asks for a Cloud data-protection password.
+- Cloud uses a random account data-key envelope. The protection password is used transiently only for setup, change, reset, upload, download, and explicit recovery. A password change rewraps the same key without re-encrypting Host/AI business ciphertext.
+- Adding either Agent or SSH hosts must first complete real SSH negotiation, host-key verification, and authentication. Only then are host, mode, credential, and trust committed atomically; failure leaves no partial host.
+- Ordinary deletion removes only local host, credential, trust, and related state. It never connects to the server or removes a remote agent, authorized key, tmux session, or server data.
+- Android restores the AI tool-loop limit with a `1..=200` range, a default of `30`, and local SQLite persistence, including cold-start restoration after force-stop.
+- Fixed Cloud registration in Traditional Chinese and other UI languages, and separated deterministic input/auth/conflict/rate-limit errors from service unavailability.
+- All four Windows agent/tmux resources are embedded. Install directories contain no `resources` folder or runtime DLL, and the portable ZIP contains a single EXE.
+- Production assets are exactly three Windows packages—NSIS, MSI, and portable ZIP—and one Android arm64 APK. The Linux client remains frozen, and Android produces or uploads no AAB.
 
 ## Current Capabilities
 
-- Windows and Android can persistently enable or disable Startup Password Protection. Both changes verify the current data-protection password in a dialog; disabling it auto-enters on the next cold start without changing local or Cloud data.
-- Creation Cloud provides accounts, device sessions, and manual sync. Host credentials and AI-provider Key/Token values, API endpoints, and model bindings are encrypted only by trusted clients; Cloud cannot read or use them.
+- Windows and Android transparently wrap local keys using platform device capabilities. The Cloud data-protection password is not involved in startup, SSH, AI, or ordinary use.
+- Creation Cloud provides accounts, device sessions, and manual sync. Host credentials and AI-provider Key/Token values, API endpoints, and model bindings are encrypted by the account data key; Cloud cannot read or use them.
 - AI supports multiple local provider accounts and model bindings. Conversations and five-layer memory remain local and are never synchronized.
 - AI permissions remain View, Edit, and Full Access and are independent from Global, Project, and Host scope. Canonical raw events and five-layer memory remain available when switching models.
 - Ordinary scoped summaries use the shared cognition snapshot directly. Full original conversations are read only in explicit exact-evidence mode, and cognition recall never grants remote execution authority.
 - Shared Rust orchestration handles transient AI retries and durably records each retry schedule before emitting it. A stop request can cancel the wait.
 - Broadcast execution can mix Agent and native SSH hosts with common per-host results, isolation, and confirmation behavior.
 - Windows installers, portable builds, and direct execution all use the adjacent `data` directory; file drag-out and download recovery remain inside the same isolated data root.
-- Windows Frost, the compact host rail, real latency, and image messages, plus Android scoped AI and image messages, are included in `v0.7.6`.
+- Windows Frost, the compact host rail, real latency, and image messages, plus Android scoped AI and image messages, remain included in `v0.7.7`.
 - Windows terminal right-click takes over only to copy an existing selection. With no selection, it preserves the remote terminal's right-click behavior.
 - Windows and Android provide Contact Us cards for WeChat, QQ group, and WhatsApp, plus a compact mobile AI toolbar.
 - Fixed data-protection cold start and forgot-password reset, empty-cloud download previews, live AI configuration refresh, and host-monitor status projection.
@@ -48,33 +49,33 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 
 ## Android First
 
-The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.6` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
+The same hosts and tmux sessions can continue across desktop and phone. Android `v0.7.7` ships one arm64 APK. No AAB is generated or uploaded, and x86_64 emulator test builds remain private.
 
 ## Download
 
 | Platform | Recommended download | Other production assets |
 | --- | --- | --- |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/C-SSH_0.7.6_android-arm64.apk) | No AAB for this release |
-| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.6/Creation-SSH_0.7.6_portable-Windows-x64.zip) |
+| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.7/C-SSH_0.7.7_android-arm64.apk) | No AAB for this release |
+| Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.7/Creation-SSH_0.7.7_x64-setup.exe) | [MSI](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.7/Creation-SSH_0.7.7_x64_en-US.msi) · [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.7.7/Creation-SSH_0.7.7_portable-Windows-x64.zip) |
 
 ### SHA256
 
-- `E996FEE3EABDBFA4EBEF1C6E429264B17FFB51972CD807E8AFF764F9432C4D48`  `Creation-SSH_0.7.6_x64-setup.exe`
-- `BF246971DBE5C0A1190EC940E715D9D1752E66D35FF141E76AADB1E427379627`  `Creation-SSH_0.7.6_x64_en-US.msi`
-- `C43A7006524F5E0C0AC53C9720F7945160D39614969E05B413329F9FDAC8230B`  `Creation-SSH_0.7.6_portable-Windows-x64.zip`
-- `84A9CA3C71582AC28C6A3468502290611788F2B281AB0A49C32A516626D4996D`  `C-SSH_0.7.6_android-arm64.apk`
+- `DBFFE88A5A2DCC59A0AF463EF9A16520E3B207717DF8DA9A313095C4038FB513`  `Creation-SSH_0.7.7_x64-setup.exe`
+- `F80767097D2BB3F0422B8652C7C45349F9882797240805AE7982840EA883CD57`  `Creation-SSH_0.7.7_x64_en-US.msi`
+- `4C44A98EF6655F66C2FE76926D951536678CFD36F57D7119755DA529FA8E7252`  `Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- `C1321415BC0CF0AB4D9188D8DFDD5947E68E49CB9950C056C60584291D79E5B4`  `C-SSH_0.7.7_android-arm64.apk`
 
 Linux client development is discontinued and frozen. Historical source and historical releases remain available only as records.
 
-See the [v0.7.6 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.6) for downloads and release notes, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
+See the [v0.7.7 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.7.7) for downloads and release notes, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
 ## Delivered Platforms
 
-| Platform | Delivered in `v0.7.6` |
+| Platform | Delivered in `v0.7.7` |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as EXE, MSI, and portable ZIP |
-| iOS / macOS | **Not released** and not part of the `v0.7.6` delivery |
+| iOS / macOS | **Not released** and not part of the `v0.7.7` delivery |
 
 The Linux client is no longer developed, tested, built, or released. The server-side Linux agent is not a Linux client.
 
@@ -84,13 +85,13 @@ The Linux client is no longer developed, tested, built, or released. The server-
 
 | Page | What it does |
 | --- | --- |
-| Hosts | Add, edit, and hard-delete hosts; clear attributable local state on deletion; install or update/repair the agent; enter terminal, monitoring, and system management |
+| Hosts | Add hosts only after real SSH authentication; edit hosts; delete local state while explicitly retaining remote state; install or update/repair the agent; enter terminal, monitoring, and system management |
 | Terminal | Switch between reconnectable tmux sessions and standard SSH PTY; manage windows, font, sizing, scrolling, copy, and mobile shortcut keys |
 | Files | Browse, edit, create, rename, and delete remote files; use Android SAF for single-file upload or download destinations with chunking, resume, and integrity checks |
 | Monitoring | View CPU, memory, disk, network, disk I/O, and top processes; background multi-host collection settings persist in local SQLite |
 | AI assistant | Select host, model, permission profile, history, and context; tool execution is governed by permissions and confirmation |
 | System management | Inspect system facts, processes, and firewall ports; confirm actions such as process termination and SSH password changes |
-| Me / login gate | Manage language, theme, version, updates, and local security; a configured login password unlocks the local vault at startup |
+| Me / settings | Manage language, theme, version, updates, transparent local protection, and the optional Creation Cloud account |
 
 ### Android Product Screenshots
 
@@ -102,7 +103,7 @@ These screenshots come from the `v0.7.5` Android test UI and use only RFC 5737, 
 <img width="360" src="screenshots/mobile-hosts.png" alt="Android host management" />
 </div>
 
-View connectivity and agent deployment status in one place, install or update/repair the agent, then add, edit, or hard-delete hosts. Hard deletion ends the host's local lifecycle, so adding the same ID or address later still creates a new host without inherited data.
+View connectivity and agent deployment status in one place, install or update/repair the agent, then add, edit, or delete hosts. Adding requires real SSH authentication first. Deletion ends only the local lifecycle and explicitly leaves the remote agent, authorized key, tmux sessions, and data intact. Adding the same ID or address later creates a new host without inherited data.
 
 #### Persistent And Standard Terminals
 
@@ -224,13 +225,13 @@ Create an independent temporary SSH access key for a selected host, with the pri
 <img width="920" src="screenshots/settings.png" alt="Desktop settings" />
 </div>
 
-Configure system-language following, local login and vault protection, AI providers, appearance, and monitoring collection in one place. Windows business state uses the adjacent `data` directory, while the master key and related platform material remain in Credential Manager.
+Configure system-language following, the optional Creation Cloud account, AI providers, appearance, and monitoring collection in one place. Windows business state uses the adjacent `data` directory, while local keys are transparently wrapped by platform device capabilities.
 
 ## Security Boundaries
 
-- Private keys and passwords stay in the current device's local encrypted vault. They are not uploaded to servers or a C-SSH cloud; C-SSH does not provide a hosted credential service.
+- Private keys and passwords first stay in the current device's local encrypted vault. Only an explicit manual sync uploads opaque ciphertext encrypted by the account data key; Creation Cloud cannot read or use those secrets.
 - The agent is reached through an SSH tunnel and listens only on a server-local Unix socket. It exposes no extra public port and runs as the current SSH login identity without self-elevation.
-- Host-key anomalies stop the connection, and destructive actions require explicit confirmation. An unreachable host allows local-only deletion only before remote cleanup begins; once remote state is involved, uncertain ownership or incomplete cleanup fails closed.
+- Host-key anomalies stop the connection, and a host is stored only after SSH authentication succeeds. Deletion requires explicit confirmation but removes only local state and never connects to or cleans the remote server; remote uninstall is a separate user action.
 - Port forwarding binds to `127.0.0.1` by default. Users who choose another listen address are responsible for evaluating LAN exposure.
 - AI tools are controlled by permission profiles and execution confirmation. When a third-party AI provider is used, selected conversations and context are processed under that provider's terms.
 

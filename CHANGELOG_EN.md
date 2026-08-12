@@ -4,6 +4,41 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.7.7 - Account-Level Encrypted Sync And Safe Host Add/Delete
+
+> Protocol remains 13. Windows and Android now share SQLite schema 12. Production assets are exactly three Windows packages and one Android arm64 APK. The Linux client remains frozen with no Linux artifact, and no AAB is generated or uploaded.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.7.7_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.7.7_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.7.7_android-arm64.apk`
+
+### Added And Changed
+- Cloud data protection now uses one random account data-key envelope. The protection password is used transiently only for setup, change, known-password reset, upload, download, and explicit recovery. Startup, local SSH, AI, and ordinary use no longer ask for it.
+- Windows and Android share schema 12, transparent local device wrapping, and the same manual-sync contract. A password change rewraps the same account data key without re-encrypting Host/AI business ciphertext.
+- Adding a host must first complete real SSH negotiation, host-key verification, and authentication using the frozen address, port, user, and credential. Only then are the host, mode, credential, and trust committed atomically; failure writes nothing.
+- Deleting a host stops local activity and atomically removes local host, credential, trust, and related state. It does not connect through Agent/SSH or remove a remote agent, authorized key, tmux session, or server data.
+- Android restores the AI tool-loop limit in the parameter sheet, with a `1..=200` range, a default of `30`, local SQLite persistence, and cold-start restoration.
+- All four Windows agent/tmux resources are embedded in the EXE. Install directories no longer contain a `resources` folder or runtime DLL, and the portable ZIP contains a single EXE.
+
+### Fixed
+- Fixed Cloud registration failures when the UI language was Traditional Chinese or another locale outside `zh-CN/en`, and separated deterministic 4xx responses from service-unavailable errors.
+- Fixed the Android tool-loop value reverting to its default after force-stop.
+- Fixed hosts being stored before SSH connection/authentication succeeded, and fixed ordinary deletion attempting remote cleanup.
+
+### Verified
+- Windows production background clicks: an unreachable SSH target remained `0→0`; a controlled SSH fixture produced one connect and one authentication before `0→1`; final deletion produced `1→0` with SSH events remaining `0→0`, and the user's local key was unchanged.
+- Android MuMu background clicks proved that an unreachable host is not stored and that a tool-loop value of `200` remains `200` after force-stop and cold start.
+- Production Creation Cloud 0046 cross-device verification covered Windows Host+AI upload, Android download, password change, Windows reconciliation with the new password, and reset clearing Cloud data while preserving Android-local Host+AI data.
+- All four assets were checked by version, filename, and SHA256. Windows embedded-resource gates, Android arm64 ABI/v2 single-signer checks, and zero AAB all passed.
+
+### SHA256
+- `DBFFE88A5A2DCC59A0AF463EF9A16520E3B207717DF8DA9A313095C4038FB513`  `Creation-SSH_0.7.7_x64-setup.exe`
+- `F80767097D2BB3F0422B8652C7C45349F9882797240805AE7982840EA883CD57`  `Creation-SSH_0.7.7_x64_en-US.msi`
+- `4C44A98EF6655F66C2FE76926D951536678CFD36F57D7119755DA529FA8E7252`  `Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- `C1321415BC0CF0AB4D9188D8DFDD5947E68E49CB9950C056C60584291D79E5B4`  `C-SSH_0.7.7_android-arm64.apk`
+
 ## v0.7.6 - Per-Data Protection And Three-Scope AI
 
 > Protocol remains 13. Windows uses SQLite schema 11, while Android creates only fresh schema 10. Production assets are exactly three Windows packages and one Android arm64 APK. The Linux client remains frozen with no Linux artifact, and no AAB is generated or uploaded.

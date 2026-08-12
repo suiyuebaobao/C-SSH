@@ -4,6 +4,41 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.7.7 - 账号级加密同步与主机安全新增/删除
+
+> 协议保持 13；Windows 与 Android 统一使用 SQLite schema 12。正式资产恰好为 Windows 三项与 Android arm64 APK 一项；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.7_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.7_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.7_android-arm64.apk`
+
+### 新增与调整
+- Cloud 数据保护改为账号级随机数据密钥 envelope。保护密码只在设置、修改、已知密码清空、上传、下载与显式恢复时短暂使用；普通启动、本机 SSH、AI 与日常操作不再要求 Cloud 保护密码。
+- Windows 与 Android 共用 schema 12、本机无感 device wrapper 和同一手动同步合同；改密只重包同一账号数据密钥，不重加密 Host/AI 业务密文。
+- 新增主机必须先用冻结的 IP、端口、用户名与凭据完成真实 SSH 握手、主机密钥校验和认证，成功后才原子保存主机、模式、凭据与 trust；失败零写。
+- 删除主机只停止本机活动并原子清除本机主机、凭据、trust 与关联状态，不连接 Agent/SSH，不卸载远端 agent，也不删除远端公钥、tmux 或数据。
+- Android AI 参数抽屉恢复工具循环上限，范围 `1..=200`、默认 `30`，使用本机 SQLite 持久化并在冷启动后恢复。
+- Windows 四份 agent/tmux 资源全部内嵌到 EXE；安装目录不再携带 `resources` 或运行时 DLL，便携 ZIP 只包含单一 EXE。
+
+### 修复
+- 修复繁体中文等非 `zh-CN/en` 界面语言注册 Cloud 账号时被服务端拒绝的问题，并把确定性 4xx 与服务不可用错误分开显示。
+- 修复 Android 工具循环输入值在强制停止后恢复默认值的问题。
+- 修复新增主机在 SSH 未连接或认证失败时仍可写入本机的问题，以及普通删除错误尝试连接远端的问题。
+
+### 验证
+- Windows 正式后台真实点击验证：不可达 SSH 新增保持 `0→0`；受控 SSH 仅一次连接与一次认证后新增 `0→1`；最终删除 `1→0`，删除期间 SSH 事件 `0→0`，用户本机密钥不变。
+- Android MuMu 后台真实点击验证不可达主机不会写入；工具循环设为 `200` 后 force-stop 冷启动仍为 `200`。
+- 正式 Creation Cloud 0046 跨设备验证覆盖 Windows 上传 Host+AI、Android 下载、改密、Windows 新密收敛，以及 reset 后 Cloud 清空而 Android 本机 Host+AI 保留。
+- 四项资产均核对版本、名称和 SHA256；Windows 内嵌资源、Android arm64 ABI/v2 单签名与无 AAB 均通过。
+
+### SHA256
+- `DBFFE88A5A2DCC59A0AF463EF9A16520E3B207717DF8DA9A313095C4038FB513`  `Creation-SSH_0.7.7_x64-setup.exe`
+- `F80767097D2BB3F0422B8652C7C45349F9882797240805AE7982840EA883CD57`  `Creation-SSH_0.7.7_x64_en-US.msi`
+- `4C44A98EF6655F66C2FE76926D951536678CFD36F57D7119755DA529FA8E7252`  `Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- `C1321415BC0CF0AB4D9188D8DFDD5947E68E49CB9950C056C60584291D79E5B4`  `C-SSH_0.7.7_android-arm64.apk`
+
 ## v0.7.6 - 数据实例保护与三作用域 AI
 
 > 协议保持 13；Windows SQLite 为 schema 11，Android 只建立 fresh schema 10。正式资产恰好为 Windows 三项与 Android arm64 APK 一项；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
