@@ -4,6 +4,34 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.8.3 - Announcements, Version Control, Automatic Updates, And Safe Data Migration
+
+> Protocol is 14, and Windows and Android share SQLite schema 15. Production assets are exactly Windows NSIS, MSI, portable ZIP, and one Android arm64 APK. There is no Linux client artifact, and no AAB is generated or uploaded.
+
+### Downloads
+- Windows installer: `Creation-SSH_0.8.3_x64-setup.exe`
+- Windows MSI: `Creation-SSH_0.8.3_x64_en-US.msi`
+- Windows portable: `Creation-SSH_0.8.3_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.8.3_android-arm64.apk`
+
+### Added And Changed
+- At startup, clients obtain announcements, version details, downloads, and update policy from one Creation Cloud response. Announcements use one modal with Normal, Important, or Critical priority.
+- Administrators can retire selected old versions or force them to a selected stable release. Policy can compare only the version or also verify the current installed-file SHA-256.
+- Windows downloads, verifies, safely exits, replaces, and restarts automatically. Android updates through the system installer and shows OS confirmation only when required.
+- Schema 12→15 uses Copy-on-Migrate: only a database copy is migrated; hosts, credentials, known_hosts, groups, snippets, AI/Cloud data, and required settings remain intact, while failure leaves the original database unchanged.
+- Creation-Log uses an independent diagnostics database and is off by default. Collection starts only after the user enables it, and the database is not created or opened while disabled.
+
+### Verified
+- Windows NSIS, MSI, and Portable each passed the formal install/replace/restart, data-retention, and cleanup gates.
+- Android passed the existing real-app, real-SSH, Agent, UI, SQLite, and arm64 artifact gates. We do not present an x86_64 emulator's inability to run the arm64 bootstrap as a passed automatic-update test.
+- All four production assets were checked by version, filename, size, and SHA256. Windows updater signatures are carried as Creation Cloud metadata and do not add public assets.
+
+### SHA256
+- `87DC4A7F07DD39B2D4764BE00DA1726BD8F50437F9ED8F172E7E931AAC254BE5`  `Creation-SSH_0.8.3_x64-setup.exe`
+- `0D1BC658622B456F1AFC32066C2B6CA1D8D34813896989203637C64C8D03A8AA`  `Creation-SSH_0.8.3_x64_en-US.msi`
+- `333DB9499D851450561995ADA2A982502434027865F66867A524B2D4C20610A8`  `Creation-SSH_0.8.3_portable-Windows-x64.zip`
+- `77D383471B1D122100B37C24F4FDA5DC3732FFC9A412C994C12B944C115651CE`  `C-SSH_0.8.3_android-arm64.apk`
+
 ## v0.7.7 - Account-Level Encrypted Sync And Safe Host Add/Delete
 
 > Protocol remains 13. Windows and Android now share SQLite schema 12. Production assets are exactly three Windows packages and one Android arm64 APK. The Linux client remains frozen with no Linux artifact, and no AAB is generated or uploaded.

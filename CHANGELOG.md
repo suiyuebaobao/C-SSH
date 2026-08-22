@@ -4,6 +4,34 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.8.3 - 公告、版本控制、自动更新与安全数据迁移
+
+> 协议为 14；Windows 与 Android 统一使用 SQLite schema 15。正式资产恰好为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK 四项；不发布 Linux 客户端制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.8.3_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.8.3_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.8.3_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.8.3_android-arm64.apk`
+
+### 新增与调整
+- 客户端启动时通过 Creation Cloud 统一取得公告、版本、下载和更新策略；公告按普通、重要、紧急三档以整体弹窗显示。
+- 管理端可停用指定旧版本或强制更新到指定稳定版；策略可只比较版本号，也可启用当前安装身份 SHA-256 核对。
+- Windows 自动下载、验签、安全退出、替换并重启；Android 通过系统安装器更新，系统要求时显示系统确认。
+- schema 12→15 使用 Copy-on-Migrate：只迁移数据库副本，主机、凭据、known_hosts、分组、片段、AI/Cloud 数据与必要设置保持一致；失败时原库不变。
+- Creation-Log 使用独立诊断数据库，默认关闭；用户手动开启后才采集，关闭时不建立或打开诊断库。
+
+### 验证
+- Windows NSIS、MSI 与 Portable 分别通过正式安装／替换／重启、数据保留和清场门禁。
+- Android 已通过既有真 App、真 SSH、Agent、UI、SQLite 与 arm64 制品门禁；不把 x86_64 模拟器无法运行 arm64 引导包的结果冒充为自动更新通过。
+- 四项正式资产均按版本、名称、大小和 SHA256 核对；Windows 更新签名由 Creation Cloud 元数据承载，不新增公开资产。
+
+### SHA256
+- `87DC4A7F07DD39B2D4764BE00DA1726BD8F50437F9ED8F172E7E931AAC254BE5`  `Creation-SSH_0.8.3_x64-setup.exe`
+- `0D1BC658622B456F1AFC32066C2B6CA1D8D34813896989203637C64C8D03A8AA`  `Creation-SSH_0.8.3_x64_en-US.msi`
+- `333DB9499D851450561995ADA2A982502434027865F66867A524B2D4C20610A8`  `Creation-SSH_0.8.3_portable-Windows-x64.zip`
+- `77D383471B1D122100B37C24F4FDA5DC3732FFC9A412C994C12B944C115651CE`  `C-SSH_0.8.3_android-arm64.apk`
+
 ## v0.7.7 - 账号级加密同步与主机安全新增/删除
 
 > 协议保持 13；Windows 与 Android 统一使用 SQLite schema 12。正式资产恰好为 Windows 三项与 Android arm64 APK 一项；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
