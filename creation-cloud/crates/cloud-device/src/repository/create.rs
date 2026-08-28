@@ -6,6 +6,7 @@ use cloud_store::PgPool;
 use uuid::Uuid;
 
 use crate::{
+    MAX_ACTIVE_DEVICES_PER_ACCOUNT,
     model::{CreateDeviceOutcome, Device, DeviceRow, DeviceSessionView},
     session,
 };
@@ -27,6 +28,8 @@ pub(crate) const INSERT_DEVICE_SESSION_SQL: &str = "INSERT INTO sessions \
       expires_at, absolute_expires_at, rotated_from_id, last_login_ip, user_agent, \
       client_version, device_fingerprint) \
      VALUES ($1, $2, $3, $4, 'device', $5, $6, $7, $8, $9::inet, $10, $11, $12)";
+pub(crate) const COUNT_ACTIVE_DEVICES_SQL: &str =
+    "SELECT count(*)::BIGINT FROM devices WHERE account_id = $1 AND revoked_at IS NULL";
 
 type AccountRow = (
     Uuid,
@@ -115,6 +118,16 @@ pub(crate) async fn bind(
         None => {
             if active_session.0.is_some() {
                 return Err(AppError::Conflict("当前会话已绑定其它设备".to_owned()));
+            }
+            let active_device_count = sqlx::query_scalar::<_, i64>(COUNT_ACTIVE_DEVICES_SQL)
+                .bind(current_session.account_id)
+                .fetch_one(&mut *transaction)
+                .await
+                .map_err(error::storage)?;
+            if active_device_count >= MAX_ACTIVE_DEVICES_PER_ACCOUNT {
+                return Err(AppError::Conflict(
+                    "账号的活动设备数量已达到上限".to_owned(),
+                ));
             }
             let row = sqlx::query_as::<_, DeviceRow>(
                 "INSERT INTO devices \

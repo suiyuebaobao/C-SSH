@@ -334,6 +334,7 @@ dependencies = [
  "chrono",
  "cloud-auth",
  "cloud-domain",
+ "cloud-notification",
  "cloud-store",
  "serde",
  "serde_json",
@@ -367,6 +368,7 @@ dependencies = [
  "axum",
  "chrono",
  "cloud-domain",
+ "cloud-notification",
  "cloud-store",
  "hex",
  "rand 0.9.5",
@@ -397,6 +399,7 @@ dependencies = [
  "axum",
  "chrono",
  "cloud-domain",
+ "cloud-notification",
  "cloud-store",
  "hex",
  "rand 0.9.5",
@@ -467,8 +470,10 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "cloud-domain",
+ "cloud-notification",
  "cloud-store",
  "http",
+ "rand 0.9.5",
  "serde",
  "serde_json",
  "sha2",
@@ -508,6 +513,21 @@ dependencies = [
  "tokio",
  "tower",
  "url",
+ "uuid",
+]
+
+[[package]]
+name = "cloud-notification"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "cloud-domain",
+ "cloud-store",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
  "uuid",
 ]
 
@@ -658,6 +678,7 @@ dependencies = [
  "cloud-feedback",
  "cloud-host",
  "cloud-model",
+ "cloud-notification",
  "cloud-release",
  "cloud-seo",
  "cloud-site",
@@ -764,6 +785,7 @@ dependencies = [
  "cloud-host",
  "cloud-maintenance",
  "cloud-model",
+ "cloud-notification",
  "cloud-release",
  "cloud-seo",
  "cloud-site-content",

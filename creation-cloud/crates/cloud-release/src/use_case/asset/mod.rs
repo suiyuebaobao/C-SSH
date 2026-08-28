@@ -3,6 +3,7 @@
 pub(crate) mod create;
 mod delete;
 mod get;
+pub(crate) mod installed_identity;
 mod list;
 mod list_all;
 mod update;

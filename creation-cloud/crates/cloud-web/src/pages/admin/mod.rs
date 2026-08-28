@@ -8,6 +8,7 @@ pub(crate) mod devices;
 pub(crate) mod feedback;
 pub(crate) mod hosts;
 pub(crate) mod models;
+pub(crate) mod notifications;
 pub(crate) mod overview;
 pub(crate) mod releases;
 pub(crate) mod seo;

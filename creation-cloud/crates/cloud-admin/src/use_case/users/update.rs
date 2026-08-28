@@ -1,6 +1,7 @@
 //! 在同一事务和管理员行锁内执行账号资料更新、策略保护与语义审计。
 
 use cloud_domain::{AdminActor, AppError, AppResult, mark_semantic_audit_recorded};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use uuid::Uuid;
 
 use crate::{
@@ -83,6 +84,14 @@ impl Service {
             "user.admin_update",
         )
         .await?;
+        if password_hash.is_some() {
+            record_account_event(
+                &mut transaction,
+                account_id,
+                AccountNotificationEvent::PasswordChanged,
+            )
+            .await?;
+        }
         transaction
             .commit()
             .await

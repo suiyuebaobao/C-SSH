@@ -4,6 +4,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use uuid::Uuid;
 
+mod protection;
+
+pub use protection::*;
+
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum HostStatus {
@@ -140,6 +144,8 @@ pub struct AiProviderChange {
 #[serde(deny_unknown_fields)]
 pub struct PushRequest {
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
     pub base_revision: i64,
     pub client_mutation_id: Uuid,
     pub host_changes: Vec<HostChange>,
@@ -158,6 +164,8 @@ pub struct ResourceRevision {
 pub enum PushOutcome {
     Applied {
         sync_generation: i64,
+        protection_epoch: i64,
+        protection_revision: i64,
         revision: i64,
         changed_count: u32,
         revisions: Vec<ResourceRevision>,
@@ -165,6 +173,8 @@ pub enum PushOutcome {
     },
     Unchanged {
         sync_generation: i64,
+        protection_epoch: i64,
+        protection_revision: i64,
         revision: i64,
         revisions: Vec<ResourceRevision>,
         idempotent: bool,
@@ -179,10 +189,23 @@ pub enum PullMode {
     Full,
 }
 
+/// A required pull intent. Preview is strictly read-only; download and
+/// verification pulls create the delivery evidence required by a later ACK.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PullPurpose {
+    Preview,
+    Download,
+    Verification,
+}
+
 #[derive(Clone, Copy, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PullRequest {
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
+    pub purpose: PullPurpose,
     #[serde(default)]
     pub since_revision: i64,
     #[serde(default)]
@@ -199,6 +222,9 @@ impl Default for PullRequest {
     fn default() -> Self {
         Self {
             sync_generation: 1,
+            protection_epoch: 1,
+            protection_revision: 1,
+            purpose: PullPurpose::Download,
             since_revision: 0,
             mode: PullMode::Incremental,
             snapshot_revision: None,
@@ -239,6 +265,9 @@ pub struct PullAiProviderRecord {
 #[derive(Clone, Debug, Serialize)]
 pub struct PullResponse {
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
+    pub purpose: PullPurpose,
     pub mode: PullMode,
     pub host_records: Vec<PullHostRecord>,
     pub ai_records: Vec<PullAiProviderRecord>,
@@ -276,6 +305,8 @@ pub struct PullDecision {
 #[serde(deny_unknown_fields)]
 pub struct PullAckRequest {
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
     pub acknowledged_revision: i64,
     pub decisions: Vec<PullDecision>,
 }
@@ -284,6 +315,8 @@ pub struct PullAckRequest {
 #[serde(rename_all = "snake_case")]
 pub enum SyncGenerationTransition {
     Initial,
+    ProtectionSetup,
+    LegacyMigration,
     Rekey,
     Reset,
 }
@@ -291,9 +324,13 @@ pub enum SyncGenerationTransition {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 pub struct SyncStateView {
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
     pub current_revision: i64,
     pub compacted_through_revision: i64,
     pub generation_transition: SyncGenerationTransition,
+    pub data_protection_configured: bool,
+    pub legacy_migration_required: bool,
     pub secret_present: bool,
 }
 
@@ -303,18 +340,27 @@ pub enum ResetConfirmation {
     ResetEncryptedSyncData,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ResetSyncRequest {
     pub mutation_id: Uuid,
     pub sync_generation: i64,
+    pub expected_epoch: i64,
+    pub expected_revision: i64,
+    pub current_revision: i64,
     pub confirmation: ResetConfirmation,
+    pub authorization: ResetAuthorization,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct ResetSyncResponse {
     pub status: String,
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
+    pub current_revision: i64,
+    pub data_protection_configured: bool,
+    pub idempotent: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]

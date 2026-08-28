@@ -30,6 +30,7 @@ pub struct PublicAsset {
     pub file_name: String,
     pub byte_size: i64,
     pub sha256: String,
+    pub updater_signature: Option<String>,
     pub sources: Vec<PublicSource>,
 }
 
@@ -59,6 +60,7 @@ pub(crate) struct PublicCatalogRow {
     pub file_name: String,
     pub byte_size: i64,
     pub sha256: String,
+    pub updater_signature: Option<String>,
     pub source_id: Uuid,
     pub source_kind: String,
     pub provider_name: String,

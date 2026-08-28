@@ -66,6 +66,24 @@ impl VerificationMailer for SmtpVerificationMailer {
     }
 }
 
+impl cloud_host::ProtectionResetMailer for SmtpVerificationMailer {
+    fn send_protection_reset<'a>(
+        &'a self,
+        email: &'a str,
+        code: &'a str,
+    ) -> cloud_host::ProtectionResetMailerFuture<'a> {
+        Box::pin(async move {
+            self.send_named(
+                email,
+                code,
+                "Creation-SSH 数据保护清空验证码",
+                "清空 Cloud 数据保护",
+            )
+            .await
+        })
+    }
+}
+
 impl SmtpVerificationMailer {
     async fn send(
         &self,
@@ -73,9 +91,6 @@ impl SmtpVerificationMailer {
         code: &str,
         purpose: VerificationPurpose,
     ) -> AppResult<()> {
-        let recipient = recipient
-            .parse::<Mailbox>()
-            .map_err(|_| AppError::Validation("收件邮箱地址无效".to_owned()))?;
         let subject = match purpose {
             VerificationPurpose::Registration => "Creation-SSH 邮箱验证码",
             VerificationPurpose::Login => "Creation-SSH 登录验证码",
@@ -86,6 +101,19 @@ impl SmtpVerificationMailer {
             VerificationPurpose::Login => "登录",
             VerificationPurpose::PasswordReset => "找回密码",
         };
+        self.send_named(recipient, code, subject, action).await
+    }
+
+    async fn send_named(
+        &self,
+        recipient: &str,
+        code: &str,
+        subject: &str,
+        action: &str,
+    ) -> AppResult<()> {
+        let recipient = recipient
+            .parse::<Mailbox>()
+            .map_err(|_| AppError::Validation("收件邮箱地址无效".to_owned()))?;
         let message = Message::builder()
             .from(self.from.clone())
             .to(recipient)

@@ -26,6 +26,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let device_service = services.device.clone();
     let host_service = services.host.clone();
     let model_service = services.model.clone();
+    let notification_service = services.notification.clone();
     let download_service = services.download.clone();
     let seo_topic_service = services.seo.clone();
     let site_content_service = services.site_content.clone();
@@ -103,6 +104,10 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/maintenance",
             cloud_maintenance::management_router(services.maintenance.clone()),
         )
+        .nest(
+            "/notifications",
+            cloud_notification::management_router(notification_service.clone()),
+        )
         .merge(cloud_device::management_router(device_service.clone()))
         .layer(middleware::from_fn(cloud_auth::require_csrf))
         .layer(middleware::from_fn_with_state(
@@ -124,6 +129,10 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             cloud_download::account_router(download_service.clone()),
         )
         .nest("/feedback", cloud_feedback::user_router(feedback_service))
+        .nest(
+            "/notifications",
+            cloud_notification::account_router(notification_service),
+        )
         .layer(middleware::from_fn(cloud_auth::require_csrf))
         .route_layer(middleware::from_fn_with_state(
             auth_service.clone(),
@@ -263,7 +272,9 @@ mod tests {
 
     use super::*;
 
+    mod notification_route_tests;
     mod sync_route_tests;
+    mod update_route_tests;
 
     fn app() -> Router {
         let pool = sqlx::postgres::PgPoolOptions::new()

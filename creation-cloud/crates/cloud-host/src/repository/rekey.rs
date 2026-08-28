@@ -190,6 +190,24 @@ pub(crate) async fn rekey(
 
     purge_prior_ciphertext_versions(&mut tx, actor.account_id(), state.current_revision).await?;
     clear_stale_sync_state(&mut tx, actor.account_id()).await?;
+    // 0046 binds a configured envelope to the exact synchronization identity.
+    // Rekey advances only the synchronization generation, so move an existing
+    // envelope in the same transaction before the deferred identity FK is
+    // checked at commit. Legacy accounts without an envelope remain unchanged.
+    sqlx::query(
+        "UPDATE cloud_data_protection_envelopes
+         SET sync_generation = $2, updated_at = now()
+         WHERE account_id = $1 AND sync_generation = $3
+           AND protection_epoch = $4 AND protection_revision = $5",
+    )
+    .bind(actor.account_id())
+    .bind(next_generation)
+    .bind(state.sync_generation)
+    .bind(state.protection_epoch)
+    .bind(state.protection_revision)
+    .execute(&mut *tx)
+    .await
+    .map_err(storage)?;
     sqlx::query(
         "UPDATE cloud_host_sync_states
          SET current_revision = $2, sync_generation = $3, updated_at = now()

@@ -1,11 +1,30 @@
 {% extends "admin.html" %}
 
 {% block admin_content %}
+<section class="admin-section" aria-labelledby="account-notifications-heading">
+  <div class="admin-section-heading"><div><h2 id="account-notifications-heading">{% if is_en %}Send notification{% else %}发送通知{% endif %}</h2><p>{% if is_en %}Choose a user and a message. The client will display it automatically.{% else %}选择用户和通知内容，客户端会自动显示。{% endif %}</p></div></div>
+  <form class="admin-form-grid" hx-post="/admin/account-notifications" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+    <label class="admin-field">{% if is_en %}User ID{% else %}用户 ID{% endif %}<input name="account_id" required maxlength="36" class="admin-mono"></label>
+    <label class="admin-field">{% if is_en %}Message{% else %}通知内容{% endif %}<select name="code" required>
+      <option value="security_review_required">{% if is_en %}Security review required{% else %}安全检查提醒{% endif %}</option>
+      <option value="password_changed">{% if is_en %}Password changed{% else %}密码已修改{% endif %}</option>
+      <option value="device_revoked">{% if is_en %}Device removed{% else %}设备已移除{% endif %}</option>
+      <option value="session_revoked">{% if is_en %}Signed out on a device{% else %}设备登录已退出{% endif %}</option>
+      <option value="sync_review_required">{% if is_en %}Sync needs attention{% else %}同步需要检查{% endif %}</option>
+      <option value="sync_upload_completed">{% if is_en %}Upload completed{% else %}上传完成{% endif %}</option>
+      <option value="sync_download_completed">{% if is_en %}Download completed{% else %}下载完成{% endif %}</option>
+      <option value="sync_reset_completed">{% if is_en %}Sync data reset{% else %}同步数据已重置{% endif %}</option>
+    </select></label>
+    <label class="admin-field">{% if is_en %}Importance{% else %}重要程度{% endif %}<select name="priority"><option value="normal">{% if is_en %}Normal{% else %}一般{% endif %}</option><option value="important">{% if is_en %}Important{% else %}重要{% endif %}</option><option value="critical">{% if is_en %}Critical{% else %}紧急{% endif %}</option></select></label>
+    <button class="button button-primary" type="submit">{% if is_en %}Send notification{% else %}发送通知{% endif %}</button>
+  </form>
+</section>
 <section class="admin-section" aria-labelledby="announcements-heading">
   <div class="admin-section-heading">
     <div>
       <h2 id="announcements-heading">{% if is_en %}Announcements{% else %}公告管理{% endif %}</h2>
-      <p>{% if is_en %}Create and publish the single global announcement returned by the public API.{% else %}新增、编辑并发布公开接口返回的全局公告。{% endif %}</p>
+      <p>{% if is_en %}Clients only receive the latest announcement. Older announcements remain here as history.{% else %}客户端只接收最新公告，历史公告保留在这里查看。{% endif %}</p>
     </div>
   </div>
 
@@ -14,6 +33,7 @@
     <form class="admin-form-grid admin-announcement-form" hx-post="/admin/announcements" hx-target="#admin-global-feedback" hx-swap="innerHTML">
       <label class="admin-field">中文标题<input name="title_zh_cn" maxlength="160" required></label>
       <label class="admin-field">English title<input name="title_en" maxlength="160" required></label>
+      <label class="admin-field">{% if is_en %}Importance{% else %}重要程度{% endif %}<select name="priority" required><option value="normal">{% if is_en %}Normal{% else %}一般{% endif %}</option><option value="important">{% if is_en %}Important{% else %}重要{% endif %}</option><option value="critical">{% if is_en %}Critical{% else %}紧急{% endif %}</option></select></label>
       <label class="admin-field">中文内容<textarea name="body_zh_cn" maxlength="10000" required></textarea></label>
       <label class="admin-field">English content<textarea name="body_en" maxlength="10000" required></textarea></label>
       {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
@@ -29,31 +49,34 @@
     <article class="admin-simple-record">
       <div class="admin-simple-record-heading">
         <div><h3>{{ row.title_zh_cn }}</h3><p>{{ row.title_en }}</p></div>
-        <div><span class="status-badge" data-tone="{% if row.status == "published" %}success{% else if row.status == "draft" %}warning{% else %}danger{% endif %}">{% if row.status == "published" %}{% if is_en %}Published{% else %}已发布{% endif %}{% else if row.status == "draft" %}{% if is_en %}Draft{% else %}草稿{% endif %}{% else %}{% if is_en %}Hidden{% else %}已隐藏{% endif %}{% endif %}</span><small>{{ row.updated_at }}</small></div>
+        <div><span class="status-badge" data-tone="{% if row.status == "published" %}success{% else if row.status == "draft" %}warning{% else %}danger{% endif %}">{% if row.status == "published" %}{% if is_en %}Published{% else %}已发布{% endif %}{% else if row.status == "draft" %}{% if is_en %}Draft{% else %}草稿{% endif %}{% else %}{% if is_en %}History{% else %}历史{% endif %}{% endif %}</span><span class="status-badge" data-tone="{% if row.priority == "critical" %}danger{% else if row.priority == "important" %}warning{% else %}success{% endif %}">{% if row.priority == "critical" %}{% if is_en %}Critical{% else %}紧急{% endif %}{% else if row.priority == "important" %}{% if is_en %}Important{% else %}重要{% endif %}{% else %}{% if is_en %}Normal{% else %}一般{% endif %}{% endif %}</span><small>{{ row.updated_at }}</small></div>
       </div>
 
-      {% if row.status == "draft" %}
+      {% if row.status != "draft" %}<div class="admin-simple-copy"><p>{{ row.body_zh_cn }}</p><p>{{ row.body_en }}</p></div>{% endif %}
+
+      {% if row.status == "draft" || row.status == "published" %}
       <details>
         <summary>{% if is_en %}Edit{% else %}编辑{% endif %}</summary>
         <form class="admin-form-grid admin-announcement-form" hx-post="/admin/announcements/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
           <input type="hidden" name="expected_revision" value="{{ row.revision }}">
           <label class="admin-field">中文标题<input name="title_zh_cn" value="{{ row.title_zh_cn }}" maxlength="160" required></label>
           <label class="admin-field">English title<input name="title_en" value="{{ row.title_en }}" maxlength="160" required></label>
+          <label class="admin-field">{% if is_en %}Importance{% else %}重要程度{% endif %}<select name="priority" required><option value="normal"{% if row.priority == "normal" %} selected{% endif %}>{% if is_en %}Normal{% else %}一般{% endif %}</option><option value="important"{% if row.priority == "important" %} selected{% endif %}>{% if is_en %}Important{% else %}重要{% endif %}</option><option value="critical"{% if row.priority == "critical" %} selected{% endif %}>{% if is_en %}Critical{% else %}紧急{% endif %}</option></select></label>
           <label class="admin-field">中文内容<textarea name="body_zh_cn" maxlength="10000" required>{{ row.body_zh_cn }}</textarea></label>
           <label class="admin-field">English content<textarea name="body_en" maxlength="10000" required>{{ row.body_en }}</textarea></label>
           {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-          <button class="button button-secondary" type="submit">{% if is_en %}Save changes{% else %}保存修改{% endif %}</button>
+          <button class="button button-secondary" type="submit">{% if row.status == "published" %}{% if is_en %}Save and apply now{% else %}保存并立即生效{% endif %}{% else %}{% if is_en %}Save changes{% else %}保存修改{% endif %}{% endif %}</button>
         </form>
       </details>
+      {% endif %}
+
+      {% if row.status == "draft" || row.status == "published" %}
       <div class="admin-actions">
+        {% if row.status == "draft" %}
         <form hx-post="/admin/announcements/{{ row.id }}/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this announcement?{% else %}确认发布这条公告？{% endif %}"><input type="hidden" name="expected_revision" value="{{ row.revision }}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button></form>
-        <form hx-post="/admin/announcements/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft?{% else %}确认删除这条草稿？{% endif %}"><input type="hidden" name="expected_revision" value="{{ row.revision }}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button></form>
+        {% endif %}
+        <form hx-post="/admin/announcements/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if row.status == "published" %}{% if is_en %}Remove this published announcement from clients? Clients will stop showing it, and the website will keep a history record.{% else %}删除已发布公告后，客户端将不再显示，网站仍保留历史记录。确认继续？{% endif %}{% else %}{% if is_en %}Permanently delete this draft? It cannot be recovered.{% else %}永久删除这条草稿？删除后无法恢复。{% endif %}{% endif %}"><input type="hidden" name="expected_revision" value="{{ row.revision }}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-danger" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button></form>
       </div>
-      {% else if row.status == "published" %}
-      <div class="admin-simple-copy"><p>{{ row.body_zh_cn }}</p><p>{{ row.body_en }}</p></div>
-      <form hx-post="/admin/announcements/{{ row.id }}/hide" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Hide this announcement?{% else %}确认隐藏这条公告？{% endif %}"><input type="hidden" name="expected_revision" value="{{ row.revision }}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Hide{% else %}隐藏{% endif %}</button></form>
-      {% else %}
-      <div class="admin-simple-copy"><p>{{ row.body_zh_cn }}</p><p>{{ row.body_en }}</p></div>
       {% endif %}
     </article>
   {% endfor %}

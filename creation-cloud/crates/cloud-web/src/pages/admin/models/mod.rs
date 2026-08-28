@@ -11,7 +11,9 @@ use axum::{
     response::Html,
 };
 use cloud_domain::{AppError, AppResult, AuthenticatedSession};
-use cloud_model::{CreateGlobalModelInput, GlobalModel, ModelInterface, ReplaceGlobalModelInput};
+use cloud_model::{
+    CreateGlobalModelInput, GlobalModel, ModelInterface, ReasoningControl, ReplaceGlobalModelInput,
+};
 use cloud_site::{Locale, PageId, SiteView};
 use serde::Deserialize;
 use serde_json::json;
@@ -29,6 +31,8 @@ pub(crate) struct ModelForm {
     pub(crate) openai_model_name: String,
     pub(crate) anthropic_base_url: String,
     pub(crate) anthropic_model_name: String,
+    pub(crate) responses_base_url: String,
+    pub(crate) responses_model_name: String,
     #[serde(default)]
     pub(crate) enabled: bool,
     pub(crate) expected_revision: Option<i64>,
@@ -42,12 +46,15 @@ impl ModelForm {
             self.openai_model_name,
             self.anthropic_base_url,
             self.anthropic_model_name,
+            self.responses_base_url,
+            self.responses_model_name,
         )?;
         Ok(CreateGlobalModelInput {
             name: self.name,
             provider: self.provider,
             context_length: self.context_length,
             interfaces,
+            reasoning_control: ReasoningControl::Unsupported,
             capability_tags: Vec::new(),
             default_parameters: json!({}),
             enabled: self.enabled,
@@ -65,6 +72,8 @@ impl ModelForm {
             self.openai_model_name,
             self.anthropic_base_url,
             self.anthropic_model_name,
+            self.responses_base_url,
+            self.responses_model_name,
         )?;
         Ok(ReplaceGlobalModelInput {
             expected_revision,
@@ -72,6 +81,7 @@ impl ModelForm {
             provider: self.provider,
             context_length: self.context_length,
             interfaces,
+            reasoning_control: ReasoningControl::Unsupported,
             capability_tags: current.capability_tags.clone(),
             default_parameters: current.default_parameters.clone(),
             enabled: self.enabled,
@@ -86,8 +96,10 @@ fn form_interfaces(
     openai_model_name: String,
     anthropic_base_url: String,
     anthropic_model_name: String,
+    responses_base_url: String,
+    responses_model_name: String,
 ) -> AppResult<Vec<ModelInterface>> {
-    let mut interfaces = Vec::with_capacity(2);
+    let mut interfaces = Vec::with_capacity(3);
     push_form_interface(
         &mut interfaces,
         "openai_compatible",
@@ -101,6 +113,13 @@ fn form_interfaces(
         anthropic_base_url,
         anthropic_model_name,
         "Anthropic",
+    )?;
+    push_form_interface(
+        &mut interfaces,
+        "responses_compatible",
+        responses_base_url,
+        responses_model_name,
+        "Responses",
     )?;
     if interfaces.is_empty() {
         return Err(AppError::Validation("至少配置一种模型接口".to_owned()));
@@ -143,6 +162,8 @@ struct ModelRow {
     openai_model_name: String,
     anthropic_base_url: String,
     anthropic_model_name: String,
+    responses_base_url: String,
+    responses_model_name: String,
     interface_count: usize,
     enabled: bool,
     revision: i64,
@@ -159,6 +180,10 @@ impl From<GlobalModel> for ModelRow {
             .interfaces
             .iter()
             .find(|item| item.api_format == "anthropic_compatible");
+        let responses = value
+            .interfaces
+            .iter()
+            .find(|item| item.api_format == "responses_compatible");
         Self {
             id: value.id.to_string(),
             name: value.name,
@@ -168,6 +193,9 @@ impl From<GlobalModel> for ModelRow {
             openai_model_name: openai.map_or_else(String::new, |item| item.model_name.clone()),
             anthropic_base_url: anthropic.map_or_else(String::new, |item| item.base_url.clone()),
             anthropic_model_name: anthropic
+                .map_or_else(String::new, |item| item.model_name.clone()),
+            responses_base_url: responses.map_or_else(String::new, |item| item.base_url.clone()),
+            responses_model_name: responses
                 .map_or_else(String::new, |item| item.model_name.clone()),
             interface_count,
             enabled: value.enabled,
@@ -233,6 +261,8 @@ mod tests {
             openai_model_name: "deepseek-v4-pro".to_owned(),
             anthropic_base_url: "https://api.deepseek.com/anthropic".to_owned(),
             anthropic_model_name: "deepseek-v4-pro".to_owned(),
+            responses_base_url: "https://api.deepseek.com".to_owned(),
+            responses_model_name: "deepseek-v4-pro".to_owned(),
             enabled: true,
             expected_revision: None,
             lang: None,
@@ -241,8 +271,9 @@ mod tests {
         .expect("极简表单应生成模型输入");
         assert_eq!(input.name, "DeepSeek V4 Pro");
         assert_eq!(input.context_length, 1_000_000);
-        assert_eq!(input.interfaces.len(), 2);
+        assert_eq!(input.interfaces.len(), 3);
         assert_eq!(input.interfaces[0].model_name, "deepseek-v4-pro");
+        assert_eq!(input.reasoning_control, ReasoningControl::Unsupported);
         assert!(input.capability_tags.is_empty());
         assert_eq!(input.default_parameters, json!({}));
         assert!(!input.is_default);
@@ -266,7 +297,9 @@ mod tests {
                 openai_model_name: "example-model<script>".to_owned(),
                 anthropic_base_url: "https://api.example.com/anthropic".to_owned(),
                 anthropic_model_name: "example-anthropic".to_owned(),
-                interface_count: 2,
+                responses_base_url: "https://api.example.com/v1".to_owned(),
+                responses_model_name: "example-responses".to_owned(),
+                interface_count: 3,
                 enabled: true,
                 revision: 7,
             }],
@@ -288,8 +321,17 @@ mod tests {
         assert!(body.contains("name=\"openai_model_name\""));
         assert!(body.contains("name=\"anthropic_base_url\""));
         assert!(body.contains("name=\"anthropic_model_name\""));
+        assert!(body.contains("name=\"responses_base_url\""));
+        assert!(body.contains("name=\"responses_model_name\""));
+        assert!(!body.contains("name=\"reasoning_control\""));
+        assert!(!body.contains("Controllable thinking"));
+        assert!(!body.contains("可控思考"));
+        assert!(!body.contains("V3.2"));
+        assert!(!body.contains("K2.5"));
+        assert!(!body.contains("Example model&lt;script&gt;（"));
         assert!(body.contains("openai_compatible"));
         assert!(body.contains("anthropic_compatible"));
+        assert!(body.contains("responses_compatible"));
         assert!(!body.contains("example-model<script>"));
         assert!(body.contains("name=\"context_length\""));
         assert!(!body.contains("name=\"capability_tags\""));

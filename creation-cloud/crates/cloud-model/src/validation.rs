@@ -8,8 +8,8 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::types::{
-    CreateGlobalModelInput, ModelInterface, ReplaceGlobalModelInput, ValidatedInterfaces,
-    ValidatedModel,
+    CreateGlobalModelInput, ModelInterface, ReasoningControl, ReplaceGlobalModelInput,
+    ValidatedInterfaces, ValidatedModel,
 };
 
 const MAX_PARAMETERS_BYTES: usize = 16 * 1024;
@@ -38,6 +38,7 @@ pub(crate) fn create(input: CreateGlobalModelInput) -> AppResult<ValidatedModel>
         input.provider,
         input.context_length,
         input.interfaces,
+        input.reasoning_control,
         input.capability_tags,
         input.default_parameters,
         input.enabled,
@@ -53,6 +54,7 @@ pub(crate) fn replace(input: ReplaceGlobalModelInput) -> AppResult<(i64, Validat
         input.provider,
         input.context_length,
         input.interfaces,
+        input.reasoning_control,
         input.capability_tags,
         input.default_parameters,
         input.enabled,
@@ -68,6 +70,7 @@ fn validate_model(
     provider: String,
     context_length: i32,
     interfaces: Vec<ModelInterface>,
+    _reasoning_control: ReasoningControl,
     capability_tags: Vec<String>,
     default_parameters: Value,
     enabled: bool,
@@ -92,6 +95,7 @@ fn validate_model(
         provider,
         context_length,
         interfaces,
+        reasoning_control: ReasoningControl::Unsupported,
         capability_tags,
         default_parameters,
         enabled,
@@ -101,9 +105,9 @@ fn validate_model(
 }
 
 fn validate_interfaces(values: Vec<ModelInterface>) -> AppResult<ValidatedInterfaces> {
-    if !(1..=2).contains(&values.len()) {
+    if !(1..=3).contains(&values.len()) {
         return Err(AppError::Validation(
-            "interfaces 必须包含 1 到 2 个接口".to_owned(),
+            "interfaces 必须包含 1 到 3 个接口".to_owned(),
         ));
     }
     let mut seen = HashSet::new();
@@ -112,6 +116,8 @@ fn validate_interfaces(values: Vec<ModelInterface>) -> AppResult<ValidatedInterf
         openai_model_name: None,
         anthropic_base_url: None,
         anthropic_model_name: None,
+        responses_base_url: None,
+        responses_model_name: None,
     };
     for value in values {
         let api_format = validate_api_format(value.api_format)?;
@@ -131,6 +137,10 @@ fn validate_interfaces(values: Vec<ModelInterface>) -> AppResult<ValidatedInterf
                 result.anthropic_base_url = Some(base_url);
                 result.anthropic_model_name = Some(model_name);
             }
+            "responses_compatible" => {
+                result.responses_base_url = Some(base_url);
+                result.responses_model_name = Some(model_name);
+            }
             _ => unreachable!("api_format 已由白名单验证"),
         }
     }
@@ -139,11 +149,15 @@ fn validate_interfaces(values: Vec<ModelInterface>) -> AppResult<ValidatedInterf
 
 fn validate_api_format(value: String) -> AppResult<String> {
     let value = value.trim().to_ascii_lowercase();
-    if matches!(value.as_str(), "openai_compatible" | "anthropic_compatible") {
+    if matches!(
+        value.as_str(),
+        "openai_compatible" | "anthropic_compatible" | "responses_compatible"
+    ) {
         Ok(value)
     } else {
         Err(AppError::Validation(
-            "api_format 只能是 openai_compatible 或 anthropic_compatible".to_owned(),
+            "api_format 只能是 openai_compatible、anthropic_compatible 或 responses_compatible"
+                .to_owned(),
         ))
     }
 }
@@ -266,7 +280,7 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn api_format_accepts_only_the_two_supported_interfaces() {
+    fn api_format_accepts_only_the_three_supported_interfaces() {
         assert_eq!(
             validate_api_format(" OpenAI_Compatible ".to_owned()).expect("OpenAI 兼容格式应有效"),
             "openai_compatible"
@@ -275,6 +289,11 @@ mod tests {
             validate_api_format("anthropic_compatible".to_owned())
                 .expect("Anthropic 兼容格式应有效"),
             "anthropic_compatible"
+        );
+        assert_eq!(
+            validate_api_format("responses_compatible".to_owned())
+                .expect("Responses 兼容格式应有效"),
+            "responses_compatible"
         );
         assert!(validate_api_format("claude".to_owned()).is_err());
         assert!(validate_api_format("custom".to_owned()).is_err());
@@ -286,6 +305,7 @@ mod tests {
             provider: "Example".to_owned(),
             context_length: 128_000,
             interfaces,
+            reasoning_control: ReasoningControl::Unsupported,
             capability_tags: Vec::new(),
             default_parameters: json!({}),
             enabled: true,
@@ -303,7 +323,7 @@ mod tests {
     }
 
     #[test]
-    fn model_requires_one_or_two_unique_interfaces() {
+    fn model_requires_one_to_three_unique_interfaces() {
         assert!(create(input(Vec::new())).is_err());
         let duplicate = interface(
             "openai_compatible",
@@ -324,7 +344,7 @@ mod tests {
     }
 
     #[test]
-    fn model_accepts_distinct_model_ids_for_the_two_interfaces() {
+    fn model_accepts_distinct_model_ids_for_three_interfaces() {
         let validated = create(input(vec![
             interface(
                 "openai_compatible",
@@ -335,6 +355,11 @@ mod tests {
                 "anthropic_compatible",
                 "https://api.example.test/anthropic",
                 "example-anthropic",
+            ),
+            interface(
+                "responses_compatible",
+                "https://api.example.test/v1",
+                "example-responses",
             ),
         ]))
         .expect("两个独立接口应有效");
@@ -350,6 +375,36 @@ mod tests {
             validated.interfaces.openai_base_url.as_deref(),
             Some("https://api.example.test/v1")
         );
+        assert_eq!(
+            validated.interfaces.responses_model_name.as_deref(),
+            Some("example-responses")
+        );
+    }
+
+    #[test]
+    fn legacy_reasoning_types_are_accepted_but_normalized_to_unsupported() {
+        for reasoning_control in [
+            ReasoningControl::Unsupported,
+            ReasoningControl::OpenAi,
+            ReasoningControl::DeepSeek,
+            ReasoningControl::Glm,
+            ReasoningControl::Qwen,
+            ReasoningControl::Kimi,
+            ReasoningControl::MiniMax,
+        ] {
+            let mut value = input(vec![interface(
+                "openai_compatible",
+                "https://api.example.test/v1",
+                "example",
+            )]);
+            value.reasoning_control = reasoning_control;
+            assert_eq!(
+                create(value)
+                    .expect("兼容思考字段应通过模型验证")
+                    .reasoning_control,
+                ReasoningControl::Unsupported
+            );
+        }
     }
 
     #[test]

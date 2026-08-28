@@ -26,8 +26,14 @@ impl Service {
         actor: &AdminActor,
         mut asset_input: CreateAssetInput,
         mut prepared: PreparedLocalUpload,
+        updater_signature: Option<&str>,
     ) -> AppResult<ReleaseSource> {
         authorization::require(actor)?;
+        let updater_signature = crate::signature::validate_for_asset(
+            &asset_input.platform,
+            &asset_input.package_kind,
+            updater_signature,
+        )?;
         asset_input.file_name = prepared.file_name().to_owned();
         asset_input.byte_size = prepared.byte_size();
         asset_input.sha256 = prepared.sha256().to_owned();
@@ -41,6 +47,18 @@ impl Service {
         let asset =
             cloud_release::create_asset_in_transaction(actor, &mut transaction, asset_input)
                 .await?;
+        if let Some(installed_sha256) = automatic_installed_sha256(&asset) {
+            cloud_release::record_installed_sha256_in_transaction(
+                actor,
+                &mut transaction,
+                asset.id,
+                installed_sha256,
+            )
+            .await?;
+        }
+        if let Some(signature) = updater_signature.as_deref() {
+            crate::signature::set_in_transaction(&mut transaction, asset.id, signature).await?;
+        }
         let source_input = CreateSourceInput {
             asset_id: asset.id,
             source_kind: SourceKind::Local,
@@ -98,6 +116,18 @@ impl Service {
     }
 }
 
+fn automatic_installed_sha256(asset: &cloud_release::ReleaseAsset) -> Option<&str> {
+    matches!(
+        (
+            asset.platform.as_str(),
+            asset.architecture.as_str(),
+            asset.package_kind.as_str(),
+        ),
+        ("android", "aarch64", "apk")
+    )
+    .then_some(asset.sha256.as_str())
+}
+
 fn external_source_input(asset_id: Uuid, external_url: &str) -> AppResult<CreateSourceInput> {
     let external_url = validation::external_url(external_url)?;
     let parsed = Url::parse(&external_url)
@@ -125,6 +155,7 @@ fn external_source_input(asset_id: Uuid, external_url: &str) -> AppResult<Create
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::Utc;
 
     #[test]
     fn derives_external_provider_without_accepting_metadata_from_the_form() {
@@ -145,5 +176,28 @@ mod tests {
             external_source_input(Uuid::now_v7(), "https://example.com/client.exe?token=x")
                 .is_err()
         );
+    }
+
+    #[test]
+    fn only_android_apk_can_derive_installed_identity_from_uploaded_asset() {
+        let mut asset = cloud_release::ReleaseAsset {
+            id: Uuid::now_v7(),
+            release_id: Uuid::now_v7(),
+            platform: "android".into(),
+            architecture: "aarch64".into(),
+            package_kind: "apk".into(),
+            file_name: "client.apk".into(),
+            byte_size: 1,
+            sha256: "a".repeat(64),
+            installed_sha256: None,
+            created_at: Utc::now(),
+        };
+        assert_eq!(
+            automatic_installed_sha256(&asset),
+            Some(asset.sha256.as_str())
+        );
+        asset.platform = "windows".into();
+        asset.package_kind = "exe".into();
+        assert_eq!(automatic_installed_sha256(&asset), None);
     }
 }

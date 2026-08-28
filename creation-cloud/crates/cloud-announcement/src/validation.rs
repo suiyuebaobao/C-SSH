@@ -31,6 +31,7 @@ pub(crate) fn create(input: CreateAnnouncementInput) -> AppResult<ValidatedAnnou
         input.body_zh_cn,
         input.title_en,
         input.body_en,
+        input.priority,
     )
 }
 
@@ -41,14 +42,23 @@ pub(crate) fn replace(input: ReplaceAnnouncementInput) -> AppResult<(i64, Valida
         input.body_zh_cn,
         input.title_en,
         input.body_en,
+        input.priority,
     )?;
     Ok((expected, value))
 }
 
-pub(crate) fn editable_draft(record: &Announcement, expected: i64) -> AppResult<()> {
+pub(crate) fn editable(record: &Announcement, expected: i64) -> AppResult<()> {
     compare_revision(record, expected)?;
-    if record.status != AnnouncementStatus::Draft {
-        return Err(AppError::Conflict("只有草稿公告可以编辑或删除".to_owned()));
+    if record.status == AnnouncementStatus::Hidden {
+        return Err(AppError::Conflict("已隐藏公告不能编辑".to_owned()));
+    }
+    Ok(())
+}
+
+pub(crate) fn deletable(record: &Announcement, expected: i64) -> AppResult<()> {
+    compare_revision(record, expected)?;
+    if record.status == AnnouncementStatus::Hidden {
+        return Err(AppError::Conflict("已隐藏公告不能删除".to_owned()));
     }
     Ok(())
 }
@@ -84,12 +94,14 @@ fn content(
     body_zh_cn: String,
     title_en: String,
     body_en: String,
+    priority: crate::AnnouncementPriority,
 ) -> AppResult<ValidatedAnnouncement> {
     Ok(ValidatedAnnouncement {
         title_zh_cn: title(title_zh_cn, "中文标题")?,
         body_zh_cn: body(body_zh_cn, "中文正文")?,
         title_en: title(title_en, "英文标题")?,
         body_en: body(body_en, "英文正文")?,
+        priority,
     })
 }
 

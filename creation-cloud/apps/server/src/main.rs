@@ -68,7 +68,31 @@ async fn main() -> Result<()> {
             let services = services::AppServices::new(pool, &config)?;
             maintenance_cli::status(services, task).await
         }
+        command::Command::SchemaMigrate => migration_summary(&pool).await,
     }
+}
+
+async fn migration_summary(pool: &cloud_store::PgPool) -> Result<()> {
+    let (max_version, count, failed): (i64, i64, i64) = sqlx::query_as(
+        r#"
+        SELECT COALESCE(MAX(version), 0),
+               COUNT(*),
+               COUNT(*) FILTER (WHERE NOT success)
+        FROM _sqlx_migrations
+        "#,
+    )
+    .fetch_one(pool)
+    .await?;
+    println!(
+        "{}",
+        serde_json::json!({
+            "count": count,
+            "failed": failed,
+            "max_version": max_version,
+            "status": "migrated"
+        })
+    );
+    Ok(())
 }
 
 async fn seed_system_model_catalog(pool: &cloud_store::PgPool) -> Result<()> {

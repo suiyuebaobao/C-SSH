@@ -5,8 +5,9 @@ use cloud_store::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    Announcement, AnnouncementLocale, CreateAnnouncementInput, CurrentAnnouncementResponse,
-    ReplaceAnnouncementInput, TransitionAnnouncementInput, repository, validation,
+    Announcement, AnnouncementLocale, AnnouncementStatus, CreateAnnouncementInput,
+    CurrentAnnouncementResponse, ReplaceAnnouncementInput, TransitionAnnouncementInput, repository,
+    validation,
 };
 
 #[derive(Clone)]
@@ -64,6 +65,7 @@ impl Service {
             "announcement.created",
             record.id,
             record.status.as_str(),
+            record.priority,
             record.revision,
         )
         .await?;
@@ -81,17 +83,44 @@ impl Service {
         let id = validation::id(id)?;
         let (expected_revision, value) = validation::replace(input)?;
         let mut transaction = self.pool.begin().await.map_err(transaction_error)?;
+        let publication = repository::lock_publication(&mut transaction).await?;
         let current = repository::lock(&mut transaction, id).await?;
-        validation::editable_draft(&current, expected_revision)?;
-        let record =
-            repository::replace_draft(&mut transaction, actor_id, id, expected_revision, &value)
+        validation::editable(&current, expected_revision)?;
+        let record = match current.status {
+            AnnouncementStatus::Draft => {
+                repository::replace_draft(&mut transaction, actor_id, id, expected_revision, &value)
+                    .await?
+            }
+            AnnouncementStatus::Published => {
+                if publication.current_announcement_id != Some(id) {
+                    return Err(AppError::Conflict(
+                        "公告已不是当前公开公告，请刷新后重试".to_owned(),
+                    ));
+                }
+                repository::hide(&mut transaction, actor_id, id, expected_revision).await?;
+                let draft = repository::create(&mut transaction, actor_id, &value).await?;
+                let replacement =
+                    repository::publish(&mut transaction, actor_id, draft.id, draft.revision)
+                        .await?;
+                repository::advance_publication(
+                    &mut transaction,
+                    publication.public_revision,
+                    Some(replacement.id),
+                )
                 .await?;
+                replacement
+            }
+            AnnouncementStatus::Hidden => {
+                return Err(AppError::Conflict("已隐藏公告不能编辑".to_owned()));
+            }
+        };
         repository::audit(
             &mut transaction,
             actor_id,
             "announcement.updated",
             record.id,
             record.status.as_str(),
+            record.priority,
             record.revision,
         )
         .await?;
@@ -109,16 +138,42 @@ impl Service {
         let id = validation::id(id)?;
         let expected_revision = validation::revision(input.expected_revision)?;
         let mut transaction = self.pool.begin().await.map_err(transaction_error)?;
+        let publication = repository::lock_publication(&mut transaction).await?;
         let current = repository::lock(&mut transaction, id).await?;
-        validation::editable_draft(&current, expected_revision)?;
-        repository::delete_draft(&mut transaction, id, expected_revision).await?;
+        validation::deletable(&current, expected_revision)?;
+        let audit_revision = match current.status {
+            AnnouncementStatus::Draft => {
+                repository::delete_draft(&mut transaction, id, expected_revision).await?;
+                current.revision
+            }
+            AnnouncementStatus::Published => {
+                if publication.current_announcement_id != Some(id) {
+                    return Err(AppError::Conflict(
+                        "公告已不是当前公开公告，请刷新后重试".to_owned(),
+                    ));
+                }
+                let hidden =
+                    repository::hide(&mut transaction, actor_id, id, expected_revision).await?;
+                repository::advance_publication(
+                    &mut transaction,
+                    publication.public_revision,
+                    None,
+                )
+                .await?;
+                hidden.revision
+            }
+            AnnouncementStatus::Hidden => {
+                return Err(AppError::Conflict("已隐藏公告不能删除".to_owned()));
+            }
+        };
         repository::audit(
             &mut transaction,
             actor_id,
             "announcement.deleted",
             current.id,
             "deleted",
-            current.revision,
+            current.priority,
+            audit_revision,
         )
         .await?;
         commit(transaction).await
@@ -153,6 +208,7 @@ impl Service {
             "announcement.published",
             record.id,
             record.status.as_str(),
+            record.priority,
             record.revision,
         )
         .await?;
@@ -187,6 +243,7 @@ impl Service {
             "announcement.hidden",
             record.id,
             record.status.as_str(),
+            record.priority,
             record.revision,
         )
         .await?;

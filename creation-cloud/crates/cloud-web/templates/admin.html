@@ -2,15 +2,16 @@
 
 {% block styles %}
   <link rel="stylesheet" href="/static/css/admin-foundation.css?v=20260721-maintenance">
-  <link rel="stylesheet" href="/static/css/admin-components.css?v=20260721-maintenance">
+  <link rel="stylesheet" href="/static/css/admin-components.css?v=20260822-compact-download-method">
   <link rel="stylesheet" href="/static/css/admin-pages.css?v=20260730-session-list">
   <link rel="stylesheet" href="/static/css/admin-record-pages.css?v=20260729-model-catalog">
   <link rel="stylesheet" href="/static/css/admin-site-simple.css?v=20260729-simple-admin">
   <link rel="stylesheet" href="/static/css/admin-site-content.css?v=20260729-content-admin">
+  {% block admin_styles %}{% endblock %}
 {% endblock %}
 
 {% block scripts %}
-  <script src="/static/js/admin.js?v=20260729-downloads" defer></script>
+  <script src="/static/js/admin.js?v=20260828-no-msi-upload" defer></script>
   <script src="/static/js/admin-site-content.js?v=20260729-content-admin" defer></script>
 {% endblock %}
 

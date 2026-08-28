@@ -34,3 +34,19 @@ pub async fn create_asset_in_transaction(
 ) -> cloud_domain::AppResult<ReleaseAsset> {
     use_case::asset::create::create_in_transaction(actor, transaction, input).await
 }
+
+#[doc(hidden)]
+pub async fn record_installed_sha256_in_transaction(
+    actor: &cloud_domain::AdminActor,
+    transaction: &mut cloud_store::Transaction<'_, cloud_store::Postgres>,
+    asset_id: uuid::Uuid,
+    installed_sha256: &str,
+) -> cloud_domain::AppResult<ReleaseAsset> {
+    use_case::asset::installed_identity::record_in_transaction(
+        actor,
+        transaction,
+        asset_id,
+        installed_sha256,
+    )
+    .await
+}

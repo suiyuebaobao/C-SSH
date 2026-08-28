@@ -18,5 +18,5 @@ pub use router::{management_router, router};
 pub use service::Service;
 pub use types::{
     CreateGlobalModelInput, DeleteGlobalModelInput, GlobalModel, ModelInterface, PublicGlobalModel,
-    ReplaceGlobalModelInput,
+    ReasoningControl, ReplaceGlobalModelInput,
 };

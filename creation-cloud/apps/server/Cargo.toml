@@ -19,6 +19,7 @@ cloud-download.workspace = true
 cloud-feedback.workspace = true
 cloud-host.workspace = true
 cloud-model.workspace = true
+cloud-notification.workspace = true
 cloud-maintenance.workspace = true
 cloud-release.workspace = true
 cloud-seo.workspace = true

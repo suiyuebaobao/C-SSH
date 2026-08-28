@@ -12,6 +12,7 @@ mod readiness;
 mod repository;
 mod router;
 mod service;
+mod signature;
 mod stored_file_delete;
 mod upload_file;
 mod use_case;
@@ -30,12 +31,18 @@ mod aggregation_tests;
 mod inspection_tests;
 
 #[cfg(test)]
+mod policy_migration_tests;
+
+#[cfg(test)]
 mod validation_tests;
 
 pub use model::{
-    AssetInspectionStatus, CreateSourceInput, DownloadAggregationReport, DownloadHistoryItem,
-    LatestUpdate, PublicAsset, PublicRelease, PublicSource, PublishedAssetInspectionReport,
-    ReleaseSource, SourceKind, UpdateAsset, UpdateCheckQuery, UpdateCheckResponse, UpdateSource,
+    AdminUpdatePolicySnapshot, AssetInspectionStatus, CreateSourceInput, DownloadAggregationReport,
+    DownloadHistoryItem, InstalledIdentityEntryInput, LatestUpdate, PublicAsset, PublicRelease,
+    PublicSource, PublishUpdatePolicyInput, PublishedAssetInspectionReport, PublishedUpdatePolicy,
+    RecordInstalledIdentitiesInput, RecordInstalledIdentitiesResult, ReleaseSource,
+    SaveUpdatePolicyDraftInput, SourceKind, UpdateAsset, UpdateCheckQuery, UpdateCheckResponse,
+    UpdateIdentityStatus, UpdatePolicyDraft, UpdatePolicyTargetRelease, UpdateSource,
     UpdateSourceInput,
 };
 pub use router::{account_router, management_router, public_router, update_router};

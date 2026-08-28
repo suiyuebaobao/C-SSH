@@ -9,14 +9,18 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    HostStatus, PullAckRequest, PullAiProviderRecord, PullHostRecord, PullMode, PullRequest,
-    PullResponse, ResourceKind, actor::DeviceActor,
+    HostStatus, PullAckRequest, PullAiProviderRecord, PullHostRecord, PullMode, PullPurpose,
+    PullRequest, PullResponse, ResourceKind, actor::DeviceActor,
 };
 
 use super::{
     DbTransaction, begin, commit, invalid_stored_value, lock_sync_state, require_active_device,
-    require_retained_revision, require_sync_generation, storage,
+    require_configured_envelope, require_protection_version, require_retained_revision,
+    require_sync_generation, storage,
 };
+
+mod completion;
+pub(super) use completion::record_rekey_snapshot;
 
 #[derive(Clone, FromRow)]
 struct PullIdentityRow {
@@ -61,6 +65,8 @@ pub(crate) async fn pull(
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
     require_sync_generation(state, request.sync_generation)?;
+    require_protection_version(state, request.protection_epoch, request.protection_revision)?;
+    require_configured_envelope(&mut tx, actor.account_id(), state).await?;
     let snapshot = request.snapshot_revision.unwrap_or(state.current_revision);
     match request.mode {
         PullMode::Incremental => require_retained_revision(state, request.since_revision)?,
@@ -105,11 +111,17 @@ pub(crate) async fn pull(
             ),
         }
     }
-    record_deliveries(&mut tx, actor, &identities, snapshot).await?;
-    record_pull_watermark(&mut tx, actor, next_revision, snapshot).await?;
+    if request.purpose == PullPurpose::Download {
+        prune_delivery_window(&mut tx, actor, snapshot).await?;
+        record_deliveries(&mut tx, actor, &identities, snapshot).await?;
+        record_pull_watermark(&mut tx, actor, next_revision, snapshot).await?;
+    }
     commit(tx).await?;
     Ok(PullResponse {
         sync_generation: state.sync_generation,
+        protection_epoch: state.protection_epoch,
+        protection_revision: state.protection_revision,
+        purpose: request.purpose,
         mode: request.mode,
         host_records,
         ai_records,
@@ -246,13 +258,25 @@ pub(crate) async fn ack(
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
     require_sync_generation(state, request.sync_generation)?;
+    require_protection_version(state, request.protection_epoch, request.protection_revision)?;
+    require_configured_envelope(&mut tx, actor.account_id(), state).await?;
     require_retained_revision(state, request.acknowledged_revision)?;
     if request.acknowledged_revision > state.current_revision {
         return Err(AppError::Conflict(
             "acknowledged_revision is newer than the account revision".to_owned(),
         ));
     }
-    require_delivered_watermark(&mut tx, actor, request.acknowledged_revision).await?;
+    let delivered_snapshot =
+        delivered_watermark(&mut tx, actor, request.acknowledged_revision).await?;
+    if delivered_snapshot.is_none() {
+        if acknowledgement_already_applied(&mut tx, actor, request).await? {
+            commit(tx).await?;
+            return Ok(());
+        }
+        return Err(AppError::Validation(
+            "the acknowledgement does not match a delivered pull watermark".to_owned(),
+        ));
+    }
     let prior = load_checkpoint(&mut tx, actor).await?;
     if request.acknowledged_revision < prior {
         return Err(AppError::Conflict(
@@ -311,7 +335,45 @@ pub(crate) async fn ack(
     let safe_revision =
         safe_checkpoint_revision(&mut tx, actor, request.acknowledged_revision).await?;
     save_checkpoint(&mut tx, actor, safe_revision).await?;
+    clear_delivery_snapshot(
+        &mut tx,
+        actor,
+        delivered_snapshot.expect("checked delivered snapshot"),
+    )
+    .await?;
+    completion::record_download_completed(&mut tx, actor).await?;
     commit(tx).await
+}
+
+async fn acknowledgement_already_applied(
+    tx: &mut DbTransaction<'_>,
+    actor: DeviceActor,
+    request: &PullAckRequest,
+) -> AppResult<bool> {
+    if request.decisions.is_empty() {
+        return load_checkpoint(tx, actor)
+            .await
+            .map(|checkpoint| checkpoint >= request.acknowledged_revision);
+    }
+    for decision in &request.decisions {
+        let action = sqlx::query_scalar::<_, String>(
+            "SELECT action FROM cloud_sync_pull_decisions
+             WHERE account_id=$1 AND device_id=$2 AND resource_kind=$3
+               AND resource_id=$4 AND revision=$5",
+        )
+        .bind(actor.account_id())
+        .bind(actor.device_id())
+        .bind(decision.resource_kind.as_str())
+        .bind(decision.resource_id)
+        .bind(decision.cloud_revision)
+        .fetch_optional(&mut **tx)
+        .await
+        .map_err(storage)?;
+        if action.as_deref() != Some(decision.action.as_str()) {
+            return Ok(false);
+        }
+    }
+    Ok(true)
 }
 
 pub(super) async fn safe_checkpoint_revision(
@@ -435,113 +497,4 @@ async fn require_delivered_identity(
         ))
     }
 }
-pub(super) async fn record_rekey_snapshot(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    revisions: &[crate::ResourceRevision],
-    snapshot_revision: i64,
-) -> AppResult<()> {
-    // 这里只建立显式 ACK 所需的投递证据和水位，不代表任何本地决定。
-    for revision in revisions {
-        sqlx::query(
-            "INSERT INTO cloud_sync_resource_deliveries
-                 (account_id, device_id, resource_kind, resource_id,
-                  delivered_revision, snapshot_revision, updated_at)
-             VALUES ($1,$2,$3,$4,$5,$6,now())
-             ON CONFLICT (account_id, device_id, resource_kind, resource_id,
-                          delivered_revision, snapshot_revision)
-             DO UPDATE SET updated_at = now()",
-        )
-        .bind(actor.account_id())
-        .bind(actor.device_id())
-        .bind(revision.resource_kind.as_str())
-        .bind(revision.resource_id)
-        .bind(revision.cloud_revision)
-        .bind(snapshot_revision)
-        .execute(&mut **tx)
-        .await
-        .map_err(storage)?;
-    }
-    record_pull_watermark(tx, actor, snapshot_revision, snapshot_revision).await
-}
-
-async fn record_deliveries(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    rows: &[PullIdentityRow],
-    snapshot_revision: i64,
-) -> AppResult<()> {
-    for row in rows {
-        sqlx::query(
-            "INSERT INTO cloud_sync_resource_deliveries
-                 (account_id, device_id, resource_kind, resource_id,
-                  delivered_revision, snapshot_revision, updated_at)
-             VALUES ($1,$2,$3,$4,$5,$6,now())
-             ON CONFLICT (account_id, device_id, resource_kind, resource_id,
-                          delivered_revision, snapshot_revision)
-             DO UPDATE SET updated_at = now()",
-        )
-        .bind(actor.account_id())
-        .bind(actor.device_id())
-        .bind(&row.resource_kind)
-        .bind(row.resource_id)
-        .bind(row.revision)
-        .bind(snapshot_revision)
-        .execute(&mut **tx)
-        .await
-        .map_err(storage)?;
-    }
-    Ok(())
-}
-
-async fn record_pull_watermark(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    acknowledgeable_revision: i64,
-    snapshot_revision: i64,
-) -> AppResult<()> {
-    sqlx::query(
-        "INSERT INTO cloud_sync_pull_watermarks
-             (account_id, device_id, acknowledgeable_revision,
-              snapshot_revision, delivered_at)
-         VALUES ($1,$2,$3,$4,now())
-         ON CONFLICT (account_id, device_id, acknowledgeable_revision)
-         DO UPDATE SET snapshot_revision = GREATEST(
-             cloud_sync_pull_watermarks.snapshot_revision, EXCLUDED.snapshot_revision),
-             delivered_at = now()",
-    )
-    .bind(actor.account_id())
-    .bind(actor.device_id())
-    .bind(acknowledgeable_revision)
-    .bind(snapshot_revision)
-    .execute(&mut **tx)
-    .await
-    .map_err(storage)?;
-    Ok(())
-}
-
-async fn require_delivered_watermark(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    acknowledged_revision: i64,
-) -> AppResult<()> {
-    let delivered = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(
-             SELECT 1 FROM cloud_sync_pull_watermarks
-             WHERE account_id = $1 AND device_id = $2
-               AND acknowledgeable_revision = $3)",
-    )
-    .bind(actor.account_id())
-    .bind(actor.device_id())
-    .bind(acknowledged_revision)
-    .fetch_one(&mut **tx)
-    .await
-    .map_err(storage)?;
-    if delivered {
-        Ok(())
-    } else {
-        Err(AppError::Validation(
-            "the acknowledgement does not match a delivered pull watermark".to_owned(),
-        ))
-    }
-}
+include!("pull/delivery.rs");

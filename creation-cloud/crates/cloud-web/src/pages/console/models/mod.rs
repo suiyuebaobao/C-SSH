@@ -34,6 +34,7 @@ impl From<cloud_model::PublicGlobalModel> for ConsoleModelRow {
                 .map(|item| ConsoleModelInterface {
                     api_format: match item.api_format.as_str() {
                         "anthropic_compatible" => "Claude / Anthropic",
+                        "responses_compatible" => "Responses",
                         _ => "OpenAI",
                     },
                     model_name: item.model_name,
@@ -106,5 +107,24 @@ mod tests {
                     .contains("api keys remain vault ciphertext references")
             );
         }
+
+        let body = ModelsTemplate {
+            view: content_service().view(PageId::Models, Locale::ZhCn),
+            seo: SeoHead::private(),
+            csrf_token: "csrf-example".to_owned(),
+            is_en: false,
+            models: vec![ConsoleModelRow {
+                name: "Example".to_owned(),
+                provider: "Example".to_owned(),
+                context_length: 128_000,
+                interfaces: Vec::new(),
+            }],
+            total: 1,
+        }
+        .render()
+        .expect("模型目录应渲染模型名称");
+        assert!(body.contains("<strong>Example</strong>"));
+        assert!(!body.contains("可控思考"));
+        assert!(!body.contains("Controllable thinking"));
     }
 }

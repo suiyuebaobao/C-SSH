@@ -13,6 +13,7 @@ pub(crate) async fn execute(pool: &PgPool) -> AppResult<Vec<PublicCatalogRow>> {
                releases.notes_en, releases.published_at,
                assets.id AS asset_id, assets.platform, assets.architecture,
                assets.package_kind, assets.file_name, assets.byte_size, assets.sha256,
+               assets.updater_signature,
                sources.id AS source_id, sources.source_kind, sources.provider_name,
                sources.sort_order
         FROM releases

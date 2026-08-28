@@ -10,10 +10,6 @@ use crate::{
 
 impl Service {
     pub async fn public_manifest(&self) -> AppResult<Vec<PublicRelease>> {
-        #[cfg(test)]
-        if let Some(releases) = &self.public_manifest_override {
-            return Ok(releases.as_ref().clone());
-        }
         assemble(repository::public::catalog::execute(&self.pool).await?)
     }
 }
@@ -53,6 +49,7 @@ pub(crate) fn assemble(rows: Vec<PublicCatalogRow>) -> AppResult<Vec<PublicRelea
                 file_name: row.file_name.clone(),
                 byte_size: row.byte_size,
                 sha256: row.sha256.clone(),
+                updater_signature: row.updater_signature.clone(),
                 sources: Vec::new(),
             });
         }

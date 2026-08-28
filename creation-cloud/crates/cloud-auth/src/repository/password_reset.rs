@@ -2,6 +2,7 @@
 
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppError, AppResult};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use cloud_store::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
@@ -351,6 +352,12 @@ pub(crate) async fn complete(
     .await
     .map_err(error::storage)?;
     audit_reset(&mut transaction, snapshot.account_id, sessions_revoked).await?;
+    record_account_event(
+        &mut transaction,
+        snapshot.account_id,
+        AccountNotificationEvent::PasswordChanged,
+    )
+    .await?;
     transaction.commit().await.map_err(error::storage)?;
     Ok(true)
 }

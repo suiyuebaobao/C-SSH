@@ -2,6 +2,7 @@
 
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppError, AppResult};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
@@ -164,6 +165,12 @@ pub(crate) async fn update_and_rotate(
         .execute(&mut *transaction)
         .await
         .map_err(error::storage)?;
+    record_account_event(
+        &mut transaction,
+        account_id,
+        AccountNotificationEvent::PasswordChanged,
+    )
+    .await?;
     transaction.commit().await.map_err(error::storage)?;
     Ok(new_version)
 }

@@ -12,8 +12,9 @@ use crate::{
 use super::storage;
 
 const MODEL_COLUMNS: &str = "id, name, provider, openai_base_url, openai_model_name, \
-    anthropic_base_url, anthropic_model_name, context_length, capability_tags, \
-    default_parameters, enabled, is_default, sort_order, revision, created_at, updated_at";
+    anthropic_base_url, anthropic_model_name, responses_base_url, responses_model_name, \
+    reasoning_control, context_length, capability_tags, default_parameters, enabled, \
+    is_default, sort_order, revision, created_at, updated_at";
 
 pub(crate) async fn list_public(pool: &PgPool, page: PageQuery) -> AppResult<Page<GlobalModel>> {
     list(pool, page, true).await
@@ -97,9 +98,10 @@ pub(crate) async fn create(
     let sql = format!(
         "INSERT INTO global_model_catalog \
          (id, name, provider, openai_base_url, openai_model_name, anthropic_base_url, \
-          anthropic_model_name, context_length, capability_tags, default_parameters, enabled, \
-          is_default, sort_order, created_by, updated_by) \
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$14) \
+          anthropic_model_name, responses_base_url, responses_model_name, reasoning_control, \
+          context_length, capability_tags, default_parameters, enabled, is_default, sort_order, \
+          created_by, updated_by) \
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$17) \
          RETURNING {MODEL_COLUMNS}"
     );
     let model = sqlx::query_as::<_, PersistedModel>(&sql)
@@ -110,6 +112,9 @@ pub(crate) async fn create(
         .bind(value.interfaces.openai_model_name)
         .bind(value.interfaces.anthropic_base_url)
         .bind(value.interfaces.anthropic_model_name)
+        .bind(value.interfaces.responses_base_url)
+        .bind(value.interfaces.responses_model_name)
+        .bind(value.reasoning_control.as_str())
         .bind(value.context_length)
         .bind(value.capability_tags)
         .bind(value.default_parameters)
@@ -143,8 +148,9 @@ pub(crate) async fn replace(
     let sql = format!(
         "UPDATE global_model_catalog SET name=$2, provider=$3, openai_base_url=$4, \
          openai_model_name=$5, anthropic_base_url=$6, anthropic_model_name=$7, \
-         context_length=$8, capability_tags=$9, default_parameters=$10, enabled=$11, \
-         is_default=$12, sort_order=$13, revision=revision+1, updated_by=$14, updated_at=now() \
+         responses_base_url=$8, responses_model_name=$9, reasoning_control=$10, \
+         context_length=$11, capability_tags=$12, default_parameters=$13, enabled=$14, \
+         is_default=$15, sort_order=$16, revision=revision+1, updated_by=$17, updated_at=now() \
          WHERE id=$1 AND deleted_at IS NULL RETURNING {MODEL_COLUMNS}"
     );
     let model = sqlx::query_as::<_, PersistedModel>(&sql)
@@ -155,6 +161,9 @@ pub(crate) async fn replace(
         .bind(value.interfaces.openai_model_name)
         .bind(value.interfaces.anthropic_base_url)
         .bind(value.interfaces.anthropic_model_name)
+        .bind(value.interfaces.responses_base_url)
+        .bind(value.interfaces.responses_model_name)
+        .bind(value.reasoning_control.as_str())
         .bind(value.context_length)
         .bind(value.capability_tags)
         .bind(value.default_parameters)

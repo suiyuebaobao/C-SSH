@@ -19,6 +19,12 @@ pub use model::{
 pub use service::Service;
 pub use use_case::{CreateDevice, UpdateDevice};
 
+/// Hard per-account bound for devices that can retain an active device session.
+///
+/// Device creation serializes on the owning account row before enforcing this
+/// limit, so concurrent registrations cannot exceed it.
+pub const MAX_ACTIVE_DEVICES_PER_ACCOUNT: i64 = 16;
+
 /// 构建不含 `/api/v1/devices` 前缀的设备路由。
 #[must_use = "路由必须挂载到服务端才会生效"]
 pub fn router(service: Service) -> Router {

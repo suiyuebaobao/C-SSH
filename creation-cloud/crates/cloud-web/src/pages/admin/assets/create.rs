@@ -17,7 +17,7 @@ use crate::AdminPageState;
 
 use super::super::shared;
 
-const MAX_TEXT_FIELD_BYTES: usize = 2 * 1024;
+const MAX_TEXT_FIELD_BYTES: usize = 8 * 1024;
 
 #[derive(Default)]
 struct NewDownloadForm {
@@ -30,6 +30,7 @@ struct NewDownloadForm {
     file_name: Option<String>,
     byte_size: Option<String>,
     sha256: Option<String>,
+    updater_signature: Option<String>,
     lang: Option<String>,
     local_upload: Option<PreparedLocalUpload>,
 }
@@ -126,6 +127,18 @@ async fn parse_form(
             "sha256" => {
                 set_once(&mut form.sha256, read_text(&mut field).await?, "SHA256")?;
             }
+            "updater_signature"
+                if field
+                    .file_name()
+                    .is_some_and(|value| !value.trim().is_empty()) =>
+            {
+                set_once(
+                    &mut form.updater_signature,
+                    read_text(&mut field).await?,
+                    "updater signature",
+                )?;
+            }
+            "updater_signature" => {}
             "lang" => set_once(&mut form.lang, read_text(&mut field).await?, "语言")?,
             _ => return Err(AppError::Validation("新增下载表单包含未知字段".into())),
         }
@@ -173,6 +186,7 @@ async fn create_download(
                         sha256: prepared.sha256().to_owned(),
                     },
                     prepared,
+                    form.updater_signature.as_deref(),
                 )
                 .await?;
             Ok(())
@@ -294,6 +308,7 @@ mod tests {
             file_name: "client.exe".to_owned(),
             byte_size: 10,
             sha256: "a".repeat(64),
+            installed_sha256: None,
             created_at: chrono::Utc::now(),
         };
         assert!(matches_asset(&asset, " Windows ", "X86_64", "EXE"));

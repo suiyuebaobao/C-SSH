@@ -21,7 +21,7 @@ pub(crate) async fn execute(pool: &PgPool, query: PageQuery) -> AppResult<Page<R
     let items = sqlx::query_as::<_, AssetRow>(
         r#"
         SELECT id, release_id, platform, architecture, package_kind,
-               file_name, byte_size, sha256, created_at
+               file_name, byte_size, sha256, installed_sha256, created_at
         FROM release_assets
         ORDER BY created_at DESC, id DESC
         LIMIT $1 OFFSET $2

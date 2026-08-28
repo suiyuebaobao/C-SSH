@@ -6,6 +6,8 @@ pub(crate) mod asset;
 pub(crate) mod asset_lock;
 mod error;
 pub(crate) mod inspection;
+pub(crate) mod installed_identity;
+pub(crate) mod policy;
 pub(crate) mod public;
 pub(crate) mod release_lock;
 pub(crate) mod source;

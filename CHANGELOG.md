@@ -4,6 +4,35 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.8.8 - Cloud 数据保护恢复与三资产发布
+
+> 协议为 14，Windows 与 Android 统一使用 SQLite schema 15。正式资产恰好为 Windows NSIS、Windows Portable ZIP 与 Android arm64 APK；不再构建或发布 MSI，不生成 AAB，也不发布 Linux 客户端资产。
+
+### 下载
+- Windows 安装版：`C-SSH_0.8.8_x64-setup.exe`
+- Windows 便携版：`C-SSH_0.8.8_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.8.8_android-arm64.apk`
+
+### 新增与调整
+- Windows 与 Android 的 Cloud 数据保护页面统一为明确的加载、就绪和错误状态；旧 envelope 迁移、首次设置、修改、重置和重试入口按服务端权威状态显示。
+- `0.8.8` 是 Windows updater 信任根 epoch 2 的首个版本。`0.8.7` 及更早 Windows 用户需要手动安装一次 `0.8.8`，之后恢复自动更新；Android 不受影响。
+- 从本版起 Windows 只发布 NSIS 与 Portable ZIP，历史 MSI 只作为不可改写的旧版本记录保留。
+
+### 修复
+- 修复正确密码在真正验证前被旧 envelope 状态拒绝、云同步长期停在“正在读取”、数据保护修改／重置入口被隐藏，以及 Cloud 状态变化后预览未正确恢复。
+- 修复撤销登录设备后会话行仍显示且删除按钮禁用，以及通知中心首次只有账号通知时无法正常选择的问题。
+- 修复 Android 浅色主题账号页标签栏与内容卡背景颜色不一致。
+
+### 验证
+- Windows NSIS 与 Portable 通过正式安装、退出、卸载保留数据、用户手动执行的 `0.8.7 → 0.8.8` 升级和完整清场门禁；双设备生产 Cloud 数据保护与 Host+AI 手动同步链通过。
+- Android x86_64 MuMu 通过受影响的 Cloud 数据保护、Host+AI 手动同步、Reset 本地保留和清场真链；主题静态与真实浏览器对比门禁通过。
+- 正式 arm64 APK 通过 `0.8.8 / 8000008`、SDK 24/36、唯一 `arm64-v8a`、非 debug、v2 单 signer 与四份内嵌 Agent/tmux 资源包级核验；本条不冒充物理 arm64 真机验收。
+
+### SHA256
+- `FF15C6CD40D3FC6725A413BD7253AABC191BD76C78CD3AFF83AA255758907736`  `C-SSH_0.8.8_x64-setup.exe`
+- `55B42F281725D3995B9117C85A9E688F51AD4F2359D2921768C52E6AB027FAA0`  `C-SSH_0.8.8_portable-Windows-x64.zip`
+- `A2C98E7A81BB4E5A66B38A2C8096FE41951AC8B66DD3DFE9AA4C64E17A1E4F80`  `C-SSH_0.8.8_android-arm64.apk`
+
 ## v0.8.3 - 公告、版本控制、自动更新与安全数据迁移
 
 > 协议为 14；Windows 与 Android 统一使用 SQLite schema 15。正式资产恰好为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK 四项；不发布 Linux 客户端制品，也不生成或上传 AAB。

@@ -5,6 +5,7 @@ mod admin_sync;
 mod ai;
 mod capacity;
 mod hosts;
+mod protection;
 mod pull;
 mod push;
 mod rekey;
@@ -18,10 +19,14 @@ use uuid::Uuid;
 pub(crate) use admin_delete::{host as delete_admin_host, sync_record as delete_admin_sync_record};
 pub(crate) use admin_sync::list as list_admin_sync_records;
 pub(crate) use hosts::{count, get, list};
+pub(crate) use protection::{
+    cancel_challenge, change_protection, get_protection, issue_reset_challenge, legacy_pull,
+    mark_challenge_sent, migrate_protection, setup_protection, verify_reset_challenge,
+};
 pub(crate) use pull::{ack, pull};
 pub(crate) use push::push;
 pub(crate) use rekey::rekey;
-pub(crate) use reset::{reset, state};
+pub(crate) use reset::reset;
 
 pub(crate) type DbTransaction<'a> = Transaction<'a, Postgres>;
 
@@ -30,6 +35,8 @@ pub(crate) struct SyncState {
     pub current_revision: i64,
     pub compacted_through_revision: i64,
     pub sync_generation: i64,
+    pub protection_epoch: i64,
+    pub protection_revision: i64,
 }
 
 pub(crate) async fn begin(pool: &PgPool) -> AppResult<DbTransaction<'_>> {
@@ -50,8 +57,9 @@ pub(crate) async fn lock_sync_state(
     .await
     .map_err(storage)?;
 
-    let row = sqlx::query_as::<_, (i64, i64, i64)>(
-        "SELECT current_revision, compacted_through_revision, sync_generation
+    let row = sqlx::query_as::<_, (i64, i64, i64, i64, i64)>(
+        "SELECT current_revision, compacted_through_revision, sync_generation,
+                protection_epoch, protection_revision
          FROM cloud_host_sync_states
          WHERE account_id = $1
          FOR UPDATE",
@@ -64,7 +72,52 @@ pub(crate) async fn lock_sync_state(
         current_revision: row.0,
         compacted_through_revision: row.1,
         sync_generation: row.2,
+        protection_epoch: row.3,
+        protection_revision: row.4,
     })
+}
+
+pub(crate) fn require_protection_version(
+    state: SyncState,
+    requested_epoch: i64,
+    requested_revision: i64,
+) -> AppResult<()> {
+    if requested_epoch == state.protection_epoch && requested_revision == state.protection_revision
+    {
+        Ok(())
+    } else {
+        Err(AppError::SyncStateChanged(
+            "data protection epoch/revision changed; refresh the envelope".to_owned(),
+        ))
+    }
+}
+
+pub(crate) async fn require_configured_envelope(
+    tx: &mut DbTransaction<'_>,
+    account_id: Uuid,
+    state: SyncState,
+) -> AppResult<()> {
+    let configured = sqlx::query_scalar::<_, bool>(
+        "SELECT EXISTS(
+             SELECT 1 FROM cloud_data_protection_envelopes
+             WHERE account_id = $1 AND sync_generation = $2
+               AND protection_epoch = $3 AND protection_revision = $4
+         )",
+    )
+    .bind(account_id)
+    .bind(state.sync_generation)
+    .bind(state.protection_epoch)
+    .bind(state.protection_revision)
+    .fetch_one(&mut **tx)
+    .await
+    .map_err(storage)?;
+    if configured {
+        Ok(())
+    } else {
+        Err(AppError::SyncStateChanged(
+            "account data protection is not configured".to_owned(),
+        ))
+    }
 }
 
 pub(crate) fn require_sync_generation(state: SyncState, requested: i64) -> AppResult<()> {

@@ -3,6 +3,7 @@
 
 pub(crate) mod create;
 pub(crate) mod delete;
+pub(crate) mod signature;
 pub(crate) mod source_create;
 pub(crate) mod source_delete;
 pub(crate) mod source_update;
@@ -19,6 +20,8 @@ use cloud_domain::{AppResult, AuthenticatedSession, PageQuery};
 use cloud_download::ReleaseSource;
 use cloud_release::{Release, ReleaseAsset};
 use cloud_site::{Locale, PageId, SiteView};
+use serde::Deserialize;
+use uuid::Uuid;
 
 use crate::{AdminPageState, seo::SeoHead};
 
@@ -42,11 +45,19 @@ struct AssetRow {
     release_state_error: bool,
     identity_mutable: bool,
     source_mutable: bool,
+    supports_updater_signature: bool,
 }
 
 struct ReleaseOption {
     id: String,
     label: String,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub(crate) struct AssetsQuery {
+    #[serde(flatten)]
+    list: AdminListQuery,
+    release_id: Option<Uuid>,
 }
 
 #[derive(Template)]
@@ -60,6 +71,7 @@ struct AssetsTemplate {
     rows: Vec<AssetRow>,
     release_options: Vec<ReleaseOption>,
     release_options_error: bool,
+    selected_release_label: Option<String>,
     load_error: Option<String>,
     page_number: u32,
     total: i64,
@@ -70,36 +82,50 @@ struct AssetsTemplate {
 pub(crate) async fn page(
     State(state): State<AdminPageState>,
     Extension(session): Extension<AuthenticatedSession>,
-    Query(query): Query<AdminListQuery>,
+    Query(query): Query<AssetsQuery>,
 ) -> AppResult<Html<String>> {
-    let locale = query.locale();
+    let locale = query.list.locale();
     let actor = shared::actor_from_session(&session)?;
-    let page_query = query.page_query();
+    let page_query = query.list.page_query();
     let (release_options, release_options_error) = load_releases(&state, &actor).await;
-    let (rows, total, load_error) = match state.release().list_all_assets(&actor, page_query).await
-    {
-        Ok(page) => {
-            let mut rows = Vec::with_capacity(page.items.len());
-            for asset in page.items {
-                let sources = state.download().list_sources(&actor, asset.id).await;
-                let release = state.release().get_release(&actor, asset.release_id).await;
-                rows.extend(AssetRow::new(asset, sources, release));
+    let (assets, total, load_error) = match query.release_id {
+        Some(release_id) => match state.release().list_assets(&actor, release_id).await {
+            Ok(items) => {
+                let total = i64::try_from(items.len()).unwrap_or(i64::MAX);
+                (items, total, None)
             }
-            (rows, page.total, None)
-        }
-        Err(_) => (
-            Vec::new(),
-            0,
-            Some(if locale == Locale::En {
-                "Assets are temporarily unavailable.".to_owned()
-            } else {
-                "资产列表暂时无法读取。".to_owned()
-            }),
-        ),
+            Err(_) => (Vec::new(), 0, Some(asset_load_error(locale))),
+        },
+        None => match state.release().list_all_assets(&actor, page_query).await {
+            Ok(page) => (page.items, page.total, None),
+            Err(_) => (Vec::new(), 0, Some(asset_load_error(locale))),
+        },
     };
-    let previous_href = (page_query.page > 1).then(|| asset_href(page_query.page - 1, locale));
-    let next_href = (i64::from(page_query.page) * i64::from(page_query.size) < total)
-        .then(|| asset_href(page_query.page + 1, locale));
+    let mut rows = Vec::with_capacity(assets.len());
+    for asset in assets {
+        let sources = state.download().list_sources(&actor, asset.id).await;
+        let release = state.release().get_release(&actor, asset.release_id).await;
+        rows.extend(AssetRow::new(asset, sources, release));
+    }
+    let selected_release_label = query.release_id.and_then(|release_id| {
+        release_options
+            .iter()
+            .find(|option| option.id == release_id.to_string())
+            .map(|option| option.label.clone())
+    });
+    let previous_href = query
+        .release_id
+        .is_none()
+        .then(|| (page_query.page > 1).then(|| asset_href(page_query.page - 1, locale)))
+        .flatten();
+    let next_href = query
+        .release_id
+        .is_none()
+        .then(|| {
+            (i64::from(page_query.page) * i64::from(page_query.size) < total)
+                .then(|| asset_href(page_query.page + 1, locale))
+        })
+        .flatten();
     let parts = shared::page_parts(PageId::AdminAssets, locale, &session);
     shared::render(&AssetsTemplate {
         view: parts.view,
@@ -110,12 +136,25 @@ pub(crate) async fn page(
         rows,
         release_options,
         release_options_error,
+        selected_release_label,
         load_error,
-        page_number: page_query.page,
+        page_number: if query.release_id.is_some() {
+            1
+        } else {
+            page_query.page
+        },
         total,
         previous_href,
         next_href,
     })
+}
+
+fn asset_load_error(locale: Locale) -> String {
+    if locale == Locale::En {
+        "Assets are temporarily unavailable.".to_owned()
+    } else {
+        "资产列表暂时无法读取。".to_owned()
+    }
 }
 
 impl AssetRow {
@@ -183,6 +222,8 @@ impl AssetRow {
                 release_state_error,
                 identity_mutable,
                 source_mutable,
+                supports_updater_signature: asset.platform == "windows"
+                    && matches!(asset.package_kind.as_str(), "exe" | "msi" | "zip"),
             }
         };
         match sources {
@@ -247,7 +288,7 @@ mod tests {
     use cloud_site::content_service;
 
     #[test]
-    fn template_keeps_download_management_simple_and_strongly_validated() {
+    fn updater_signature_scope_keeps_download_management_simple() {
         let asset_id = "01917f21-9f82-7ca4-b1dd-034518738965";
         let source_id = "01917f21-9f82-7ca4-b1dd-034518738966";
         let body = AssetsTemplate {
@@ -274,12 +315,14 @@ mod tests {
                 release_state_error: false,
                 identity_mutable: true,
                 source_mutable: true,
+                supports_updater_signature: true,
             }],
             release_options: vec![ReleaseOption {
                 id: "01917f21-9f82-7ca4-b1dd-034518738967".to_owned(),
                 label: "7.0.0 · stable · validating".to_owned(),
             }],
             release_options_error: false,
+            selected_release_label: Some("7.0.0 · stable · validating".to_owned()),
             load_error: None,
             page_number: 1,
             total: 1,
@@ -294,10 +337,16 @@ mod tests {
         assert!(body.contains("name=\"release_id\""));
         assert!(body.contains("name=\"source_mode\" value=\"local\" checked"));
         assert!(body.contains("name=\"source_mode\" value=\"external\""));
+        assert!(body.contains("class=\"admin-download-method-options\""));
+        assert!(body.contains("仅显示 7.0.0 · stable · validating"));
+        assert!(body.contains("查看全部版本"));
         assert!(body.contains("name=\"file\""));
+        assert!(body.contains("name=\"updater_signature\""));
+        assert!(body.contains("data-download-signature"));
         assert!(body.contains("name=\"external_url\""));
         assert!(body.contains("value=\"macos\" disabled"));
         assert!(body.contains("value=\"ios\" disabled"));
+        assert!(!body.contains("value=\"msi\""));
         assert!(body.contains("data-platform=\"android\">APK"));
         assert!(!body.contains(">AAB<"));
         assert!(body.contains("data-download-validation"));
@@ -307,8 +356,22 @@ mod tests {
         assert!(!body.contains("name=\"provider_name\""));
         assert!(!body.contains("name=\"sort_order\""));
         assert!(body.contains(&format!("hx-post=\"/admin/assets/{asset_id}\"")));
+        assert!(body.contains(&format!(
+            "hx-post=\"/admin/assets/{asset_id}/updater-signature\""
+        )));
         assert!(body.contains(&format!("hx-post=\"/admin/sources/{source_id}\"")));
         assert!(body.contains(&format!("hx-post=\"/admin/sources/{source_id}/delete\"")));
         assert!(!body.contains("client<script>.exe"));
+
+        let admin_js = include_str!("../../../../static/js/admin.js");
+        assert!(admin_js.contains("function adminSyncUpdaterSignature(form)"));
+        assert!(admin_js.contains("platform.value === \"windows\""));
+        assert!(admin_js.contains("[\"exe\", \"zip\"].includes(packages.value)"));
+        assert!(!admin_js.contains("[\"exe\", \"msi\", \"zip\"]"));
+        let template = include_str!("../../../../templates/admin-assets.html");
+        assert!(template.contains("{% if row.supports_updater_signature %}"));
+        let shell = include_str!("../../../../templates/admin.html");
+        assert!(shell.contains("admin.js?v=20260828-no-msi-upload"));
+        assert!(shell.contains("admin-components.css?v=20260822-compact-download-method"));
     }
 }

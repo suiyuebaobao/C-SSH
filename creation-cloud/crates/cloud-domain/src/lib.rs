@@ -6,6 +6,7 @@ mod admin_login_name;
 mod auth;
 mod error;
 mod page;
+mod release_contract;
 mod request_context;
 mod semantic_version;
 
@@ -16,6 +17,7 @@ pub use admin_login_name::{
 pub use auth::AuthenticatedSession;
 pub use error::{AppError, AppResult, SyncResyncReason};
 pub use page::{Page, PageQuery};
+pub use release_contract::{FormalReleaseAssetIdentity, formal_release_asset_identities};
 pub use request_context::{
     current_request_id, mark_semantic_audit_recorded, with_request_id, with_semantic_audit_tracking,
 };

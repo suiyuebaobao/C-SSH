@@ -76,6 +76,7 @@ mod tests {
                 file_name: "creation-ssh-example.msi".to_owned(),
                 byte_size: 123,
                 sha256: "example-sha256".to_owned(),
+                updater_signature: None,
                 sources: vec![PublicSource {
                     id: source_id,
                     source_kind: SourceKind::Local,

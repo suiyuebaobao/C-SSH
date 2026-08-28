@@ -18,6 +18,7 @@ pub struct AppServices {
     pub host: cloud_host::Service,
     pub maintenance: cloud_maintenance::Service,
     pub model: cloud_model::Service,
+    pub notification: cloud_notification::Service,
     pub release: cloud_release::Service,
     pub seo: cloud_seo::Service,
     pub site_content: cloud_site_content::Service,
@@ -31,17 +32,31 @@ impl AppServices {
         let site_media =
             cloud_site_media::Service::new(pool.clone(), config.site_media_root.clone());
         let site_content = cloud_site_content::Service::new(pool.clone(), site_media.clone());
-        let auth = match config.smtp.as_ref() {
-            Some(smtp) => cloud_auth::Service::with_verification(
-                pool.clone(),
-                config.session_ttl,
-                smtp.verification_key().to_vec(),
-                Arc::new(SmtpVerificationMailer::new(
+        let (auth, host) = match config.smtp.as_ref() {
+            Some(smtp) => {
+                let mailer = Arc::new(SmtpVerificationMailer::new(
                     smtp,
                     config.public_base_url.as_str(),
-                )?),
+                )?);
+                let verification_key = smtp.verification_key().to_vec();
+                (
+                    cloud_auth::Service::with_verification(
+                        pool.clone(),
+                        config.session_ttl,
+                        verification_key.clone(),
+                        mailer.clone(),
+                    ),
+                    cloud_host::Service::with_protection_verification(
+                        pool.clone(),
+                        verification_key,
+                        mailer,
+                    )?,
+                )
+            }
+            None => (
+                cloud_auth::Service::new(pool.clone(), config.session_ttl),
+                cloud_host::Service::new(pool.clone()),
             ),
-            None => cloud_auth::Service::new(pool.clone(), config.session_ttl),
         };
         Ok(Self {
             admin: cloud_admin::Service::new(pool.clone()),
@@ -50,9 +65,10 @@ impl AppServices {
             device: cloud_device::Service::new(pool.clone()),
             download: cloud_download::Service::new(pool.clone(), config.download_root.clone()),
             feedback: cloud_feedback::Service::new(pool.clone()),
-            host: cloud_host::Service::new(pool.clone()),
+            host,
             maintenance: cloud_maintenance::Service::new(pool.clone()),
             model: cloud_model::Service::new(pool.clone()),
+            notification: cloud_notification::Service::new(pool.clone()),
             release: cloud_release::Service::new(pool.clone()),
             seo: cloud_seo::Service::new(pool.clone()),
             site_content,

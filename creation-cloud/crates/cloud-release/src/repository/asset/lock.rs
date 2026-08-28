@@ -8,7 +8,7 @@ use crate::{ReleaseAsset, model::AssetRow, repository::map_read_error};
 
 pub(crate) const LOCK_ASSET_SQL: &str = r#"
     SELECT id, release_id, platform, architecture, package_kind,
-           file_name, byte_size, sha256, created_at
+           file_name, byte_size, sha256, installed_sha256, created_at
     FROM release_assets
     WHERE id = $1
     FOR UPDATE

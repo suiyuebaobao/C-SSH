@@ -3,6 +3,8 @@
 mod account_history;
 pub(crate) mod aggregation;
 pub(crate) mod inspection;
+mod installed_identity;
+mod policy;
 mod public;
 mod simplified_upload;
 mod source;

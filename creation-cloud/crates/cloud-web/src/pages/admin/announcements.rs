@@ -8,7 +8,8 @@ use axum::{
     response::{Html, Response},
 };
 use cloud_announcement::{
-    Announcement, CreateAnnouncementInput, ReplaceAnnouncementInput, TransitionAnnouncementInput,
+    Announcement, AnnouncementPriority, CreateAnnouncementInput, ReplaceAnnouncementInput,
+    TransitionAnnouncementInput,
 };
 use cloud_domain::{AppResult, AuthenticatedSession};
 use cloud_site::{Locale, PageId, SiteView};
@@ -25,6 +26,7 @@ pub(crate) struct AnnouncementForm {
     body_zh_cn: String,
     title_en: String,
     body_en: String,
+    priority: AnnouncementPriority,
     expected_revision: Option<i64>,
     lang: Option<String>,
 }
@@ -41,6 +43,7 @@ struct AnnouncementRow {
     body_zh_cn: String,
     title_en: String,
     body_en: String,
+    priority: &'static str,
     status: &'static str,
     revision: i64,
     updated_at: String,
@@ -54,6 +57,7 @@ impl From<Announcement> for AnnouncementRow {
             body_zh_cn: value.body_zh_cn,
             title_en: value.title_en,
             body_en: value.body_en,
+            priority: value.priority.as_str(),
             status: value.status.as_str(),
             revision: value.revision,
             updated_at: value.updated_at.format("%Y-%m-%d %H:%M UTC").to_string(),
@@ -130,6 +134,7 @@ pub(crate) async fn create(
         body_zh_cn: form.body_zh_cn,
         title_en: form.title_en,
         body_en: form.body_en,
+        priority: form.priority,
     };
     match state.announcement().create_admin(&actor, input).await {
         Ok(_) => shared::action_success(&headers, "/admin/announcements", locale),
@@ -161,6 +166,7 @@ pub(crate) async fn update(
         body_zh_cn: form.body_zh_cn,
         title_en: form.title_en,
         body_en: form.body_en,
+        priority: form.priority,
     };
     match state.announcement().replace_admin(&actor, id, input).await {
         Ok(_) => shared::action_success(&headers, "/admin/announcements", locale),
@@ -230,5 +236,45 @@ async fn transition(
     match result {
         Ok(()) => shared::action_success(&headers, "/admin/announcements", locale),
         Err(error) => shared::action_error(locale, error),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    const TEMPLATE: &str = include_str!("../../../templates/admin-announcements.html");
+
+    #[test]
+    fn announcement_forms_expose_only_the_closed_priority_set() {
+        assert_eq!(TEMPLATE.matches("name=\"priority\"").count(), 3);
+        for value in ["normal", "important", "critical"] {
+            assert!(
+                TEMPLATE.contains(&format!("value=\"{value}\"")),
+                "公告表单缺少优先级 {value}"
+            );
+        }
+        assert!(TEMPLATE.contains("row.priority == \"critical\""));
+        assert!(!TEMPLATE.contains("value=\"urgent\""));
+    }
+
+    #[test]
+    fn account_notification_form_is_plain_language_and_has_no_internal_history() {
+        assert!(TEMPLATE.contains("安全检查提醒"));
+        assert!(TEMPLATE.contains("Security review required"));
+        assert!(TEMPLATE.contains("一般"));
+        assert!(!TEMPLATE.contains("name=\"resource_id\""));
+        assert!(!TEMPLATE.contains("notification_rows"));
+        assert!(!TEMPLATE.contains("<th>kind</th>"));
+    }
+
+    #[test]
+    fn draft_and_published_announcements_offer_edit_and_delete_without_hide() {
+        assert!(TEMPLATE.contains("row.status == \"draft\" || row.status == \"published\""));
+        assert!(TEMPLATE.contains("button button-danger"));
+        assert!(TEMPLATE.contains("客户端将不再显示"));
+        assert!(TEMPLATE.contains("网站仍保留历史记录"));
+        assert!(
+            TEMPLATE.contains("{% if row.status != \"draft\" %}<div class=\"admin-simple-copy\"")
+        );
+        assert!(!TEMPLATE.contains("/hide"));
     }
 }

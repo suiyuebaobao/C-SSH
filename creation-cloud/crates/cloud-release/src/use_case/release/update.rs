@@ -4,7 +4,8 @@ use cloud_domain::{AdminActor, AppError, AppResult};
 use uuid::Uuid;
 
 use crate::{
-    Release, ReleaseStatus, Service, UpdateReleaseInput, authorization, repository, validation,
+    Release, ReleaseAsset, ReleaseStatus, Service, UpdateReleaseInput, authorization, repository,
+    validation,
 };
 
 impl Service {
@@ -20,16 +21,43 @@ impl Service {
         let input = normalize(input)?;
         ensure_update_allowed(&current, &input)?;
 
-        if input.status == Some(ReleaseStatus::Published)
-            && repository::asset::list::execute(&self.pool, id)
-                .await?
-                .is_empty()
+        if current.status == ReleaseStatus::Validating
+            && input.status == Some(ReleaseStatus::Published)
         {
-            return Err(AppError::Conflict("至少登记一个资产后才能发布版本".into()));
+            let assets = repository::asset::list::execute(&self.pool, id).await?;
+            ensure_formal_asset_shape(&current.version, &assets)?;
+        }
+        if input.status == Some(ReleaseStatus::Published)
+            && repository::asset::signature::has_invalid_metadata(&self.pool, id).await?
+        {
+            return Err(AppError::Conflict(
+                "Windows 正式资产必须有 updater signature，其他资产不得携带该字段".into(),
+            ));
         }
 
         repository::release::update::execute(&self.pool, id, &input).await
     }
+}
+
+fn ensure_formal_asset_shape(version: &str, assets: &[ReleaseAsset]) -> AppResult<()> {
+    let expected = cloud_domain::formal_release_asset_identities(version)
+        .ok_or_else(|| AppError::Internal("数据库中的版本号无效".into()))?;
+    if assets.len() != expected.len()
+        || expected.iter().any(|identity| {
+            !assets.iter().any(|asset| {
+                (
+                    asset.platform.as_str(),
+                    asset.architecture.as_str(),
+                    asset.package_kind.as_str(),
+                ) == *identity
+            })
+        })
+    {
+        return Err(AppError::Conflict(
+            "发布版本的正式资产形态与版本合同不一致".into(),
+        ));
+    }
+    Ok(())
 }
 
 pub(crate) fn normalize(input: UpdateReleaseInput) -> AppResult<UpdateReleaseInput> {
@@ -77,4 +105,42 @@ pub(crate) const fn valid_transition(from: ReleaseStatus, to: ReleaseStatus) -> 
         ) | (ReleaseStatus::Revoked, ReleaseStatus::Revoked)
             | (ReleaseStatus::Hidden, ReleaseStatus::Hidden)
     )
+}
+
+#[cfg(test)]
+mod release_shape_tests {
+    use chrono::Utc;
+
+    use super::*;
+
+    fn asset(platform: &str, architecture: &str, package_kind: &str) -> ReleaseAsset {
+        ReleaseAsset {
+            id: Uuid::now_v7(),
+            release_id: Uuid::now_v7(),
+            platform: platform.into(),
+            architecture: architecture.into(),
+            package_kind: package_kind.into(),
+            file_name: "asset.bin".into(),
+            byte_size: 1,
+            sha256: "a".repeat(64),
+            installed_sha256: None,
+            created_at: Utc::now(),
+        }
+    }
+
+    #[test]
+    fn publishing_uses_the_versioned_three_or_four_asset_contract() {
+        let legacy = vec![
+            asset("windows", "x86_64", "exe"),
+            asset("windows", "x86_64", "msi"),
+            asset("windows", "x86_64", "zip"),
+            asset("android", "aarch64", "apk"),
+        ];
+        assert!(ensure_formal_asset_shape("0.8.7", &legacy).is_ok());
+        assert!(ensure_formal_asset_shape("0.8.8", &legacy).is_err());
+
+        let current = vec![legacy[0].clone(), legacy[2].clone(), legacy[3].clone()];
+        assert!(ensure_formal_asset_shape("0.8.8", &current).is_ok());
+        assert!(ensure_formal_asset_shape("0.8.7", &current).is_err());
+    }
 }

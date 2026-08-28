@@ -1,34 +1,130 @@
 {% extends "admin.html" %}
 
-{% block admin_content %}
-<section class="admin-section" aria-labelledby="create-release-heading">
-  <div class="admin-section-heading"><div><h2 id="create-release-heading">{% if is_en %}Create release{% else %}创建版本{% endif %}</h2><p>{% if is_en %}Bilingual notes are required before the release enters validation.{% else %}版本进入校验前必须提供完整双语说明。{% endif %}</p></div></div>
-  <form class="admin-form-grid" hx-post="/admin/releases" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-    <label class="admin-field">{% if is_en %}Version{% else %}版本号{% endif %}<input name="version" required maxlength="64" autocomplete="off" placeholder="0.7.0"></label>
-    <label class="admin-field">{% if is_en %}Channel{% else %}渠道{% endif %}<select name="channel" required><option value="stable">stable</option><option value="beta">beta</option><option value="nightly">nightly</option></select></label>
-    <label class="admin-field">中文标题<input name="title_zh" required maxlength="200"></label><label class="admin-field">English title<input name="title_en" required maxlength="200"></label>
-    <label class="admin-field">中文发布说明<textarea name="notes_zh" required maxlength="20000"></textarea></label><label class="admin-field">English release notes<textarea name="notes_en" required maxlength="20000"></textarea></label>
-    <button class="button button-primary" type="submit">{% if is_en %}Create draft{% else %}创建草稿{% endif %}</button>
-  </form>
-</section>
-<section class="admin-section" aria-labelledby="releases-heading">
-  <div class="admin-section-heading"><div><h2 id="releases-heading">{% if is_en %}Release workflow{% else %}版本工作流{% endif %}</h2><p>{% if is_en %}State transitions remain one-way and are revalidated by the service.{% else %}状态迁移保持单向，并由领域服务重新校验。{% endif %}</p></div></div>
-  {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
-  {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No releases{% else %}暂无版本{% endif %}</strong><p>{% if is_en %}Create the first draft above.{% else %}可在上方创建第一个草稿。{% endif %}</p></div>{% endif %}
-  {% for row in rows %}<article class="workspace-section" id="release-{{ row.id }}">
-    <header class="admin-section-heading"><div><h3>{{ row.version }} · {{ row.channel }}</h3><p><span class="admin-mono">{{ row.id }}</span> · {{ row.updated_at }}</p></div><span class="status-badge" data-tone="{% if row.status == "published" %}success{% else if row.status == "revoked" || row.status == "hidden" %}danger{% else %}warning{% endif %}">{{ row.status }}</span></header>
-    <div class="admin-split">{% if row.status == "draft" || row.status == "validating" %}<form class="admin-form-grid" hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-      {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<label class="admin-field">中文标题<input name="title_zh" value="{{ row.title_zh }}" maxlength="200"></label><label class="admin-field">English title<input name="title_en" value="{{ row.title_en }}" maxlength="200"></label><label class="admin-field">中文说明<textarea name="notes_zh" maxlength="20000">{{ row.notes_zh }}</textarea></label><label class="admin-field">English notes<textarea name="notes_en" maxlength="20000">{{ row.notes_en }}</textarea></label><button class="button button-secondary" type="submit">{% if is_en %}Save metadata{% else %}保存元数据{% endif %}</button>
-    </form>{% else %}<div><h4>{{ row.title_zh }} / {{ row.title_en }}</h4><pre class="admin-audit-details">{{ row.notes_zh }}
+{% block admin_styles %}<link rel="stylesheet" href="/static/css/admin-releases.css?v=20260820-simple-release">{% endblock %}
 
-{{ row.notes_en }}</pre></div>{% endif %}<div><p>{% if is_en %}Published at{% else %}发布时间{% endif %}: <span class="admin-mono">{{ row.published_at }}</span></p><div class="admin-actions">
-      {% if row.status == "draft" %}<form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Move this release into validation?{% else %}确认将版本推进到校验中？{% endif %}"><input type="hidden" name="status" value="validating">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-primary" type="submit">{% if is_en %}Start validation{% else %}开始校验{% endif %}</button></form>{% endif %}
-      {% if row.status == "validating" %}<form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this release? At least one registered asset is required.{% else %}确认发布该版本？必须至少登记一个资产。{% endif %}"><input type="hidden" name="status" value="published">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button></form>{% endif %}
-      {% if row.status == "published" %}<form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke this published release? This cannot be undone.{% else %}确认撤销已发布版本？该操作不可逆。{% endif %}"><input type="hidden" name="status" value="revoked">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button></form><form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Hide this published release? This cannot be undone.{% else %}确认隐藏已发布版本？该操作不可逆。{% endif %}"><input type="hidden" name="status" value="hidden">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Hide{% else %}隐藏{% endif %}</button></form>{% endif %}
-      {% if row.status == "draft" %}<form hx-post="/admin/releases/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft release and its mutable records?{% else %}确认删除该草稿版本及其可变记录？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Delete draft{% else %}删除草稿{% endif %}</button></form>{% endif %}
-    </div></div></div>
-  </article>{% endfor %}
-  {% if load_error.is_none() %}<nav class="admin-pagination" aria-label="{% if is_en %}Release pagination{% else %}版本分页{% endif %}">{% if let Some(href) = previous_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Previous{% else %}上一页{% endif %}</a>{% endif %}<span>{% if is_en %}Page{% else %}第{% endif %} {{ page_number }} · {{ total }} {% if is_en %}releases{% else %}个版本{% endif %}</span>{% if let Some(href) = next_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Next{% else %}下一页{% endif %}</a>{% endif %}</nav>{% endif %}
-</section>
+{% block admin_content %}
+<div class="release-page">
+  <section class="release-quickstart" aria-labelledby="release-quickstart-heading">
+    <div class="admin-section-heading">
+      <div>
+        <p class="release-kicker">{% if is_en %}SIMPLE RELEASE FLOW{% else %}傻瓜式发布流程{% endif %}</p>
+        <h2 id="release-quickstart-heading">{% if is_en %}Three steps to publish{% else %}只做三步，就能发布{% endif %}</h2>
+      </div>
+    </div>
+    <ol class="release-steps">
+      <li><span>1</span><div><strong>{% if is_en %}Create a version{% else %}创建版本{% endif %}</strong><small>{% if is_en %}Enter the version and bilingual notes.{% else %}填写版本号和双语说明。{% endif %}</small></div></li>
+      <li><span>2</span><div><strong>{% if is_en %}Upload three files{% else %}上传三个文件{% endif %}</strong><small>{% if is_en %}Windows × 2 and Android × 1.{% else %}Windows 两个，Android 一个。{% endif %}</small></div></li>
+      <li><span>3</span><div><strong>{% if is_en %}Publish and choose who must update{% else %}发布并选择强制更新版本{% endif %}</strong><small>{% if is_en %}The system validates the files before publishing.{% else %}系统会先检查文件，再允许发布。{% endif %}</small></div></li>
+    </ol>
+  </section>
+
+  <div class="release-control-grid">
+    <section class="admin-section release-card release-create-card" aria-labelledby="create-release-heading">
+      <div class="admin-section-heading">
+        <div><span class="release-step-label">1</span><h2 id="create-release-heading">{% if is_en %}Create a version{% else %}创建新版本{% endif %}</h2><p>{% if is_en %}Start here. Advanced details stay hidden until needed.{% else %}从这里开始，其余复杂信息按需展开。{% endif %}</p></div>
+      </div>
+      <details class="release-create-panel">
+        <summary><strong>{% if is_en %}Create a new version{% else %}＋ 创建新版本{% endif %}</strong><small>{% if is_en %}About one minute{% else %}大约 1 分钟{% endif %}</small></summary>
+        <form class="admin-form-grid release-create-form" hx-post="/admin/releases" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+          {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+          <label class="admin-field">{% if is_en %}Version{% else %}版本号{% endif %}<input name="version" required maxlength="64" autocomplete="off" placeholder="0.8.2"></label>
+          <label class="admin-field">{% if is_en %}Channel{% else %}发布通道{% endif %}<select name="channel" required><option value="stable">stable</option><option value="beta">beta</option><option value="nightly">nightly</option></select></label>
+          <label class="admin-field">中文标题<input name="title_zh" required maxlength="200" placeholder="Creation-SSH 0.8.2"></label>
+          <label class="admin-field">English title<input name="title_en" required maxlength="200" placeholder="Creation-SSH 0.8.2"></label>
+          <label class="admin-field release-field-wide">中文发布说明<textarea name="notes_zh" required maxlength="20000" placeholder="告诉用户这次更新了什么。"></textarea></label>
+          <label class="admin-field release-field-wide">English release notes<textarea name="notes_en" required maxlength="20000" placeholder="Tell users what changed in this release."></textarea></label>
+          <button class="button button-primary release-field-wide" type="submit">{% if is_en %}Create draft{% else %}创建草稿，进入下一步{% endif %}</button>
+        </form>
+      </details>
+    </section>
+
+    <section class="admin-section release-card release-policy-card" aria-labelledby="update-policy-heading">
+      <div class="admin-section-heading">
+        <div><span class="release-step-label">3</span><h2 id="update-policy-heading">{% if is_en %}Update policy{% else %}更新范围{% endif %}</h2><p>{% if is_en %}Choose the target and the versions that cannot continue.{% else %}选择目标版本，以及哪些旧版本必须更新。{% endif %}</p></div>
+      </div>
+      {% if let Some(message) = policy_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+      {% if let Some(policy) = policy %}
+      <form class="admin-form-grid release-policy-form" hx-post="/admin/update-policy/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+        <input type="hidden" name="expected_revision" value="{{ policy.draft_revision }}">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <label class="release-switch"><input type="checkbox" name="enabled" value="true" {% if policy.enabled %}checked{% endif %}><span><strong>{% if is_en %}Enable update policy{% else %}启用更新策略{% endif %}</strong><small>{% if is_en %}Turn this on only when the target is ready.{% else %}目标版本准备好后再开启。{% endif %}</small></span></label>
+        <label class="admin-field"><strong>{% if is_en %}Versions that must update{% else %}必须更新的旧版本{% endif %}</strong><textarea name="forced_versions" maxlength="8192" placeholder="0.8.1">{{ policy.forced_versions }}</textarea><small>{% if is_en %}One version per line. Empty means optional update.{% else %}每行一个版本；留空就是普通可选更新。{% endif %}</small></label>
+        <label class="admin-field"><strong>{% if is_en %}Update target{% else %}更新到哪个版本{% endif %}</strong><select name="target_release_id"><option value="">—</option>{% for target in policy.targets %}<option value="{{ target.id }}" {% if target.selected %}selected{% endif %} {% if !target.eligible %}disabled{% endif %}>{{ target.label }}</option>{% endfor %}</select><small>{% if is_en %}Only complete, published releases can be selected.{% else %}只有文件完整并已发布的版本可以选择。{% endif %}</small></label>
+        <details class="release-advanced">
+          <summary>{% if is_en %}Advanced verification{% else %}高级校验{% endif %}</summary>
+          <label class="release-check"><input type="checkbox" name="sha256_enabled" value="true" {% if policy.sha256_enabled %}checked{% endif %}><span><strong>SHA-256</strong><small>{% if is_en %}Verify SHA-256 in addition to updater signature.{% else %}在更新签名之外，再校验安装文件摘要。{% endif %}</small></span></label>
+        </details>
+        <button class="button button-secondary" type="submit">{% if is_en %}Save settings{% else %}保存设置{% endif %}</button>
+      </form>
+      <form class="admin-actions release-policy-publish" hx-post="/admin/update-policy/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this update policy revision?{% else %}确认发布当前更新策略？{% endif %}">
+        <input type="hidden" name="expected_draft_revision" value="{{ policy.draft_revision }}">
+        <input type="hidden" name="confirmation" value="publish_update_policy">
+        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+        <span class="status-badge">{% if is_en %}Published revision{% else %}已发布修订{% endif %} {{ policy.published_revision }}</span>
+        <button class="button button-primary" type="submit">{% if is_en %}Publish policy{% else %}发布更新策略{% endif %}</button>
+      </form>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="admin-section release-workflow" aria-labelledby="releases-heading">
+    <div class="admin-section-heading">
+      <div><span class="release-step-label">2</span><h2 id="releases-heading">{% if is_en %}Versions and next actions{% else %}版本与下一步{% endif %}</h2><p>{% if is_en %}Each card shows only the next useful action. Technical details stay folded.{% else %}每张卡片只突出当前状态和下一步，技术细节默认收起。{% endif %}</p></div>
+      <a class="button button-secondary" href="/admin/assets{% if is_en %}?lang=en{% endif %}">{% if is_en %}Open file uploads{% else %}管理发布文件{% endif %}</a>
+    </div>
+    {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
+    {% if rows.is_empty() && load_error.is_none() %}<div class="admin-empty"><strong>{% if is_en %}No releases yet{% else %}还没有版本{% endif %}</strong><p>{% if is_en %}Use “Create a new version” above.{% else %}点击上方“创建新版本”即可开始。{% endif %}</p></div>{% endif %}
+    <div class="release-list">
+    {% for row in rows %}
+      <article class="release-item" id="release-{{ row.id }}">
+        <header class="release-item-header">
+          <div><strong class="release-version">{{ row.version }}</strong><span class="release-channel">{{ row.channel }}</span><small>{% if is_en %}Updated{% else %}更新于{% endif %} {{ row.updated_at }}</small></div>
+          <span class="status-badge" data-tone="{% if row.status == "published" %}success{% else if row.status == "revoked" || row.status == "hidden" %}danger{% else %}warning{% endif %}">{{ row.status }}</span>
+        </header>
+        <div class="release-item-main">
+          <div class="release-item-copy"><h3>{{ row.title_zh }}</h3><p>{{ row.title_en }}</p>{% if row.status == "published" %}<small>{% if is_en %}Published{% else %}发布于{% endif %} {{ row.published_at }}</small>{% endif %}</div>
+          <div class="release-next-action">
+            {% if row.status == "draft" %}
+              <a class="button button-primary" href="/admin/assets{% if is_en %}?lang=en{% endif %}">{% if is_en %}2. Upload three files{% else %}2. 上传三个文件{% endif %}</a>
+              <form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Move this release into validation?{% else %}确认资产已经上传完成，并开始校验？{% endif %}"><input type="hidden" name="status" value="validating">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Files ready · validate{% else %}文件齐了，开始校验{% endif %}</button></form>
+            {% else if row.status == "validating" %}
+              <form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish this release now?{% else %}确认发布这个版本？{% endif %}"><input type="hidden" name="status" value="published">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-primary" type="submit">{% if is_en %}3. Publish release{% else %}3. 发布版本{% endif %}</button></form>
+            {% else if row.status == "published" %}
+              <a class="button button-secondary" href="/admin/assets?release_id={{ row.id }}{% if is_en %}&amp;lang=en{% endif %}">{% if is_en %}View download files{% else %}查看下载文件{% endif %}</a>
+            {% endif %}
+          </div>
+        </div>
+        <details class="release-details">
+          <summary>{% if is_en %}Details and more actions{% else %}查看说明与更多操作{% endif %}</summary>
+          <div class="release-details-grid">
+            {% if row.status == "draft" || row.status == "validating" %}
+            <form class="admin-form-grid release-edit-form" hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+              {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+              <label class="admin-field">中文标题<input name="title_zh" value="{{ row.title_zh }}" maxlength="200"></label>
+              <label class="admin-field">English title<input name="title_en" value="{{ row.title_en }}" maxlength="200"></label>
+              <label class="admin-field release-field-wide">中文说明<textarea name="notes_zh" maxlength="20000">{{ row.notes_zh }}</textarea></label>
+              <label class="admin-field release-field-wide">English notes<textarea name="notes_en" maxlength="20000">{{ row.notes_en }}</textarea></label>
+              <button class="button button-secondary release-field-wide" type="submit">{% if is_en %}Save metadata{% else %}保存说明{% endif %}</button>
+            </form>
+            {% else %}
+            <div class="release-notes"><h4>{{ row.title_zh }} / {{ row.title_en }}</h4><pre class="admin-audit-details">{{ row.notes_zh }}
+
+{{ row.notes_en }}</pre></div>
+            {% endif %}
+            <aside class="release-technical"><small>{% if is_en %}Release ID{% else %}版本 ID{% endif %}</small><code class="admin-mono">{{ row.id }}</code>
+              {% if row.status == "draft" || row.status == "published" %}
+              <details class="release-danger"><summary>{% if is_en %}Irreversible actions{% else %}不可逆操作{% endif %}</summary><div class="admin-actions">
+                {% if row.status == "draft" %}<form hx-post="/admin/releases/{{ row.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft release?{% else %}确认删除这个草稿？{% endif %}">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Delete draft{% else %}删除草稿{% endif %}</button></form>{% endif %}
+                {% if row.status == "published" %}<form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke this release? This cannot be undone.{% else %}确认撤销这个版本？此操作无法恢复。{% endif %}"><input type="hidden" name="status" value="revoked">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button></form><form hx-post="/admin/releases/{{ row.id }}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Hide this release? This cannot be undone.{% else %}确认隐藏这个版本？此操作无法恢复。{% endif %}"><input type="hidden" name="status" value="hidden">{% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}<button class="button button-secondary" type="submit">{% if is_en %}Hide{% else %}隐藏{% endif %}</button></form>{% endif %}
+              </div></details>
+              {% endif %}
+            </aside>
+          </div>
+        </details>
+      </article>
+    {% endfor %}
+    </div>
+    {% if load_error.is_none() %}<nav class="admin-pagination" aria-label="{% if is_en %}Release pagination{% else %}版本分页{% endif %}">{% if let Some(href) = previous_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Previous{% else %}上一页{% endif %}</a>{% endif %}<span>{% if is_en %}Page{% else %}第{% endif %} {{ page_number }} · {{ total }} {% if is_en %}releases{% else %}个版本{% endif %}</span>{% if let Some(href) = next_href %}<a class="button button-secondary" href="{{ href }}">{% if is_en %}Next{% else %}下一页{% endif %}</a>{% endif %}</nav>{% endif %}
+  </section>
+</div>
 {% endblock %}

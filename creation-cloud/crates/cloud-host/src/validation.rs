@@ -6,11 +6,17 @@ use cloud_domain::{AppError, AppResult};
 use uuid::Uuid;
 
 use crate::{
-    HostChange, HostMetadataInput, HostOperation, PullAckRequest, PullMode, PullRequest,
-    PushRequest, RekeyResourceCandidate, RekeySyncRequest, ResetSyncRequest, ResourceKind,
+    HostChange, HostMetadataInput, HostOperation, LegacyPullRequest, PullAckRequest, PullMode,
+    PullRequest, PushRequest, RekeyResourceCandidate, RekeySyncRequest, ResetAuthorization,
+    ResetSyncRequest, ResourceKind, VerifyProtectionResetChallengeRequest,
 };
 
 mod opaque;
+mod protection;
+
+pub(crate) use protection::{
+    ValidatedEnvelope, change_protection, migrate_protection, setup_protection,
+};
 
 #[cfg(test)]
 pub(crate) use opaque::MAX_NONCE_BYTES;
@@ -50,6 +56,7 @@ pub(crate) struct ValidatedPush {
 
 pub(crate) fn push(request: &PushRequest) -> AppResult<ValidatedPush> {
     generation(request.sync_generation)?;
+    protection_version(request.protection_epoch, request.protection_revision, true)?;
     if request.base_revision < 0 {
         return Err(AppError::Validation("base_revision 不能为负数".to_owned()));
     }
@@ -102,6 +109,7 @@ pub(crate) fn push(request: &PushRequest) -> AppResult<ValidatedPush> {
 
 pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
     generation(request.sync_generation)?;
+    protection_version(request.protection_epoch, request.protection_revision, true)?;
     if request.since_revision < 0 {
         return Err(AppError::Validation("since_revision 不能为负数".to_owned()));
     }
@@ -138,6 +146,7 @@ pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
 
 pub(crate) fn ack(request: &PullAckRequest) -> AppResult<()> {
     generation(request.sync_generation)?;
+    protection_version(request.protection_epoch, request.protection_revision, true)?;
     if request.acknowledged_revision < 0 {
         return Err(AppError::Validation(
             "acknowledged_revision 不能为负数".to_owned(),
@@ -213,22 +222,99 @@ impl ValidatedRekeyResource {
 
 pub(crate) fn reset(request: &ResetSyncRequest) -> AppResult<()> {
     generation(request.sync_generation)?;
-    require_uuid(request.mutation_id, "mutation_id")
+    protection_version(request.expected_epoch, request.expected_revision, false)?;
+    if request.current_revision < 0 {
+        return Err(AppError::Validation(
+            "current_revision 不能为负数".to_owned(),
+        ));
+    }
+    require_uuid(request.mutation_id, "mutation_id")?;
+    if let ResetAuthorization::EmailVerification {
+        challenge_id,
+        authorization_token,
+    } = &request.authorization
+    {
+        require_uuid(*challenge_id, "challenge_id")?;
+        let mut token = opaque::decode_required(authorization_token, "authorization_token", 32)?;
+        let valid_length = token.len() == 32;
+        token.fill(0);
+        if !valid_length {
+            return Err(AppError::Validation(
+                "authorization_token 长度不合法".to_owned(),
+            ));
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn legacy_pull(request: LegacyPullRequest) -> AppResult<LegacyPullRequest> {
+    generation(request.sync_generation)?;
+    if request.expected_epoch != 0 || request.expected_revision != 0 {
+        return Err(AppError::Validation(
+            "legacy pull 必须绑定 protection 0/0".to_owned(),
+        ));
+    }
+    if !(1..=200).contains(&request.limit) {
+        return Err(AppError::Validation(
+            "legacy pull limit 必须在 1 到 200 之间".to_owned(),
+        ));
+    }
+    let cursor_parts = [
+        request.after_revision.is_some(),
+        request.after_resource_kind.is_some(),
+        request.after_resource_id.is_some(),
+    ];
+    if cursor_parts.iter().any(|value| *value) && !cursor_parts.iter().all(|value| *value) {
+        return Err(AppError::Validation(
+            "legacy pull 必须携带完整复合游标".to_owned(),
+        ));
+    }
+    if cursor_parts.iter().all(|value| *value) && request.snapshot_revision.is_none() {
+        return Err(AppError::Validation(
+            "legacy pull 续页必须绑定 snapshot_revision".to_owned(),
+        ));
+    }
+    if request.after_revision.is_some_and(|value| value <= 0) {
+        return Err(AppError::Validation(
+            "legacy pull after_revision 必须大于 0".to_owned(),
+        ));
+    }
+    if request
+        .after_resource_id
+        .is_some_and(|value| value.is_nil())
+    {
+        return Err(AppError::Validation(
+            "legacy pull after_resource_id 不能为空".to_owned(),
+        ));
+    }
+    if request.snapshot_revision.is_some_and(|value| value < 0) {
+        return Err(AppError::Validation(
+            "legacy pull snapshot_revision 不能为负数".to_owned(),
+        ));
+    }
+    Ok(request)
 }
 
 pub(crate) fn rekey(request: &RekeySyncRequest) -> AppResult<Vec<ValidatedRekeyResource>> {
     generation(request.sync_generation)?;
     require_uuid(request.mutation_id, "mutation_id")?;
-    if request.resources.len() > MAX_REKEY_RESOURCES {
+    resource_candidates(&request.resources, "rekey")
+}
+
+pub(crate) fn resource_candidates(
+    resources: &[RekeyResourceCandidate],
+    scope: &str,
+) -> AppResult<Vec<ValidatedRekeyResource>> {
+    if resources.len() > MAX_REKEY_RESOURCES {
         return Err(AppError::SyncCapacityExceeded(format!(
             "resources 不能超过 {MAX_REKEY_RESOURCES} 项"
         )));
     }
-    let mut unique = HashSet::with_capacity(request.resources.len());
+    let mut unique = HashSet::with_capacity(resources.len());
     let mut ciphertext_total = 0_usize;
     let mut auxiliary_total = 0_usize;
-    let mut validated = Vec::with_capacity(request.resources.len());
-    for resource in &request.resources {
+    let mut validated = Vec::with_capacity(resources.len());
+    for resource in resources {
         let (kind, resource_id, cloud_revision) = resource_identity(resource);
         require_uuid(resource_id, "resource_id")?;
         if !unique.insert((kind, resource_id)) {
@@ -276,7 +362,7 @@ pub(crate) fn rekey(request: &RekeySyncRequest) -> AppResult<Vec<ValidatedRekeyR
                 }
             }
         };
-        enforce_rekey_totals(ciphertext_total, auxiliary_total)?;
+        enforce_totals(ciphertext_total, auxiliary_total, scope)?;
         validated.push(value);
     }
     validated.sort_unstable_by_key(|resource| {
@@ -404,102 +490,10 @@ fn enforce_totals(ciphertext: usize, auxiliary: usize, scope: &str) -> AppResult
     Ok(())
 }
 
-fn enforce_rekey_totals(ciphertext: usize, auxiliary: usize) -> AppResult<()> {
-    if ciphertext > MAX_REKEY_CIPHERTEXT_BYTES {
-        return Err(AppError::SyncCapacityExceeded(
-            "rekey ciphertext 总量超过 32 MiB".to_owned(),
-        ));
-    }
-    if auxiliary > MAX_SYNC_AUXILIARY_BYTES {
-        return Err(AppError::SyncCapacityExceeded(
-            "rekey AI envelope 辅助数据总量超过 512 KiB".to_owned(),
-        ));
-    }
-    Ok(())
-}
-
 fn add_total(total: usize, value: usize, field: &str) -> AppResult<usize> {
     total
         .checked_add(value)
         .ok_or_else(|| AppError::Validation(format!("{field} 总量过大")))
 }
 
-fn validate_metadata(metadata: &HostMetadataInput) -> AppResult<()> {
-    validate_address(&metadata.address)?;
-    if metadata.port == 0 {
-        return Err(AppError::Validation(
-            "port must be between 1 and 65535".to_owned(),
-        ));
-    }
-    validate_text(&metadata.name, 128, "name")?;
-    validate_text(&metadata.platform, 32, "platform")?;
-    if metadata.tags.len() > 32 {
-        return Err(AppError::Validation("tags 不能超过 32 项".to_owned()));
-    }
-    let mut tags = HashSet::with_capacity(metadata.tags.len());
-    for tag in &metadata.tags {
-        validate_text(tag, 48, "tag")?;
-        if !tags.insert(tag) {
-            return Err(AppError::Validation("tags 不得重复".to_owned()));
-        }
-    }
-    Ok(())
-}
-
-fn validate_address(address: &str) -> AppResult<()> {
-    address
-        .parse::<IpAddr>()
-        .map(|_| ())
-        .map_err(|_| AppError::Validation("address 必须是纯 IPv4 或 IPv6 地址".to_owned()))
-}
-
-fn validate_text(value: &str, max_chars: usize, field: &str) -> AppResult<()> {
-    let count = value.chars().count();
-    if count == 0
-        || count > max_chars
-        || value.trim() != value
-        || value.chars().any(char::is_control)
-    {
-        return Err(AppError::Validation(format!("{field} 长度或字符不合法")));
-    }
-    Ok(())
-}
-
-fn decode_ciphertext(value: Option<&Option<String>>) -> AppResult<Option<Option<Vec<u8>>>> {
-    let Some(value) = value else {
-        return Ok(None);
-    };
-    let Some(value) = value.as_deref() else {
-        return Ok(Some(None));
-    };
-    opaque::decode_required(value, "ciphertext", MAX_CIPHERTEXT_BYTES)
-        .map(|value| Some(Some(value)))
-}
-
-fn generation(value: i64) -> AppResult<()> {
-    if value <= 0 {
-        Err(AppError::Validation(
-            "sync_generation 必须大于 0".to_owned(),
-        ))
-    } else {
-        Ok(())
-    }
-}
-
-fn positive_expected(value: Option<i64>) -> AppResult<i64> {
-    value
-        .filter(|revision| *revision > 0)
-        .ok_or_else(|| AppError::Validation("expected_revision 必须大于 0".to_owned()))
-}
-
-fn require_uuid(value: Uuid, field: &str) -> AppResult<()> {
-    if value.is_nil() {
-        Err(AppError::Validation(format!("{field} 不能为空")))
-    } else {
-        Ok(())
-    }
-}
-
-pub(crate) fn host_id(host_id: Uuid) -> AppResult<()> {
-    require_uuid(host_id, "host_id")
-}
+include!("validation/common.rs");

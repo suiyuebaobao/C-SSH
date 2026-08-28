@@ -35,7 +35,16 @@ impl Service {
             .package_kind
             .as_deref()
             .unwrap_or(&current.package_kind);
-        validation::asset_identity(platform, package_kind)?;
+        let architecture = input
+            .architecture
+            .as_deref()
+            .unwrap_or(&current.architecture);
+        validation::asset_identity_for_release(
+            &release.version,
+            platform,
+            architecture,
+            package_kind,
+        )?;
         let asset = repository::asset::update::execute(&mut transaction, id, &input).await?;
         transaction
             .commit()

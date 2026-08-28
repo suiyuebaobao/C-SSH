@@ -30,6 +30,7 @@ const ADMIN_PAGES_CSS: &str = include_str!("../static/css/admin-pages.css");
 const ADMIN_RECORD_PAGES_CSS: &str = include_str!("../static/css/admin-record-pages.css");
 const ADMIN_SITE_SIMPLE_CSS: &str = include_str!("../static/css/admin-site-simple.css");
 const ADMIN_SITE_CONTENT_CSS: &str = include_str!("../static/css/admin-site-content.css");
+const ADMIN_RELEASES_CSS: &str = include_str!("../static/css/admin-releases.css");
 const CONSOLE_CSS: &str = include_str!("../static/css/console.css");
 const SITE_JS: &str = include_str!("../static/js/site.js");
 const HOME_QR_JS: &str = include_str!("../static/js/home-qr.js");
@@ -92,6 +93,7 @@ pub(crate) fn router() -> Router {
             "/static/css/admin-site-content.css",
             get(admin_site_content_css),
         )
+        .route("/static/css/admin-releases.css", get(admin_releases_css))
         .route("/static/css/console.css", get(console_css))
         .route("/static/js/site.js", get(site_js))
         .route("/static/js/home-qr.js", get(home_qr_js))
@@ -200,6 +202,10 @@ async fn admin_site_simple_css() -> Response {
 
 async fn admin_site_content_css() -> Response {
     text_response(ADMIN_SITE_CONTENT_CSS, "text/css; charset=utf-8")
+}
+
+async fn admin_releases_css() -> Response {
+    text_response(ADMIN_RELEASES_CSS, "text/css; charset=utf-8")
 }
 
 async fn console_css() -> Response {

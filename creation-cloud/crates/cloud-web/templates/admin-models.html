@@ -6,7 +6,7 @@
     <div><h2 id="models-heading">{% if is_en %}Models{% else %}模型管理{% endif %}</h2></div>
   </div>
   <p class="admin-model-note">
-    {% if is_en %}Only the global model catalog is managed here. API keys and tokens normally stay in each client's secure storage; manual sync may upload only client-encrypted opaque account records. This catalog cannot receive, decrypt, or display credentials.{% else %}这里只管理全局模型目录；API Key/Token 平时保存在各客户端安全存储，手动同步也只能上传客户端加密的不透明账户记录。本目录不能接收明文、解密或回显凭据。{% endif %}
+    {% if is_en %}Only the global model catalog is managed here. API keys and tokens normally stay in each client's secure storage; manual sync may upload only client-encrypted opaque account records. Built-in web search runs in the clients; this website never receives or proxies search queries or page content.{% else %}这里只管理全局模型目录；API Key/Token 平时保存在各客户端安全存储，手动同步也只能上传客户端加密的不透明账户记录。内置网络搜索只在客户端运行，网站不接收或代理搜索词与页面正文。{% endif %}
   </p>
 
   <details class="admin-model-create">
@@ -25,6 +25,11 @@
         <legend>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</legend>
         <label class="admin-field">{% if is_en %}Base URL{% else %}Base URL{% endif %}<input name="anthropic_base_url" type="url" maxlength="512" placeholder="https://api.example.com/anthropic"></label>
         <label class="admin-field">{% if is_en %}Model ID{% else %}Model ID{% endif %}<input name="anthropic_model_name" maxlength="128" placeholder="example-model"></label>
+      </fieldset>
+      <fieldset class="admin-model-interface" data-api-format="responses_compatible">
+        <legend>{% if is_en %}Responses-compatible interface{% else %}Responses 兼容接口{% endif %}</legend>
+        <label class="admin-field">Base URL<input name="responses_base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1"></label>
+        <label class="admin-field">Model ID<input name="responses_model_name" maxlength="128" placeholder="example-model"></label>
       </fieldset>
       <div class="admin-model-options">
         <label><input name="enabled" type="checkbox" value="true" checked> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
@@ -65,6 +70,11 @@
             <legend>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</legend>
             <label class="admin-field">Base URL<input name="anthropic_base_url" type="url" value="{{ row.anthropic_base_url }}" maxlength="512"></label>
             <label class="admin-field">Model ID<input name="anthropic_model_name" value="{{ row.anthropic_model_name }}" maxlength="128"></label>
+          </fieldset>
+          <fieldset class="admin-model-interface" data-api-format="responses_compatible">
+            <legend>{% if is_en %}Responses-compatible interface{% else %}Responses 兼容接口{% endif %}</legend>
+            <label class="admin-field">Base URL<input name="responses_base_url" type="url" value="{{ row.responses_base_url }}" maxlength="512"></label>
+            <label class="admin-field">Model ID<input name="responses_model_name" value="{{ row.responses_model_name }}" maxlength="128"></label>
           </fieldset>
           <div class="admin-model-options">
             <label><input name="enabled" type="checkbox" value="true"{% if row.enabled %} checked{% endif %}> {% if is_en %}Enabled{% else %}启用{% endif %}</label>

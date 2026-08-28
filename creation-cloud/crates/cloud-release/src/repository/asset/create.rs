@@ -18,7 +18,7 @@ pub(crate) async fn execute(
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id, release_id, platform, architecture, package_kind,
-                  file_name, byte_size, sha256, created_at
+                  file_name, byte_size, sha256, installed_sha256, created_at
         "#,
     )
     .bind(Uuid::now_v7())

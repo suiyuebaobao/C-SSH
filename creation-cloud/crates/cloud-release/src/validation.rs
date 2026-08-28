@@ -1,6 +1,6 @@
 //! 集中校验版本和资产输入，避免 handler 与 SQL 重复业务规则。
 
-use cloud_domain::{AppError, AppResult};
+use cloud_domain::{AppError, AppResult, formal_release_asset_identities};
 use uuid::Uuid;
 
 pub(crate) const MAX_ASSET_BYTES: i64 = 4 * 1024 * 1024 * 1024;
@@ -97,6 +97,23 @@ pub(crate) fn asset_identity(platform: &str, package_kind: &str) -> AppResult<()
     Ok(())
 }
 
+pub(crate) fn asset_identity_for_release(
+    version: &str,
+    platform: &str,
+    architecture: &str,
+    package_kind: &str,
+) -> AppResult<()> {
+    asset_identity(platform, package_kind)?;
+    let expected = formal_release_asset_identities(version)
+        .ok_or_else(|| AppError::Internal("数据库中的版本号无效".into()))?;
+    if expected.len() == 3 && !expected.contains(&(platform, architecture, package_kind)) {
+        return Err(AppError::Validation(
+            "0.8.8 及后续版本只允许 Windows EXE/ZIP 与 Android arm64 APK".into(),
+        ));
+    }
+    Ok(())
+}
+
 pub(crate) fn sha256(value: &str) -> AppResult<String> {
     let normalized = value.trim().to_ascii_lowercase();
     if normalized.len() != 64 || !normalized.bytes().all(|byte| byte.is_ascii_hexdigit()) {
@@ -105,4 +122,20 @@ pub(crate) fn sha256(value: &str) -> AppResult<String> {
         ));
     }
     Ok(normalized)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_releases_reject_msi_while_legacy_release_mutations_remain_compatible() {
+        assert!(asset_identity_for_release("0.8.7", "windows", "x86_64", "msi").is_ok());
+        assert!(asset_identity_for_release("0.8.8", "windows", "x86_64", "exe").is_ok());
+        assert!(asset_identity_for_release("0.8.8", "windows", "x86_64", "zip").is_ok());
+        assert!(asset_identity_for_release("0.8.8", "android", "aarch64", "apk").is_ok());
+        assert!(asset_identity_for_release("0.8.8", "windows", "x86_64", "msi").is_err());
+        assert!(asset_identity_for_release("0.8.8", "linux", "x86_64", "appimage").is_err());
+        assert!(asset_identity_for_release("0.8.8", "android", "x86_64", "apk").is_err());
+    }
 }

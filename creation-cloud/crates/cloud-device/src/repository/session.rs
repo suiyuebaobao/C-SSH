@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppResult, PageQuery};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
@@ -150,6 +151,12 @@ pub(crate) async fn delete_any(
     .execute(&mut *transaction)
     .await
     .map_err(error::storage)?;
+    record_account_event(
+        &mut transaction,
+        target_account_id.expect("checked target account"),
+        AccountNotificationEvent::SessionRevoked { session_id },
+    )
+    .await?;
     transaction.commit().await.map_err(error::storage)?;
     cloud_domain::mark_semantic_audit_recorded();
     Ok(true)
@@ -196,6 +203,12 @@ async fn revoke(
     .execute(&mut *transaction)
     .await
     .map_err(error::storage)?;
+    record_account_event(
+        &mut transaction,
+        target_account_id,
+        AccountNotificationEvent::SessionRevoked { session_id },
+    )
+    .await?;
     transaction.commit().await.map_err(error::storage)?;
     cloud_domain::mark_semantic_audit_recorded();
     Ok(true)

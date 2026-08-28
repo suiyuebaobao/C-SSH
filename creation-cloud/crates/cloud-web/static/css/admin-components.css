@@ -62,6 +62,47 @@
   resize: vertical;
 }
 
+.admin-download-method {
+  padding: 0;
+  border: 0;
+}
+
+.admin-download-method legend {
+  margin-bottom: 6px;
+}
+
+.admin-download-method-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.admin-download-method-option {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.76rem;
+}
+
+.admin-download-method-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.admin-download-method-option input {
+  width: 16px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
 .admin-field input:focus-visible,
 .admin-field select:focus-visible,
 .admin-field textarea:focus-visible {

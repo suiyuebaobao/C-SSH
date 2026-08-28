@@ -62,6 +62,44 @@ impl FromStr for AnnouncementStatus {
     }
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AnnouncementPriority {
+    Normal,
+    Important,
+    Critical,
+}
+
+impl AnnouncementPriority {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Normal => "normal",
+            Self::Important => "important",
+            Self::Critical => "critical",
+        }
+    }
+}
+
+impl fmt::Display for AnnouncementPriority {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.as_str())
+    }
+}
+
+impl FromStr for AnnouncementPriority {
+    type Err = AppError;
+
+    fn from_str(value: &str) -> AppResult<Self> {
+        match value {
+            "normal" => Ok(Self::Normal),
+            "important" => Ok(Self::Important),
+            "critical" => Ok(Self::Critical),
+            _ => Err(AppError::Internal("数据库中的公告优先级无效".to_owned())),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub struct Announcement {
     pub id: Uuid,
@@ -69,6 +107,7 @@ pub struct Announcement {
     pub body_zh_cn: String,
     pub title_en: String,
     pub body_en: String,
+    pub priority: AnnouncementPriority,
     pub status: AnnouncementStatus,
     pub revision: i64,
     pub created_by: Uuid,
@@ -86,6 +125,7 @@ pub(crate) struct AnnouncementRow {
     pub body_zh_cn: String,
     pub title_en: String,
     pub body_en: String,
+    pub priority: String,
     pub status: String,
     pub revision: i64,
     pub created_by: Uuid,
@@ -118,6 +158,7 @@ impl TryFrom<AnnouncementRow> for Announcement {
             body_zh_cn: row.body_zh_cn,
             title_en: row.title_en,
             body_en: row.body_en,
+            priority: row.priority.parse()?,
             status: row.status.parse()?,
             revision: row.revision,
             created_by: row.created_by,
@@ -137,6 +178,7 @@ pub struct CreateAnnouncementInput {
     pub body_zh_cn: String,
     pub title_en: String,
     pub body_en: String,
+    pub priority: AnnouncementPriority,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -147,6 +189,7 @@ pub struct ReplaceAnnouncementInput {
     pub body_zh_cn: String,
     pub title_en: String,
     pub body_en: String,
+    pub priority: AnnouncementPriority,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize)]
@@ -166,6 +209,7 @@ pub struct PublicAnnouncement {
     pub id: Uuid,
     pub title: String,
     pub content: String,
+    pub priority: AnnouncementPriority,
     pub published_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -189,6 +233,7 @@ impl Announcement {
             id: self.id,
             title: title.clone(),
             content: content.clone(),
+            priority: self.priority,
             published_at,
             updated_at: self.updated_at,
         })
@@ -201,4 +246,5 @@ pub(crate) struct ValidatedAnnouncement {
     pub body_zh_cn: String,
     pub title_en: String,
     pub body_en: String,
+    pub priority: AnnouncementPriority,
 }

@@ -6,19 +6,25 @@ use axum::{
     http::StatusCode,
     routing::{delete, get, post},
 };
-use cloud_domain::{AdminActor, AppResult, AuthenticatedSession, Page, PageQuery};
+use cloud_domain::{AdminActor, AppError, AppResult, AuthenticatedSession, Page, PageQuery};
 use uuid::Uuid;
 
 use crate::{
-    AdminSyncRecord, HostView, PullAckRequest, PullRequest, PullResponse, PushOutcome, PushRequest,
-    RekeySyncRequest, RekeySyncResponse, ResetSyncRequest, ResetSyncResponse, Service,
-    SyncStateView,
+    AdminSyncRecord, ChangeDataProtectionRequest, DataProtectionMutationResponse,
+    DataProtectionView, HostView, LegacyPullRequest, LegacyPullResponse,
+    MigrateDataProtectionRequest, ProtectionResetChallengeRequest,
+    ProtectionResetChallengeResponse, PullAckRequest, PullPurpose, PullRequest, PullResponse,
+    PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
+    ResetSyncResponse, Service, SetupDataProtectionRequest, SyncStateView,
+    VerifyProtectionResetChallengeRequest, VerifyProtectionResetChallengeResponse,
 };
 
 /// 32 MiB decoded ciphertext expands to at most 42.67 MiB of canonical
 /// Base64. The remaining space covers the bounded opaque envelope and JSON.
 pub(crate) const SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES: usize = 45 * 1024 * 1024;
 pub(crate) const SYNC_ACK_REQUEST_BODY_LIMIT_BYTES: usize = 2 * 1024 * 1024;
+pub(crate) const PROTECTION_ENVELOPE_BODY_LIMIT_BYTES: usize = 64 * 1024;
+pub(crate) const PROTECTION_CHALLENGE_BODY_LIMIT_BYTES: usize = 4 * 1024;
 
 #[must_use = "the router must be mounted by the server"]
 pub fn router(service: Service) -> Router {
@@ -39,11 +45,42 @@ pub fn host_router(service: Service) -> Router {
 pub fn sync_router(service: Service) -> Router {
     Router::new()
         .route("/state", get(sync_state))
+        .route("/protection", get(data_protection))
+        .route("/protection/legacy-full", get(legacy_protection_pull))
+        .route(
+            "/protection/setup",
+            post(setup_data_protection)
+                .layer(DefaultBodyLimit::max(PROTECTION_ENVELOPE_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/protection/migrate",
+            post(migrate_data_protection)
+                .layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/protection/change",
+            post(change_data_protection)
+                .layer(DefaultBodyLimit::max(PROTECTION_ENVELOPE_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/protection/reset-challenge",
+            post(request_protection_reset_challenge)
+                .layer(DefaultBodyLimit::max(PROTECTION_CHALLENGE_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/protection/reset-challenge/verify",
+            post(verify_protection_reset_challenge)
+                .layer(DefaultBodyLimit::max(PROTECTION_CHALLENGE_BODY_LIMIT_BYTES)),
+        )
         .route(
             "/push",
             post(push).layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
         )
-        .route("/pull", get(pull))
+        .route("/pull", get(pull_preview))
+        .route(
+            "/pull/deliver",
+            post(pull_delivery).layer(DefaultBodyLimit::max(PROTECTION_CHALLENGE_BODY_LIMIT_BYTES)),
+        )
         .route(
             "/pull/ack",
             post(ack_pull).layer(DefaultBodyLimit::max(SYNC_ACK_REQUEST_BODY_LIMIT_BYTES)),
@@ -52,8 +89,81 @@ pub fn sync_router(service: Service) -> Router {
             "/rekey",
             post(rekey_sync).layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
         )
-        .route("/reset", post(reset_sync))
+        .route("/protection/reset", post(reset_sync))
         .with_state(service)
+}
+
+async fn data_protection(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+) -> AppResult<Json<DataProtectionView>> {
+    service.data_protection(&session).await.map(Json)
+}
+
+async fn legacy_protection_pull(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Query(request): Query<LegacyPullRequest>,
+) -> AppResult<Json<LegacyPullResponse>> {
+    service
+        .legacy_protection_pull(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn setup_data_protection(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<SetupDataProtectionRequest>,
+) -> AppResult<Json<DataProtectionMutationResponse>> {
+    service
+        .setup_data_protection(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn migrate_data_protection(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<MigrateDataProtectionRequest>,
+) -> AppResult<Json<DataProtectionMutationResponse>> {
+    service
+        .migrate_data_protection(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn change_data_protection(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<ChangeDataProtectionRequest>,
+) -> AppResult<Json<DataProtectionMutationResponse>> {
+    service
+        .change_data_protection(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn request_protection_reset_challenge(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<ProtectionResetChallengeRequest>,
+) -> AppResult<Json<ProtectionResetChallengeResponse>> {
+    service
+        .request_protection_reset_challenge(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn verify_protection_reset_challenge(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<VerifyProtectionResetChallengeRequest>,
+) -> AppResult<Json<VerifyProtectionResetChallengeResponse>> {
+    service
+        .verify_protection_reset_challenge(&session, request)
+        .await
+        .map(Json)
 }
 
 async fn sync_state(
@@ -107,11 +217,29 @@ async fn push(
     service.push(&session, request).await.map(Json)
 }
 
-async fn pull(
+async fn pull_preview(
     State(service): State<Service>,
     Extension(session): Extension<AuthenticatedSession>,
     Query(request): Query<PullRequest>,
 ) -> AppResult<Json<PullResponse>> {
+    if request.purpose == PullPurpose::Download {
+        return Err(AppError::Validation(
+            "download pull must use POST /sync/pull/deliver".to_owned(),
+        ));
+    }
+    service.pull(&session, request).await.map(Json)
+}
+
+async fn pull_delivery(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<PullRequest>,
+) -> AppResult<Json<PullResponse>> {
+    if request.purpose != PullPurpose::Download {
+        return Err(AppError::Validation(
+            "pull delivery only accepts download purpose".to_owned(),
+        ));
+    }
     service.pull(&session, request).await.map(Json)
 }
 

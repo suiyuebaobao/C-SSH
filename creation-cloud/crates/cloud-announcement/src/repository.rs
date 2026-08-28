@@ -4,11 +4,11 @@ use serde_json::{Value, json};
 use uuid::Uuid;
 
 use crate::{
-    Announcement,
+    Announcement, AnnouncementPriority,
     model::{AnnouncementRow, CurrentPublication, PublicationStateRow, ValidatedAnnouncement},
 };
 
-const COLUMNS: &str = "id, title_zh_cn, body_zh_cn, title_en, body_en, status, revision, \
+const COLUMNS: &str = "id, title_zh_cn, body_zh_cn, title_en, body_en, priority, status, revision, \
 created_by, updated_by, published_at, hidden_at, created_at, updated_at";
 
 pub(crate) async fn list(pool: &PgPool, page: PageQuery) -> AppResult<Page<Announcement>> {
@@ -117,9 +117,9 @@ pub(crate) async fn create(
 ) -> AppResult<Announcement> {
     let query = format!(
         "INSERT INTO global_announcements \
-         (id, title_zh_cn, body_zh_cn, title_en, body_en, status, revision, \
+         (id, title_zh_cn, body_zh_cn, title_en, body_en, priority, status, revision, \
           created_by, updated_by) \
-         VALUES ($1, $2, $3, $4, $5, 'draft', 1, $6, $6) RETURNING {COLUMNS}"
+         VALUES ($1, $2, $3, $4, $5, $6, 'draft', 1, $7, $7) RETURNING {COLUMNS}"
     );
     let row = sqlx::query_as::<_, AnnouncementRow>(&query)
         .bind(Uuid::now_v7())
@@ -127,6 +127,7 @@ pub(crate) async fn create(
         .bind(&value.body_zh_cn)
         .bind(&value.title_en)
         .bind(&value.body_en)
+        .bind(value.priority.as_str())
         .bind(actor_id)
         .fetch_one(&mut **transaction)
         .await
@@ -143,7 +144,7 @@ pub(crate) async fn replace_draft(
 ) -> AppResult<Announcement> {
     let query = format!(
         "UPDATE global_announcements SET title_zh_cn = $4, body_zh_cn = $5, \
-         title_en = $6, body_en = $7, revision = revision + 1, updated_by = $3, \
+         title_en = $6, body_en = $7, priority = $8, revision = revision + 1, updated_by = $3, \
          updated_at = now() WHERE id = $1 AND revision = $2 AND status = 'draft' \
          RETURNING {COLUMNS}"
     );
@@ -155,6 +156,7 @@ pub(crate) async fn replace_draft(
         .bind(&value.body_zh_cn)
         .bind(&value.title_en)
         .bind(&value.body_en)
+        .bind(value.priority.as_str())
         .fetch_optional(&mut **transaction)
         .await
         .map_err(write_error)?
@@ -211,6 +213,7 @@ pub(crate) async fn audit(
     action: &str,
     announcement_id: Uuid,
     status: &str,
+    priority: AnnouncementPriority,
     revision: i64,
 ) -> AppResult<()> {
     let request_id =
@@ -225,17 +228,23 @@ pub(crate) async fn audit(
     .bind(action)
     .bind(announcement_id.to_string())
     .bind(request_id)
-    .bind(audit_details(announcement_id, status, revision))
+    .bind(audit_details(announcement_id, status, priority, revision))
     .execute(&mut **transaction)
     .await
     .map_err(|_| AppError::Storage("保存公告审计失败".to_owned()))?;
     Ok(())
 }
 
-pub(crate) fn audit_details(announcement_id: Uuid, status: &str, revision: i64) -> Value {
+pub(crate) fn audit_details(
+    announcement_id: Uuid,
+    status: &str,
+    priority: AnnouncementPriority,
+    revision: i64,
+) -> Value {
     json!({
         "announcement_id": announcement_id,
         "status": status,
+        "priority": priority.as_str(),
         "revision": revision
     })
 }

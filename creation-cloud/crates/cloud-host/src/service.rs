@@ -1,5 +1,7 @@
 //! 同步用例边界；账号与设备身份始终来自已认证会话。
 
+use std::sync::Arc;
+
 use cloud_domain::{AdminActor, AppError, AppResult, AuthenticatedSession, Page, PageQuery};
 use cloud_store::PgPool;
 use serde::Serialize;
@@ -7,21 +9,61 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::{
-    AdminSyncRecord, HostView, PullAckRequest, PullRequest, PullResponse, PushOutcome, PushRequest,
-    RekeySyncRequest, RekeySyncResponse, ResetSyncRequest, ResetSyncResponse, SyncStateView,
+    AdminSyncRecord, ChangeDataProtectionRequest, DataProtectionMutationResponse,
+    DataProtectionView, HostView, LegacyPullRequest, LegacyPullResponse,
+    MigrateDataProtectionRequest, ProtectionResetChallengeRequest,
+    ProtectionResetChallengeResponse, ProtectionResetMailer, PullAckRequest, PullRequest,
+    PullResponse, PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
+    ResetSyncResponse, SetupDataProtectionRequest, SyncStateView,
+    VerifyProtectionResetChallengeRequest, VerifyProtectionResetChallengeResponse,
     actor::{AccountActor, DeviceActor},
+    protection_mailer::UnavailableProtectionResetMailer,
     repository, validation,
 };
 
 #[derive(Clone)]
 pub struct Service {
     pool: PgPool,
+    protection_verification: Arc<ProtectionVerification>,
+}
+
+struct ProtectionVerification {
+    key: Vec<u8>,
+    mailer: Arc<dyn ProtectionResetMailer>,
+}
+
+impl Drop for ProtectionVerification {
+    fn drop(&mut self) {
+        self.key.fill(0);
+    }
 }
 
 impl Service {
     #[must_use]
     pub fn new(pool: PgPool) -> Self {
-        Self { pool }
+        Self {
+            pool,
+            protection_verification: Arc::new(ProtectionVerification {
+                key: Vec::new(),
+                mailer: Arc::new(UnavailableProtectionResetMailer),
+            }),
+        }
+    }
+
+    pub fn with_protection_verification(
+        pool: PgPool,
+        key: Vec<u8>,
+        mailer: Arc<dyn ProtectionResetMailer>,
+    ) -> AppResult<Self> {
+        if key.len() < 32 {
+            return Err(AppError::Validation(
+                "protection reset verification key must contain at least 32 bytes".to_owned(),
+            ));
+        }
+        Ok(Self {
+            pool,
+            protection_verification: Arc::new(ProtectionVerification { key, mailer }),
+        })
     }
 
     pub async fn list_self(
@@ -75,7 +117,106 @@ impl Service {
 
     pub async fn sync_state(&self, session: &AuthenticatedSession) -> AppResult<SyncStateView> {
         let actor = DeviceActor::from_session(session)?;
-        repository::state(&self.pool, actor).await
+        repository::get_protection(&self.pool, actor)
+            .await
+            .map(|view| view.state)
+    }
+
+    pub async fn data_protection(
+        &self,
+        session: &AuthenticatedSession,
+    ) -> AppResult<DataProtectionView> {
+        let actor = DeviceActor::from_session(session)?;
+        repository::get_protection(&self.pool, actor).await
+    }
+
+    pub async fn setup_data_protection(
+        &self,
+        session: &AuthenticatedSession,
+        request: SetupDataProtectionRequest,
+    ) -> AppResult<DataProtectionMutationResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        let envelope = validation::setup_protection(&request)?;
+        let request_hash = fingerprint("data-protection-setup-v1", &request)?;
+        repository::setup_protection(&self.pool, actor, &request, &envelope, &request_hash).await
+    }
+
+    pub async fn migrate_data_protection(
+        &self,
+        session: &AuthenticatedSession,
+        request: MigrateDataProtectionRequest,
+    ) -> AppResult<DataProtectionMutationResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        let (envelope, resources) = validation::migrate_protection(&request)?;
+        let request_hash = fingerprint("data-protection-migrate-v1", &request)?;
+        repository::migrate_protection(
+            &self.pool,
+            actor,
+            &request,
+            &envelope,
+            &resources,
+            &request_hash,
+        )
+        .await
+    }
+
+    pub async fn change_data_protection(
+        &self,
+        session: &AuthenticatedSession,
+        request: ChangeDataProtectionRequest,
+    ) -> AppResult<DataProtectionMutationResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        let envelope = validation::change_protection(&request)?;
+        let request_hash = fingerprint("data-protection-change-v1", &request)?;
+        repository::change_protection(&self.pool, actor, &request, &envelope, &request_hash).await
+    }
+
+    pub async fn legacy_protection_pull(
+        &self,
+        session: &AuthenticatedSession,
+        request: LegacyPullRequest,
+    ) -> AppResult<LegacyPullResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        repository::legacy_pull(&self.pool, actor, validation::legacy_pull(request)?).await
+    }
+
+    pub async fn request_protection_reset_challenge(
+        &self,
+        session: &AuthenticatedSession,
+        _request: ProtectionResetChallengeRequest,
+    ) -> AppResult<ProtectionResetChallengeResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        let pending =
+            repository::issue_reset_challenge(&self.pool, actor, &self.protection_verification.key)
+                .await?;
+        if let Err(error) = self
+            .protection_verification
+            .mailer
+            .send_protection_reset(&pending.email, pending.code.expose())
+            .await
+        {
+            let _ = repository::cancel_challenge(&self.pool, actor, pending.response.challenge_id)
+                .await;
+            return Err(error);
+        }
+        repository::mark_challenge_sent(&self.pool, actor, pending.response.challenge_id).await?;
+        Ok(pending.response)
+    }
+
+    pub async fn verify_protection_reset_challenge(
+        &self,
+        session: &AuthenticatedSession,
+        request: VerifyProtectionResetChallengeRequest,
+    ) -> AppResult<VerifyProtectionResetChallengeResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        validation::verify_reset_challenge(&request)?;
+        repository::verify_reset_challenge(
+            &self.pool,
+            actor,
+            &request,
+            &self.protection_verification.key,
+        )
+        .await
     }
 
     pub async fn reset_sync(
@@ -85,7 +226,15 @@ impl Service {
     ) -> AppResult<ResetSyncResponse> {
         let actor = DeviceActor::from_session(session)?;
         validation::reset(&request)?;
-        repository::reset(&self.pool, actor, &request).await
+        let request_hash = fingerprint("data-protection-reset-v1", &request)?;
+        repository::reset(
+            &self.pool,
+            actor,
+            &request,
+            &request_hash,
+            &self.protection_verification.key,
+        )
+        .await
     }
 
     pub async fn rekey_sync(
@@ -168,13 +317,15 @@ impl Service {
 }
 
 fn fingerprint<T: Serialize>(scope: &str, value: &T) -> AppResult<[u8; 32]> {
-    let encoded = serde_json::to_vec(value)
+    let mut encoded = serde_json::to_vec(value)
         .map_err(|_| AppError::Internal("host sync request fingerprint failed".to_owned()))?;
     let mut hasher = Sha256::new();
     hasher.update(scope.as_bytes());
     hasher.update([0]);
-    hasher.update(encoded);
-    Ok(hasher.finalize().into())
+    hasher.update(&encoded);
+    let result = hasher.finalize().into();
+    encoded.fill(0);
+    Ok(result)
 }
 
 fn require_admin(actor: &AdminActor) -> AppResult<()> {
@@ -227,6 +378,8 @@ mod tests {
         };
         let request = |ciphertext| PushRequest {
             sync_generation: 1,
+            protection_epoch: 1,
+            protection_revision: 1,
             base_revision: 1,
             client_mutation_id: Uuid::nil(),
             host_changes: vec![HostChange {

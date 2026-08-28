@@ -1,6 +1,7 @@
 //! 在账号与设备锁内撤销设备，并先清除该设备的全部会话。
 
 use cloud_domain::{AppError, AppResult};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
@@ -12,6 +13,10 @@ pub(crate) const LOCK_DEVICE_SQL: &str = "SELECT id FROM devices \
      WHERE account_id = $1 AND id = $2 AND revoked_at IS NULL FOR UPDATE";
 pub(crate) const DELETE_DEVICE_SESSIONS_SQL: &str =
     "DELETE FROM sessions WHERE account_id = $1 AND device_id = $2";
+pub(crate) const DELETE_DEVICE_DELIVERIES_SQL: &str =
+    "DELETE FROM cloud_sync_resource_deliveries WHERE account_id = $1 AND device_id = $2";
+pub(crate) const DELETE_DEVICE_WATERMARKS_SQL: &str =
+    "DELETE FROM cloud_sync_pull_watermarks WHERE account_id = $1 AND device_id = $2";
 pub(crate) const REVOKE_SQL: &str = "UPDATE devices SET revoked_at = now(), updated_at = now() \
      WHERE account_id = $1 AND id = $2 AND revoked_at IS NULL";
 
@@ -42,12 +47,33 @@ pub(crate) async fn revoke(pool: &PgPool, account_id: Uuid, device_id: Uuid) -> 
         .execute(&mut *transaction)
         .await
         .map_err(error::storage)?;
+    sqlx::query(DELETE_DEVICE_DELIVERIES_SQL)
+        .bind(account_id)
+        .bind(device_id)
+        .execute(&mut *transaction)
+        .await
+        .map_err(error::storage)?;
+    sqlx::query(DELETE_DEVICE_WATERMARKS_SQL)
+        .bind(account_id)
+        .bind(device_id)
+        .execute(&mut *transaction)
+        .await
+        .map_err(error::storage)?;
     let result = sqlx::query(REVOKE_SQL)
         .bind(account_id)
         .bind(device_id)
         .execute(&mut *transaction)
         .await
         .map_err(error::storage)?;
+    if result.rows_affected() != 1 {
+        return Ok(result.rows_affected());
+    }
+    record_account_event(
+        &mut transaction,
+        account_id,
+        AccountNotificationEvent::DeviceRevoked { device_id },
+    )
+    .await?;
     transaction.commit().await.map_err(error::storage)?;
     Ok(result.rows_affected())
 }

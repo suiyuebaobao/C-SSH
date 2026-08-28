@@ -10,6 +10,7 @@ use uuid::Uuid;
 use crate::model::retention::{RetentionRequest, V2RetentionReport};
 
 use super::storage;
+pub(crate) mod protection;
 
 pub(crate) const LOCK_CANDIDATE_ACCOUNTS_SQL: &str = r#"
 SELECT account.id
@@ -129,6 +130,25 @@ WHERE EXISTS (
         JOIN cloud_host_sync_states AS state ON state.account_id = mutation.account_id
         WHERE mutation.account_id = account.id AND mutation.created_at < $1
           AND mutation.result_generation <> state.sync_generation
+    )
+   OR EXISTS (
+        SELECT 1 FROM cloud_data_protection_mutations AS mutation
+        JOIN cloud_host_sync_states AS state ON state.account_id = mutation.account_id
+        WHERE mutation.account_id = account.id AND mutation.created_at < $1
+          AND NOT (
+              mutation.result_generation = state.sync_generation
+              AND mutation.result_epoch = state.protection_epoch
+              AND mutation.result_revision = state.protection_revision
+              AND mutation.result_current_revision = state.current_revision
+          )
+    )
+   OR EXISTS (
+        SELECT 1 FROM cloud_data_protection_reset_challenges AS challenge
+        WHERE challenge.account_id = account.id
+          AND (
+              challenge.consumed_at < $1
+              OR (challenge.consumed_at IS NULL AND challenge.expires_at < $1)
+          )
     )
 ORDER BY account.id ASC
 FOR UPDATE OF account SKIP LOCKED
@@ -433,11 +453,17 @@ pub(crate) async fn run(
         "无法删除旧 reset 幂等记录",
     )
     .await?;
+    let (protection_mutations, protection_challenges) =
+        protection::delete(transaction, account_ids, request).await?;
 
     Ok(V2RetentionReport {
         tombstones_deleted: (host_tombstones.len() + ai_tombstones.len()) as u64,
         versions_deleted: (host_versions.len() + ai_versions.len()) as u64,
-        mutations_deleted: (push_mutations + rekey_mutations + reset_mutations) as u64,
+        mutations_deleted: (push_mutations
+            + rekey_mutations
+            + reset_mutations
+            + protection_mutations
+            + protection_challenges) as u64,
     })
 }
 

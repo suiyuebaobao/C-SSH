@@ -4,6 +4,35 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.8.8 - Cloud Data-Protection Recovery And Three-Asset Release
+
+> Protocol is 14, and Windows and Android share SQLite schema 15. Production assets are exactly Windows NSIS, Windows portable ZIP, and one Android arm64 APK. MSI is no longer built or published, no AAB is generated, and no Linux client artifact is released.
+
+### Downloads
+- Windows installer: `C-SSH_0.8.8_x64-setup.exe`
+- Windows portable: `C-SSH_0.8.8_portable-Windows-x64.zip`
+- Android arm64 APK: `C-SSH_0.8.8_android-arm64.apk`
+
+### Added And Changed
+- Cloud data-protection pages on Windows and Android now use explicit loading, ready, and error states. Legacy-envelope migration, first-time setup, change, reset, and retry actions follow the authoritative server state.
+- `0.8.8` is the first Windows release under updater trust-root epoch 2. Windows users on `0.8.7` or earlier must install `0.8.8` manually once; automatic updates resume afterward. Android is unaffected.
+- Starting with this release, Windows publishes only NSIS and portable ZIP. Historical MSI assets remain immutable records of older releases.
+
+### Fixed
+- Fixed correct passwords being rejected before actual verification in legacy-envelope state, manual sync remaining stuck on loading, change/reset actions being hidden, and stale previews after Cloud state changes.
+- Fixed revoked login sessions remaining visible with disabled delete buttons and the notification center failing to select its first account-only notification.
+- Fixed mismatched tab and card backgrounds on the Android account page in the light theme.
+
+### Verified
+- Windows NSIS and Portable passed formal install, exit, uninstall-with-data-retention, user-initiated `0.8.7 → 0.8.8` upgrade, and full cleanup gates. The two-device production Cloud data-protection and Host+AI manual-sync path also passed.
+- Android x86_64 on MuMu passed the affected Cloud data-protection, Host+AI manual-sync, Reset local-retention, and cleanup path. Static and real-browser theme checks passed.
+- The production arm64 APK passed `0.8.8 / 8000008`, SDK 24/36, arm64-only ABI, non-debug, v2 single-signer, and four embedded Agent/tmux resource checks. This is not presented as physical-arm64 acceptance.
+
+### SHA256
+- `FF15C6CD40D3FC6725A413BD7253AABC191BD76C78CD3AFF83AA255758907736`  `C-SSH_0.8.8_x64-setup.exe`
+- `55B42F281725D3995B9117C85A9E688F51AD4F2359D2921768C52E6AB027FAA0`  `C-SSH_0.8.8_portable-Windows-x64.zip`
+- `A2C98E7A81BB4E5A66B38A2C8096FE41951AC8B66DD3DFE9AA4C64E17A1E4F80`  `C-SSH_0.8.8_android-arm64.apk`
+
 ## v0.8.3 - Announcements, Version Control, Automatic Updates, And Safe Data Migration
 
 > Protocol is 14, and Windows and Android share SQLite schema 15. Production assets are exactly Windows NSIS, MSI, portable ZIP, and one Android arm64 APK. There is no Linux client artifact, and no AAB is generated or uploaded.

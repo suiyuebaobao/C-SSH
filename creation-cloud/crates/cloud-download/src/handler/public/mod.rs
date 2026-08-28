@@ -2,4 +2,5 @@
 
 pub(crate) mod download;
 pub(crate) mod manifest;
+pub(crate) mod tauri;
 pub(crate) mod update;

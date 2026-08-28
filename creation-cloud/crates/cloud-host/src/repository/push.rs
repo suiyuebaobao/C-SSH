@@ -1,6 +1,7 @@
 //! 先完整预检 Host 与 AI 资源 CAS，再在一个事务中整批写入统一 revision 流。
 
 use cloud_domain::{AppError, AppResult};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use cloud_store::PgPool;
 use serde_json::Value;
 use sqlx::FromRow;
@@ -22,13 +23,16 @@ use super::{
     hosts::{HostRow, lock_current},
     lock_sync_state,
     pull::{safe_checkpoint_revision, save_checkpoint},
-    require_active_device, require_base_revision, require_sync_generation, storage,
+    require_active_device, require_base_revision, require_configured_envelope,
+    require_protection_version, require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
 struct MutationRow {
     source_device_id: Uuid,
     request_generation: i64,
+    request_protection_epoch: i64,
+    request_protection_revision: i64,
     request_hash: Vec<u8>,
     outcome: String,
     result_revision: i64,
@@ -72,11 +76,12 @@ pub(crate) async fn push(
     require_active_device(&mut tx, account_id, actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, account_id).await?;
     require_sync_generation(state, request.sync_generation)?;
-
     if let Some(outcome) = replay_mutation(
         &mut tx,
         actor,
         request.sync_generation,
+        request.protection_epoch,
+        request.protection_revision,
         request.client_mutation_id,
         request_hash,
     )
@@ -85,6 +90,8 @@ pub(crate) async fn push(
         commit(tx).await?;
         return Ok(outcome);
     }
+    require_protection_version(state, request.protection_epoch, request.protection_revision)?;
+    require_configured_envelope(&mut tx, account_id, state).await?;
     require_base_revision(state, request.base_revision)?;
 
     // 所有行锁与 expected revision 检查必须在任何业务写入之前完成。
@@ -168,9 +175,19 @@ pub(crate) async fn push(
         revisions: &revisions,
     };
     insert_mutation(&mut tx, actor, request, request_hash, &mutation).await?;
+    record_account_event(
+        &mut tx,
+        account_id,
+        AccountNotificationEvent::SyncUploadCompleted {
+            mutation_id: request.client_mutation_id,
+        },
+    )
+    .await?;
     commit(tx).await?;
     Ok(response(
         request.sync_generation,
+        request.protection_epoch,
+        request.protection_revision,
         revision,
         changed_count,
         revisions,
@@ -381,160 +398,4 @@ pub(super) async fn write_host(
     Ok(())
 }
 
-async fn replay_mutation(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    sync_generation: i64,
-    mutation_id: Uuid,
-    request_hash: &[u8; 32],
-) -> AppResult<Option<PushOutcome>> {
-    let row = sqlx::query_as::<_, MutationRow>(
-        "SELECT source_device_id, request_generation, request_hash, outcome,
-                result_revision, changed_count
-         FROM cloud_sync_push_mutations
-         WHERE account_id = $1 AND client_mutation_id = $2",
-    )
-    .bind(actor.account_id())
-    .bind(mutation_id)
-    .fetch_optional(&mut **tx)
-    .await
-    .map_err(storage)?;
-    let Some(row) = row else {
-        return Ok(None);
-    };
-    if row.source_device_id != actor.device_id()
-        || row.request_generation != sync_generation
-        || row.request_hash.as_slice() != request_hash
-    {
-        return Err(AppError::Conflict(
-            "client_mutation_id was already used for another request".to_owned(),
-        ));
-    }
-    let revisions = load_results(tx, actor.account_id(), mutation_id).await?;
-    let outcome = match row.outcome.as_str() {
-        "applied" => PushOutcome::Applied {
-            sync_generation,
-            revision: row.result_revision,
-            changed_count: u32::try_from(row.changed_count)
-                .map_err(|_| super::invalid_stored_value())?,
-            revisions,
-            idempotent: true,
-        },
-        "unchanged" => PushOutcome::Unchanged {
-            sync_generation,
-            revision: row.result_revision,
-            revisions,
-            idempotent: true,
-        },
-        _ => return Err(super::invalid_stored_value()),
-    };
-    Ok(Some(outcome))
-}
-
-async fn load_results(
-    tx: &mut DbTransaction<'_>,
-    account_id: Uuid,
-    mutation_id: Uuid,
-) -> AppResult<Vec<ResourceRevision>> {
-    let rows = sqlx::query_as::<_, RevisionRow>(
-        "SELECT resource_kind, resource_id, result_revision
-         FROM cloud_sync_push_results
-         WHERE account_id = $1 AND client_mutation_id = $2
-         ORDER BY result_revision",
-    )
-    .bind(account_id)
-    .bind(mutation_id)
-    .fetch_all(&mut **tx)
-    .await
-    .map_err(storage)?;
-    rows.into_iter()
-        .map(|row| {
-            Ok(ResourceRevision {
-                resource_kind: ResourceKind::parse(&row.resource_kind)
-                    .ok_or_else(super::invalid_stored_value)?,
-                resource_id: row.resource_id,
-                cloud_revision: row.result_revision,
-            })
-        })
-        .collect()
-}
-
-async fn insert_mutation(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    request: &PushRequest,
-    request_hash: &[u8; 32],
-    result: &MutationResult<'_>,
-) -> AppResult<()> {
-    sqlx::query(
-        "INSERT INTO cloud_sync_push_mutations
-             (account_id, client_mutation_id, source_device_id,
-              request_generation, base_revision, request_hash, outcome,
-              result_revision, changed_count)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
-    )
-    .bind(actor.account_id())
-    .bind(request.client_mutation_id)
-    .bind(actor.device_id())
-    .bind(request.sync_generation)
-    .bind(request.base_revision)
-    .bind(request_hash.as_slice())
-    .bind(result.outcome)
-    .bind(result.revision)
-    .bind(
-        i32::try_from(result.changed_count).map_err(|_| {
-            AppError::Validation("push changed_count exceeds storage limit".to_owned())
-        })?,
-    )
-    .execute(&mut **tx)
-    .await
-    .map_err(storage)?;
-    for revision in result.revisions {
-        sqlx::query(
-            "INSERT INTO cloud_sync_push_results
-                 (account_id, client_mutation_id, resource_kind,
-                  resource_id, result_revision)
-             VALUES ($1,$2,$3,$4,$5)",
-        )
-        .bind(actor.account_id())
-        .bind(request.client_mutation_id)
-        .bind(revision.resource_kind.as_str())
-        .bind(revision.resource_id)
-        .bind(revision.cloud_revision)
-        .execute(&mut **tx)
-        .await
-        .map_err(storage)?;
-    }
-    Ok(())
-}
-
-fn response(
-    sync_generation: i64,
-    revision: i64,
-    changed_count: usize,
-    revisions: Vec<ResourceRevision>,
-    idempotent: bool,
-) -> PushOutcome {
-    if changed_count == 0 {
-        PushOutcome::Unchanged {
-            sync_generation,
-            revision,
-            revisions,
-            idempotent,
-        }
-    } else {
-        PushOutcome::Applied {
-            sync_generation,
-            revision,
-            changed_count: u32::try_from(changed_count).unwrap_or(u32::MAX),
-            revisions,
-            idempotent,
-        }
-    }
-}
-
-fn next_revision(current: i64) -> AppResult<i64> {
-    current
-        .checked_add(1)
-        .ok_or_else(|| AppError::Conflict("account revision is exhausted".to_owned()))
-}
+include!("push/replay.rs");

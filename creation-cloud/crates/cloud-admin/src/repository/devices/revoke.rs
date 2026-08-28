@@ -1,6 +1,7 @@
 //! 在账号与设备锁内清除绑定会话，再软撤销设备授权。
 
 use cloud_domain::{AppError, AppResult};
+use cloud_notification::{AccountNotificationEvent, record_account_event};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
@@ -67,6 +68,12 @@ pub(crate) async fn execute(pool: &PgPool, device_id: Uuid) -> AppResult<AdminDe
         .map_err(map_write_error)?
         .ok_or_else(|| AppError::NotFound("设备不存在或已撤销".to_owned()))?;
     let device = AdminDevice::try_from(row)?;
+    record_account_event(
+        &mut transaction,
+        account_id,
+        AccountNotificationEvent::DeviceRevoked { device_id },
+    )
+    .await?;
     transaction.commit().await.map_err(map_write_error)?;
     Ok(device)
 }

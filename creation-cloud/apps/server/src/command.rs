@@ -15,6 +15,7 @@ pub enum Command {
     },
     MaintenanceRun(MaintenanceTask),
     MaintenanceStatus(Option<MaintenanceTask>),
+    SchemaMigrate,
 }
 
 pub fn from_env() -> Result<Command> {
@@ -52,8 +53,13 @@ fn parse(arguments: impl IntoIterator<Item = String>) -> Result<Command> {
         {
             Ok(Command::MaintenanceStatus(Some(parse_task(task)?)))
         }
+        [schema, migrate, json]
+            if schema == "schema" && migrate == "migrate" && json == "--json" =>
+        {
+            Ok(Command::SchemaMigrate)
+        }
         _ => bail!(
-            "用法：creation-cloud-server [admin promote <registered-email> | admin set-login <registered-email> <admin-login-name> | maintenance run <task> --json | maintenance status [<task>] --json]"
+            "用法：creation-cloud-server [admin promote <registered-email> | admin set-login <registered-email> <admin-login-name> | maintenance run <task> --json | maintenance status [<task>] --json | schema migrate --json]"
         ),
     }
 }
@@ -140,5 +146,22 @@ mod tests {
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn parses_only_the_exact_schema_migration_command() {
+        assert_eq!(
+            parse(["schema", "migrate", "--json"].map(str::to_owned))
+                .expect("exact schema migration command should parse"),
+            Command::SchemaMigrate
+        );
+        for arguments in [
+            vec!["schema", "migrate"],
+            vec!["schema", "migrate", "--json", "extra"],
+            vec!["schema", "status", "--json"],
+            vec!["Schema", "migrate", "--json"],
+        ] {
+            assert!(parse(arguments.into_iter().map(str::to_owned)).is_err());
+        }
     }
 }

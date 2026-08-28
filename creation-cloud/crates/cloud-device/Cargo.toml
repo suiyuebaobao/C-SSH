@@ -9,6 +9,7 @@ rust-version.workspace = true
 axum.workspace = true
 chrono.workspace = true
 cloud-domain.workspace = true
+cloud-notification.workspace = true
 cloud-store.workspace = true
 hex.workspace = true
 rand.workspace = true

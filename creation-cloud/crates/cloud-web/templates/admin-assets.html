@@ -46,20 +46,24 @@
     <label class="admin-field">{% if is_en %}Package{% else %}包类型{% endif %}
       <select name="package_kind" data-download-package required>
         <option value="exe" data-platform="windows">EXE</option>
-        <option value="msi" data-platform="windows">MSI</option>
         <option value="zip" data-platform="windows">ZIP</option>
         <option value="appimage" data-platform="linux">AppImage</option>
         <option value="deb" data-platform="linux">DEB</option>
         <option value="apk" data-platform="android">APK</option>
       </select>
     </label>
-    <fieldset class="admin-field">
+    <fieldset class="admin-field admin-download-method">
       <legend>{% if is_en %}Download method{% else %}下载方式{% endif %}</legend>
-      <label><input type="radio" name="source_mode" value="local" checked> {% if is_en %}Local upload{% else %}本地上传{% endif %}</label>
-      <label><input type="radio" name="source_mode" value="external"> {% if is_en %}External link{% else %}外链下载{% endif %}</label>
+      <div class="admin-download-method-options">
+        <label class="admin-download-method-option"><input type="radio" name="source_mode" value="local" checked><span>{% if is_en %}Local upload · recommended{% else %}本地上传 · 推荐{% endif %}</span></label>
+        <label class="admin-download-method-option"><input type="radio" name="source_mode" value="external"><span>{% if is_en %}HTTPS link{% else %}HTTPS 外链{% endif %}</span></label>
+      </div>
     </fieldset>
     <label class="admin-field" data-download-local>{% if is_en %}Client file{% else %}客户端文件{% endif %}
-      <input type="file" name="file" data-download-local-input required>
+      <input type="file" name="file" data-download-local-input data-download-file-input required>
+    </label>
+    <label class="admin-field" data-download-local data-download-signature>{% if is_en %}Windows updater signature (required){% else %}Windows 更新签名（必选）{% endif %}
+      <input type="file" name="updater_signature" data-download-local-input data-download-signature-input required>
     </label>
     <div class="admin-field" data-download-external hidden>
       <label>HTTPS URL
@@ -84,7 +88,11 @@
   <div class="admin-section-heading">
     <div>
       <h2 id="downloads-heading">{% if is_en %}Downloads{% else %}下载列表{% endif %}</h2>
+      {% if let Some(label) = selected_release_label %}
+      <p>{% if is_en %}Showing only{% else %}仅显示{% endif %} {{ label }} · <a href="/admin/assets{% if is_en %}?lang=en{% endif %}">{% if is_en %}View all versions{% else %}查看全部版本{% endif %}</a></p>
+      {% else %}
       <p>{% if is_en %}One row represents one actual download source. Technical details stay folded.{% else %}一行就是一个真实下载来源；技术详情默认收起。{% endif %}</p>
+      {% endif %}
     </div>
   </div>
   {% if let Some(message) = load_error %}<div class="admin-feedback" data-tone="error" role="alert"><p>{{ message }}</p></div>{% endif %}
@@ -138,6 +146,12 @@
                 <label class="admin-field">{% if is_en %}File{% else %}文件名{% endif %}<input name="file_name" value="{{ row.file_name }}" required></label>
                 <button class="button button-primary" type="submit">{% if is_en %}Save{% else %}保存{% endif %}</button>
               </form>
+              {% if row.supports_updater_signature %}
+              <form class="admin-form-grid" hx-post="/admin/assets/{{ row.asset_id }}/updater-signature{% if is_en %}?lang=en{% endif %}" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-encoding="multipart/form-data" enctype="multipart/form-data">
+                <label class="admin-field">{% if is_en %}Replace updater signature file{% else %}上传／替换更新签名文件{% endif %}<input type="file" name="signature" required></label>
+                <button class="button button-secondary" type="submit">{% if is_en %}Upload signature{% else %}上传签名{% endif %}</button>
+              </form>
+              {% endif %}
               {% endif %}
               {% if let Some(source_id) = row.source_id %}
               {% if row.source_mutable %}

@@ -25,6 +25,7 @@ pub struct AdminPageState {
     feedback: cloud_feedback::Service,
     host: cloud_host::Service,
     model: cloud_model::Service,
+    notification: cloud_notification::Service,
     seo: cloud_seo::Service,
     site_content: cloud_site_content::Service,
     site_media: cloud_site_media::Service,
@@ -51,6 +52,7 @@ impl AdminPageState {
         let feedback = cloud_feedback::Service::new(pool.clone());
         let seo = cloud_seo::Service::new(pool.clone());
         let device = cloud_device::Service::new(pool.clone());
+        let notification = cloud_notification::Service::new(pool.clone());
         Self {
             admin,
             auth,
@@ -61,6 +63,7 @@ impl AdminPageState {
             feedback,
             host,
             model,
+            notification,
             seo,
             site_content,
             site_media,
@@ -103,6 +106,10 @@ impl AdminPageState {
 
     pub(crate) const fn model(&self) -> &cloud_model::Service {
         &self.model
+    }
+
+    pub(crate) const fn notification(&self) -> &cloud_notification::Service {
+        &self.notification
     }
 
     pub(crate) const fn seo(&self) -> &cloud_seo::Service {

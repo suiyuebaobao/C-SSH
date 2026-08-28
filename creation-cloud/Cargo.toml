@@ -11,6 +11,7 @@ members = [
     "crates/cloud-feedback",
     "crates/cloud-host",
     "crates/cloud-model",
+    "crates/cloud-notification",
     "crates/cloud-maintenance",
     "crates/cloud-release",
     "crates/cloud-seo",
@@ -49,6 +50,7 @@ cloud-download = { path = "crates/cloud-download" }
 cloud-feedback = { path = "crates/cloud-feedback" }
 cloud-host = { path = "crates/cloud-host" }
 cloud-model = { path = "crates/cloud-model" }
+cloud-notification = { path = "crates/cloud-notification" }
 cloud-maintenance = { path = "crates/cloud-maintenance" }
 cloud-release = { path = "crates/cloud-release" }
 cloud-seo = { path = "crates/cloud-seo" }

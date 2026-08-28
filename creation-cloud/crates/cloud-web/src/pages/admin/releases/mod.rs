@@ -3,6 +3,8 @@
 
 pub(crate) mod create;
 pub(crate) mod delete;
+pub(crate) mod policy_publish;
+pub(crate) mod policy_save;
 pub(crate) mod update;
 
 use askama::Template;
@@ -32,6 +34,22 @@ struct ReleaseRow {
     updated_at: String,
 }
 
+struct PolicyTargetOption {
+    id: String,
+    label: String,
+    selected: bool,
+    eligible: bool,
+}
+
+struct PolicyPanel {
+    draft_revision: i64,
+    enabled: bool,
+    forced_versions: String,
+    sha256_enabled: bool,
+    published_revision: i64,
+    targets: Vec<PolicyTargetOption>,
+}
+
 #[derive(Template)]
 #[template(path = "admin-releases.html")]
 struct ReleasesTemplate {
@@ -41,6 +59,8 @@ struct ReleasesTemplate {
     csrf_token: String,
     is_en: bool,
     rows: Vec<ReleaseRow>,
+    policy: Option<PolicyPanel>,
+    policy_error: Option<String>,
     load_error: Option<String>,
     page_number: u32,
     total: i64,
@@ -56,6 +76,17 @@ pub(crate) async fn page(
     let locale = query.locale();
     let actor = shared::actor_from_session(&session)?;
     let page_query = query.page_query();
+    let (policy, policy_error) = match state.download().admin_update_policy(&actor).await {
+        Ok(snapshot) => (Some(PolicyPanel::from(snapshot)), None),
+        Err(_) => (
+            None,
+            Some(if locale == Locale::En {
+                "Update policy is temporarily unavailable.".to_owned()
+            } else {
+                "版本策略暂时无法读取。".to_owned()
+            }),
+        ),
+    };
     let (rows, total, load_error) = match state.release().list_releases(&actor, page_query).await {
         Ok(page) => (
             page.items.into_iter().map(ReleaseRow::from).collect(),
@@ -83,12 +114,37 @@ pub(crate) async fn page(
         csrf_token: parts.csrf_token,
         is_en: parts.is_en,
         rows,
+        policy,
+        policy_error,
         load_error,
         page_number: page_query.page,
         total,
         previous_href,
         next_href,
     })
+}
+
+impl From<cloud_download::AdminUpdatePolicySnapshot> for PolicyPanel {
+    fn from(value: cloud_download::AdminUpdatePolicySnapshot) -> Self {
+        let selected_id = value.draft.target_release_id;
+        Self {
+            draft_revision: value.draft.revision,
+            enabled: value.draft.enabled,
+            forced_versions: value.draft.forced_versions.join("\n"),
+            sha256_enabled: value.draft.sha256_enabled,
+            published_revision: value.published.revision,
+            targets: value
+                .target_releases
+                .into_iter()
+                .map(|target| PolicyTargetOption {
+                    id: target.id.to_string(),
+                    label: format!("{} · {}", target.version, target.readiness),
+                    selected: selected_id == Some(target.id),
+                    eligible: target.eligible,
+                })
+                .collect(),
+        }
+    }
 }
 
 impl From<Release> for ReleaseRow {
@@ -112,4 +168,43 @@ impl From<Release> for ReleaseRow {
 
 fn release_href(page: u32, locale: Locale) -> String {
     shared::localized_admin_path(&format!("/admin/releases?page={page}"), locale)
+}
+
+#[cfg(test)]
+mod tests {
+    const TEMPLATE: &str = include_str!("../../../../templates/admin-releases.html");
+
+    #[test]
+    fn update_policy_form_keeps_exactly_the_three_business_choices() {
+        for field in [
+            "name=\"forced_versions\"",
+            "name=\"target_release_id\"",
+            "name=\"sha256_enabled\"",
+            "value=\"publish_update_policy\"",
+        ] {
+            assert!(TEMPLATE.contains(field), "策略后台缺少字段 {field}");
+        }
+        assert!(!TEMPLATE.contains("name=\"download_url\""));
+        assert!(!TEMPLATE.contains("name=\"updater_signature\""));
+    }
+
+    #[test]
+    fn release_page_keeps_one_simple_flow_and_hides_advanced_details() {
+        for marker in [
+            "class=\"release-steps\"",
+            "class=\"release-create-panel\"",
+            "class=\"release-advanced\"",
+            "class=\"release-details\"",
+            "class=\"release-danger\"",
+            "2. 上传三个文件",
+            "3. 发布版本",
+        ] {
+            assert!(TEMPLATE.contains(marker), "发布页缺少渐进式入口 {marker}");
+        }
+        assert_eq!(TEMPLATE.matches("hx-post=\"/admin/releases\"").count(), 1);
+        assert!(TEMPLATE.contains("href=\"/admin/assets?release_id={{ row.id }}"));
+        assert!(TEMPLATE.find("创建版本").unwrap() < TEMPLATE.find("上传三个文件").unwrap());
+        assert!(TEMPLATE.find("上传三个文件").unwrap() < TEMPLATE.find("发布并选择").unwrap());
+        assert!(!TEMPLATE.contains("上传四个文件"));
+    }
 }

@@ -15,12 +15,14 @@ pub struct ReleaseAsset {
     pub file_name: String,
     pub byte_size: i64,
     pub sha256: String,
+    pub installed_sha256: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
 pub(crate) type AssetRow = ReleaseAsset;
 
 #[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CreateAssetInput {
     #[serde(skip)]
     pub release_id: Uuid,
@@ -33,6 +35,7 @@ pub struct CreateAssetInput {
 }
 
 #[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct UpdateAssetInput {
     pub platform: Option<String>,
     pub architecture: Option<String>,

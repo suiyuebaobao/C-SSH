@@ -10,7 +10,7 @@ pub(crate) async fn execute(pool: &PgPool, id: Uuid) -> AppResult<ReleaseAsset> 
     sqlx::query_as::<_, AssetRow>(
         r#"
         SELECT id, release_id, platform, architecture, package_kind,
-               file_name, byte_size, sha256, created_at
+               file_name, byte_size, sha256, installed_sha256, created_at
         FROM release_assets
         WHERE id = $1
         "#,

@@ -7,9 +7,9 @@ mod service;
 mod validation;
 
 pub use model::{
-    Announcement, AnnouncementLocale, AnnouncementStatus, CreateAnnouncementInput,
-    CurrentAnnouncementResponse, PublicAnnouncement, ReplaceAnnouncementInput,
-    TransitionAnnouncementInput,
+    Announcement, AnnouncementLocale, AnnouncementPriority, AnnouncementStatus,
+    CreateAnnouncementInput, CurrentAnnouncementResponse, PublicAnnouncement,
+    ReplaceAnnouncementInput, TransitionAnnouncementInput,
 };
 pub use router::{management_router, public_router};
 pub use service::Service;

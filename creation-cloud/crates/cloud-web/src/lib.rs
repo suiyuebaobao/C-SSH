@@ -223,6 +223,14 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
             post(pages::admin::releases::delete::handle),
         )
         .route(
+            "/update-policy/draft",
+            post(pages::admin::releases::policy_save::handle),
+        )
+        .route(
+            "/update-policy/publish",
+            post(pages::admin::releases::policy_publish::handle),
+        )
+        .route(
             "/assets",
             get(pages::admin::assets::page)
                 .post(pages::admin::assets::create::handle)
@@ -261,6 +269,10 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
             post(pages::admin::announcements::delete),
         )
         .route(
+            "/account-notifications",
+            post(pages::admin::notifications::create),
+        )
+        .route(
             "/assets/{asset_id}",
             post(pages::admin::assets::update::handle),
         )
@@ -271,6 +283,10 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
         .route(
             "/assets/{asset_id}/upload",
             post(pages::admin::assets::upload::handle).layer(DefaultBodyLimit::disable()),
+        )
+        .route(
+            "/assets/{asset_id}/updater-signature",
+            post(pages::admin::assets::signature::handle).layer(DefaultBodyLimit::max(16 * 1024)),
         )
         .route(
             "/assets/{asset_id}/sources",

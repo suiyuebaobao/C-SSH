@@ -226,19 +226,24 @@ function adminSyncDownloadMethod(form) {
     return;
   }
   const selected = form.querySelector('input[name="source_mode"]:checked');
-  const localPanel = form.querySelector("[data-download-local]");
+  const localPanels = form.querySelectorAll("[data-download-local]");
   const externalPanel = form.querySelector("[data-download-external]");
-  const localInput = form.querySelector("[data-download-local-input]");
+  const localInputs = form.querySelectorAll("[data-download-local-input]");
   const externalInputs = form.querySelectorAll("[data-download-external-input]");
   const external = selected instanceof HTMLInputElement && selected.value === "external";
 
-  if (localPanel instanceof HTMLElement) {
-    localPanel.hidden = external;
+  for (const localPanel of localPanels) {
+    if (localPanel instanceof HTMLElement) {
+      localPanel.hidden = external;
+    }
   }
   if (externalPanel instanceof HTMLElement) {
     externalPanel.hidden = !external;
   }
-  if (localInput instanceof HTMLInputElement) {
+  for (const localInput of localInputs) {
+    if (!(localInput instanceof HTMLInputElement)) {
+      continue;
+    }
     localInput.disabled = external;
     localInput.required = !external;
   }
@@ -248,6 +253,34 @@ function adminSyncDownloadMethod(form) {
     }
     externalInput.disabled = !external;
     externalInput.required = external && externalInput.matches("[data-download-external-url]");
+  }
+  adminSyncUpdaterSignature(form);
+}
+
+function adminSyncUpdaterSignature(form) {
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+  const selected = form.querySelector('input[name="source_mode"]:checked');
+  const platform = form.querySelector("[data-download-platform]");
+  const packages = form.querySelector("[data-download-package]");
+  const panel = form.querySelector("[data-download-signature]");
+  const input = form.querySelector("[data-download-signature-input]");
+  if (!(platform instanceof HTMLSelectElement)
+      || !(packages instanceof HTMLSelectElement)
+      || !(panel instanceof HTMLElement)
+      || !(input instanceof HTMLInputElement)) {
+    return;
+  }
+  const local = selected instanceof HTMLInputElement && selected.value === "local";
+  const supports = local
+    && platform.value === "windows"
+    && ["exe", "zip"].includes(packages.value);
+  panel.hidden = !supports;
+  input.disabled = !supports;
+  input.required = supports;
+  if (!supports) {
+    input.value = "";
   }
 }
 
@@ -272,6 +305,7 @@ function adminSyncDownloadPackages(form) {
       packages.value = firstAvailable.value;
     }
   }
+  adminSyncUpdaterSignature(form);
 }
 
 function adminSetupDownloadForms(root = document) {
@@ -287,6 +321,9 @@ function adminSetupDownloadForms(root = document) {
       }
       if (target instanceof HTMLSelectElement && target.matches("[data-download-platform]")) {
         adminSyncDownloadPackages(form);
+      }
+      if (target instanceof HTMLSelectElement && target.matches("[data-download-package]")) {
+        adminSyncUpdaterSignature(form);
       }
     });
     adminSyncDownloadMethod(form);

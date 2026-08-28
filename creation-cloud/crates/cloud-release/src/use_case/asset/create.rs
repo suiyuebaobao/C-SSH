@@ -36,6 +36,12 @@ pub(crate) async fn create_in_transaction(
     if !release.status.allows_asset_mutation() {
         return Err(AppError::Conflict("已发布版本不能新增资产".into()));
     }
+    validation::asset_identity_for_release(
+        &release.version,
+        &input.platform,
+        &input.architecture,
+        &input.package_kind,
+    )?;
     repository::asset::create::execute(transaction, &input).await
 }
 
