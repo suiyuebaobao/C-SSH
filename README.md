@@ -8,17 +8,20 @@
 
 [![Android](https://img.shields.io/badge/下载-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_android-arm64.apk)
 [![Windows](https://img.shields.io/badge/下载-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8)
+[![macOS 测试版](https://img.shields.io/badge/macOS-v0.8.8%20测试版-000000?logo=apple&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg)
 [![Stable](https://img.shields.io/badge/stable-v0.8.8-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8)
 
 </div>
 
-Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 端负责更完整的日常运维工作流。
+Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端，并提供 macOS Universal 测试候选。Android 不是只读遥控器：它可以直接管理主机、恢复服务端 tmux 持久化会话、查看监控、处理文件、调用 AI 助手和进入系统管理；Windows 端负责更完整的日常运维工作流。
 
-当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。当前公开稳定版为 **`v0.8.8`**；旧版本继续保留为历史记录。
+当前提供 Agent 与原生 SSH 两种主机模式：Agent 模式负责 tmux 持久终端与服务端持续监控；SSH 模式无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心和 SSH AI 工具。Windows 与 Android 当前公开稳定版为 **`v0.8.8`**；同一 Release 另提供 macOS `arm64 + x86_64` Universal 测试版。
 
 > Windows 安全提示：本版 NSIS 尚未使用 Authenticode 签名，Windows SmartScreen 可能显示“未知发布者”或额外确认。请只从本仓库 Release 下载，并用下方 SHA256 核对文件。
 
 > Windows 升级提示：`v0.8.8` 是新更新信任根的首个版本。`v0.8.7` 及更早 Windows 客户端需要手动安装一次 `v0.8.8`；从 `v0.8.8` 开始，后续版本恢复自动更新。Android 不受此断代影响。
+
+> macOS 测试版提示：当前包使用 ad-hoc 签名，未经 Developer ID 签名、公证或真实 Mac 验收，系统可能要求用户手动允许打开。它不属于正式版，不支持自动更新，也没有 Creation Cloud 正式下载入口；请只用于测试。
 
 ## v0.8.8 更新重点
 
@@ -27,6 +30,7 @@ Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。An
 - 登录设备撤销后会立即从客户端会话列表移除；账号与同步通知继续保留真实事件和跨设备回执。
 - 修复 Android 浅色主题账号页标签栏与内容卡背景颜色不一致。
 - `v0.8.8` 起 Windows 只发布 NSIS 与便携 ZIP，不再构建或发布 MSI；Android 只发布 arm64 APK，不生成 AAB。
+- 新增 macOS 13+ Universal 测试候选，包含 `arm64 + x86_64`，以名称带 `TEST-UNVERIFIED` 的 DMG 和 `.app.zip` 提供下载。
 
 ## 当前主要能力
 
@@ -50,33 +54,38 @@ Creation-SSH 是一套面向 Windows PC 与 Android 的 SSH 运维客户端。An
 
 ## 下载
 
-| 平台 | 推荐下载 | 其他正式资产 |
+| 平台 | 推荐下载 | 其他资产／说明 |
 | --- | --- | --- |
 | Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_android-arm64.apk) | 本版不提供 AAB |
 | Windows x64 | [安装版 EXE](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_x64-setup.exe) | [便携版 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_portable-Windows-x64.zip)；本版不提供 MSI |
+| macOS 13+ Universal（测试版） | [TEST-UNVERIFIED DMG](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg) | [TEST-UNVERIFIED `.app.zip`](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip)；未经真实 Mac 验收 |
 
 ### SHA256
 
 - `FF15C6CD40D3FC6725A413BD7253AABC191BD76C78CD3AFF83AA255758907736`  `C-SSH_0.8.8_x64-setup.exe`
 - `55B42F281725D3995B9117C85A9E688F51AD4F2359D2921768C52E6AB027FAA0`  `C-SSH_0.8.8_portable-Windows-x64.zip`
 - `A2C98E7A81BB4E5A66B38A2C8096FE41951AC8B66DD3DFE9AA4C64E17A1E4F80`  `C-SSH_0.8.8_android-arm64.apk`
+- `E150EA982F65E458539A7DF2A4E8E45B12B12CAAD0D1CD57DEB5AA785CAD4FA3`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg`
+- `6359C20F6D9F70C8DAA1E825972597FA4CC7BF40C08869A5B7166F7F85976403`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip`
 
 ### 发布验证
 
 - Windows NSIS 与 Portable 已通过正式安装、退出、卸载保留数据、`0.8.7 → 0.8.8` 手动升级和完整清场门禁；两资产带 Creation Cloud updater signature 元数据。
 - Android x86_64 MuMu 已通过本次 Cloud 数据保护与手动同步真链；正式 arm64 APK 已通过版本、ABI、非 debug、v2 单签名与四份内嵌部署资源包级核验。本条不冒充物理 arm64 真机验收。
+- macOS 候选已在 GitHub `macos-15` runner 通过 Universal 架构、ad-hoc 签名结构和 DMG 完整性门禁，公开下载 SHA256 与候选一致；尚未进行真实 Mac 的安装、Gatekeeper、Keychain、交互或网络链验收。
 
 Linux 客户端已停止开发并冻结；历史源码和历史 Release 仅作为既有记录保留。
 
 版本说明和下载见 [v0.8.8 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8)，历史记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 已交付平台
+## 平台交付状态
 
-| 平台 | `v0.8.8` 已交付范围 |
+| 平台 | `v0.8.8` 状态与范围 |
 | --- | --- |
 | Android | 主机管理、agent 安装与更新/修复、持久化/普通终端、文件上传下载、实时监控、AI、系统管理、本地登录门与“我的”设置 |
 | Windows | 完整桌面工作流；提供 NSIS EXE 与便携 ZIP |
-| iOS / macOS | **尚未发布**，不属于 `v0.8.8` 已交付范围 |
+| macOS | **公开测试版**；Universal DMG／`.app.zip`，未经真实 Mac 验收，不属于正式发布范围 |
+| iOS | **尚未发布**，不属于 `v0.8.8` 已交付范围 |
 
 Linux 客户端不再开发、测试、构建或发布；服务器侧 Linux agent 不属于 Linux 客户端。
 

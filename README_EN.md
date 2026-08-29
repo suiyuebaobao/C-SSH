@@ -8,17 +8,20 @@
 
 [![Android](https://img.shields.io/badge/Download-Android-3DDC84?logo=android&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_android-arm64.apk)
 [![Windows](https://img.shields.io/badge/Download-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8)
+[![macOS Test](https://img.shields.io/badge/macOS-v0.8.8%20Test-000000?logo=apple&logoColor=white)](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg)
 [![Stable](https://img.shields.io/badge/stable-v0.8.8-2ea44f)](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8)
 
 </div>
 
-Creation-SSH is an SSH operations client for Windows PCs and Android. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows client covers broader day-to-day operations.
+Creation-SSH is an SSH operations client for Windows PCs and Android, with a macOS Universal test candidate also available. Android is more than a read-only remote: it manages hosts, restores server-side tmux sessions, shows monitoring data, handles files, runs the AI assistant, and opens system-management workflows. The Windows client covers broader day-to-day operations.
 
-Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current public stable release is **`v0.8.8`**. Older versions remain available as historical records.
+Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retains persistent tmux sessions and server-side monitoring. SSH mode requires no installed agent and provides terminal access, port forwarding, SFTP file management, online monitoring, system management, app-center operations, and SSH AI tools. The current Windows and Android public stable release is **`v0.8.8`**; the same Release also provides a macOS `arm64 + x86_64` Universal test build.
 
 > Windows security notice: the NSIS package in this release is not Authenticode-signed. Windows SmartScreen may show Unknown Publisher or require an extra confirmation. Download only from this repository's Release and verify the SHA256 values below.
 
 > Windows upgrade notice: `v0.8.8` is the first release under a new updater trust root. Windows clients on `v0.8.7` or earlier must install `v0.8.8` manually once; automatic updates resume for releases after `v0.8.8`. Android is unaffected.
+
+> macOS test notice: the current package uses ad-hoc signing and has not undergone Developer ID signing, notarization, or real-Mac acceptance. macOS may require users to allow it manually. It is not a production release, has no automatic updates, and is not listed as an official Creation Cloud download. Use it for testing only.
 
 ## v0.8.8 Highlights
 
@@ -27,6 +30,7 @@ Creation-SSH provides explicit Agent and native SSH host modes. Agent mode retai
 - Revoked login sessions disappear immediately from the client list, while real account/sync notifications and cross-device receipts remain available.
 - Fixed mismatched tab and card backgrounds on the Android account page in the light theme.
 - Starting with `v0.8.8`, Windows ships only NSIS and portable ZIP; MSI is no longer built or published. Android ships one arm64 APK and no AAB.
+- Added a macOS 13+ Universal test candidate containing `arm64 + x86_64`, distributed as clearly named `TEST-UNVERIFIED` DMG and `.app.zip` files.
 
 ## Current Capabilities
 
@@ -50,33 +54,38 @@ The same hosts and tmux sessions can continue across desktop and phone. Android 
 
 ## Download
 
-| Platform | Recommended download | Other production assets |
+| Platform | Recommended download | Other assets / notes |
 | --- | --- | --- |
 | Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_android-arm64.apk) | No AAB for this release |
 | Windows x64 | [EXE installer](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_x64-setup.exe) | [portable ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_portable-Windows-x64.zip); no MSI for this release |
+| macOS 13+ Universal (test) | [TEST-UNVERIFIED DMG](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg) | [TEST-UNVERIFIED `.app.zip`](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip); not accepted on a real Mac |
 
 ### SHA256
 
 - `FF15C6CD40D3FC6725A413BD7253AABC191BD76C78CD3AFF83AA255758907736`  `C-SSH_0.8.8_x64-setup.exe`
 - `55B42F281725D3995B9117C85A9E688F51AD4F2359D2921768C52E6AB027FAA0`  `C-SSH_0.8.8_portable-Windows-x64.zip`
 - `A2C98E7A81BB4E5A66B38A2C8096FE41951AC8B66DD3DFE9AA4C64E17A1E4F80`  `C-SSH_0.8.8_android-arm64.apk`
+- `E150EA982F65E458539A7DF2A4E8E45B12B12CAAD0D1CD57DEB5AA785CAD4FA3`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg`
+- `6359C20F6D9F70C8DAA1E825972597FA4CC7BF40C08869A5B7166F7F85976403`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip`
 
 ### Release Verification
 
 - Windows NSIS and Portable passed formal install, exit, uninstall-with-data-retention, manual `0.8.7 → 0.8.8` upgrade, and cleanup gates. Both carry Creation Cloud updater-signature metadata.
 - Android x86_64 on MuMu passed the affected Cloud data-protection and manual-sync path. The production arm64 APK passed version, ABI, non-debug, v2 single-signer, and four embedded deployment-resource checks; this is not presented as physical-arm64 acceptance.
+- The macOS candidate passed Universal architecture, ad-hoc signing-structure, and DMG integrity gates on GitHub's `macos-15` runner, and the public downloads match the candidate SHA256 values. Real-Mac installation, Gatekeeper, Keychain, UI, and network paths remain untested.
 
 Linux client development is discontinued and frozen. Historical source and historical releases remain available only as records.
 
 See the [v0.8.8 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8) for downloads and release notes, or [CHANGELOG_EN.md](CHANGELOG_EN.md) for history.
 
-## Delivered Platforms
+## Platform Availability
 
-| Platform | Delivered in `v0.8.8` |
+| Platform | `v0.8.8` status and scope |
 | --- | --- |
 | Android | Host management, agent install and update/repair, persistent/standard terminals, file upload/download, live monitoring, AI, system management, local login gate, and Me settings |
 | Windows | Complete desktop workflow, distributed as NSIS EXE and portable ZIP |
-| iOS / macOS | **Not released** and not part of the `v0.8.8` delivery |
+| macOS | **Public test build** distributed as Universal DMG / `.app.zip`; not accepted on a real Mac and not a production release |
+| iOS | **Not released** and not part of the `v0.8.8` delivery |
 
 The Linux client is no longer developed, tested, built, or released. The server-side Linux agent is not a Linux client.
 
