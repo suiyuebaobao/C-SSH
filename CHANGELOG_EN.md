@@ -17,6 +17,7 @@ This update publishes documentation and screenshots only. No new binaries, exist
 
 ### Fixed
 
+- Windows Agent labels now show the authenticated software version, with an explicit unknown state; account overview translations are complete across both clients and nine languages.
 - Version-cache failures no longer block the entire local interface; known mandatory-update or disabled-version decisions remain effective.
 - Fixed Android database path inconsistency, with real legacy-database migration and original-configuration retention verified.
 - Fixed installation subtitles, repeated password requests and Windows disk/network metrics.

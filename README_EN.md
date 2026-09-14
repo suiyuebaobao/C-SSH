@@ -16,7 +16,7 @@ Server operations on Windows and Android: terminals, remote desktop, monitoring,
 
 ## Interface Gallery
 
-**54 current screens:** [Windows · 30 screens](screenshots/WINDOWS.md) · [Android · 24 screens](screenshots/ANDROID.md) · [Gallery index](screenshots/README.md).
+**55 current screens:** [Windows · 31 screens](screenshots/WINDOWS.md) · [Android · 24 screens](screenshots/ANDROID.md) · [Gallery index](screenshots/README.md).
 
 Covers hosts, automatic/manual installation, RDP entry, terminals, files, monitoring, all three AI scopes, proxy profiles, account/sync, settings and more. The older v0.7.5 images have been replaced.
 

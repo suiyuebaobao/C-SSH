@@ -16,7 +16,7 @@ Windows 与 Android 上的服务器运维工具：终端、远程桌面、监控
 
 ## 完整界面图集
 
-**共54张当前界面：**[Windows · 30张](screenshots/WINDOWS.md) · [Android · 24张](screenshots/ANDROID.md) · [图集目录](screenshots/README.md)。
+**共55张当前界面：**[Windows · 31张](screenshots/WINDOWS.md) · [Android · 24张](screenshots/ANDROID.md) · [图集目录](screenshots/README.md)。
 
 覆盖主机、自动／手动安装、RDP入口、终端、文件、监控、AI三作用域、代理线路、账号／同步、设置等主要页面；原v0.7.5旧图已替换。
 

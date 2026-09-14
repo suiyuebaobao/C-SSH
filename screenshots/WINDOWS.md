@@ -2,9 +2,9 @@
 
 [返回首页 / Home](../README.md) · [图集目录 / Index](README.md)
 
-共 30 张。当前 0.8.9 前端的离线示例界面，使用示例主机、RFC 5737 地址和 example.com；没有连接服务器、Cloud 或 AI provider。长页面按实际滚动位置展示。
+共 31 张。当前 0.8.9 前端的离线示例界面，使用示例主机、RFC 5737 地址和 example.com；没有连接服务器、Cloud 或 AI provider。长页面按实际滚动位置展示。
 
-30 screens from the current 0.8.9 frontend with offline sample data. No server, Cloud or AI-provider connection was made. Long pages are shown at their captured scroll positions.
+31 screens from the current 0.8.9 frontend with offline sample data. No server, Cloud or AI-provider connection was made. Long pages are shown at their captured scroll positions.
 
 安装三张图复用 2026-09-13 的PC隔离窗口产品界面；进度图为状态回放。其余图为后台浏览器渲染，不是原生安装、真机或业务链验收证据。0.8.9 程序尚未上传。
 
@@ -129,3 +129,7 @@ The three installation images reuse September 13 product UI captures; progress i
 ## 30 · 版本缓存故障时继续本地使用 / Local use during a version-cache failure
 
 <a href="v0.8.9/windows-local-mode.png"><img width="1080" src="v0.8.9/windows-local-mode.png" alt="C-SSH 0.8.9 Local use during a version-cache failure" /></a>
+
+## 31 · 账号概览与数据保护状态 / Account overview and data protection
+
+<a href="v0.8.9/windows-account-overview.png"><img width="1080" src="v0.8.9/windows-account-overview.png" alt="C-SSH 0.8.9 account overview with translated protection status" /></a>

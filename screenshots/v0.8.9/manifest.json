@@ -11,7 +11,8 @@
       "kind": "current_frontend_sample",
       "width": 1440,
       "height": 960,
-      "sha256": "04b18afc74b3b5dbc72d221139fb07e76b32d6f82b2a3a4b9def50234ef46742"
+      "sha256": "9b16f5cf74c4185a931455f2a41ee9285f9978bc1cba70e2b987765eb7bdb1a4",
+      "revision_note": "authenticated-agent-version-and-account-labels"
     },
     {
       "file": "screenshots/v0.8.9/windows-add-server.png",
@@ -301,7 +302,19 @@
       "kind": "current_frontend_sample",
       "width": 1440,
       "height": 960,
-      "sha256": "6b62431971cf5e1af4507b492bc0f2bba52f113af957cdeb6fa7c20367442d59"
+      "sha256": "85808e7af43b5539769f8ee66e67326a0efc74215dc0ed47f58351aa0e111964",
+      "revision_note": "authenticated-agent-version-and-account-labels"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-account-overview.png",
+      "platform": "windows",
+      "title_zh": "账号概览与数据保护状态",
+      "title_en": "Account overview and data-protection status",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "afa97930143450050f3d4b3507c0644c9c4b15d275d9a2ec5aef1924661be19f",
+      "revision_note": "authenticated-agent-version-and-account-labels"
     },
     {
       "file": "screenshots/v0.8.9/android-hosts.png",
@@ -309,9 +322,10 @@
       "title_zh": "主机清单",
       "title_en": "Hosts",
       "kind": "current_frontend_sample",
-      "width": 412,
-      "height": 892,
-      "sha256": "91ba73e5c3d62dbfcc5470ee9ec0b5aef604b2cb5d98fe8b4da2d5c375e9b982"
+      "width": 824,
+      "height": 1784,
+      "sha256": "c4b416a629186d3c852e782d84b55ce7fc8a119ee22cf0a071d50973ca68798e",
+      "revision_note": "authenticated-agent-version-and-account-labels"
     },
     {
       "file": "screenshots/v0.8.9/android-add-windows-server.png",
@@ -449,9 +463,10 @@
       "title_zh": "账号概览",
       "title_en": "Account overview",
       "kind": "current_frontend_sample",
-      "width": 412,
-      "height": 892,
-      "sha256": "4050d4ab9acb52d40ef6acabd6f81ed7abb84450250c0fc1ae5275cbb6c25679"
+      "width": 824,
+      "height": 1784,
+      "sha256": "307a6b2a40946f04feaff246ae9ca291470ba406d25280662937f5e3b1e8d6f8",
+      "revision_note": "authenticated-agent-version-and-account-labels"
     },
     {
       "file": "screenshots/v0.8.9/android-cloud-sync.png",
@@ -539,9 +554,10 @@
       "title_zh": "非阻断本地模式提示",
       "title_en": "Nonblocking local-mode notice",
       "kind": "current_frontend_sample",
-      "width": 412,
-      "height": 892,
-      "sha256": "c5d692d20e7bfe025d85f960f01938e579ec168647832893751773a34820a5c1"
+      "width": 824,
+      "height": 1784,
+      "sha256": "a9083c5480fbe3c05c5d2d7185c18c9519f5f424d43c300322a10f9e949e5b22",
+      "revision_note": "authenticated-agent-version-and-account-labels"
     }
   ]
 }
