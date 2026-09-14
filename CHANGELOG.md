@@ -4,6 +4,32 @@
 
 完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
+## v0.8.9（未发布）— Windows 管理双入口与本地可用性
+
+本次仅更新说明和截图，未上传新程序，也未变更旧版资产或自动更新策略。
+
+### 新增与调整
+
+- Windows／Android 共用自动安装流程；保留原手动 Setup 与远程桌面接管。
+- Windows 管理支持 RDP-only、OpenSSH 直连和 SSH-over-RDP，复用已保存凭据。
+- 补齐 Windows Native AI、监控及跨端代理线路和加密同步相关能力。
+
+### 修复
+
+- 版本缓存故障不再全屏封锁本地界面，保留已知强制更新／停用决策。
+- 修复 Android 数据库路径不一致，并验证真实旧库迁移与原配置保持。
+- 修复安装副标题、密码重复输入及 Windows 磁盘／网络指标问题。
+
+### 验证
+
+- Windows Server 2022 真实 UAC、真实 Server 2019 安装与权限检查通过定向验证；不外推其它环境。
+- Windows 公开旧包升级、本地模式故障与数据保持按各自原制品记录；Android采用MuMu，无物理手机结果。
+- 最新界面截图使用示例主机；安装进度图为状态回放。
+
+### 下载与 SHA256
+
+暂不提供 0.8.9 下载或正式发布摘要；现有 0.8.8 下载及下方历史记录保持。
+
 ## v0.8.8 - Cloud 数据保护恢复与三资产发布
 
 > 协议为 14，Windows 与 Android 统一使用 SQLite schema 15。正式资产恰好为 Windows NSIS、Windows Portable ZIP 与 Android arm64 APK；不再构建或发布 MSI，不生成 AAB，也不发布 Linux 客户端资产。

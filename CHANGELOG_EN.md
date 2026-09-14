@@ -4,6 +4,32 @@
 
 Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
 
+## v0.8.9 (Unreleased) — Windows Installation Choices And Local Availability
+
+This update publishes documentation and screenshots only. No new binaries, existing assets or automatic-update policies have been changed.
+
+### Added And Changed
+
+- Shared automatic installation on Windows and Android, retaining manual Setup and remote-desktop takeover.
+- RDP-only, direct OpenSSH and SSH-over-RDP access with saved-credential reuse.
+- Windows Native AI and monitoring improvements, plus shared proxy routes and encrypted-sync capabilities.
+
+### Fixed
+
+- Version-cache failures no longer block the entire local interface; known mandatory-update or disabled-version decisions remain effective.
+- Fixed Android database path inconsistency, with real legacy-database migration and original-configuration retention verified.
+- Fixed installation subtitles, repeated password requests and Windows disk/network metrics.
+
+### Verified
+
+- Targeted checks cover real UAC on Windows Server 2022 and installation and privilege checks on a real Server 2019 host, without extrapolating to other environments.
+- Windows update, local-mode fault and data-retention results keep their individual tested artifact identities. Android used MuMu, with no physical-phone result.
+- Current interface screenshots use a demonstration host; the progress image is a state replay.
+
+### Downloads And SHA256
+
+No 0.8.9 download or formal release digest is published yet. Existing 0.8.8 downloads and the historical entries below remain unchanged.
+
 ## v0.8.8 - Cloud Data-Protection Recovery And Three-Asset Release
 
 > Protocol is 14, and Windows and Android share SQLite schema 15. Production assets are exactly Windows NSIS, Windows portable ZIP, and one Android arm64 APK. MSI is no longer built or published, no AAB is generated, and no Linux client artifact is released.
