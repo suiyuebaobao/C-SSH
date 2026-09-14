@@ -1,0 +1,547 @@
+{
+  "version": "0.8.9",
+  "binaries_uploaded": false,
+  "example_data_only": true,
+  "screens": [
+    {
+      "file": "screenshots/v0.8.9/windows-hosts.png",
+      "platform": "windows",
+      "title_zh": "主机管理",
+      "title_en": "Host management",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "04b18afc74b3b5dbc72d221139fb07e76b32d6f82b2a3a4b9def50234ef46742"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-add-server.png",
+      "platform": "windows",
+      "title_zh": "新增 Windows 主机与三种访问模式",
+      "title_en": "Add a Windows host and choose an access mode",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "f9e9d1b0c0cf664d5d7f3a14bf924f2389650eb5e42ed4ada361087316e55a1c"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-rdp-entry.png",
+      "platform": "windows",
+      "title_zh": "远程桌面连接入口",
+      "title_en": "Remote desktop connection entry",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "cecec44ddd13dc8d3c2cf92f6e1d8e2ddc24e003a6d2557aa6df4f151b766642"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-install-choice.png",
+      "platform": "windows",
+      "title_zh": "自动或手动安装",
+      "title_en": "Automatic or manual installation",
+      "kind": "native_sample_ui",
+      "width": 1524,
+      "height": 1317,
+      "sha256": "4c4f563ce06952920da7f3545fb7fc0ac24379e6a5856c7159e707d709c17a84"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-manual-install.png",
+      "platform": "windows",
+      "title_zh": "手动 Setup 流程",
+      "title_en": "Manual Setup workflow",
+      "kind": "native_sample_ui",
+      "width": 1524,
+      "height": 1317,
+      "sha256": "bafd65f73f09a636d0260e87c12e3fb401b3945b5c1ff5eaf3b9b218bd1c5a13"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-install-progress.png",
+      "platform": "windows",
+      "title_zh": "自动安装进度与手动接管",
+      "title_en": "Installation progress and manual takeover",
+      "kind": "recorded_state_replay",
+      "width": 1524,
+      "height": 1755,
+      "sha256": "95713f131ff5179d48c8deab247f3f844a7097bce5a306cc67aceb79c25b669d"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-terminal.png",
+      "platform": "windows",
+      "title_zh": "终端",
+      "title_en": "Terminal",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "1ef09fc77d4e0ef9dde54706d7883c5e1943eb9040fae4ddefb8d37a92072794"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-files.png",
+      "platform": "windows",
+      "title_zh": "文件管理",
+      "title_en": "File manager",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "4712747d0a52a22a5dacd4e5361e078f5483f8afd34e233a43c3a3ee60367235"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-monitor-overview.png",
+      "platform": "windows",
+      "title_zh": "跨主机监控",
+      "title_en": "Fleet monitoring",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "fef4a939165fbb6e6153c9527bbeeac0a8ac70a61366092d7419814f3a5682f1"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-monitor-charts.png",
+      "platform": "windows",
+      "title_zh": "监控详情与趋势",
+      "title_en": "Monitoring details and trends",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "7f07a9bff43232e303b2b02aa91e55131b4595dbba29ecdcc6c5ebe9e0dc116c"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-ai-host.png",
+      "platform": "windows",
+      "title_zh": "主机 AI 示例对话",
+      "title_en": "Host AI sample conversation",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "0179f46d9db593b415c7f95913d4ff6f5d828860979d1612595bc4bdb4c282de"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-ai-project.png",
+      "platform": "windows",
+      "title_zh": "项目 AI 示例对话",
+      "title_en": "Project AI sample conversation",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "21114755454e22a344de9b1374c2b31a1a281fd2a4d690f60148821a83d0f77c"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-ai-global.png",
+      "platform": "windows",
+      "title_zh": "全局 AI 示例对话",
+      "title_en": "Global AI sample conversation",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "03fc319143d879d7d2543c4dd8d4231d1f6aefd51a1e7c7c4531a37bad785645"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-ai-models.png",
+      "platform": "windows",
+      "title_zh": "AI 模型账户",
+      "title_en": "AI model accounts",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "ea3d4253dda7f2078799c56fb405e760a32ea9924625a42839129b4bb0689159"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-port-forwarding.png",
+      "platform": "windows",
+      "title_zh": "端口映射",
+      "title_en": "Port forwarding",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "3690c1e13de17007a098e88632d58f7c31167db2abd2bb72ff9d2bb5d244e073"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-broadcast.png",
+      "platform": "windows",
+      "title_zh": "群发执行",
+      "title_en": "Broadcast execution",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "f0c0dc53828d22823332ab79ac59b6ced2cdbdaa117109ecb3945a9a5da3f9a8"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-command-library-full.png",
+      "platform": "windows",
+      "title_zh": "常用命令库",
+      "title_en": "Command library",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "dcb05690e67e4d7d8f5d4dcb467b79db419e1cc2bfef8d8af7ce1c6e522609b3"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-system-processes.png",
+      "platform": "windows",
+      "title_zh": "进程管理",
+      "title_en": "Process management",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "38c2d4748070536d85c7457b64fcdfe2bbf588187ad9f2fad068d6e67d0b85ba"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-firewall.png",
+      "platform": "windows",
+      "title_zh": "防火墙端口",
+      "title_en": "Firewall ports",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "2eed7fc326b7920b2d4a8319c89228dabeca846478e6e1f11f5b4cbdf0c6f061"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-app-center.png",
+      "platform": "windows",
+      "title_zh": "应用中心",
+      "title_en": "App Center",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "e3b2008c39cdd3622bee7d0bbf9d673c2d5b75f5b5c0feed316c10dded71687c"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-access-grants.png",
+      "platform": "windows",
+      "title_zh": "访问授权",
+      "title_en": "Access grants",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "25c2641ba271c13ccc5e8425334c16695559ae6af56f7373f3c6bfecca43d626"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-proxy-profiles.png",
+      "platform": "windows",
+      "title_zh": "代理线路",
+      "title_en": "Proxy profiles",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "c43ec000527c4ca9d157d8e15d26396a2a12ce1b930edeab2b0ca5e6e8cc2a6d"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-appearance.png",
+      "platform": "windows",
+      "title_zh": "外观设置",
+      "title_en": "Appearance",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "2b7523b45bf7fcefcee14eb154222009fd0920952bde3199e50f875b37668dbc"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-collection.png",
+      "platform": "windows",
+      "title_zh": "监控采集设置",
+      "title_en": "Monitoring collection settings",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "ef64b3061073224ec073a2d262a5f39ff56503828bb0a45d2067c1e1adc7e3dd"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-data-protection.png",
+      "platform": "windows",
+      "title_zh": "数据保护设置",
+      "title_en": "Data protection",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "c4cf33783b2628854481a66ca23a9443535f22d3443665295c845104fab1069f"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-cloud-account.png",
+      "platform": "windows",
+      "title_zh": "可选账号登录与本地模式",
+      "title_en": "Optional account login and local mode",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "b546be4299e745e0c0c7de312578c36af69168ea2b5fc5a2661f21e7f5de466c"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-cloud-sync.png",
+      "platform": "windows",
+      "title_zh": "云同步变化清单",
+      "title_en": "Cloud sync change preview",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "714d734f0ca6d11f382fd45abd04656f5ab7ccefe4a8cf5f5f2bfb3108e738e6"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-diagnostics.png",
+      "platform": "windows",
+      "title_zh": "诊断日志默认关闭",
+      "title_en": "Diagnostics off by default",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "6ef34c4851cfe844bed352f788b220a6ed1ad6651bd953a4a406704bbbfbb2de"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-about.png",
+      "platform": "windows",
+      "title_zh": "关于与更新入口",
+      "title_en": "About and update entry",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "84b93134d3a77f5deccf578b819d6c0641611e939be5b6f870d20f0c17985c54"
+    },
+    {
+      "file": "screenshots/v0.8.9/windows-local-mode.png",
+      "platform": "windows",
+      "title_zh": "版本缓存故障时继续本地使用",
+      "title_en": "Local use during a version-cache failure",
+      "kind": "current_frontend_sample",
+      "width": 1440,
+      "height": 960,
+      "sha256": "6b62431971cf5e1af4507b492bc0f2bba52f113af957cdeb6fa7c20367442d59"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-hosts.png",
+      "platform": "android",
+      "title_zh": "主机清单",
+      "title_en": "Hosts",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "91ba73e5c3d62dbfcc5470ee9ec0b5aef604b2cb5d98fe8b4da2d5c375e9b982"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-add-windows-server.png",
+      "platform": "android",
+      "title_zh": "Windows 三种访问模式",
+      "title_en": "Windows access modes",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "6a908b51c0db3d27d6ac90d96e2c4d6731d456f14220dae7b33d721d8ff8b370"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-install-choice.png",
+      "platform": "android",
+      "title_zh": "自动或手动安装",
+      "title_en": "Automatic or manual installation",
+      "kind": "native_sample_ui",
+      "width": 1080,
+      "height": 1848,
+      "sha256": "032b18e7cdf06b362349c9dd4d7afea4f843d14013fafb4cbed48883b02d1179"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-manual-install.png",
+      "platform": "android",
+      "title_zh": "手动导出 Setup",
+      "title_en": "Manual Setup export",
+      "kind": "native_sample_ui",
+      "width": 1080,
+      "height": 1848,
+      "sha256": "1c3590acb0424a07295eacc4fa349305b020c07b1e10a1e8351b164ab136fbd4"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-install-progress.png",
+      "platform": "android",
+      "title_zh": "安装进度与接管入口",
+      "title_en": "Installation progress and takeover",
+      "kind": "recorded_state_replay",
+      "width": 1080,
+      "height": 1848,
+      "sha256": "cf23eb10d13bd9cb2679ccac500fc55158f872ee8dceb5971c988a83b266c61f"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-terminal.png",
+      "platform": "android",
+      "title_zh": "移动终端",
+      "title_en": "Mobile terminal",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "cdc79576c7b0415de3514e492c6dcbda4253ed15ed0ec3ec4807b67685f71f2b"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-files.png",
+      "platform": "android",
+      "title_zh": "文件管理",
+      "title_en": "File manager",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "8ddec8df9ecbf5e4c35d1d13d27cb18597bdc1c2627a85b5315db7fe9c6993fb"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-monitor.png",
+      "platform": "android",
+      "title_zh": "监控与 Top 进程",
+      "title_en": "Monitoring and top processes",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "17a677d99250fae6dc04c8255a3c8fd24246c22cad1d1588ed4c63c14a35ac3c"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-system.png",
+      "platform": "android",
+      "title_zh": "系统信息",
+      "title_en": "System information",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "e77e77b052d6169ccd519a2bfe0c947c44ebd5874556429a805f807383bf95e2"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-firewall.png",
+      "platform": "android",
+      "title_zh": "防火墙与系统操作",
+      "title_en": "Firewall and system actions",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "945499f8befa20ba9b16112e355f898add89e9c32d5ad3aa73de540f5e33ff10"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-ai-conversation.png",
+      "platform": "android",
+      "title_zh": "AI 示例对话",
+      "title_en": "AI sample conversation",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "1da04b92b5508c07c596036d2774c13cc82f95583c49bd4201485046042998bf"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-ai-host.png",
+      "platform": "android",
+      "title_zh": "AI 历史对话",
+      "title_en": "AI conversation history",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "f93c447d52e6b08b51f0c3dcc4ddffb37ec85a00d25dc7455f2bc53557c96e42"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-ai-models.png",
+      "platform": "android",
+      "title_zh": "模型账户与绑定",
+      "title_en": "Model accounts and bindings",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "dc7c67b1e648afcb29f84f19c691056c977c9c9ae7e65712f4eb2e215b1837fb"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-local-account.png",
+      "platform": "android",
+      "title_zh": "本地模式与可选登录",
+      "title_en": "Local mode and optional login",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "e7300436cf218d4129b2fe632d8d3f684b5458a1e76970f637b24d123861ba67"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-cloud-account.png",
+      "platform": "android",
+      "title_zh": "账号概览",
+      "title_en": "Account overview",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "4050d4ab9acb52d40ef6acabd6f81ed7abb84450250c0fc1ae5275cbb6c25679"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-cloud-sync.png",
+      "platform": "android",
+      "title_zh": "手动同步入口",
+      "title_en": "Manual sync entry",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "47d52e144302c917f9256b9c9fedd634750fd0db5ec91274e533678d1c00fc38"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-cloud-changes-final.png",
+      "platform": "android",
+      "title_zh": "紧凑同步变化清单",
+      "title_en": "Compact sync change preview",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "2c96fda08ac2107672f518baa067822822074e7ae3ab7ed03327b00a8272fdad"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-cloud-devices.png",
+      "platform": "android",
+      "title_zh": "登录设备会话",
+      "title_en": "Device sessions",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "f095bf40c2d9accc618c25dce37465b810f518c4c031481f3d15f8bccd423cd7"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-data-protection.png",
+      "platform": "android",
+      "title_zh": "数据保护设置",
+      "title_en": "Data protection",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "9969a2e06e526d45e27403de4a52c10bdb2893ccc23da1d60ab5e2fd94f9aae8"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-appearance.png",
+      "platform": "android",
+      "title_zh": "外观与监控采集",
+      "title_en": "Appearance and collection",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "34a09160dcc99125c2e32268d7a17a9f5a8cc8f04b16e7a84034da28eb018b62"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-proxy-profiles.png",
+      "platform": "android",
+      "title_zh": "代理线路",
+      "title_en": "Proxy profiles",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "40739b10a00c88c6c4d5b294b3c01134fdc79dda16c5febdc1ef29682089dd89"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-diagnostics.png",
+      "platform": "android",
+      "title_zh": "诊断日志默认关闭",
+      "title_en": "Diagnostics off by default",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "7f13b43194d6af97df2ea50de70de00bf024eeec8f8b7d4c69cec0d824ce8056"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-about.png",
+      "platform": "android",
+      "title_zh": "语言、关于与更新",
+      "title_en": "Language, about and updates",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "1219c692c4d89237ead97b357ae98ed5b937ac7fb88d5f20947c7e4849159468"
+    },
+    {
+      "file": "screenshots/v0.8.9/android-local-mode.png",
+      "platform": "android",
+      "title_zh": "非阻断本地模式提示",
+      "title_en": "Nonblocking local-mode notice",
+      "kind": "current_frontend_sample",
+      "width": 412,
+      "height": 892,
+      "sha256": "c5d692d20e7bfe025d85f960f01938e579ec168647832893751773a34820a5c1"
+    }
+  ]
+}

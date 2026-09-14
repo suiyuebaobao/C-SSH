@@ -10,6 +10,7 @@ This update publishes documentation and screenshots only. No new binaries, exist
 
 ### Added And Changed
 
+- Expanded the current screenshot gallery to 54 screens across Windows and Android; replaced legacy root screenshot URLs and added per-platform galleries.
 - Shared automatic installation on Windows and Android, retaining manual Setup and remote-desktop takeover.
 - RDP-only, direct OpenSSH and SSH-over-RDP access with saved-credential reuse.
 - Windows Native AI and monitoring improvements, plus shared proxy routes and encrypted-sync capabilities.

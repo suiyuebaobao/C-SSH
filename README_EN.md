@@ -14,23 +14,20 @@ Server operations on Windows and Android: terminals, remote desktop, monitoring,
 - **Local use remains accessible when checks fail.** Version-cache access failures show a nonblocking notice and retry action. Known mandatory-update or disabled-version decisions remain effective. Unreadable business data reports its own error; the original database is not replaced with an empty one.
 - **Improved data and connection handling.** Fixes Android database path inconsistency while preserving upgrade data, and improves credential reuse, proxy profiles, Windows disk/network metrics and encrypted sync.
 
-## Latest Installation Screens
+## Interface Gallery
 
-These are 0.8.9 development-client screens captured on September 13, 2026, using a demonstration host name. Windows was captured in an isolated background window; Android used MuMu. The progress image replays an existing state to illustrate the interface and is not a new remote-installation run.
+**54 current screens:** [Windows · 30 screens](screenshots/WINDOWS.md) · [Android · 24 screens](screenshots/ANDROID.md) · [Gallery index](screenshots/README.md).
 
-<p align="center"><img width="900" src="screenshots/v0.8.9-preview/windows-install-choice.png" alt="Windows: automatic and manual installation" /></p>
+Covers hosts, automatic/manual installation, RDP entry, terminals, files, monitoring, all three AI scopes, proxy profiles, account/sync, settings and more. The older v0.7.5 images have been replaced.
+
+These are current 0.8.9 product interfaces with offline demonstration data. Installation screens reuse saved PC/MuMu captures; other screens are background browser renders. They are not new native-device or live-server acceptance results.
+
+<p align="center"><img width="1080" src="screenshots/v0.8.9/windows-hosts.png" alt="C-SSH 0.8.9 Windows hosts" /></p>
 
 <table>
-<tr><th>Android · 自动 / Automatic</th><th>Android · 手动 / Manual</th></tr>
-<tr><td><img width="320" src="screenshots/v0.8.9-preview/android-install-choice.png" alt="Android installation choices" /></td><td><img width="320" src="screenshots/v0.8.9-preview/android-manual-install.png" alt="Android manual Setup export" /></td></tr>
+<tr><th>Android · Hosts</th><th>Android · Monitoring</th><th>Android · AI</th></tr>
+<tr><td><img width="290" src="screenshots/v0.8.9/android-hosts.png" alt="Android hosts" /></td><td><img width="290" src="screenshots/v0.8.9/android-monitor.png" alt="Android monitoring" /></td><td><img width="290" src="screenshots/v0.8.9/android-ai-conversation.png" alt="Android AI sample conversation" /></td></tr>
 </table>
-
-<details>
-<summary>Android · 安装进度界面 / Installation progress preview</summary>
-<p align="center"><img width="320" src="screenshots/v0.8.9-preview/android-install-progress.png" alt="Android installation progress state replay" /></p>
-</details>
-
-Automatic installation handles only the product task selected by the user and keeps system UAC settings. When a prompt or result cannot be verified, users can continue manually; other applications are not automatically approved.
 
 ## Everyday Work
 
@@ -71,16 +68,6 @@ The Windows 0.8.8 installer is not Authenticode-signed and may trigger an unknow
 - `6359C20F6D9F70C8DAA1E825972597FA4CC7BF40C08869A5B7166F7F85976403`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip`
 
 Production client platforms are Windows and Android: NSIS/portable ZIP for Windows and an arm64 APK for Android. macOS has only the test downloads above; iOS has not been released. The Linux client is frozen, while the server-side Linux Agent is maintained separately.
-
-## Historical Interface Reference
-
-These v0.7.5 screenshots use offline demonstration data and remain historical references. The 0.8.9 screens above show the new installation flow.
-
-<table>
-<tr><td><img width="500" src="screenshots/hosts.png" alt="v0.7.5 Windows hosts" /></td><td><img width="500" src="screenshots/terminal.png" alt="v0.7.5 Windows terminal" /></td></tr>
-<tr><td><img width="500" src="screenshots/monitor.png" alt="v0.7.5 Windows monitoring" /></td><td><img width="500" src="screenshots/files.png" alt="v0.7.5 Windows files" /></td></tr>
-<tr><td><img width="280" src="screenshots/mobile-hosts.png" alt="v0.7.5 Android hosts" /></td><td><img width="280" src="screenshots/mobile-ai.png" alt="v0.7.5 Android simulated AI conversation" /></td></tr>
-</table>
 
 ## Data And Source Boundaries
 

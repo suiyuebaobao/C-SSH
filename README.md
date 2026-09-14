@@ -14,23 +14,20 @@ Windows 与 Android 上的服务器运维工具：终端、远程桌面、监控
 - **检查失败时保留本地使用。** 版本缓存访问失败改为非阻断提示与重试入口；已知的强制更新或停用规则仍有效。确实无法读取的业务数据会单独报错，不清空或新建空库替代原数据。
 - **更稳妥的数据与连接处理。** 修复 Android 数据库路径不一致，保留升级前数据；改进主机凭据复用、代理线路、Windows 磁盘／网络指标与加密同步。
 
-## 最新安装界面
+## 完整界面图集
 
-以下为 2026-09-13 的 0.8.9 开发程序界面，使用示例主机名。Windows 图来自隔离后台窗口，Android 图来自 MuMu；进度图回放既有状态，用于展示界面，不是一轮新的远端安装记录。
+**共54张当前界面：**[Windows · 30张](screenshots/WINDOWS.md) · [Android · 24张](screenshots/ANDROID.md) · [图集目录](screenshots/README.md)。
 
-<p align="center"><img width="900" src="screenshots/v0.8.9-preview/windows-install-choice.png" alt="Windows: automatic and manual installation" /></p>
+覆盖主机、自动／手动安装、RDP入口、终端、文件、监控、AI三作用域、代理线路、账号／同步、设置等主要页面；原v0.7.5旧图已替换。
+
+图片使用当前0.8.9产品界面与离线示例数据。安装图复用已保存的PC／MuMu界面，其余为后台浏览器渲染，不是新一轮真机或真实服务器验收。
+
+<p align="center"><img width="1080" src="screenshots/v0.8.9/windows-hosts.png" alt="C-SSH 0.8.9 Windows hosts" /></p>
 
 <table>
-<tr><th>Android · 自动 / Automatic</th><th>Android · 手动 / Manual</th></tr>
-<tr><td><img width="320" src="screenshots/v0.8.9-preview/android-install-choice.png" alt="Android installation choices" /></td><td><img width="320" src="screenshots/v0.8.9-preview/android-manual-install.png" alt="Android manual Setup export" /></td></tr>
+<tr><th>Android · 主机</th><th>Android · 监控</th><th>Android · AI</th></tr>
+<tr><td><img width="290" src="screenshots/v0.8.9/android-hosts.png" alt="Android hosts" /></td><td><img width="290" src="screenshots/v0.8.9/android-monitor.png" alt="Android monitoring" /></td><td><img width="290" src="screenshots/v0.8.9/android-ai-conversation.png" alt="Android AI sample conversation" /></td></tr>
 </table>
-
-<details>
-<summary>Android · 安装进度界面 / Installation progress preview</summary>
-<p align="center"><img width="320" src="screenshots/v0.8.9-preview/android-install-progress.png" alt="Android installation progress state replay" /></p>
-</details>
-
-自动安装只处理用户选择的本产品安装任务，保留系统 UAC 设置。无法确认提示或安装结果时，可转手动继续，不自动批准其它程序。
 
 ## 日常使用
 
@@ -71,16 +68,6 @@ Windows 0.8.8 安装器没有 Authenticode 签名，系统可能提示未知发�
 - `6359C20F6D9F70C8DAA1E825972597FA4CC7BF40C08869A5B7166F7F85976403`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip`
 
 正式客户端平台为 Windows 与 Android；Windows 采用 NSIS／便携 ZIP，Android 采用 arm64 APK。macOS 仅有上述公开测试包，iOS 尚未发布；Linux 客户端冻结，服务器侧 Linux Agent 继续独立维护。
-
-## 旧版页面参考
-
-下列图来自 v0.7.5，使用离线示例数据，保留为历史界面参考；当前新安装流程以上方 0.8.9 截图为准。
-
-<table>
-<tr><td><img width="500" src="screenshots/hosts.png" alt="v0.7.5 Windows hosts" /></td><td><img width="500" src="screenshots/terminal.png" alt="v0.7.5 Windows terminal" /></td></tr>
-<tr><td><img width="500" src="screenshots/monitor.png" alt="v0.7.5 Windows monitoring" /></td><td><img width="500" src="screenshots/files.png" alt="v0.7.5 Windows files" /></td></tr>
-<tr><td><img width="280" src="screenshots/mobile-hosts.png" alt="v0.7.5 Android hosts" /></td><td><img width="280" src="screenshots/mobile-ai.png" alt="v0.7.5 Android simulated AI conversation" /></td></tr>
-</table>
 
 ## 数据与源码边界
 

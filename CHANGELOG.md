@@ -10,6 +10,7 @@
 
 ### 新增与调整
 
+- 界面图集扩充到Windows／Android共54张，补齐主要页面并替换旧图原链接，新增分平台图集导航。
 - Windows／Android 共用自动安装流程；保留原手动 Setup 与远程桌面接管。
 - Windows 管理支持 RDP-only、OpenSSH 直连和 SSH-over-RDP，复用已保存凭据。
 - 补齐 Windows Native AI、监控及跨端代理线路和加密同步相关能力。
