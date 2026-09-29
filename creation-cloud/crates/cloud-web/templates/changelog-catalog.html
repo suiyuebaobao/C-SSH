@@ -27,9 +27,21 @@
         <article class="changelog-entry-content">
           <span class="card-badge">{{ release.channel }}</span>
           <h3>{{ release.title }}</h3>
-          {% if !release.notes.is_empty() %}<p>{{ release.notes }}</p>{% endif %}
+          {% if !release.notes_blocks.is_empty() %}
+          <div class="release-notes">
+            {% for block in release.notes_blocks %}
+            {% match block %}
+            {% when NotesBlock::Heading with (title) %}<h4>{{ title }}</h4>
+            {% when NotesBlock::Paragraph with (text) %}<p>{{ text }}</p>
+            {% when NotesBlock::Bullets with (items) %}
+            <ul>{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul>
+            {% endmatch %}
+            {% endfor %}
+          </div>
+          {% endif %}
           <ul class="changelog-platforms" aria-label="{% if is_en %}Released platforms{% else %}发布平台{% endif %}">
             {% for platform in release.platforms %}<li>{{ platform.name }}</li>{% endfor %}
+            {% if release.version == "0.9.0" && !release.has_macos %}<li>macOS</li>{% endif %}
           </ul>
         </article>
       </li>

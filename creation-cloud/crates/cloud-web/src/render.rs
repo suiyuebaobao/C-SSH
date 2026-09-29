@@ -11,6 +11,9 @@ use cloud_site_content::SiteContentPayload;
 
 use crate::seo::{SeoConfig, SeoHead};
 
+mod release_notes;
+use release_notes::NotesBlock;
+
 #[derive(Template)]
 #[template(path = "home.html")]
 struct HomeTemplate {
@@ -336,7 +339,7 @@ struct PublishedReleaseView {
     version: String,
     channel: String,
     title: String,
-    notes: String,
+    notes_blocks: Vec<NotesBlock>,
     published_at_iso: String,
     published_at_label: String,
     platforms: Vec<PublishedPlatformView>,
@@ -376,7 +379,7 @@ impl PublishedReleaseView {
             version: release.version,
             channel: release.channel,
             title,
-            notes,
+            notes_blocks: release_notes::parse(&notes),
             published_at_iso,
             published_at_label,
             platforms,

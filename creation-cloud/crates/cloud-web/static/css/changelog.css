@@ -133,10 +133,44 @@
   font-size: clamp(1.65rem, 3vw, 2.35rem);
 }
 
-.changelog-entry-content > p {
-  max-width: 760px;
-  margin: 0;
+.release-notes {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 780px;
   color: var(--ink-soft);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.release-notes h4 {
+  margin: var(--space-3) 0 0;
+  color: var(--ink);
+  font-size: 1.12rem;
+  line-height: 1.5;
+}
+
+.release-notes p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.release-notes > p:first-child {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.release-notes ul,
+.release-notes ol {
+  margin: 0;
+  padding-inline-start: 1.4em;
+}
+
+.release-notes li + li {
+  margin-top: var(--space-3);
+}
+
+.release-notes li::marker {
+  color: var(--accent-text);
 }
 
 .changelog-platforms {
