@@ -30,7 +30,9 @@ Installation notes:
 
 Download complete installers from [GitHub Releases](https://github.com/suiyuebaobao/C-SSH/releases). Each release includes binaries, release notes, and verification details.
 
-## v0.8.9 (Unreleased) — Windows Installation Choices And Local Availability
+## v0.8.9 (historical development stage; not released separately)
+
+> These entries describe the state at that time, not the current product or downloads. Subsequent development is included in the 0.9.0 release above.
 
 This update publishes documentation and screenshots only. No new binaries, existing assets or automatic-update policies have been changed.
 
@@ -56,9 +58,9 @@ This update publishes documentation and screenshots only. No new binaries, exist
 
 ### Downloads And SHA256
 
-No 0.8.9 download or formal release digest is published yet. Existing 0.8.8 downloads and the historical entries below remain unchanged.
+No standalone 0.8.9 package was released at this stage; the public version at that time was 0.8.8. Use the 0.9.0 downloads above for the current release.
 
-## v0.8.8 - Cloud Data-Protection Recovery And Three-Asset Release
+## v0.8.8 (historical release) - Cloud Data-Protection Recovery And Three-Asset Release
 
 > Protocol is 14, and Windows and Android share SQLite schema 15. Production assets are exactly Windows NSIS, Windows portable ZIP, and one Android arm64 APK. MSI is no longer built or published, no AAB is generated, and no Linux client artifact is released.
 
