@@ -150,3 +150,13 @@
     flex: none;
   }
 }
+
+/* 0.9.0手动安装与数据保护提示，不进入客户端自动更新逻辑。 */
+.download-manual-notice {
+  padding: 20px;
+  border: 2px solid var(--accent, #d63b25);
+  line-height: 1.65;
+}
+.download-manual-notice strong { display: block; font-size: 1.1rem; }
+.download-manual-notice p { margin: 12px 0; }
+.download-manual-notice a { text-decoration: underline; }

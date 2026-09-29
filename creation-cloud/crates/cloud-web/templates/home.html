@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block styles %}
-  <link rel="stylesheet" href="/static/css/home-foundation.css?v=20260720-seo">
-  <link rel="stylesheet" href="/static/css/home-hero.css?v=20260720-seo">
-  <link rel="stylesheet" href="/static/css/home-sections.css?v=20260720-seo">
-  <link rel="stylesheet" href="/static/css/home-closing.css?v=20260728-topics">
+  <link rel="stylesheet" href="/static/css/home-foundation.css?v=20260908-deduplicated">
+  <link rel="stylesheet" href="/static/css/home-hero.css?v=20260908-deduplicated">
+  <link rel="stylesheet" href="/static/css/home-sections.css?v=20260908-deduplicated">
+  <link rel="stylesheet" href="/static/css/home-closing.css?v=20260908-deduplicated">
   <link rel="stylesheet" href="/static/css/home-qr.css?v=20260720-qr-managed">
 {% endblock %}
 
@@ -14,9 +14,8 @@
 
 {% block main %}
 <main id="main-content" class="home-main">
-  <div class="home-status-strip" aria-label="{{ home.status_strip_label }}">
+  <div class="home-status-strip">
     <div class="container home-status-inner">
-      <span>{{ home.status_strip_label }}</span>
       <span>{{ home.status_note }}</span>
     </div>
   </div>
@@ -30,12 +29,13 @@
         <p class="hero-lead">{{ view.page.lead }}</p>
         <div class="action-row">
           {% for action in view.page.actions %}
+          {% if action.href != "/docs/getting-started#add-host" && action.href != "/en/docs/getting-started#add-host" %}
           <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
+          {% endif %}
           {% endfor %}
         </div>
       </div>
       <div class="hero-blueprint" aria-hidden="true">
-        <span class="blueprint-label">{{ home.hero_blueprint_label }}</span>
         <span class="blueprint-axis blueprint-axis-x"></span>
         <span class="blueprint-axis blueprint-axis-y"></span>
         <span class="blueprint-target blueprint-target-start"></span>
@@ -45,13 +45,8 @@
     </div>
   </section>
 
-  <section class="home-platform-rail" aria-labelledby="home-platform-title">
+  <section class="home-platform-rail" id="platforms">
     <div class="container home-platform-grid">
-      <header class="home-platform-label">
-        <h2 id="home-platform-title">{{ home.platform_label }}</h2>
-        <i aria-hidden="true"></i>
-        <small>{{ home.platform_note }}</small>
-      </header>
       {% for platform in home.platforms %}
       <article class="home-platform-item{% if platform.planned %} home-platform-item-planned{% endif %}">
         <span class="platform-led" aria-hidden="true"></span>
@@ -65,12 +60,11 @@
   </section>
 
   {% for section in home.sections %}
+  {% if section.anchor != "platforms" %}
   <section class="home-system-section home-system-section-{{ section.anchor }}" id="{{ section.anchor }}" aria-labelledby="home-section-{{ section.anchor }}">
-    <span class="home-section-side" aria-hidden="true">{{ section.side_label }}</span>
     <div class="container">
       <header class="home-section-heading">
         <div>
-          <p class="home-section-code">{{ section.code }}</p>
           <h2 id="home-section-{{ section.anchor }}">{{ section.title }}</h2>
         </div>
         <p>{{ section.lead }}</p>
@@ -78,7 +72,6 @@
       <div class="home-system-grid home-layout-{{ section.layout }}">
         {% for item in section.items %}
         <article class="home-system-item home-tone-{{ item.tone }}">
-          <span class="home-item-index">0{{ loop.index }}</span>
           <span class="home-item-badge">{{ item.badge }}</span>
           <i class="home-item-port" aria-hidden="true"></i>
           <h3>{{ item.title }}</h3>
@@ -89,14 +82,13 @@
       </div>
     </div>
   </section>
+  {% endif %}
   {% endfor %}
 
   <section class="home-system-section home-faq-section" id="home-faq" aria-labelledby="home-faq-title">
-    <span class="home-section-side" aria-hidden="true">{{ home.faq_side_label }}</span>
     <div class="container">
       <header class="home-section-heading">
         <div>
-          <p class="home-section-code">{{ home.faq_code }}</p>
           <h2 id="home-faq-title">{{ home.faq_heading }}</h2>
         </div>
         <p>{{ home.faq_lead }}</p>
@@ -104,7 +96,7 @@
       <div class="home-faq-list">
         {% for item in home.faqs %}
         <details class="home-faq-item">
-          <summary><span>{{ home.faq_item_prefix }} 0{{ loop.index }}</span>{{ item.question }}</summary>
+          <summary>{{ item.question }}</summary>
           <p>{{ item.answer }}</p>
         </details>
         {% endfor %}
@@ -116,7 +108,6 @@
   <section class="home-seo-topics" aria-labelledby="home-seo-topics-title">
     <div class="container home-seo-topics-inner">
       <div>
-        <p class="home-section-code">{{ home.seo_code }}</p>
         <h2 id="home-seo-topics-title">{{ home.seo_heading }}</h2>
       </div>
       <ul aria-label="{{ home.seo_topics_label }}">
@@ -125,22 +116,6 @@
     </div>
   </section>
   {% endif %}
-
-  <section class="home-final-cta" aria-labelledby="home-final-title">
-    <div class="container home-final-panel">
-      <div>
-        <p class="home-section-code">{{ home.final_code }}</p>
-        <h2 id="home-final-title">{{ home.final_heading }}</h2>
-        <p>{{ home.final_lead }}</p>
-        <div class="action-row">
-          {% for action in view.page.actions %}
-          <a class="{{ action.class_name }}" href="{{ action.href }}">{{ action.label }}</a>
-          {% endfor %}
-        </div>
-      </div>
-      <span class="home-final-c" aria-hidden="true"></span>
-    </div>
-  </section>
 </main>
 
 <div class="home-qr-widget" id="home-qr-window" data-home-qr-widget data-home-qr-expanded="false" data-home-qr-state="{% if home.qr_widget.has_image() %}ready{% else %}empty{% endif %}">

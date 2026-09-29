@@ -164,6 +164,9 @@ struct ModelRow {
     anthropic_model_name: String,
     responses_base_url: String,
     responses_model_name: String,
+    has_openai_interface: bool,
+    has_anthropic_interface: bool,
+    has_responses_interface: bool,
     interface_count: usize,
     enabled: bool,
     revision: i64,
@@ -197,6 +200,9 @@ impl From<GlobalModel> for ModelRow {
             responses_base_url: responses.map_or_else(String::new, |item| item.base_url.clone()),
             responses_model_name: responses
                 .map_or_else(String::new, |item| item.model_name.clone()),
+            has_openai_interface: openai.is_some(),
+            has_anthropic_interface: anthropic.is_some(),
+            has_responses_interface: responses.is_some(),
             interface_count,
             enabled: value.enabled,
             revision: value.revision,
@@ -280,6 +286,34 @@ mod tests {
     }
 
     #[test]
+    fn create_form_accepts_one_interface_and_keeps_each_protocol_independent() {
+        let input = ModelForm {
+            name: "Example model".to_owned(),
+            provider: "Example".to_owned(),
+            context_length: 128_000,
+            openai_base_url: "https://openai.example.com/v1".to_owned(),
+            openai_model_name: "openai-model".to_owned(),
+            anthropic_base_url: String::new(),
+            anthropic_model_name: String::new(),
+            responses_base_url: String::new(),
+            responses_model_name: String::new(),
+            enabled: true,
+            expected_revision: None,
+            lang: None,
+        }
+        .into_create()
+        .expect("只配置默认接口时应可创建模型");
+
+        assert_eq!(input.interfaces.len(), 1);
+        assert_eq!(input.interfaces[0].api_format, "openai_compatible");
+        assert_eq!(
+            input.interfaces[0].base_url,
+            "https://openai.example.com/v1"
+        );
+        assert_eq!(input.interfaces[0].model_name, "openai-model");
+    }
+
+    #[test]
     fn template_keeps_model_actions_in_simple_expandable_rows() {
         let id = "01917f21-9f82-7ca4-b1dd-034518738965";
         let body = ModelsTemplate {
@@ -299,6 +333,9 @@ mod tests {
                 anthropic_model_name: "example-anthropic".to_owned(),
                 responses_base_url: "https://api.example.com/v1".to_owned(),
                 responses_model_name: "example-responses".to_owned(),
+                has_openai_interface: true,
+                has_anthropic_interface: true,
+                has_responses_interface: true,
                 interface_count: 3,
                 enabled: true,
                 revision: 7,
@@ -332,6 +369,15 @@ mod tests {
         assert!(body.contains("openai_compatible"));
         assert!(body.contains("anthropic_compatible"));
         assert!(body.contains("responses_compatible"));
+        assert!(
+            body.contains("data-api-format=\"openai_compatible\" data-configured=\"true\" open")
+        );
+        assert!(
+            body.contains("data-api-format=\"anthropic_compatible\" data-configured=\"true\" open")
+        );
+        assert!(
+            body.contains("data-api-format=\"responses_compatible\" data-configured=\"true\" open")
+        );
         assert!(!body.contains("example-model<script>"));
         assert!(body.contains("name=\"context_length\""));
         assert!(!body.contains("name=\"capability_tags\""));

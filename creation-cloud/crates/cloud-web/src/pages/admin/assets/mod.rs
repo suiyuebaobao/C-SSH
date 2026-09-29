@@ -51,6 +51,8 @@ struct AssetRow {
 struct ReleaseOption {
     id: String,
     label: String,
+    selected: bool,
+    mutable: bool,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -71,7 +73,9 @@ struct AssetsTemplate {
     rows: Vec<AssetRow>,
     release_options: Vec<ReleaseOption>,
     release_options_error: bool,
+    has_mutable_release_options: bool,
     selected_release_label: Option<String>,
+    selected_release_mutable: bool,
     load_error: Option<String>,
     page_number: u32,
     total: i64,
@@ -87,7 +91,9 @@ pub(crate) async fn page(
     let locale = query.list.locale();
     let actor = shared::actor_from_session(&session)?;
     let page_query = query.list.page_query();
-    let (release_options, release_options_error) = load_releases(&state, &actor).await;
+    let (release_options, release_options_error) =
+        load_releases(&state, &actor, query.release_id).await;
+    let has_mutable_release_options = release_options.iter().any(|option| option.mutable);
     let (assets, total, load_error) = match query.release_id {
         Some(release_id) => match state.release().list_assets(&actor, release_id).await {
             Ok(items) => {
@@ -113,6 +119,9 @@ pub(crate) async fn page(
             .find(|option| option.id == release_id.to_string())
             .map(|option| option.label.clone())
     });
+    let selected_release_mutable = release_options
+        .iter()
+        .any(|option| option.selected && option.mutable);
     let previous_href = query
         .release_id
         .is_none()
@@ -136,7 +145,9 @@ pub(crate) async fn page(
         rows,
         release_options,
         release_options_error,
+        has_mutable_release_options,
         selected_release_label,
+        selected_release_mutable,
         load_error,
         page_number: if query.release_id.is_some() {
             1
@@ -240,6 +251,7 @@ impl AssetRow {
 async fn load_releases(
     state: &AdminPageState,
     actor: &cloud_domain::AdminActor,
+    selected_release_id: Option<Uuid>,
 ) -> (Vec<ReleaseOption>, bool) {
     match state
         .release()
@@ -256,7 +268,7 @@ async fn load_releases(
                             | cloud_release::ReleaseStatus::Hidden
                     )
                 })
-                .map(ReleaseOption::from)
+                .map(|release| ReleaseOption::new(release, selected_release_id))
                 .collect(),
             false,
         ),
@@ -264,8 +276,9 @@ async fn load_releases(
     }
 }
 
-impl From<Release> for ReleaseOption {
-    fn from(value: Release) -> Self {
+impl ReleaseOption {
+    fn new(value: Release, selected_release_id: Option<Uuid>) -> Self {
+        let selected = selected_release_id == Some(value.id);
         Self {
             id: value.id.to_string(),
             label: format!(
@@ -274,6 +287,8 @@ impl From<Release> for ReleaseOption {
                 value.channel.as_str(),
                 value.status.as_str()
             ),
+            selected,
+            mutable: value.status.allows_asset_mutation(),
         }
     }
 }
@@ -320,9 +335,13 @@ mod tests {
             release_options: vec![ReleaseOption {
                 id: "01917f21-9f82-7ca4-b1dd-034518738967".to_owned(),
                 label: "7.0.0 · stable · validating".to_owned(),
+                selected: true,
+                mutable: true,
             }],
             release_options_error: false,
+            has_mutable_release_options: true,
             selected_release_label: Some("7.0.0 · stable · validating".to_owned()),
+            selected_release_mutable: true,
             load_error: None,
             page_number: 1,
             total: 1,
@@ -344,8 +363,11 @@ mod tests {
         assert!(body.contains("name=\"updater_signature\""));
         assert!(body.contains("data-download-signature"));
         assert!(body.contains("name=\"external_url\""));
-        assert!(body.contains("value=\"macos\" disabled"));
-        assert!(body.contains("value=\"ios\" disabled"));
+        assert!(!body.contains("value=\"linux\""));
+        assert!(!body.contains("value=\"macos\""));
+        assert!(!body.contains("value=\"ios\""));
+        assert!(body.contains("data-download-architecture"));
+        assert!(body.contains("value=\"aarch64\" data-platform=\"android\""));
         assert!(!body.contains("value=\"msi\""));
         assert!(body.contains("data-platform=\"android\">APK"));
         assert!(!body.contains(">AAB<"));
@@ -365,13 +387,14 @@ mod tests {
 
         let admin_js = include_str!("../../../../static/js/admin.js");
         assert!(admin_js.contains("function adminSyncUpdaterSignature(form)"));
+        assert!(admin_js.contains("function adminSyncDownloadArchitecture(form)"));
         assert!(admin_js.contains("platform.value === \"windows\""));
         assert!(admin_js.contains("[\"exe\", \"zip\"].includes(packages.value)"));
         assert!(!admin_js.contains("[\"exe\", \"msi\", \"zip\"]"));
         let template = include_str!("../../../../templates/admin-assets.html");
         assert!(template.contains("{% if row.supports_updater_signature %}"));
         let shell = include_str!("../../../../templates/admin.html");
-        assert!(shell.contains("admin.js?v=20260828-no-msi-upload"));
+        assert!(shell.contains("admin.js?v=20260908-version-management"));
         assert!(shell.contains("admin-components.css?v=20260822-compact-download-method"));
     }
 }

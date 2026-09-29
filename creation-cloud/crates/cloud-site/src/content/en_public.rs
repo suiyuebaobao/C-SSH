@@ -7,8 +7,8 @@ use super::en::{item, page, section};
 pub(super) fn security() -> PageContent {
     page(
         PageId::Security,
-        "SSH tunnel, host key, and vault security | Creation-SSH",
-        "Learn how Creation-SSH handles SSH tunnels, host-key verification, the agent local socket, cloud data boundaries, and client-side encrypted vaults.",
+        "SSH tunnel, host key, and vault security | C-SSH",
+        "Learn how C-SSH handles SSH tunnels, host-key verification, the agent local socket, cloud data boundaries, and client-side encrypted vaults.",
         "Set boundaries before adding capability",
         "A clear split between control and SSH data planes",
         "Connections remain direct end to end; the cloud accepts only classified, explicitly allowed data.",
@@ -40,11 +40,11 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "Download Creation-SSH for Windows and Android",
-        "Download the latest Creation-SSH SSH terminal and server operations client for Windows and Android. The Linux client is discontinued and is not offered for download.",
+        "Download C-SSH for Windows, Apple Silicon Mac and Android",
+        "Download the latest C-SSH SSH terminal and server operations client for Windows, Apple Silicon Mac and Android. The Linux client is discontinued and is not offered for download.",
         "DOWNLOADS / DIRECT",
-        "Download Creation-SSH",
-        "Choose a platform and package, then download.",
+        "Download C-SSH",
+        "0.9.0 requires a manual download and installation. Automatic updates from older versions are unavailable. Read the data-preservation instructions first.",
     )
     .with_sections(vec![section(
         "builds",
@@ -53,8 +53,8 @@ pub(super) fn downloads() -> PageContent {
         vec![
             item("Desktop", "Windows", "Available package buttons start the download directly.", "Awaiting release data"),
             item("Mobile", "Android", "Available package buttons start the download directly.", "Awaiting release data"),
-            item("Planned", "macOS", "The independent macOS client has not been developed yet; no download is offered.", "Not developed yet"),
-            item("Planned", "iOS", "The independent iOS companion has not been developed yet; no download is offered.", "Not developed yet"),
+            item("Planned", "macOS", "DMG for Apple Silicon only; ad-hoc signed and not notarized. Manual installation required.", "Not published"),
+            item("Planned", "iOS", "The iPhone client remains in development and is not included in this release.", "Not published"),
         ],
     )])
 }
@@ -62,8 +62,8 @@ pub(super) fn downloads() -> PageContent {
 pub(super) fn changelog() -> PageContent {
     page(
         PageId::Changelog,
-        "Creation-SSH changelog | Releases and feature updates",
-        "Review Creation-SSH release dates, feature updates, and supported platforms; download files and SHA256 details stay on the download page.",
+        "C-SSH changelog | Releases and feature updates",
+        "Review C-SSH release dates, feature updates, and supported platforms; download files and SHA256 details stay on the download page.",
         "CHANGELOG / RELEASE HISTORY",
         "Changelog",
         "Track what changed, when each release shipped, and which platforms were included.",
@@ -86,8 +86,8 @@ pub(super) fn changelog() -> PageContent {
 pub(super) fn faq() -> PageContent {
     page(
         PageId::Faq,
-        "SSH client and agent FAQ | Creation-SSH",
-        "Answers about Creation-SSH connections, the resident agent, cloud sync, credential privacy, download verification, and mobile scope.",
+        "SSH client and agent FAQ | C-SSH",
+        "Answers about C-SSH connections, the resident agent, cloud sync, credential privacy, download verification, and mobile scope.",
         "Frequently asked questions",
         "Clear answers to the important boundaries",
         "A concise guide to connections, the agent, cloud sync, and downloads.",
@@ -95,7 +95,7 @@ pub(super) fn faq() -> PageContent {
     .with_faqs(vec![
         FaqItem::new("Does Creation Cloud proxy SSH connections?", "No. The SSH data plane stays direct from the client to your server; the cloud only provides account, device, and optional sync controls."),
         FaqItem::new("Can I use it without the agent?", "A standard SSH terminal and port forwarding currently use native SSH. Jump hosts share that architectural exception but remain deferred. Persistent sessions, monitoring, and structured management use the agent."),
-        FaqItem::new("Are host addresses and private keys synced?", "Non-secret host metadata such as names, IP addresses, and ports may sync. SSH accounts, passwords, private keys, and AI keys, APIs, and model bindings sync only as client-encrypted ciphertext. known_hosts, terminal content, and command history never upload."),
+        FaqItem::new("Are host addresses and private keys synced?", "Host names, addresses, ports, tags, status, connection settings, and credentials sync only as client-encrypted ciphertext. AI keys, APIs, and model bindings use the same client-side protection boundary. known_hosts, terminal content, and command history never upload."),
         FaqItem::new("Is the vault password my account password?", "No. The account password signs you in. The vault password derives encryption keys only on trusted clients and is never uploaded."),
         FaqItem::new("How can I verify a download?", "Formal download entries show platform, architecture, file size, and SHA256 for verification before installation."),
         FaqItem::new("Is mobile a full copy of desktop?", "No. Android is a mobile companion focused on inspection, lightweight actions, and continuity with desktop workflows."),

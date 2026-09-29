@@ -1,8 +1,6 @@
 //! 安全清理统一 Host/AI 同步的旧版本、墓碑与幂等 mutation 历史。
 //! 所有删除都在账号锁和同步状态锁内完成，并同步推进不可越过的压缩边界。
 
-use std::collections::BTreeMap;
-
 use cloud_domain::AppResult;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
@@ -10,7 +8,9 @@ use uuid::Uuid;
 use crate::model::retention::{RetentionRequest, V2RetentionReport};
 
 use super::storage;
+mod floor;
 pub(crate) mod protection;
+mod proxy_profile;
 
 pub(crate) const LOCK_CANDIDATE_ACCOUNTS_SQL: &str = r#"
 SELECT account.id
@@ -48,6 +48,15 @@ WHERE EXISTS (
                 AND checkpoint.last_manual_sync_at >= $2
                 AND checkpoint.acknowledged_revision < resource.revision
           )
+    )
+   OR EXISTS (
+        SELECT 1 FROM cloud_proxy_profiles AS resource
+        WHERE resource.account_id=account.id AND resource.is_deleted
+          AND resource.updated_at < $1
+    )
+   OR EXISTS (
+        SELECT 1 FROM cloud_proxy_profile_versions AS version
+        WHERE version.account_id=account.id AND version.recorded_at < $1
     )
    OR EXISTS (
         SELECT 1
@@ -135,6 +144,7 @@ WHERE EXISTS (
         SELECT 1 FROM cloud_data_protection_mutations AS mutation
         JOIN cloud_host_sync_states AS state ON state.account_id = mutation.account_id
         WHERE mutation.account_id = account.id AND mutation.created_at < $1
+          AND mutation.operation <> 'migrate'
           AND NOT (
               mutation.result_generation = state.sync_generation
               AND mutation.result_epoch = state.protection_epoch
@@ -419,13 +429,17 @@ pub(crate) async fn run(
     let ai_versions = delete_versions(transaction, account_ids, request, false).await?;
     let host_tombstones = delete_tombstones(transaction, account_ids, request, true).await?;
     let ai_tombstones = delete_tombstones(transaction, account_ids, request, false).await?;
-    advance_floors(
+    let (proxy_versions, proxy_tombstones) =
+        proxy_profile::delete(transaction, account_ids, request).await?;
+    floor::advance(
         transaction,
         host_versions
             .iter()
             .chain(&ai_versions)
             .chain(&host_tombstones)
-            .chain(&ai_tombstones),
+            .chain(&ai_tombstones)
+            .chain(&proxy_versions)
+            .chain(&proxy_tombstones),
     )
     .await?;
 
@@ -457,8 +471,9 @@ pub(crate) async fn run(
         protection::delete(transaction, account_ids, request).await?;
 
     Ok(V2RetentionReport {
-        tombstones_deleted: (host_tombstones.len() + ai_tombstones.len()) as u64,
-        versions_deleted: (host_versions.len() + ai_versions.len()) as u64,
+        tombstones_deleted: (host_tombstones.len() + ai_tombstones.len() + proxy_tombstones.len())
+            as u64,
+        versions_deleted: (host_versions.len() + ai_versions.len() + proxy_versions.len()) as u64,
         mutations_deleted: (push_mutations
             + rekey_mutations
             + reset_mutations
@@ -524,26 +539,4 @@ async fn delete_mutations(
         .await
         .map(|rows| rows.len())
         .map_err(storage(error))
-}
-
-async fn advance_floors<'a>(
-    transaction: &mut Transaction<'_, Postgres>,
-    rows: impl Iterator<Item = &'a (Uuid, i64)>,
-) -> AppResult<()> {
-    let mut floors = BTreeMap::<Uuid, i64>::new();
-    for (account_id, revision) in rows {
-        floors
-            .entry(*account_id)
-            .and_modify(|current| *current = (*current).max(*revision))
-            .or_insert(*revision);
-    }
-    for (account_id, revision) in floors {
-        sqlx::query(ADVANCE_FLOOR_SQL)
-            .bind(account_id)
-            .bind(revision)
-            .execute(&mut **transaction)
-            .await
-            .map_err(storage("无法推进统一密文同步压缩边界"))?;
-    }
-    Ok(())
 }

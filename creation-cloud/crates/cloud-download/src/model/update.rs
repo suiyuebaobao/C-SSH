@@ -9,6 +9,7 @@ use crate::SourceKind;
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct UpdateCheckQuery {
+    pub policy_version: Option<u8>,
     pub platform: String,
     pub architecture: String,
     pub package_kind: String,
@@ -22,6 +23,8 @@ pub struct UpdateCheckQuery {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct UpdateCheckResponse {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disabled: Option<bool>,
     pub update_available: bool,
     pub current_version: String,
     pub latest: Option<LatestUpdate>,
@@ -84,6 +87,7 @@ mod tests {
     #[test]
     fn response_extends_the_existing_latest_contract_without_replacing_it() {
         let value = serde_json::to_value(UpdateCheckResponse {
+            disabled: None,
             update_available: true,
             current_version: "0.7.7".into(),
             latest: Some(LatestUpdate {

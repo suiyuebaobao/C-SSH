@@ -4,9 +4,31 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use uuid::Uuid;
 
+mod host_metadata_migration;
 mod protection;
+mod proxy_profile;
+mod push_receipt;
+mod serialization;
 
+pub use host_metadata_migration::*;
 pub use protection::*;
+pub use proxy_profile::*;
+pub use push_receipt::*;
+
+pub const CURRENT_SYNC_CONTRACT_VERSION: u16 = 4;
+pub const LEGACY_SYNC_CONTRACT_VERSION: u16 = 2;
+
+const fn default_sync_contract_version() -> u16 {
+    LEGACY_SYNC_CONTRACT_VERSION
+}
+
+pub(super) const fn is_legacy_sync_contract(version: &u16) -> bool {
+    *version == LEGACY_SYNC_CONTRACT_VERSION
+}
+
+fn is_legacy_sync_contract_i32(version: &i32) -> bool {
+    *version == i32::from(LEGACY_SYNC_CONTRACT_VERSION)
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -17,14 +39,6 @@ pub enum HostStatus {
 }
 
 impl HostStatus {
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::Active => "active",
-            Self::Disabled => "disabled",
-            Self::Archived => "archived",
-        }
-    }
-
     pub(crate) fn parse(value: &str) -> Option<Self> {
         match value {
             "active" => Some(Self::Active),
@@ -50,16 +64,12 @@ pub struct HostMetadataInput {
 #[derive(Clone, Debug, Serialize)]
 pub struct HostView {
     pub id: Uuid,
-    pub address: String,
-    pub port: u16,
-    pub name: String,
-    pub platform: String,
-    pub tags: Vec<String>,
-    pub status: HostStatus,
     pub revision: i64,
     pub source_device_id: Uuid,
     pub deleted: bool,
     pub secret_present: bool,
+    pub metadata_encrypted: bool,
+    pub host_metadata_migration_required: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -77,6 +87,7 @@ pub enum HostOperation {
 pub enum ResourceKind {
     Host,
     AiProviderAccount,
+    ProxyProfile,
 }
 
 impl ResourceKind {
@@ -84,6 +95,7 @@ impl ResourceKind {
         match self {
             Self::Host => "host",
             Self::AiProviderAccount => "ai_provider_account",
+            Self::ProxyProfile => "proxy_profile",
         }
     }
 
@@ -91,6 +103,7 @@ impl ResourceKind {
         match value {
             "host" => Some(Self::Host),
             "ai_provider_account" => Some(Self::AiProviderAccount),
+            "proxy_profile" => Some(Self::ProxyProfile),
             _ => None,
         }
     }
@@ -109,8 +122,12 @@ pub enum AiProviderOperation {
 pub struct HostChange {
     pub host_id: Uuid,
     pub operation: HostOperation,
-    #[serde(default)]
-    pub metadata: Option<HostMetadataInput>,
+    #[serde(
+        default,
+        deserialize_with = "deserialize_optional_metadata",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub metadata: Option<Option<HostMetadataInput>>,
     #[serde(
         default,
         deserialize_with = "deserialize_optional_ciphertext",
@@ -119,6 +136,15 @@ pub struct HostChange {
     pub ciphertext: Option<Option<String>>,
     #[serde(default)]
     pub expected_revision: Option<i64>,
+}
+
+fn deserialize_optional_metadata<'de, D>(
+    deserializer: D,
+) -> Result<Option<Option<HostMetadataInput>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Option::<HostMetadataInput>::deserialize(deserializer).map(Some)
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -143,6 +169,11 @@ pub struct AiProviderChange {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PushRequest {
+    #[serde(
+        default = "default_sync_contract_version",
+        skip_serializing_if = "is_legacy_sync_contract"
+    )]
+    pub sync_contract_version: u16,
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
@@ -150,6 +181,8 @@ pub struct PushRequest {
     pub client_mutation_id: Uuid,
     pub host_changes: Vec<HostChange>,
     pub ai_changes: Vec<AiProviderChange>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub proxy_profile_changes: Vec<ProxyProfileChange>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -202,6 +235,8 @@ pub enum PullPurpose {
 #[derive(Clone, Copy, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PullRequest {
+    #[serde(default = "default_sync_contract_version")]
+    pub sync_contract_version: u16,
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
@@ -221,6 +256,7 @@ pub struct PullRequest {
 impl Default for PullRequest {
     fn default() -> Self {
         Self {
+            sync_contract_version: LEGACY_SYNC_CONTRACT_VERSION,
             sync_generation: 1,
             protection_epoch: 1,
             protection_revision: 1,
@@ -238,13 +274,8 @@ impl Default for PullRequest {
 pub struct PullHostRecord {
     pub host_id: Uuid,
     pub revision: i64,
-    pub address: String,
-    pub port: u16,
-    pub name: String,
-    pub platform: String,
-    pub tags: Vec<String>,
-    pub status: HostStatus,
     pub ciphertext: Option<String>,
+    pub metadata_encrypted: bool,
     pub source_device_id: Uuid,
     pub deleted: bool,
     pub updated_at: DateTime<Utc>,
@@ -262,8 +293,9 @@ pub struct PullAiProviderRecord {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug)]
 pub struct PullResponse {
+    pub sync_contract_version: u16,
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
@@ -271,6 +303,7 @@ pub struct PullResponse {
     pub mode: PullMode,
     pub host_records: Vec<PullHostRecord>,
     pub ai_records: Vec<PullAiProviderRecord>,
+    pub proxy_profile_records: Vec<PullProxyProfileRecord>,
     pub snapshot_revision: i64,
     pub next_revision: i64,
     pub has_more: bool,
@@ -304,6 +337,8 @@ pub struct PullDecision {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PullAckRequest {
+    #[serde(default = "default_sync_contract_version")]
+    pub sync_contract_version: u16,
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
@@ -317,12 +352,15 @@ pub enum SyncGenerationTransition {
     Initial,
     ProtectionSetup,
     LegacyMigration,
+    HostMetadataMigration,
     Rekey,
     Reset,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 pub struct SyncStateView {
+    #[serde(skip_serializing_if = "is_legacy_sync_contract_i32")]
+    pub minimum_sync_contract_version: i32,
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
@@ -331,6 +369,7 @@ pub struct SyncStateView {
     pub generation_transition: SyncGenerationTransition,
     pub data_protection_configured: bool,
     pub legacy_migration_required: bool,
+    pub host_metadata_migration_required: bool,
     pub secret_present: bool,
 }
 
@@ -343,6 +382,11 @@ pub enum ResetConfirmation {
 #[derive(Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ResetSyncRequest {
+    #[serde(
+        default = "default_sync_contract_version",
+        skip_serializing_if = "is_legacy_sync_contract"
+    )]
+    pub sync_contract_version: u16,
     pub mutation_id: Uuid,
     pub sync_generation: i64,
     pub expected_epoch: i64,
@@ -378,11 +422,23 @@ pub enum RekeyResourceCandidate {
         nonce: String,
         envelope_metadata: serde_json::Value,
     },
+    ProxyProfile {
+        resource_id: Uuid,
+        cloud_revision: i64,
+        ciphertext: String,
+        nonce: String,
+        envelope_metadata: serde_json::Value,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RekeySyncRequest {
+    #[serde(
+        default = "default_sync_contract_version",
+        skip_serializing_if = "is_legacy_sync_contract"
+    )]
+    pub sync_contract_version: u16,
     pub mutation_id: Uuid,
     pub sync_generation: i64,
     pub resources: Vec<RekeyResourceCandidate>,

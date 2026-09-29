@@ -166,7 +166,13 @@ async fn load_detail(
         .await
     {
         Ok(detail) => (
-            Some(FeedbackDetailView::new(detail, page, size, status_filter)),
+            Some(FeedbackDetailView::new(
+                detail,
+                page,
+                size,
+                status_filter,
+                locale,
+            )),
             None,
         ),
         Err(error) => (None, Some(detail_load_error(locale, &error).to_owned())),

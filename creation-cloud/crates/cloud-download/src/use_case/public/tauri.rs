@@ -3,13 +3,12 @@
 use std::collections::BTreeMap;
 
 use cloud_domain::{AppError, AppResult};
+use url::Url;
 
 use crate::{
     LatestUpdate, Service, UpdateCheckQuery,
     model::{TauriPlatformUpdate, TauriUpdateQuery, TauriUpdateResponse},
 };
-
-const CLOUD_ORIGIN: &str = "https://c-ssh.com";
 
 impl Service {
     pub(crate) async fn tauri_update(
@@ -24,12 +23,19 @@ impl Service {
         let latest = result
             .latest
             .ok_or_else(|| AppError::Storage("更新检查结果缺少 latest".into()))?;
-        project_response(latest, &query.package_kind, &query.architecture).map(Some)
+        project_response(
+            latest,
+            &query.package_kind,
+            &query.architecture,
+            &self.public_base_url,
+        )
+        .map(Some)
     }
 }
 
 fn shared_check_query(query: &TauriUpdateQuery) -> UpdateCheckQuery {
     UpdateCheckQuery {
+        policy_version: None,
         platform: "windows".into(),
         architecture: query.architecture.clone(),
         package_kind: query.package_kind.clone(),
@@ -44,6 +50,7 @@ fn project_response(
     latest: LatestUpdate,
     package_kind: &str,
     architecture: &str,
+    public_base_url: &Url,
 ) -> AppResult<TauriUpdateResponse> {
     let asset = latest
         .assets
@@ -68,7 +75,10 @@ fn project_response(
     let platforms = BTreeMap::from([(
         target,
         TauriPlatformUpdate {
-            url: format!("{CLOUD_ORIGIN}{}", source.download_url),
+            url: public_base_url
+                .join(&source.download_url)
+                .map_err(|_| AppError::Storage("Tauri 下载地址无法拼接".into()))?
+                .to_string(),
             signature,
         },
     )]);
@@ -125,46 +135,49 @@ mod tests {
     }
 
     #[test]
-    fn tauri_manifest_uses_the_fixed_target_and_absolute_cloud_url() {
+    fn tauri_manifest_uses_the_configured_origin_and_preserves_the_fixed_asset_path() {
         let asset_id = Uuid::now_v7();
         let source_id = Uuid::now_v7();
-        let response = project_response(
-            LatestUpdate {
-                version: "0.8.0".into(),
-                channel: "stable".into(),
-                title: "Creation-SSH 0.8.0".into(),
-                notes: "notes".into(),
-                published_at: Utc::now(),
-                assets: vec![UpdateAsset {
-                    id: asset_id,
-                    architecture: "x86_64".into(),
-                    package_kind: "exe".into(),
-                    file_name: "Creation-SSH.exe".into(),
-                    byte_size: 1,
-                    sha256: "a".repeat(64),
-                    updater_signature: Some("b".repeat(64)),
-                    sources: vec![UpdateSource {
-                        source_kind: SourceKind::Local,
-                        provider_name: "本站".into(),
-                        download_url: format!(
-                            "/api/v1/downloads/assets/{asset_id}/sources/{source_id}"
-                        ),
+        for origin in ["https://c-ssh.com/", "https://updates.example.com:9443/"] {
+            let public_base_url = Url::parse(origin).expect("测试根地址应合法");
+            let response = project_response(
+                LatestUpdate {
+                    version: "0.8.0".into(),
+                    channel: "stable".into(),
+                    title: "Creation-SSH 0.8.0".into(),
+                    notes: "notes".into(),
+                    published_at: Utc::now(),
+                    assets: vec![UpdateAsset {
+                        id: asset_id,
+                        architecture: "x86_64".into(),
+                        package_kind: "exe".into(),
+                        file_name: "Creation-SSH.exe".into(),
+                        byte_size: 1,
+                        sha256: "a".repeat(64),
+                        updater_signature: Some("b".repeat(64)),
+                        sources: vec![UpdateSource {
+                            source_kind: SourceKind::Local,
+                            provider_name: "本站".into(),
+                            download_url: format!(
+                                "/api/v1/downloads/assets/{asset_id}/sources/{source_id}"
+                            ),
+                        }],
                     }],
-                }],
-            },
-            "exe",
-            "x86_64",
-        )
-        .expect("合法 Tauri 清单应可生成");
-        let target = response
-            .platforms
-            .get("windows-x86_64")
-            .expect("固定 target 必须存在");
-        assert!(
-            target
-                .url
-                .starts_with("https://c-ssh.com/api/v1/downloads/")
-        );
-        assert_eq!(target.signature, "b".repeat(64));
+                },
+                "exe",
+                "x86_64",
+                &public_base_url,
+            )
+            .expect("合法 Tauri 清单应可生成");
+            let target = response
+                .platforms
+                .get("windows-x86_64")
+                .expect("固定 target 必须存在");
+            assert_eq!(
+                target.url,
+                format!("{origin}api/v1/downloads/assets/{asset_id}/sources/{source_id}")
+            );
+            assert_eq!(target.signature, "b".repeat(64));
+        }
     }
 }

@@ -1,0 +1,29 @@
+<section class="admin-section version-settings" aria-labelledby="update-policy-heading">
+  <div class="admin-section-heading"><div><h2 id="update-policy-heading">{% if is_en %}Update settings{% else %}更新设置{% endif %}</h2><p>{% if is_en %}Choose how each version can be used, then save to apply.{% else %}设置各版本的更新与使用方式，保存后生效。{% endif %}</p></div></div>
+  {% if let Some(message) = policy_error %}<div class="admin-feedback" data-tone="error" role="alert">{{ message }}</div>{% endif %}
+  {% if let Some(policy) = policy %}
+  <form class="version-policy-form" hx-post="/admin/update-policy/apply" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Apply these settings? Disabled versions will be blocked after receiving this policy, including offline starts with a cached policy. User data is preserved. Reopening requires a new check.{% else %}确认保存并生效？关闭版本收到规则后将无法进入客户端，已缓存规则在离线时也生效。用户数据保留；恢复开放后需重新检查。{% endif %}">
+    <input type="hidden" name="expected_revision" value="{{ policy.draft_revision }}">
+    <input type="hidden" name="expected_published_revision" value="{{ policy.published_revision }}">
+    <input type="hidden" name="confirmation" value="apply_update_policy">
+    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+    <label class="admin-field version-target">{% if is_en %}Update to{% else %}更新到{% endif %}
+      <select name="target_release_id"><option value="">{% if is_en %}No update offered{% else %}暂不提供更新{% endif %}</option>{% for target in policy.targets %}<option value="{{ target.id }}" {% if target.selected %}selected{% endif %} {% if !target.eligible %}disabled{% endif %}>{{ target.label }}</option>{% endfor %}</select>
+      <small>{% if is_en %}Select a complete published version. Applies only to required and optional updates.{% else %}仅可选择已公开且文件完整的版本，对强制更新和可选更新生效。{% endif %}</small>
+    </label>
+    <div class="admin-table-wrap"><table class="admin-table version-policy-table">
+      <thead><tr><th scope="col">{% if is_en %}Version{% else %}版本号{% endif %}</th><th scope="col">{% if is_en %}Required update{% else %}强制更新{% endif %}</th><th scope="col">{% if is_en %}Optional update{% else %}可选更新{% endif %}</th><th scope="col">{% if is_en %}No update needed{% else %}无需更新{% endif %}</th><th scope="col">{% if is_en %}Disable version{% else %}关闭版本{% endif %}</th></tr></thead>
+      <tbody>{% for version in policy.versions %}<tr>
+        <th scope="row">{{ version.version }}</th>
+        <td><label><input type="radio" name="version.{{ version.version }}" value="forced" {% if version.mode == "forced" %}checked{% endif %}><span>{% if is_en %}Required{% else %}强制更新{% endif %}</span></label></td>
+        <td><label><input type="radio" name="version.{{ version.version }}" value="optional" {% if version.mode == "optional" %}checked{% endif %}><span>{% if is_en %}Optional{% else %}可选更新{% endif %}</span></label></td>
+        <td><label><input type="radio" name="version.{{ version.version }}" value="no_update" {% if version.mode == "no_update" %}checked{% endif %}><span>{% if is_en %}No update needed{% else %}无需更新{% endif %}</span></label></td>
+        <td><label><input type="radio" name="version.{{ version.version }}" value="disabled" {% if version.mode == "disabled" %}checked{% endif %}><span>{% if is_en %}Disabled{% else %}关闭版本{% endif %}</span></label></td>
+      </tr>{% endfor %}</tbody>
+    </table></div>
+    {% if policy.versions.is_empty() %}<p class="admin-empty">{% if is_en %}Upload a version to start managing it.{% else %}上传版本后即可在这里设置。{% endif %}</p>{% endif %}
+    <p class="version-policy-help">{% if is_en %}Required: update before use. Optional: users choose when to update. No update needed: use normally without update prompts. Disabled: the version cannot enter the app. Choose Optional or No update needed to reopen it.{% else %}强制更新：更新后才能使用。可选更新：提示新版，用户自行选择。无需更新：正常使用，不提示更新。关闭版本：无法进入客户端；改为可选更新或无需更新可恢复开放。{% endif %}</p>
+    <div class="version-policy-footer"><small>{% if is_en %}Active revision{% else %}当前已生效修订{% endif %} {{ policy.published_revision }}</small><button class="button button-primary" type="submit">{% if is_en %}Save and apply{% else %}保存并生效{% endif %}</button></div>
+  </form>
+  {% endif %}
+</section>

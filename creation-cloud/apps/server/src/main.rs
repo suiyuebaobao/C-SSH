@@ -8,6 +8,8 @@ mod command;
 mod http_trace;
 mod maintenance;
 mod maintenance_cli;
+mod proxy_headers;
+mod proxy_internal;
 mod request_id;
 mod runtime;
 mod services;

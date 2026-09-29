@@ -47,6 +47,7 @@ pub(in crate::repository) struct PriorProtectionMutation {
     pub(in crate::repository) request_revision: i64,
     pub(in crate::repository) request_current_revision: i64,
     pub(in crate::repository) request_hash: Vec<u8>,
+    pub(in crate::repository) request_hash_scheme: String,
     pub(in crate::repository) result_generation: i64,
     pub(in crate::repository) result_epoch: i64,
     pub(in crate::repository) result_revision: i64,
@@ -132,6 +133,7 @@ pub(crate) async fn setup(
         DataProtectionOperation::Setup,
         state,
         request_hash,
+        "data_protection_server_struct_v1",
         result_generation,
         result_epoch,
         result_revision,
@@ -226,6 +228,7 @@ pub(crate) async fn change(
         DataProtectionOperation::Change,
         state,
         request_hash,
+        "data_protection_server_struct_v1",
         state.sync_generation,
         state.protection_epoch,
         result_revision,
@@ -268,7 +271,7 @@ pub(in crate::repository) async fn load_prior_mutation(
 ) -> AppResult<Option<PriorProtectionMutation>> {
     sqlx::query_as(
         "SELECT operation, source_device_id, request_generation, request_epoch,
-                request_revision, request_current_revision, request_hash,
+                request_revision, request_current_revision, request_hash, request_hash_scheme,
                 result_generation, result_epoch, result_revision,
                 result_current_revision
          FROM cloud_data_protection_mutations
@@ -289,6 +292,7 @@ pub(in crate::repository) async fn persist_mutation(
     operation: DataProtectionOperation,
     state: SyncState,
     request_hash: &[u8; 32],
+    request_hash_scheme: &str,
     result_generation: i64,
     result_epoch: i64,
     result_revision: i64,
@@ -299,9 +303,9 @@ pub(in crate::repository) async fn persist_mutation(
         "INSERT INTO cloud_data_protection_mutations
              (account_id, mutation_id, operation, source_device_id,
               request_generation, request_epoch, request_revision,
-              request_current_revision, request_hash, result_generation,
+              request_current_revision, request_hash, request_hash_scheme, result_generation,
               result_epoch, result_revision, result_current_revision, changed_count)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)",
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)",
     )
     .bind(actor.account_id())
     .bind(mutation_id)
@@ -312,6 +316,7 @@ pub(in crate::repository) async fn persist_mutation(
     .bind(state.protection_revision)
     .bind(state.current_revision)
     .bind(request_hash.as_slice())
+    .bind(request_hash_scheme)
     .bind(result_generation)
     .bind(result_epoch)
     .bind(result_revision)
@@ -429,8 +434,10 @@ pub(in crate::repository) async fn purge_prior_ciphertext_versions(
 ) -> AppResult<()> {
     for statement in [
         "DELETE FROM cloud_host_versions
-         WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
+         WHERE account_id = $1 AND revision <= $2",
         "DELETE FROM cloud_ai_provider_config_versions
+         WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
+        "DELETE FROM cloud_proxy_profile_versions
          WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
     ] {
         sqlx::query(statement)
@@ -485,6 +492,7 @@ fn replay(
         || prior.request_revision != revision
         || prior.request_current_revision != current_revision
         || prior.request_hash.as_slice() != request_hash
+        || prior.request_hash_scheme != "data_protection_server_struct_v1"
     {
         return Err(AppError::Conflict(
             "mutation_id was already used by a different protection request".to_owned(),

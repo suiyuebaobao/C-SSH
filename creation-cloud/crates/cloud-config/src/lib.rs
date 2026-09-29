@@ -6,6 +6,7 @@ use anyhow::{Context, Result, bail};
 use url::Url;
 
 mod maintenance;
+mod proxy;
 mod public_base_url;
 mod smtp;
 
@@ -28,10 +29,12 @@ pub struct CloudConfig {
     pub session_ttl: Duration,
     pub environment: String,
     pub maintenance: MaintenanceConfig,
+    pub proxy: ProxyConfig,
     pub smtp: Option<SmtpConfig>,
 }
 
 pub use maintenance::{MaintenanceConfig, TaskSchedule};
+pub use proxy::ProxyConfig;
 pub use smtp::{SmtpConfig, SmtpSecurity};
 
 impl CloudConfig {
@@ -57,6 +60,7 @@ impl CloudConfig {
             bail!("CLOUD_SESSION_TTL_HOURS 必须在 1 到 2160 之间");
         }
         let maintenance = MaintenanceConfig::from_env()?;
+        let proxy = ProxyConfig::from_env()?;
         let smtp = SmtpConfig::from_env()?;
         Ok(Self {
             bind_addr,
@@ -69,6 +73,7 @@ impl CloudConfig {
             session_ttl: Duration::from_secs(ttl_hours * 3600),
             environment,
             maintenance,
+            proxy,
             smtp,
         })
     }

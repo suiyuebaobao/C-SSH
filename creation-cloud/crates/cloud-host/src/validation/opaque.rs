@@ -4,7 +4,7 @@ use base64::{Engine as _, engine::general_purpose::STANDARD};
 use cloud_domain::{AppError, AppResult};
 use uuid::Uuid;
 
-use crate::{AiProviderChange, AiProviderOperation};
+use crate::{AiProviderChange, AiProviderOperation, ProxyProfileChange, ProxyProfileOperation};
 
 use super::positive_expected;
 
@@ -24,6 +24,72 @@ pub(crate) struct ValidatedAiChange {
     pub operation: AiProviderOperation,
     pub payload: Option<ValidatedAiPayload>,
     pub expected_revision: Option<i64>,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ValidatedProxyProfileChange {
+    pub resource_id: Uuid,
+    pub operation: ProxyProfileOperation,
+    pub payload: Option<ValidatedAiPayload>,
+    pub expected_revision: Option<i64>,
+}
+
+pub(super) fn proxy_profile_change_value(
+    change: &ProxyProfileChange,
+    max_ciphertext_bytes: usize,
+) -> AppResult<ValidatedProxyProfileChange> {
+    let (payload, expected_revision) = match change.operation {
+        ProxyProfileOperation::Insert => {
+            if change.expected_revision.is_some() {
+                return Err(AppError::Validation(
+                    "proxy profile insert 不得携带 expected_revision".to_owned(),
+                ));
+            }
+            let payload = change.payload.as_ref().ok_or_else(|| {
+                AppError::Validation("proxy profile insert 必须携带 payload".to_owned())
+            })?;
+            (
+                Some(proxy_payload_value(payload, max_ciphertext_bytes)?),
+                None,
+            )
+        }
+        ProxyProfileOperation::Update => {
+            let expected = positive_expected(change.expected_revision)?;
+            let payload = change.payload.as_ref().ok_or_else(|| {
+                AppError::Validation("proxy profile update 必须携带 payload".to_owned())
+            })?;
+            (
+                Some(proxy_payload_value(payload, max_ciphertext_bytes)?),
+                Some(expected),
+            )
+        }
+        ProxyProfileOperation::Delete => {
+            if change.payload.is_some() {
+                return Err(AppError::Validation(
+                    "proxy profile delete 不得携带 payload".to_owned(),
+                ));
+            }
+            (None, Some(positive_expected(change.expected_revision)?))
+        }
+    };
+    Ok(ValidatedProxyProfileChange {
+        resource_id: change.resource_id,
+        operation: change.operation,
+        payload,
+        expected_revision,
+    })
+}
+
+fn proxy_payload_value(
+    payload: &crate::ProxyProfilePayloadInput,
+    max_ciphertext_bytes: usize,
+) -> AppResult<ValidatedAiPayload> {
+    payload_parts(
+        &payload.ciphertext,
+        &payload.nonce,
+        &payload.envelope_metadata,
+        max_ciphertext_bytes,
+    )
 }
 
 pub(super) fn change_value(

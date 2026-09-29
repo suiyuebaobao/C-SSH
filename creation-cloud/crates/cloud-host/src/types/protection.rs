@@ -5,8 +5,13 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{
-    PullAiProviderRecord, PullHostRecord, RekeyResourceCandidate, ResourceKind, ResourceRevision,
+    HostStatus, LEGACY_SYNC_CONTRACT_VERSION, PullAiProviderRecord, PullProxyProfileRecord,
+    RekeyResourceCandidate, ResourceKind, ResourceRevision, is_legacy_sync_contract,
 };
+
+const fn default_sync_contract_version() -> u16 {
+    LEGACY_SYNC_CONTRACT_VERSION
+}
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -64,6 +69,11 @@ pub struct SetupDataProtectionRequest {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct MigrateDataProtectionRequest {
+    #[serde(
+        default = "default_sync_contract_version",
+        skip_serializing_if = "is_legacy_sync_contract"
+    )]
+    pub sync_contract_version: u16,
     pub mutation_id: Uuid,
     pub sync_generation: i64,
     pub expected_epoch: i64,
@@ -94,6 +104,26 @@ pub struct DataProtectionMutationResponse {
     pub data_protection_configured: bool,
     pub revisions: Vec<ResourceRevision>,
     pub idempotent: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct DataProtectionMigrationReceipt {
+    pub status: String,
+    pub mutation_id: Uuid,
+    pub source_device_id: Uuid,
+    pub request_hash: String,
+    pub request_hash_scheme: String,
+    pub source_sync_generation: i64,
+    pub source_protection_epoch: i64,
+    pub source_protection_revision: i64,
+    pub source_current_revision: i64,
+    pub result_sync_generation: i64,
+    pub result_protection_epoch: i64,
+    pub result_protection_revision: i64,
+    pub result_current_revision: i64,
+    pub changed_count: i32,
+    pub revisions: Vec<ResourceRevision>,
+    pub completed_at: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Eq, PartialEq, Serialize)]
@@ -130,6 +160,8 @@ impl ResetAuthorization {
 #[derive(Clone, Copy, Debug, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LegacyPullRequest {
+    #[serde(default = "default_sync_contract_version")]
+    pub sync_contract_version: u16,
     pub sync_generation: i64,
     pub expected_epoch: i64,
     pub expected_revision: i64,
@@ -153,13 +185,32 @@ pub struct LegacyPullCursor {
 }
 
 #[derive(Clone, Debug, Serialize)]
+pub struct LegacyPullHostRecord {
+    pub host_id: Uuid,
+    pub revision: i64,
+    pub address: String,
+    pub port: u16,
+    pub name: String,
+    pub platform: String,
+    pub tags: Vec<String>,
+    pub status: HostStatus,
+    pub ciphertext: Option<String>,
+    pub metadata_encrypted: bool,
+    pub source_device_id: Uuid,
+    pub deleted: bool,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Clone, Debug)]
 pub struct LegacyPullResponse {
+    pub sync_contract_version: u16,
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
     pub snapshot_revision: i64,
-    pub host_records: Vec<PullHostRecord>,
+    pub host_records: Vec<LegacyPullHostRecord>,
     pub ai_records: Vec<PullAiProviderRecord>,
+    pub proxy_profile_records: Vec<PullProxyProfileRecord>,
     pub next_cursor: Option<LegacyPullCursor>,
     pub has_more: bool,
 }

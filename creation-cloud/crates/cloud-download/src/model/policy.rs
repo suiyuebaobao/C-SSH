@@ -10,6 +10,8 @@ pub struct UpdatePolicyDraft {
     pub revision: i64,
     pub enabled: bool,
     pub forced_versions: Vec<String>,
+    pub disabled_versions: Vec<String>,
+    pub no_update_versions: Vec<String>,
     pub target_release_id: Option<Uuid>,
     pub sha256_enabled: bool,
     pub updated_at: DateTime<Utc>,
@@ -20,6 +22,8 @@ pub struct PublishedUpdatePolicy {
     pub revision: i64,
     pub enabled: bool,
     pub forced_versions: Vec<String>,
+    pub disabled_versions: Vec<String>,
+    pub no_update_versions: Vec<String>,
     pub target_release_id: Option<Uuid>,
     pub target_version: Option<String>,
     pub sha256_enabled: bool,
@@ -34,6 +38,8 @@ impl PublishedUpdatePolicy {
             revision: 0,
             enabled: false,
             forced_versions: Vec::new(),
+            disabled_versions: Vec::new(),
+            no_update_versions: Vec::new(),
             target_release_id: None,
             target_version: None,
             sha256_enabled: true,
@@ -65,6 +71,8 @@ pub struct SaveUpdatePolicyDraftInput {
     pub expected_revision: i64,
     pub enabled: bool,
     pub forced_versions: Vec<String>,
+    pub disabled_versions: Option<Vec<String>>,
+    pub no_update_versions: Option<Vec<String>>,
     pub target_release_id: Option<Uuid>,
     pub sha256_enabled: bool,
 }
@@ -81,6 +89,8 @@ pub(crate) struct UpdatePolicyDraftRow {
     pub revision: i64,
     pub enabled: bool,
     pub forced_versions: Vec<String>,
+    pub disabled_versions: Vec<String>,
+    pub no_update_versions: Vec<String>,
     pub target_release_id: Option<Uuid>,
     pub sha256_enabled: bool,
     pub updated_at: DateTime<Utc>,
@@ -91,6 +101,8 @@ pub(crate) struct PublishedUpdatePolicyRow {
     pub revision: i64,
     pub enabled: bool,
     pub forced_versions: Vec<String>,
+    pub disabled_versions: Vec<String>,
+    pub no_update_versions: Vec<String>,
     pub target_release_id: Option<Uuid>,
     pub target_version: Option<String>,
     pub sha256_enabled: bool,
@@ -131,4 +143,13 @@ pub(crate) struct ForcedIdentityRow {
     pub package_kind: String,
     pub asset_sha256: String,
     pub installed_sha256: Option<String>,
+}
+
+/// 一次保存并生效，分别保护草稿与当前已发布策略。
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ApplyUpdatePolicyInput {
+    pub expected_published_revision: i64,
+    pub confirmation: String,
+    pub draft: SaveUpdatePolicyDraftInput,
 }

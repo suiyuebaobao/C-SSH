@@ -1,21 +1,19 @@
 async fn replay_mutation(
     tx: &mut DbTransaction<'_>,
     actor: DeviceActor,
-    sync_generation: i64,
-    protection_epoch: i64,
-    protection_revision: i64,
-    mutation_id: Uuid,
+    request: &PushRequest,
     request_hash: &[u8; 32],
+    request_hash_scheme: &str,
 ) -> AppResult<Option<PushOutcome>> {
     let row = sqlx::query_as::<_, MutationRow>(
-        "SELECT source_device_id, request_generation, request_protection_epoch,
-                request_protection_revision, request_hash, outcome,
-                result_revision, changed_count
-         FROM cloud_sync_push_mutations
-         WHERE account_id = $1 AND client_mutation_id = $2",
+        "SELECT source_device_id,request_generation,request_protection_epoch,
+                request_protection_revision,request_hash,request_hash_scheme,outcome,
+                result_revision,changed_count
+         FROM cloud_sync_push_receipts
+         WHERE account_id=$1 AND client_mutation_id=$2",
     )
     .bind(actor.account_id())
-    .bind(mutation_id)
+    .bind(request.client_mutation_id)
     .fetch_optional(&mut **tx)
     .await
     .map_err(storage)?;
@@ -23,21 +21,22 @@ async fn replay_mutation(
         return Ok(None);
     };
     if row.source_device_id != actor.device_id()
-        || row.request_generation != sync_generation
-        || row.request_protection_epoch != protection_epoch
-        || row.request_protection_revision != protection_revision
+        || row.request_generation != request.sync_generation
+        || row.request_protection_epoch != request.protection_epoch
+        || row.request_protection_revision != request.protection_revision
         || row.request_hash.as_slice() != request_hash
+        || row.request_hash_scheme != request_hash_scheme
     {
         return Err(AppError::Conflict(
             "client_mutation_id was already used for another request".to_owned(),
         ));
     }
-    let revisions = load_results(tx, actor.account_id(), mutation_id).await?;
+    let revisions = load_results(tx, actor.account_id(), request.client_mutation_id).await?;
     let outcome = match row.outcome.as_str() {
         "applied" => PushOutcome::Applied {
-            sync_generation,
-            protection_epoch,
-            protection_revision,
+            sync_generation: request.sync_generation,
+            protection_epoch: request.protection_epoch,
+            protection_revision: request.protection_revision,
             revision: row.result_revision,
             changed_count: u32::try_from(row.changed_count)
                 .map_err(|_| super::invalid_stored_value())?,
@@ -45,9 +44,9 @@ async fn replay_mutation(
             idempotent: true,
         },
         "unchanged" => PushOutcome::Unchanged {
-            sync_generation,
-            protection_epoch,
-            protection_revision,
+            sync_generation: request.sync_generation,
+            protection_epoch: request.protection_epoch,
+            protection_revision: request.protection_revision,
             revision: row.result_revision,
             revisions,
             idempotent: true,
@@ -57,15 +56,15 @@ async fn replay_mutation(
     Ok(Some(outcome))
 }
 
-async fn load_results(
+pub(super) async fn load_results(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
     mutation_id: Uuid,
 ) -> AppResult<Vec<ResourceRevision>> {
     let rows = sqlx::query_as::<_, RevisionRow>(
-        "SELECT resource_kind, resource_id, result_revision
-         FROM cloud_sync_push_results
-         WHERE account_id = $1 AND client_mutation_id = $2
+        "SELECT resource_kind,resource_id,result_revision
+         FROM cloud_sync_push_receipt_results
+         WHERE account_id=$1 AND client_mutation_id=$2
          ORDER BY result_revision",
     )
     .bind(account_id)
@@ -90,15 +89,16 @@ async fn insert_mutation(
     actor: DeviceActor,
     request: &PushRequest,
     request_hash: &[u8; 32],
+    request_hash_scheme: &str,
     result: &MutationResult<'_>,
 ) -> AppResult<()> {
     sqlx::query(
         "INSERT INTO cloud_sync_push_mutations
              (account_id, client_mutation_id, source_device_id,
               request_generation, request_protection_epoch,
-              request_protection_revision, base_revision, request_hash, outcome,
-              result_revision, changed_count)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)",
+              request_protection_revision, base_revision, request_hash,
+              request_hash_scheme, outcome, result_revision, changed_count)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
     )
     .bind(actor.account_id())
     .bind(request.client_mutation_id)
@@ -108,6 +108,7 @@ async fn insert_mutation(
     .bind(request.protection_revision)
     .bind(request.base_revision)
     .bind(request_hash.as_slice())
+    .bind(request_hash_scheme)
     .bind(result.outcome)
     .bind(result.revision)
     .bind(

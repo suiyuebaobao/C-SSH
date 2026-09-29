@@ -9,11 +9,6 @@ use uuid::Uuid;
 
 use super::{DbTransaction, begin, commit, lock_sync_state, storage};
 
-const TOMBSTONE_ADDRESS: &str = "deleted.invalid";
-const TOMBSTONE_NAME: &str = "deleted";
-const TOMBSTONE_PLATFORM: &str = "deleted";
-const TOMBSTONE_PORT: i32 = 1;
-
 pub(crate) async fn host(
     pool: &PgPool,
     actor: &AdminActor,
@@ -62,18 +57,14 @@ pub(crate) async fn host(
 
     sqlx::query(
         "UPDATE cloud_hosts
-         SET address = $3, port = $4, name = $5, platform = $6,
-             tags = '[]'::jsonb, status = 'archived', ciphertext = NULL,
-             source_device_id = $7, revision = $8, is_deleted = TRUE,
+         SET address=NULL,port=NULL,name=NULL,platform=NULL,tags=NULL,status=NULL,
+             ciphertext=NULL,metadata_encrypted=TRUE,
+             source_device_id=$3,revision=$4,is_deleted=TRUE,
              updated_at = now()
          WHERE account_id = $1 AND id = $2 AND NOT is_deleted",
     )
     .bind(account_id)
     .bind(host_id)
-    .bind(TOMBSTONE_ADDRESS)
-    .bind(TOMBSTONE_PORT)
-    .bind(TOMBSTONE_NAME)
-    .bind(TOMBSTONE_PLATFORM)
     .bind(source_device_id)
     .bind(revision)
     .execute(&mut *tx)
@@ -81,17 +72,13 @@ pub(crate) async fn host(
     .map_err(storage)?;
     sqlx::query(
         "INSERT INTO cloud_host_versions
-             (account_id, host_id, revision, address, port, name, platform,
-              tags, status, ciphertext, source_device_id, is_deleted)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,'[]'::jsonb,'archived',NULL,$8,TRUE)",
+             (account_id,host_id,revision,address,port,name,platform,tags,status,
+              ciphertext,source_device_id,is_deleted,metadata_encrypted)
+         VALUES ($1,$2,$3,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$4,TRUE,TRUE)",
     )
     .bind(account_id)
     .bind(host_id)
     .bind(revision)
-    .bind(TOMBSTONE_ADDRESS)
-    .bind(TOMBSTONE_PORT)
-    .bind(TOMBSTONE_NAME)
-    .bind(TOMBSTONE_PLATFORM)
     .bind(source_device_id)
     .execute(&mut *tx)
     .await
@@ -112,6 +99,94 @@ pub(crate) async fn host(
         "host.admin_delete",
         "host",
         host_id,
+    )
+    .await?;
+    commit(tx).await?;
+    mark_semantic_audit_recorded();
+    Ok(())
+}
+
+pub(crate) async fn proxy_profile(
+    pool: &PgPool,
+    actor: &AdminActor,
+    account_id: Uuid,
+    resource_id: Uuid,
+) -> AppResult<()> {
+    let mut tx = begin(pool).await?;
+    if !account_exists(&mut tx, account_id).await? {
+        return not_found(tx, "proxy profile was not found").await;
+    }
+    let state = lock_sync_state(&mut tx, account_id).await?;
+    let source_device_id = sqlx::query_scalar::<_, Uuid>(
+        "SELECT source_device_id FROM cloud_proxy_profiles
+         WHERE account_id=$1 AND id=$2 AND NOT is_deleted FOR UPDATE",
+    )
+    .bind(account_id)
+    .bind(resource_id)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(storage)?;
+    let Some(source_device_id) = source_device_id else {
+        return not_found(tx, "proxy profile was not found").await;
+    };
+    let revision = state
+        .current_revision
+        .checked_add(1)
+        .ok_or_else(|| AppError::Storage("proxy profile revision is exhausted".to_owned()))?;
+    for statement in [
+        "DELETE FROM cloud_sync_pull_decisions
+         WHERE account_id=$1 AND resource_kind='proxy_profile' AND resource_id=$2",
+        "DELETE FROM cloud_sync_resource_deliveries
+         WHERE account_id=$1 AND resource_kind='proxy_profile' AND resource_id=$2",
+        "DELETE FROM cloud_proxy_profile_versions WHERE account_id=$1 AND resource_id=$2",
+    ] {
+        sqlx::query(statement)
+            .bind(account_id)
+            .bind(resource_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(storage)?;
+    }
+    sqlx::query(
+        "UPDATE cloud_proxy_profiles SET ciphertext=NULL,nonce=NULL,envelope_metadata=NULL,
+             source_device_id=$3,revision=$4,is_deleted=TRUE,updated_at=now()
+         WHERE account_id=$1 AND id=$2 AND NOT is_deleted",
+    )
+    .bind(account_id)
+    .bind(resource_id)
+    .bind(source_device_id)
+    .bind(revision)
+    .execute(&mut *tx)
+    .await
+    .map_err(storage)?;
+    sqlx::query(
+        "INSERT INTO cloud_proxy_profile_versions
+             (account_id,resource_id,revision,ciphertext,nonce,envelope_metadata,
+              source_device_id,is_deleted)
+         VALUES ($1,$2,$3,NULL,NULL,NULL,$4,TRUE)",
+    )
+    .bind(account_id)
+    .bind(resource_id)
+    .bind(revision)
+    .bind(source_device_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(storage)?;
+    sqlx::query(
+        "UPDATE cloud_host_sync_states SET current_revision=$2,updated_at=now()
+         WHERE account_id=$1",
+    )
+    .bind(account_id)
+    .bind(revision)
+    .execute(&mut *tx)
+    .await
+    .map_err(storage)?;
+    audit(
+        &mut tx,
+        actor.account_id(),
+        "proxy_profile.admin_delete",
+        "proxy_profile",
+        resource_id,
     )
     .await?;
     commit(tx).await?;

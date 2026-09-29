@@ -9,9 +9,8 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    HostStatus, LegacyPullCursor, LegacyPullRequest, LegacyPullResponse,
-    MigrateDataProtectionRequest, PullAiProviderRecord, PullHostRecord, ResourceKind,
-    ResourceRevision,
+    HostStatus, LegacyPullCursor, LegacyPullHostRecord, LegacyPullRequest, LegacyPullResponse,
+    MigrateDataProtectionRequest, PullAiProviderRecord, ResourceKind, ResourceRevision,
     actor::DeviceActor,
     validation::{ValidatedEnvelope, ValidatedRekeyResource},
 };
@@ -20,12 +19,14 @@ use super::super::{
     DbTransaction, SyncState,
     ai::{self, AiWriteValue},
     begin,
-    capacity::require_current_within_limit,
+    capacity::{require_current_within_limit, require_host_metadata_migration_within_limit},
     commit, lock_sync_state,
     push::{WriteValue, write_host},
     require_active_device, require_base_revision, require_protection_version,
-    require_sync_generation, storage,
+    require_sync_contract, require_sync_generation, storage,
 };
+
+mod host_metadata;
 use super::{
     DataProtectionOperation, PriorProtectionMutation, audit_mutation, clear_delivery_state,
     insert_envelope, load_prior_mutation, persist_mutation, purge_prior_ciphertext_versions,
@@ -49,7 +50,7 @@ struct LegacyHostRow {
     platform: String,
     tags: Value,
     status: String,
-    ciphertext: Vec<u8>,
+    ciphertext: Option<Vec<u8>>,
     source_device_id: Uuid,
     revision: i64,
     updated_at: DateTime<Utc>,
@@ -102,6 +103,7 @@ pub(crate) async fn pull(
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
+    require_sync_contract(state, request.sync_contract_version)?;
     require_legacy_state(&mut tx, actor.account_id(), state, &request).await?;
     let snapshot = request.snapshot_revision.unwrap_or(state.current_revision);
     if snapshot != state.current_revision {
@@ -136,16 +138,19 @@ pub(crate) async fn pull(
             ResourceKind::AiProviderAccount => {
                 ai_records.push(load_ai(&mut tx, actor.account_id(), identity.resource_id).await?)
             }
+            ResourceKind::ProxyProfile => return Err(super::super::invalid_stored_value()),
         }
     }
     commit(tx).await?;
     Ok(LegacyPullResponse {
+        sync_contract_version: request.sync_contract_version,
         sync_generation: state.sync_generation,
         protection_epoch: 0,
         protection_revision: 0,
         snapshot_revision: snapshot,
         host_records,
         ai_records,
+        proxy_profile_records: vec![],
         next_cursor,
         has_more,
     })
@@ -162,6 +167,7 @@ pub(crate) async fn migrate(
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
+    require_sync_contract(state, request.sync_contract_version)?;
     if let Some(prior) =
         load_prior_mutation(&mut tx, actor.account_id(), request.mutation_id).await?
     {
@@ -186,10 +192,36 @@ pub(crate) async fn migrate(
             "account is not in legacy protection state".to_owned(),
         ));
     }
+    if active_encrypted_count(&mut tx, actor.account_id()).await? == 0 {
+        return Err(AppError::Conflict(
+            "account has no legacy data to migrate".to_owned(),
+        ));
+    }
     require_envelope_absent(&mut tx, actor.account_id()).await?;
     require_current_within_limit(&mut tx, actor.account_id()).await?;
     let current = lock_resources(&mut tx, actor.account_id()).await?;
     require_complete(&current, candidates)?;
+    let active_hosts = current
+        .iter()
+        .filter(|resource| matches!(resource, LegacyResource::Host(_)))
+        .count();
+    let host_ciphertext_bytes = candidates.iter().try_fold(0_usize, |total, candidate| {
+        let bytes = match candidate {
+            ValidatedRekeyResource::Host { ciphertext, .. } => ciphertext.len(),
+            ValidatedRekeyResource::AiProviderAccount { .. }
+            | ValidatedRekeyResource::ProxyProfile { .. } => 0,
+        };
+        total
+            .checked_add(bytes)
+            .ok_or_else(|| AppError::Validation("legacy migration Host密文总量过大".to_owned()))
+    })?;
+    require_host_metadata_migration_within_limit(
+        &mut tx,
+        actor.account_id(),
+        active_hosts,
+        host_ciphertext_bytes,
+    )
+    .await?;
     let result_generation = next(state.sync_generation, "sync_generation")?;
     let result_epoch = 1;
     let result_protection_revision = 1;
@@ -208,14 +240,15 @@ pub(crate) async fn migrate(
                     host.id,
                     current_revision,
                     WriteValue {
-                        address: host.address,
-                        port: host.port,
-                        name: host.name,
-                        platform: host.platform,
-                        tags: host.tags,
-                        status: host.status,
+                        address: None,
+                        port: None,
+                        name: None,
+                        platform: None,
+                        tags: None,
+                        status: None,
                         ciphertext: Some(ciphertext.clone()),
                         deleted: false,
+                        metadata_encrypted: true,
                     },
                 )
                 .await?;
@@ -241,6 +274,8 @@ pub(crate) async fn migrate(
             previous_revision,
         ));
     }
+    host_metadata::rebaseline_tombstones(&mut tx, actor, &mut current_revision, &mut results)
+        .await?;
     purge_prior_ciphertext_versions(&mut tx, actor.account_id(), state.current_revision).await?;
     clear_delivery_state(&mut tx, actor.account_id()).await?;
     update_state(
@@ -252,6 +287,15 @@ pub(crate) async fn migrate(
         current_revision,
     )
     .await?;
+    sqlx::query(
+        "UPDATE cloud_host_sync_states
+         SET minimum_sync_contract_version=4
+         WHERE account_id=$1",
+    )
+    .bind(actor.account_id())
+    .execute(&mut *tx)
+    .await
+    .map_err(storage)?;
     insert_envelope(
         &mut tx,
         actor,
@@ -268,6 +312,7 @@ pub(crate) async fn migrate(
         DataProtectionOperation::Migrate,
         state,
         request_hash,
+        "canonical_json_v1",
         result_generation,
         result_epoch,
         result_protection_revision,
@@ -335,7 +380,7 @@ async fn load_identities(
         "WITH active AS (
              SELECT 'host'::TEXT resource_kind, id resource_id, revision
              FROM cloud_hosts
-             WHERE account_id=$1 AND NOT is_deleted AND ciphertext IS NOT NULL
+             WHERE account_id=$1 AND NOT is_deleted
              UNION ALL
              SELECT 'ai_provider_account'::TEXT, id, revision
              FROM cloud_ai_provider_configs
@@ -360,19 +405,19 @@ async fn load_host(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
     id: Uuid,
-) -> AppResult<PullHostRecord> {
+) -> AppResult<LegacyPullHostRecord> {
     let row = sqlx::query_as::<_, LegacyHostRow>(
         "SELECT id,address,port,name,platform,tags,status,ciphertext,
                 source_device_id,revision,updated_at
          FROM cloud_hosts WHERE account_id=$1 AND id=$2
-           AND NOT is_deleted AND ciphertext IS NOT NULL",
+           AND NOT is_deleted",
     )
     .bind(account_id)
     .bind(id)
     .fetch_one(&mut **tx)
     .await
     .map_err(storage)?;
-    Ok(PullHostRecord {
+    Ok(LegacyPullHostRecord {
         host_id: row.id,
         revision: row.revision,
         address: row.address,
@@ -381,7 +426,8 @@ async fn load_host(
         platform: row.platform,
         tags: serde_json::from_value(row.tags).map_err(|_| super::super::invalid_stored_value())?,
         status: HostStatus::parse(&row.status).ok_or_else(super::super::invalid_stored_value)?,
-        ciphertext: Some(STANDARD.encode(row.ciphertext)),
+        ciphertext: row.ciphertext.map(|value| STANDARD.encode(value)),
+        metadata_encrypted: false,
         source_device_id: row.source_device_id,
         deleted: false,
         updated_at: row.updated_at,
@@ -423,7 +469,7 @@ async fn lock_resources(
         "SELECT id,address,port,name,platform,tags,status,ciphertext,
                 source_device_id,revision,updated_at
          FROM cloud_hosts WHERE account_id=$1 AND NOT is_deleted
-           AND ciphertext IS NOT NULL ORDER BY id FOR UPDATE",
+         ORDER BY id FOR UPDATE",
     )
     .bind(account_id)
     .fetch_all(&mut **tx)
@@ -480,6 +526,7 @@ fn validate_replay(
         || prior.request_revision != request.expected_revision
         || prior.request_current_revision != request.current_revision
         || prior.request_hash.as_slice() != request_hash
+        || prior.request_hash_scheme != "canonical_json_v1"
     {
         return Err(AppError::Conflict(
             "mutation_id was already used by a different migration request".to_owned(),

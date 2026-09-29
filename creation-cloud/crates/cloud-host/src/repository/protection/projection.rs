@@ -59,6 +59,8 @@ pub(super) async fn active_encrypted_count(
              (SELECT count(*)::BIGINT FROM cloud_hosts
               WHERE account_id=$1 AND NOT is_deleted AND ciphertext IS NOT NULL)
            + (SELECT count(*)::BIGINT FROM cloud_ai_provider_configs
+              WHERE account_id=$1 AND NOT is_deleted AND ciphertext IS NOT NULL)
+           + (SELECT count(*)::BIGINT FROM cloud_proxy_profiles
               WHERE account_id=$1 AND NOT is_deleted AND ciphertext IS NOT NULL)",
     )
     .bind(account_id)
@@ -73,6 +75,16 @@ async fn state_view(
     state: SyncState,
     configured: bool,
 ) -> AppResult<SyncStateView> {
+    let host_metadata_migration_required = sqlx::query_scalar::<_, bool>(
+        "SELECT EXISTS(SELECT 1 FROM cloud_hosts
+                       WHERE account_id=$1 AND NOT metadata_encrypted)
+             OR EXISTS(SELECT 1 FROM cloud_host_versions
+                       WHERE account_id=$1 AND NOT metadata_encrypted)",
+    )
+    .bind(account_id)
+    .fetch_one(&mut **tx)
+    .await
+    .map_err(storage)?;
     let secret_present = active_encrypted_count(tx, account_id).await? > 0;
     let legacy_migration_required = !configured
         && state.protection_epoch == 0
@@ -85,6 +97,7 @@ async fn state_view(
     }
     let generation_transition = load_transition(tx, account_id, state.sync_generation).await?;
     Ok(SyncStateView {
+        minimum_sync_contract_version: state.minimum_sync_contract_version,
         sync_generation: state.sync_generation,
         protection_epoch: state.protection_epoch,
         protection_revision: state.protection_revision,
@@ -93,6 +106,7 @@ async fn state_view(
         generation_transition,
         data_protection_configured: configured,
         legacy_migration_required,
+        host_metadata_migration_required,
         secret_present,
     })
 }
@@ -120,10 +134,12 @@ async fn load_transition(
             _ => Err(super::super::invalid_stored_value()),
         };
     }
-    let (reset_seen, rekey_seen) = sqlx::query_as::<_, (bool, bool)>(
+    let (reset_seen, rekey_seen, metadata_seen) = sqlx::query_as::<_, (bool, bool, bool)>(
         "SELECT EXISTS(SELECT 1 FROM cloud_sync_reset_mutations
                        WHERE account_id=$1 AND result_generation=$2),
                 EXISTS(SELECT 1 FROM cloud_sync_rekey_mutations
+                       WHERE account_id=$1 AND result_generation=$2),
+                EXISTS(SELECT 1 FROM cloud_host_metadata_migrations
                        WHERE account_id=$1 AND result_generation=$2)",
     )
     .bind(account_id)
@@ -131,11 +147,12 @@ async fn load_transition(
     .fetch_one(&mut **tx)
     .await
     .map_err(storage)?;
-    match (generation, reset_seen, rekey_seen) {
-        (1, false, false) => Ok(SyncGenerationTransition::Initial),
-        (2.., true, false) => Ok(SyncGenerationTransition::Reset),
-        (2.., false, true) => Ok(SyncGenerationTransition::Rekey),
-        (2.., false, false) => load_audit_transition(tx, account_id, generation).await,
+    match (generation, reset_seen, rekey_seen, metadata_seen) {
+        (1, false, false, false) => Ok(SyncGenerationTransition::Initial),
+        (2.., true, false, false) => Ok(SyncGenerationTransition::Reset),
+        (2.., false, true, false) => Ok(SyncGenerationTransition::Rekey),
+        (2.., false, false, true) => Ok(SyncGenerationTransition::HostMetadataMigration),
+        (2.., false, false, false) => load_audit_transition(tx, account_id, generation).await,
         _ => transition_unproven(),
     }
 }

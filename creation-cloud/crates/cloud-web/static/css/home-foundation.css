@@ -1,4 +1,4 @@
-/* 首页基础：负责宽纸面、状态条、编号章节与公共响应式骨架。 */
+/* 首页基础：负责宽纸面、状态条、章节与公共响应式骨架。 */
 .home-main {
   background: var(--paper);
 }
@@ -17,7 +17,7 @@
   display: flex;
   min-height: 42px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--space-4);
   color: var(--ink-muted);
   font-family: var(--font-mono);
@@ -47,19 +47,6 @@
   background: var(--paper-alt);
 }
 
-.home-section-side {
-  position: absolute;
-  top: clamp(64px, 8vw, 96px);
-  left: max(6px, calc((100vw - var(--home-content-width)) / 2 - 34px));
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transform: rotate(180deg);
-  writing-mode: vertical-rl;
-}
-
 .home-section-heading {
   display: grid;
   min-width: 0;
@@ -72,27 +59,6 @@
 .home-section-heading > div,
 .home-section-heading > p {
   min-width: 0;
-}
-
-.home-section-code {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 var(--space-3);
-  color: var(--accent-text);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 760;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.home-section-code::before {
-  width: 18px;
-  height: 2px;
-  flex: 0 0 auto;
-  background: var(--accent);
-  content: "";
 }
 
 .home-section-heading h2 {
@@ -114,10 +80,6 @@
     width: min(calc(100% - 40px), var(--home-content-width));
   }
 
-  .home-section-side {
-    display: none;
-  }
-
   .home-section-heading {
     grid-template-columns: 1fr;
     gap: var(--space-5);
@@ -135,7 +97,7 @@
     padding-block: 9px;
   }
 
-  .home-status-inner span:last-child {
+  .home-status-inner span {
     text-align: left;
   }
 

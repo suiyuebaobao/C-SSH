@@ -1,11 +1,37 @@
 {% extends "admin.html" %}
 
 {% block admin_content %}
+<section class="admin-section website-content-organizer" aria-labelledby="website-content-organizer-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="website-content-organizer-heading">{% if is_en %}Website content{% else %}网站内容{% endif %}</h2>
+      <p>{% if is_en %}Edit website copy, the QR code and search presentation.{% else %}修改网站文字、二维码和搜索展示。{% endif %}</p>
+    </div>
+  </div>
+  <div class="website-content-controls">
+    <nav class="website-content-sections" aria-label="{% if is_en %}Website content areas{% else %}网站内容分区{% endif %}">
+      <a href="/admin/site?section=home&amp;content_lang={{ content_lang }}{% if is_en %}&amp;lang=en{% endif %}"{% if section == "home" %} aria-current="page"{% endif %}>{% if is_en %}Home page{% else %}首页{% endif %}</a>
+      <a href="/admin/site?section=site_shell&amp;content_lang={{ content_lang }}{% if is_en %}&amp;lang=en{% endif %}"{% if section == "site_shell" %} aria-current="page"{% endif %}>{% if is_en %}Header and footer{% else %}页头页脚{% endif %}</a>
+      <a href="/admin/site?section=qr{% if is_en %}&amp;lang=en{% endif %}"{% if section == "qr" %} aria-current="page"{% endif %}>{% if is_en %}QR code{% else %}二维码{% endif %}</a>
+      <a href="/admin/seo?content_lang={{ content_lang }}{% if is_en %}&amp;lang=en{% endif %}">SEO</a>
+    </nav>
+    {% if section != "qr" %}
+    <nav class="website-content-languages" aria-label="{% if is_en %}Content language{% else %}内容语种{% endif %}">
+      <a href="/admin/site?section={{ section }}&amp;content_lang=zh-CN{% if is_en %}&amp;lang=en{% endif %}"{% if content_lang == "zh-CN" %} aria-current="page"{% endif %}>简体中文</a>
+      <a href="/admin/site?section={{ section }}&amp;content_lang=en{% if is_en %}&amp;lang=en{% endif %}"{% if content_lang == "en" %} aria-current="page"{% endif %}>English</a>
+    </nav>
+    {% else %}
+    <span class="website-content-bilingual">{% if is_en %}Chinese and English together{% else %}中英文共同维护{% endif %}</span>
+    {% endif %}
+  </div>
+</section>
+
+{% if section != "qr" %}
 <section class="admin-section" aria-labelledby="site-content-heading">
   <div class="admin-section-heading">
     <div>
-      <h2 id="site-content-heading">{% if is_en %}Home-page content{% else %}首页内容{% endif %}</h2>
-      <p>{% if is_en %}Add an item, then expand it to edit, save and publish.{% else %}新增内容后，逐条展开编辑、保存和发布。{% endif %}</p>
+      <h2 id="site-content-heading">{% if section == "home" %}{% if is_en %}Home-page content{% else %}首页内容{% endif %}{% else %}{% if is_en %}Header and footer{% else %}页头与页脚{% endif %}{% endif %}</h2>
+      <p>{% if is_en %}Edit the selected language, then preview and publish it.{% else %}修改当前语种内容，保存后可预览并发布。{% endif %}</p>
     </div>
   </div>
 
@@ -14,31 +40,13 @@
   {% endif %}
 
   <details class="admin-simple-editor site-simple-create">
-    <summary>{% if is_en %}Add content{% else %}新增内容{% endif %}</summary>
+    <summary>{% if is_en %}Create draft for this area{% else %}创建当前分区草稿{% endif %}</summary>
     <div class="site-simple-create-grid">
       <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-        <input type="hidden" name="document_key" value="home">
-        <input type="hidden" name="content_locale" value="zh-CN">
+        <input type="hidden" name="document_key" value="{{ document_key }}">
+        <input type="hidden" name="content_locale" value="{{ content_lang }}">
         {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-        <button class="button button-secondary" type="submit">{% if is_en %}Chinese home page{% else %}中文首页{% endif %}</button>
-      </form>
-      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-        <input type="hidden" name="document_key" value="home">
-        <input type="hidden" name="content_locale" value="en">
-        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-        <button class="button button-secondary" type="submit">{% if is_en %}English home page{% else %}英文首页{% endif %}</button>
-      </form>
-      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-        <input type="hidden" name="document_key" value="site_shell">
-        <input type="hidden" name="content_locale" value="zh-CN">
-        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-        <button class="button button-secondary" type="submit">{% if is_en %}Chinese header and footer{% else %}中文页头与页脚{% endif %}</button>
-      </form>
-      <form hx-post="/admin/site/content/draft" hx-target="#admin-global-feedback" hx-swap="innerHTML">
-        <input type="hidden" name="document_key" value="site_shell">
-        <input type="hidden" name="content_locale" value="en">
-        {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
-        <button class="button button-secondary" type="submit">{% if is_en %}English header and footer{% else %}英文页头与页脚{% endif %}</button>
+        <button class="button button-secondary" type="submit">{% if is_en %}Create draft{% else %}创建草稿{% endif %}</button>
       </form>
     </div>
   </details>
@@ -104,11 +112,15 @@
         <div class="admin-actions site-simple-actions site-simple-transitions">
           <form hx-post="/admin/site/content/{{ editor.id }}/publish" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish the saved version?{% else %}确认发布已保存版本？{% endif %}">
             <input type="hidden" name="expected_revision" value="{{ editor.revision }}">
+            <input type="hidden" name="document_key" value="{{ document_key }}">
+            <input type="hidden" name="content_locale" value="{{ content_lang }}">
             {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
             <button class="button button-primary" type="submit">{% if is_en %}Publish{% else %}发布{% endif %}</button>
           </form>
           <form hx-post="/admin/site/content/{{ editor.id }}/delete" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Delete this draft?{% else %}确认删除这条草稿？{% endif %}">
             <input type="hidden" name="expected_revision" value="{{ editor.revision }}">
+            <input type="hidden" name="document_key" value="{{ document_key }}">
+            <input type="hidden" name="content_locale" value="{{ content_lang }}">
             {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
             <button class="button button-secondary" type="submit">{% if is_en %}Delete{% else %}删除{% endif %}</button>
           </form>
@@ -133,12 +145,16 @@
           {% if item.is_published %}
           <form hx-post="/admin/site/content/{{ item.id }}/revoke" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Revoke this published version?{% else %}确认撤销此已发布版本？{% endif %}">
             <input type="hidden" name="expected_revision" value="{{ item.revision }}">
+            <input type="hidden" name="document_key" value="{{ document_key }}">
+            <input type="hidden" name="content_locale" value="{{ content_lang }}">
             {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
             <button class="button button-secondary" type="submit">{% if is_en %}Revoke{% else %}撤销{% endif %}</button>
           </form>
           {% else %}
           <form hx-post="/admin/site/content/{{ item.id }}/rollback" hx-target="#admin-global-feedback" hx-swap="innerHTML" hx-confirm="{% if is_en %}Publish a new version copied from this one?{% else %}确认基于此版本重新发布？{% endif %}">
             <input type="hidden" name="expected_revision" value="{{ item.revision }}">
+            <input type="hidden" name="document_key" value="{{ document_key }}">
+            <input type="hidden" name="content_locale" value="{{ content_lang }}">
             {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
             <button class="button button-secondary" type="submit">{% if is_en %}Restore{% else %}恢复此版本{% endif %}</button>
           </form>
@@ -150,7 +166,9 @@
   </details>
   {% endif %}
 </section>
+{% endif %}
 
+{% if section == "qr" %}
 <section class="admin-section" aria-labelledby="site-media-heading">
   <div class="admin-section-heading">
     <div>
@@ -230,4 +248,5 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 {% endblock %}

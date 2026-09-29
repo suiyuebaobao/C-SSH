@@ -42,7 +42,7 @@ pub(crate) async fn handle(
         alt_en: shared::optional_text(form.alt_en),
     };
     match state.site_media().update(&actor, media_id, input).await {
-        Ok(_) => shared::action_success(&headers, "/admin/site", locale),
+        Ok(_) => shared::action_success(&headers, super::qr_return_path(), locale),
         Err(error) => shared::action_error(locale, error),
     }
 }

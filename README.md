@@ -1,86 +1,88 @@
 **中文** | [English](README_EN.md)
 
-# C-SSH
+# C-SSH 0.9.0
 
-Windows 与 Android 上的服务器运维工具：终端、远程桌面、监控、文件管理和 AI 助手。
+面向 **Windows、M系列 Mac 和 Android** 的服务器运维工作台：主机管理、持久终端、RDP、监控、文件和三作用域 AI。无需登录 Cloud 也能使用本地功能。
 
-**0.8.9 功能与界面预览，程序尚未上传。** 本次更新说明和截图；现有公开下载仍为 [v0.8.8](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.8.8)，下述 0.8.9 新功能不代表旧安装包已经具备。
+> **本次 0.9.0 必须自行下载并安装，旧版本无法自动更新。**
+>
+> Android 使用新安装签名，不能直接覆盖旧正式版；卸载会清除本地数据。请先阅读[安装与数据保全说明](INSTALL.md)，尤其注意 AI 对话和记忆不参与 Cloud 同步。Mac 仅支持 M 系列，DMG 采用 ad-hoc 签名且未公证。
 
-## 0.8.9 新变化
+## 下载
 
-- **Windows 管理自动安装，也保留手动安装。** 使用已提供的 Windows 登录凭据建立 RDP 连接，自动投放并启动本产品 Setup；需要时识别并确认本产品 UAC，再检查实际管理员权限与安装结果。也可手动导出、运行 Setup，或接管当前远程桌面继续操作。
-- **一套 Windows 访问流程。** 支持仅 RDP、OpenSSH 直连和通过 RDP 通道访问 SSH。已保存的密码可复用，避免安装过程中反复填写。
-- **PC 与 Android 共用安装逻辑。** Windows 监控、远程桌面、终端、文件与 Native AI 能力进入相应客户端；Windows 终端不提供 Linux tmux 持久会话。
-- **检查失败时保留本地使用。** 版本缓存访问失败改为非阻断提示与重试入口；已知的强制更新或停用规则仍有效。确实无法读取的业务数据会单独报错，不清空或新建空库替代原数据。
-- **更稳妥的数据与连接处理。** 修复 Android 数据库路径不一致，保留升级前数据；改进主机凭据复用、代理线路、Windows 磁盘／网络指标与加密同步。
+| 平台 | 0.9.0 官方下载 |
+|---|---|
+| Windows x64 · NSIS | [C-SSH_0.9.0_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.0/C-SSH_0.9.0_x64-setup.exe) |
+| Windows x64 · Portable | [C-SSH_0.9.0_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.0/C-SSH_0.9.0_portable-Windows-x64.zip) |
+| macOS · Apple Silicon | [C-SSH_0.9.0_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.0/C-SSH_0.9.0_macOS-arm64.dmg) |
+| Android · arm64 | [C-SSH_0.9.0_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.0/C-SSH_0.9.0_android-arm64.apk) |
 
-## 完整界面图集
+[官网](https://c-ssh.com) · [官网下载页](https://c-ssh.com/downloads) · [本次 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.0) · [安装说明](INSTALL.md)
 
-**共55张当前界面：**[Windows · 31张](screenshots/WINDOWS.md) · [Android · 24张](screenshots/ANDROID.md) · [图集目录](screenshots/README.md)。
+iOS 本次不上传；不提供 Intel Mac、Linux 客户端、MSI、AAB 或 x86 Android 发布包。Windows 需要可用的 WebView2 Runtime；Mac 最低系统目标为 macOS 13，Android 最低系统目标为 Android 7.0/API 24。最低目标不等于所有系统都已实测。
 
-覆盖主机、自动／手动安装、RDP入口、终端、文件、监控、AI三作用域、代理线路、账号／同步、设置等主要页面；原v0.7.5旧图已替换。
+## 这次更新了什么
 
-图片使用当前0.8.9产品界面与离线示例数据。安装图复用已保存的PC／MuMu界面，其余为后台浏览器渲染，不是新一轮真机或真实服务器验收。
+- **新增 M 系列 Mac 客户端**，共享现有桌面业务能力，使用原生窗口、钥匙串和文件选择器；以 DMG 分发。
+- **主机支持 IPv4 或域名**，下拉框只保留这两个选项，端口单独填写；域名解析仍兼容 IPv6，已有 IPv6 主机保持可用。
+- **设置中可选择自建云**：默认官方 Creation Cloud，也可填写兼容自建服务的 HTTPS 地址；账号、同步及更新来源按所选云隔离。
+- **Windows 管理接入更清楚**：服务器首次手动运行配套 Setup，之后通过 Windows 账号及受信 RDP/DVC 连接；不再提供自动投放、OCR 或自动 UAC 安装流程。
+- **Windows 持久终端已接入**：配套 Agent 管理 Terminal2/psmux，普通 OpenSSH 路径继续保留；Linux 继续使用 tmux。
+- **三作用域 AI 历史访问修复**：全局知道本机各作用域历史，项目限定本项目，主机限定当前主机；跨设备聊天不通过 Cloud 自动同步。
+- **数据、连接与界面修复**：共享存储迁移、自建云切换、主机通知刷新、RDP 登录就绪、终端输入及系统信息等，详见[更新记录](CHANGELOG.md)。
 
-<p align="center"><img width="1080" src="screenshots/v0.8.9/windows-hosts.png" alt="C-SSH 0.8.9 Windows hosts" /></p>
+## 完整能力
 
-<table>
-<tr><th>Android · 主机</th><th>Android · 监控</th><th>Android · AI</th></tr>
-<tr><td><img width="290" src="screenshots/v0.8.9/android-hosts.png" alt="Android hosts" /></td><td><img width="290" src="screenshots/v0.8.9/android-monitor.png" alt="Android monitoring" /></td><td><img width="290" src="screenshots/v0.8.9/android-ai-conversation.png" alt="Android AI sample conversation" /></td></tr>
-</table>
+| 模块 | 能做什么 |
+|---|---|
+| 主机与项目 | 新增、编辑、搜索、收藏、分组；IPv4/域名、独立端口、密码/私钥和显式代理线路 |
+| SSH 与 Agent | 按主机选择普通 SSH 或 Agent 模式；身份、能力及错误由共享运行时处理 |
+| 终端 | Linux tmux、Windows Terminal2/psmux 持久终端及普通 SSH；桌面多标签、移动端输入与会话恢复 |
+| Windows RDP | 远程桌面及 RDP 内的 DVC 管理通道；证书与账号验证，登录完成后才开放管理连接 |
+| 监控 | CPU、内存、磁盘、负载、网络和磁盘 IO、实时/历史曲线、Top 进程与采集设置 |
+| 文件 | 浏览、上传、下载、创建、重命名、删除、文本编辑和摘要校验；手机系统文件选择器 |
+| AI | 全局/项目/主机作用域，多模型账户与绑定、权限模式、确认、停止、历史及本地记忆 |
+| 系统与应用 | 系统信息、进程、防火墙、服务；桌面应用中心按服务器能力管理 Docker/systemd/Windows 服务 |
+| 桌面工具 | Windows/Mac 的端口映射、命令库、群发执行、逐机结果及访问授权 |
+| 代理 | 直连、保存的 SOCKS5/HTTP CONNECT 线路及显式官方代理；代理失败不自动直连 |
+| Cloud | 可选登录、设备管理、主机/代理/模型账户的手动端到端加密同步；官方或自建服务 |
+| 偏好与诊断 | 九种语言、外观、采集参数、数据保护设置；诊断日志默认关闭 |
 
-## 日常使用
+[逐项功能与平台差异](FEATURES.md) · [自建云接入与更新](SELF_HOSTING.md) · [完整截图目录](screenshots/README.md)
 
-| 能力 | 说明 |
-| --- | --- |
-| Linux 服务器 | Agent 模式提供 tmux 持久终端、监控和文件能力；普通 SSH 模式可直接使用 PTY、SFTP 与相应运维工具 |
-| Windows 服务器 | 0.8.9 候选提供 RDP 与独立 Windows Agent 管理，可选择自动或手动安装 |
-| AI 助手 | 多 provider 与模型绑定，支持全局／项目／主机作用域及查看／编辑／全权权限；对话与记忆留在本机 |
-| 连接线路 | 0.8.9 候选统一管理直连、SOCKS5、HTTP CONNECT 与显式选择的官方代理；代理失败不自动改为直连 |
-| 可选 Cloud | 账号、设备和用户主动发起的加密同步；Cloud 不处于客户端到 Agent 的直接数据链路 |
-| 本地数据 | Windows 使用程序旁的 data，Android 使用应用私有目录；删除主机只清本机关联数据 |
+## 界面图集
 
-## 已验证范围
+[Windows](screenshots/WINDOWS.md) · [Mac](screenshots/MACOS.md) · [Android](screenshots/ANDROID.md)
 
-- Windows Server 2022 的真实 UAC、真实 Windows Server 2019 的安装与权限检查已有定向证据；自动与手动入口均保留。
-- Windows 已完成公开 0.8.8 升级链、数据保留及本地模式故障验证；各项测试绑定当时制品，未把不同候选合并成一次全量测试。
-- Android 使用 MuMu，已完成相关安装流程、真实旧库迁移、普通启动与本地增删。**没有物理 Android 手机验收结果。**
-- 这些结果不保证其它 Windows 策略、UAC 提示语言、缩放或设备组合全部无人值守成功。
+图集使用 0.9.0 的真实 Vue 界面和合成示例数据，在后台浏览器中渲染。它展示界面，不冒充原生程序、真机或真实服务器验收；个人联系方式在公开截图中隐藏。
 
-## 现有下载
+![Windows 主机工作台](screenshots/v0.9.0/windows-hosts.png)
+![Mac 监控](screenshots/v0.9.0/macos-monitor-detail.png)
 
-0.8.9 暂不提供下载。下面保留 0.8.8 的原始下载入口与摘要；不会把旧文件换成新程序。
+## 验证范围
 
-| 平台 | 现有 v0.8.8 下载 |
-| --- | --- |
-| Windows x64 | [NSIS 安装包](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_x64-setup.exe) · [便携 ZIP](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_portable-Windows-x64.zip) |
-| Android arm64 | [APK](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_android-arm64.apk) |
-| macOS 13+ Universal | [TEST-UNVERIFIED DMG](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg) · [TEST-UNVERIFIED .app.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.8.8/C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip) |
+- Windows 测试虚拟机完成同源 NSIS/Portable 检查、安装/启动/卸载、0.8.8 到 0.9.0 的**手动**安装升级及数据保留。
+- Mac 完成 arm64 构建、DMG 挂载、应用版本/架构及 ad-hoc 签名完整性检查；未公证，不能将此视为最低系统或所有 Mac 型号验收。
+- Android 完成包名/版本/ABI/签名/16KiB 对齐/部署资源检查，并在 Android SDK Emulator 验证同签名测试包更新、启动及原数据保持；这不代表旧正式签名可直接覆盖，也不是物理手机验证。
+- 主机地址、三端表单、自建云隔离及共享层定向测试已完成；公网 IPv6、全部系统组合及所有弱网场景不在本次已验证范围。
 
-Windows 0.8.8 安装器没有 Authenticode 签名，系统可能提示未知发布者。0.8.7 及更早 Windows 版本须先手动安装一次 0.8.8，之后才使用现行更新信任根。macOS 测试包使用 ad-hoc 签名，未经真实 Mac 验收或公证，不属于正式客户端发布，也不支持自动更新。
+## 数据与源码
 
-### 0.8.8 SHA256
+Cloud 不转发客户端到服务器的 SSH 数据。主机凭据和模型 Key 在客户端加密后才进入手动同步；AI 对话和记忆留在本机。使用模型服务时，选定上下文会发送给该服务商。删除本地主机只处理本机数据，不卸载远端 Agent 或清理远端会话。
 
-- `FF15C6CD40D3FC6725A413BD7253AABC191BD76C78CD3AFF83AA255758907736`  `C-SSH_0.8.8_x64-setup.exe`
-- `55B42F281725D3995B9117C85A9E688F51AD4F2359D2921768C52E6AB027FAA0`  `C-SSH_0.8.8_portable-Windows-x64.zip`
-- `A2C98E7A81BB4E5A66B38A2C8096FE41951AC8B66DD3DFE9AA4C64E17A1E4F80`  `C-SSH_0.8.8_android-arm64.apk`
-- `E150EA982F65E458539A7DF2A4E8E45B12B12CAAD0D1CD57DEB5AA785CAD4FA3`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.dmg`
-- `6359C20F6D9F70C8DAA1E825972597FA4CC7BF40C08869A5B7166F7F85976403`  `C-SSH_0.8.8_macOS-universal_TEST-UNVERIFIED.app.zip`
+本公开仓提供推广资料、截图、安装包及筛选后的 Creation Cloud 生产源码镜像；客户端、共享核心、AI 与 Agent 源码未公开。
 
-正式客户端平台为 Windows 与 Android；Windows 采用 NSIS／便携 ZIP，Android 采用 arm64 APK。macOS 仅有上述公开测试包，iOS 尚未发布；Linux 客户端冻结，服务器侧 Linux Agent 继续独立维护。
+## SHA256
 
-## 数据与源码边界
+- `02ce52d75dff8ec917d08ea98359e1be69da5e3364512273cda509de04df7d96`  `C-SSH_0.9.0_x64-setup.exe`
+- `adf258281f6c9682037a63cbf96009ae64908f7b44f6d839507439809c249c9e`  `C-SSH_0.9.0_portable-Windows-x64.zip`
+- `9a74d7b10297f07b623b22d36087d8c0da705e54bae5488e99e13e6e9d1ecff3`  `C-SSH_0.9.0_macOS-arm64.dmg`
+- `e7fc1cc792ee8fb4fc9ba676298a812ec9a3395d52cbadef7d5353485704cc40`  `C-SSH_0.9.0_android-arm64.apk`
 
-- 本机凭据受本机密钥保护；仅在用户主动同步时上传账号密钥加密的密文。Cloud 无法读取主机凭据和 AI provider 密钥。
-- AI 执行受所选权限和确认约束；使用第三方模型时，选定上下文会发送给该 provider。
-- 本仓库包含产品说明、截图、历史下载及 Creation Cloud 服务端源码镜像；**客户端、共享核心与 Agent 源码尚未公开**。后续开源计划不构成当前源码已公开的声明或日期承诺。
+## 反馈与联系
 
-## 语言与联系
-
-C-SSH 当前免费，提供简体中文、繁體中文、English、Español、Français、Deutsch、Português、Русский、한국어。
-
-- 微信：suiyue_creation
+- [GitHub Issues](https://github.com/suiyuebaobao/C-SSH/issues) · [官网反馈](https://c-ssh.com/feedback)
 - QQ 群【AI 创新社区】：[点击加入](https://qm.qq.com/q/OWYQ9hwFWy)，群号 1041937161
-- [更新记录](CHANGELOG.md) · [已有 Release](https://github.com/suiyuebaobao/C-SSH/releases)
+- 支持简体中文、繁體中文、English、Español、Français、Deutsch、Português、Русский、한국어。
 
-<p align="center"><img width="280" src="screenshots/qq-group-qr.png" alt="QQ 群二维码：AI 创新社区" /></p>
+旧版 Release、安装包及摘要保持原样，见[历史发布](https://github.com/suiyuebaobao/C-SSH/releases)。

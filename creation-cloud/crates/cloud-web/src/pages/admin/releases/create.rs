@@ -14,7 +14,9 @@ use super::super::shared;
 pub(crate) struct CreateReleaseForm {
     version: String,
     channel: ReleaseChannel,
+    #[serde(default)]
     title_zh: String,
+    #[serde(default)]
     title_en: String,
     notes_zh: String,
     notes_en: String,
@@ -32,16 +34,40 @@ pub(crate) async fn handle(
         Ok(actor) => actor,
         Err(error) => return shared::action_error(locale, error),
     };
+    let title = format!("C-SSH {}", form.version.trim());
     let input = CreateReleaseInput {
         version: form.version,
         channel: form.channel,
-        title_zh: form.title_zh,
-        title_en: form.title_en,
+        title_zh: release_title(form.title_zh, &title),
+        title_en: release_title(form.title_en, &title),
         notes_zh: form.notes_zh,
         notes_en: form.notes_en,
     };
     match state.release().create_release(&actor, input).await {
-        Ok(_) => shared::action_success(&headers, "/admin/releases", locale),
+        Ok(release) => shared::action_success(
+            &headers,
+            &format!("/admin/assets?release_id={}", release.id),
+            locale,
+        ),
         Err(error) => shared::action_error(locale, error),
+    }
+}
+
+fn release_title(value: String, fallback: &str) -> String {
+    if value.trim().is_empty() {
+        fallback.to_owned()
+    } else {
+        value
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::release_title;
+
+    #[test]
+    fn compact_upload_form_derives_titles_without_overwriting_explicit_values() {
+        assert_eq!(release_title(String::new(), "C-SSH 0.8.9"), "C-SSH 0.8.9");
+        assert_eq!(release_title("Custom".into(), "C-SSH 0.8.9"), "Custom");
     }
 }

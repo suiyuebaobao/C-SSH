@@ -32,7 +32,7 @@ pub(crate) async fn handle(
         Err(error) => return shared::action_error(locale, error),
     };
     match state.site_media().revoke(&actor, media_id).await {
-        Ok(_) => shared::action_success(&headers, "/admin/site", locale),
+        Ok(_) => shared::action_success(&headers, super::qr_return_path(), locale),
         Err(error) => shared::action_error(locale, error),
     }
 }

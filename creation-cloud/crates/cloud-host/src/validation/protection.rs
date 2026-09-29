@@ -34,6 +34,7 @@ pub(crate) fn setup_protection(
 pub(crate) fn migrate_protection(
     request: &MigrateDataProtectionRequest,
 ) -> AppResult<(ValidatedEnvelope, Vec<ValidatedRekeyResource>)> {
+    super::host_metadata::require_current(request.sync_contract_version)?;
     common_transition(
         request.mutation_id,
         request.sync_generation,
@@ -48,11 +49,6 @@ pub(crate) fn migrate_protection(
     }
     let envelope = envelope(&request.envelope)?;
     let resources = resource_candidates(&request.resources, "legacy migrate")?;
-    if resources.is_empty() {
-        return Err(AppError::Validation(
-            "legacy migrate 必须包含完整活动密文集合".to_owned(),
-        ));
-    }
     Ok((envelope, resources))
 }
 
@@ -106,6 +102,12 @@ fn envelope(input: &DataProtectionEnvelopeInput) -> AppResult<ValidatedEnvelope>
         nonce: exact_base64(&input.nonce, "nonce", 24)?,
         wrapped_data_key: exact_base64(&input.wrapped_data_key, "wrapped_data_key", 48)?,
     })
+}
+
+pub(crate) fn metadata_migration_envelope(
+    input: &DataProtectionEnvelopeInput,
+) -> AppResult<ValidatedEnvelope> {
+    envelope(input)
 }
 
 fn exact_base64(value: &str, field: &str, size: usize) -> AppResult<Vec<u8>> {

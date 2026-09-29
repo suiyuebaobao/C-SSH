@@ -10,11 +10,13 @@ use cloud_domain::{AdminActor, AppError, AppResult, AuthenticatedSession, Page, 
 use uuid::Uuid;
 
 use crate::{
-    AdminSyncRecord, ChangeDataProtectionRequest, DataProtectionMutationResponse,
-    DataProtectionView, HostView, LegacyPullRequest, LegacyPullResponse,
+    AdminSyncRecord, ChangeDataProtectionRequest, DataProtectionMigrationReceipt,
+    DataProtectionMutationResponse, DataProtectionView, HostMetadataMigrationPreviewRequest,
+    HostMetadataMigrationPreviewResponse, HostMetadataMigrationReceipt,
+    HostMetadataMigrationRequest, HostView, LegacyPullRequest, LegacyPullResponse,
     MigrateDataProtectionRequest, ProtectionResetChallengeRequest,
     ProtectionResetChallengeResponse, PullAckRequest, PullPurpose, PullRequest, PullResponse,
-    PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
+    PushOutcome, PushReceipt, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
     ResetSyncResponse, Service, SetupDataProtectionRequest, SyncStateView,
     VerifyProtectionResetChallengeRequest, VerifyProtectionResetChallengeResponse,
 };
@@ -58,6 +60,10 @@ pub fn sync_router(service: Service) -> Router {
                 .layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
         )
         .route(
+            "/protection/migrations/{mutation_id}",
+            get(data_protection_migration_receipt),
+        )
+        .route(
             "/protection/change",
             post(change_data_protection)
                 .layer(DefaultBodyLimit::max(PROTECTION_ENVELOPE_BODY_LIMIT_BYTES)),
@@ -76,6 +82,7 @@ pub fn sync_router(service: Service) -> Router {
             "/push",
             post(push).layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
         )
+        .route("/push/receipts/{mutation_id}", get(push_receipt))
         .route("/pull", get(pull_preview))
         .route(
             "/pull/deliver",
@@ -88,6 +95,20 @@ pub fn sync_router(service: Service) -> Router {
         .route(
             "/rekey",
             post(rekey_sync).layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/host-metadata/migration/preview",
+            post(preview_host_metadata_migration)
+                .layer(DefaultBodyLimit::max(PROTECTION_CHALLENGE_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/host-metadata/migrate",
+            post(migrate_host_metadata)
+                .layer(DefaultBodyLimit::max(SYNC_WRITE_REQUEST_BODY_LIMIT_BYTES)),
+        )
+        .route(
+            "/host-metadata/migrations/{mutation_id}",
+            get(host_metadata_migration_receipt),
         )
         .route("/protection/reset", post(reset_sync))
         .with_state(service)
@@ -129,6 +150,17 @@ async fn migrate_data_protection(
 ) -> AppResult<Json<DataProtectionMutationResponse>> {
     service
         .migrate_data_protection(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn data_protection_migration_receipt(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Path(mutation_id): Path<Uuid>,
+) -> AppResult<Json<DataProtectionMigrationReceipt>> {
+    service
+        .data_protection_migration_receipt(&session, mutation_id)
         .await
         .map(Json)
 }
@@ -187,6 +219,10 @@ pub fn management_router(service: Service) -> Router {
         )
         .route("/{account_id}/sync-records", get(admin_list_sync_records))
         .route(
+            "/{account_id}/proxy-profiles/{resource_id}",
+            delete(admin_delete_proxy_profile),
+        )
+        .route(
             "/{account_id}/sync-records/{record_id}",
             delete(admin_delete_sync_record),
         )
@@ -215,6 +251,14 @@ async fn push(
     Json(request): Json<PushRequest>,
 ) -> AppResult<Json<PushOutcome>> {
     service.push(&session, request).await.map(Json)
+}
+
+async fn push_receipt(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Path(mutation_id): Path<Uuid>,
+) -> AppResult<Json<PushReceipt>> {
+    service.push_receipt(&session, mutation_id).await.map(Json)
 }
 
 async fn pull_preview(
@@ -268,6 +312,39 @@ async fn rekey_sync(
     service.rekey_sync(&session, request).await.map(Json)
 }
 
+async fn preview_host_metadata_migration(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<HostMetadataMigrationPreviewRequest>,
+) -> AppResult<Json<HostMetadataMigrationPreviewResponse>> {
+    service
+        .preview_host_metadata_migration(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn migrate_host_metadata(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(request): Json<HostMetadataMigrationRequest>,
+) -> AppResult<Json<HostMetadataMigrationReceipt>> {
+    service
+        .migrate_host_metadata(&session, request)
+        .await
+        .map(Json)
+}
+
+async fn host_metadata_migration_receipt(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Path(mutation_id): Path<Uuid>,
+) -> AppResult<Json<HostMetadataMigrationReceipt>> {
+    service
+        .host_metadata_migration_receipt(&session, mutation_id)
+        .await
+        .map(Json)
+}
+
 async fn admin_list_for_user(
     State(service): State<Service>,
     Extension(session): Extension<AuthenticatedSession>,
@@ -316,6 +393,18 @@ async fn admin_list_sync_records(
         .admin_list_sync_records(&actor, account_id, page)
         .await
         .map(Json)
+}
+
+async fn admin_delete_proxy_profile(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Path((account_id, resource_id)): Path<(Uuid, Uuid)>,
+) -> AppResult<StatusCode> {
+    let actor = AdminActor::from_session(&session)?;
+    service
+        .admin_delete_proxy_profile(&actor, account_id, resource_id)
+        .await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 async fn admin_delete_sync_record(

@@ -9,17 +9,18 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    HostStatus, PullAckRequest, PullAiProviderRecord, PullHostRecord, PullMode, PullPurpose,
-    PullRequest, PullResponse, ResourceKind, actor::DeviceActor,
+    PullAckRequest, PullAiProviderRecord, PullHostRecord, PullMode, PullPurpose, PullRequest,
+    PullResponse, ResourceKind, actor::DeviceActor,
 };
 
 use super::{
     DbTransaction, begin, commit, invalid_stored_value, lock_sync_state, require_active_device,
     require_configured_envelope, require_protection_version, require_retained_revision,
-    require_sync_generation, storage,
+    require_sync_contract, require_sync_generation, storage,
 };
 
 mod completion;
+mod proxy_profile;
 pub(super) use completion::record_rekey_snapshot;
 
 #[derive(Clone, FromRow)]
@@ -33,15 +34,10 @@ struct PullIdentityRow {
 struct HostVersionRow {
     host_id: Uuid,
     revision: i64,
-    address: String,
-    port: i32,
-    name: String,
-    platform: String,
-    tags: Value,
-    status: String,
     ciphertext: Option<Vec<u8>>,
     source_device_id: Uuid,
     is_deleted: bool,
+    metadata_encrypted: bool,
     recorded_at: DateTime<Utc>,
 }
 
@@ -65,6 +61,7 @@ pub(crate) async fn pull(
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
     require_sync_generation(state, request.sync_generation)?;
+    require_sync_contract(state, request.sync_contract_version)?;
     require_protection_version(state, request.protection_epoch, request.protection_revision)?;
     require_configured_envelope(&mut tx, actor.account_id(), state).await?;
     let snapshot = request.snapshot_revision.unwrap_or(state.current_revision);
@@ -89,6 +86,7 @@ pub(crate) async fn pull(
     let next_revision = if has_more { cursor } else { snapshot };
     let mut host_records = Vec::new();
     let mut ai_records = Vec::new();
+    let mut proxy_profile_records = Vec::new();
     for identity in &identities {
         match ResourceKind::parse(&identity.resource_kind).ok_or_else(invalid_stored_value)? {
             ResourceKind::Host => host_records.push(
@@ -109,6 +107,15 @@ pub(crate) async fn pull(
                 )
                 .await?,
             ),
+            ResourceKind::ProxyProfile => proxy_profile_records.push(
+                proxy_profile::load(
+                    &mut tx,
+                    actor.account_id(),
+                    identity.resource_id,
+                    identity.revision,
+                )
+                .await?,
+            ),
         }
     }
     if request.purpose == PullPurpose::Download {
@@ -118,6 +125,7 @@ pub(crate) async fn pull(
     }
     commit(tx).await?;
     Ok(PullResponse {
+        sync_contract_version: request.sync_contract_version,
         sync_generation: state.sync_generation,
         protection_epoch: state.protection_epoch,
         protection_revision: state.protection_revision,
@@ -125,6 +133,7 @@ pub(crate) async fn pull(
         mode: request.mode,
         host_records,
         ai_records,
+        proxy_profile_records,
         snapshot_revision: snapshot,
         next_revision,
         has_more,
@@ -155,6 +164,16 @@ async fn load_identities(
                  SELECT DISTINCT ON (versions.resource_id)
                         versions.resource_id, versions.revision
                  FROM cloud_ai_provider_config_versions AS versions
+                 WHERE versions.account_id = $1 AND versions.revision <= $3
+                 ORDER BY versions.resource_id, versions.revision DESC
+              ) AS latest
+             UNION ALL
+             SELECT 'proxy_profile'::TEXT AS resource_kind,
+                    latest.resource_id, latest.revision
+             FROM (
+                 SELECT DISTINCT ON (versions.resource_id)
+                        versions.resource_id, versions.revision
+                 FROM cloud_proxy_profile_versions AS versions
                  WHERE versions.account_id = $1 AND versions.revision <= $3
                  ORDER BY versions.resource_id, versions.revision DESC
              ) AS latest
@@ -192,8 +211,8 @@ async fn load_host_record(
     revision: i64,
 ) -> AppResult<PullHostRecord> {
     let row = sqlx::query_as::<_, HostVersionRow>(
-        "SELECT host_id, revision, address, port, name, platform, tags, status,
-                ciphertext, source_device_id, is_deleted, recorded_at
+        "SELECT host_id, revision, ciphertext, source_device_id, is_deleted,
+                metadata_encrypted, recorded_at
          FROM cloud_host_versions
          WHERE account_id = $1 AND host_id = $2 AND revision = $3",
     )
@@ -206,13 +225,8 @@ async fn load_host_record(
     Ok(PullHostRecord {
         host_id: row.host_id,
         revision: row.revision,
-        address: row.address,
-        port: u16::try_from(row.port).map_err(|_| invalid_stored_value())?,
-        name: row.name,
-        platform: row.platform,
-        tags: serde_json::from_value(row.tags).map_err(|_| invalid_stored_value())?,
-        status: HostStatus::parse(&row.status).ok_or_else(invalid_stored_value)?,
         ciphertext: row.ciphertext.map(|value| STANDARD.encode(value)),
+        metadata_encrypted: row.metadata_encrypted,
         source_device_id: row.source_device_id,
         deleted: row.is_deleted,
         updated_at: row.recorded_at,
@@ -258,6 +272,7 @@ pub(crate) async fn ack(
     require_active_device(&mut tx, actor.account_id(), actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, actor.account_id()).await?;
     require_sync_generation(state, request.sync_generation)?;
+    require_sync_contract(state, request.sync_contract_version)?;
     require_protection_version(state, request.protection_epoch, request.protection_revision)?;
     require_configured_envelope(&mut tx, actor.account_id(), state).await?;
     require_retained_revision(state, request.acknowledged_revision)?;

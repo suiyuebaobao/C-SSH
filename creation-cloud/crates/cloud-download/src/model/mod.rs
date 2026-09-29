@@ -20,8 +20,9 @@ pub use installed_identity::{
     InstalledIdentityEntryInput, RecordInstalledIdentitiesInput, RecordInstalledIdentitiesResult,
 };
 pub use policy::{
-    AdminUpdatePolicySnapshot, PublishUpdatePolicyInput, PublishedUpdatePolicy,
-    SaveUpdatePolicyDraftInput, UpdatePolicyDraft, UpdatePolicyTargetRelease,
+    AdminUpdatePolicySnapshot, ApplyUpdatePolicyInput, PublishUpdatePolicyInput,
+    PublishedUpdatePolicy, SaveUpdatePolicyDraftInput, UpdatePolicyDraft,
+    UpdatePolicyTargetRelease,
 };
 pub(crate) use policy::{
     ForcedIdentityRow, PolicyAssetRow, PolicyTargetRow, PublishedUpdatePolicyRow,

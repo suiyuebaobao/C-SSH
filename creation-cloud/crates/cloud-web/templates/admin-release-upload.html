@@ -1,0 +1,27 @@
+<section class="admin-section version-upload" aria-labelledby="version-upload-heading">
+  <div class="admin-section-heading">
+    <div>
+      <h2 id="version-upload-heading">{% if is_en %}Upload client{% else %}上传客户端{% endif %}</h2>
+      <p>{% if is_en %}Create the version first, then upload the three formal client files on the next page.{% else %}先创建版本，再在下一页上传三个正式客户端文件。{% endif %}</p>
+    </div>
+    <a class="text-link" href="/admin/releases?tab=uploaded{% if is_en %}&amp;lang=en{% endif %}">{% if is_en %}View uploaded versions →{% else %}查看已上传版本 →{% endif %}</a>
+  </div>
+  <form class="version-upload-form" hx-post="/admin/releases" hx-target="#admin-global-feedback" hx-swap="innerHTML">
+    <input type="hidden" name="channel" value="stable">
+    {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
+    <label class="admin-field version-upload-version">
+      <span>{% if is_en %}Version{% else %}版本号{% endif %}</span>
+      <input name="version" required maxlength="64" autocomplete="off" placeholder="0.8.9">
+      <small>{% if is_en %}A new version starts unpublished.{% else %}新版本创建后保持未公开。{% endif %}</small>
+    </label>
+    <fieldset class="version-upload-notes">
+      <legend>{% if is_en %}Release notes{% else %}更新说明{% endif %}</legend>
+      <label class="admin-field"><span>中文</span><textarea name="notes_zh" required maxlength="20000" placeholder="说明这次更新了什么。"></textarea></label>
+      <label class="admin-field"><span>English</span><textarea name="notes_en" required maxlength="20000" placeholder="Explain what changed in this release."></textarea></label>
+    </fieldset>
+    <div class="version-upload-footer">
+      <p>{% if is_en %}Publishing files makes them downloadable and does not change update settings.{% else %}公开后可供下载，不会改变更新设置。{% endif %}</p>
+      <button class="button button-primary" type="submit">{% if is_en %}Create version and upload files{% else %}创建版本并上传文件{% endif %}</button>
+    </div>
+  </form>
+</section>

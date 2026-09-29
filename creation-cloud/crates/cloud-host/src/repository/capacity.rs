@@ -5,15 +5,15 @@ use serde_json::Value;
 use uuid::Uuid;
 
 use crate::{
-    AiProviderOperation, HostOperation,
+    AiProviderOperation, HostOperation, ProxyProfileOperation,
     validation::{
         MAX_CURRENT_RESOURCES, MAX_REKEY_CIPHERTEXT_BYTES, MAX_REKEY_RESOURCES,
         MAX_SYNC_AUXILIARY_BYTES, ValidatedAiChange, ValidatedAiPayload, ValidatedChange,
-        canonical_ai_auxiliary_size,
+        ValidatedProxyProfileChange, canonical_ai_auxiliary_size,
     },
 };
 
-use super::{DbTransaction, ai::AiRow, hosts::HostRow, storage};
+use super::{DbTransaction, ai::AiRow, hosts::HostRow, proxy_profile::ProxyProfileRow, storage};
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 struct Capacity {
@@ -31,6 +31,15 @@ struct ResourceState {
     auxiliary_bytes: usize,
 }
 
+pub(super) struct CapacityInputs<'a> {
+    pub(super) host_changes: &'a [ValidatedChange],
+    pub(super) host_rows: &'a [Option<HostRow>],
+    pub(super) ai_changes: &'a [ValidatedAiChange],
+    pub(super) ai_rows: &'a [Option<AiRow>],
+    pub(super) proxy_changes: &'a [ValidatedProxyProfileChange],
+    pub(super) proxy_rows: &'a [Option<ProxyProfileRow>],
+}
+
 pub(super) async fn require_current_within_limit(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
@@ -38,28 +47,61 @@ pub(super) async fn require_current_within_limit(
     require_within_limit(load_current(tx, account_id).await?)
 }
 
+pub(super) async fn require_host_metadata_migration_within_limit(
+    tx: &mut DbTransaction<'_>,
+    account_id: Uuid,
+    active_hosts: usize,
+    host_ciphertext_bytes: usize,
+) -> AppResult<()> {
+    let mut final_capacity = load_current(tx, account_id).await?;
+    let (current_encrypted_hosts, current_host_bytes) = sqlx::query_as::<_, (i64, i64)>(
+        "SELECT count(*)::BIGINT,
+                COALESCE(sum(octet_length(ciphertext)),0)::BIGINT
+         FROM cloud_hosts
+         WHERE account_id=$1 AND NOT is_deleted AND ciphertext IS NOT NULL",
+    )
+    .bind(account_id)
+    .fetch_one(&mut **tx)
+    .await
+    .map_err(storage)?;
+    final_capacity.encrypted_resources = final_capacity
+        .encrypted_resources
+        .checked_sub(current_encrypted_hosts)
+        .and_then(|value| value.checked_add(usize_limit(active_hosts)))
+        .ok_or_else(super::invalid_stored_value)?;
+    final_capacity.ciphertext_bytes = final_capacity
+        .ciphertext_bytes
+        .checked_sub(current_host_bytes)
+        .and_then(|value| value.checked_add(usize_limit(host_ciphertext_bytes)))
+        .ok_or_else(super::invalid_stored_value)?;
+    require_within_limit(final_capacity)
+}
+
 pub(super) async fn enforce_encrypted_resource_limit(
     tx: &mut DbTransaction<'_>,
     account_id: Uuid,
-    host_changes: &[ValidatedChange],
-    host_rows: &[Option<HostRow>],
-    ai_changes: &[ValidatedAiChange],
-    ai_rows: &[Option<AiRow>],
+    inputs: CapacityInputs<'_>,
 ) -> AppResult<()> {
     // 调用方已持有账号同步状态行锁；所有 Host/AI 写路径都按该锁串行，
     // 因此当前快照与净变化共同构成事务内的账号级容量门禁。
     let current = load_current(tx, account_id).await?;
     let mut delta = Capacity::default();
-    for (change, row) in host_changes.iter().zip(host_rows) {
+    for (change, row) in inputs.host_changes.iter().zip(inputs.host_rows) {
         delta = checked_add(
             delta,
             resource_delta(host_current(row.as_ref()), host_final(change, row.as_ref()))?,
         )?;
     }
-    for (change, row) in ai_changes.iter().zip(ai_rows) {
+    for (change, row) in inputs.ai_changes.iter().zip(inputs.ai_rows) {
         delta = checked_add(
             delta,
             resource_delta(ai_current(row.as_ref())?, ai_final(change)?)?,
+        )?;
+    }
+    for (change, row) in inputs.proxy_changes.iter().zip(inputs.proxy_rows) {
+        delta = checked_add(
+            delta,
+            resource_delta(proxy_current(row.as_ref())?, proxy_final(change)?)?,
         )?;
     }
     require_within_limit(checked_add(current, delta)?)
@@ -69,16 +111,22 @@ async fn load_current(tx: &mut DbTransaction<'_>, account_id: Uuid) -> AppResult
     let row = sqlx::query_as::<_, (i64, i64, i64)>(
         "SELECT
              (SELECT count(*)::BIGINT FROM cloud_hosts WHERE account_id = $1)
-           + (SELECT count(*)::BIGINT FROM cloud_ai_provider_configs WHERE account_id = $1),
+           + (SELECT count(*)::BIGINT FROM cloud_ai_provider_configs WHERE account_id = $1)
+           + (SELECT count(*)::BIGINT FROM cloud_proxy_profiles WHERE account_id = $1),
              (SELECT count(*)::BIGINT FROM cloud_hosts
               WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL)
            + (SELECT count(*)::BIGINT FROM cloud_ai_provider_configs
+              WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL)
+           + (SELECT count(*)::BIGINT FROM cloud_proxy_profiles
               WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL),
              (SELECT COALESCE(sum(octet_length(ciphertext)), 0)::BIGINT
               FROM cloud_hosts
               WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL)
            + (SELECT COALESCE(sum(octet_length(ciphertext)), 0)::BIGINT
               FROM cloud_ai_provider_configs
+              WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL)
+           + (SELECT COALESCE(sum(octet_length(ciphertext)), 0)::BIGINT
+              FROM cloud_proxy_profiles
               WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL)",
     )
     .bind(account_id)
@@ -87,8 +135,10 @@ async fn load_current(tx: &mut DbTransaction<'_>, account_id: Uuid) -> AppResult
     .map_err(storage)?;
 
     let ai_rows = sqlx::query_as::<_, (Vec<u8>, Value)>(
-        "SELECT nonce, envelope_metadata
-         FROM cloud_ai_provider_configs
+        "SELECT nonce, envelope_metadata FROM cloud_ai_provider_configs
+         WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL
+         UNION ALL
+         SELECT nonce, envelope_metadata FROM cloud_proxy_profiles
          WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL",
     )
     .bind(account_id)
@@ -253,6 +303,38 @@ fn ai_final(change: &ValidatedAiChange) -> AppResult<ResourceState> {
             payload_state(payload)
         }
         AiProviderOperation::Delete => Ok(ciphertext_state(true, None)),
+    }
+}
+
+fn proxy_current(row: Option<&ProxyProfileRow>) -> AppResult<ResourceState> {
+    match row {
+        None => Ok(ResourceState::default()),
+        Some(value) if value.is_deleted => Ok(ciphertext_state(true, None)),
+        Some(value) => match (
+            value.ciphertext.as_ref(),
+            value.nonce.as_ref(),
+            value.envelope_metadata.as_ref(),
+        ) {
+            (Some(ciphertext), Some(nonce), Some(metadata)) => Ok(ResourceState {
+                identity: true,
+                encrypted: true,
+                ciphertext_bytes: ciphertext.len(),
+                auxiliary_bytes: auxiliary_size(nonce, metadata)?,
+            }),
+            _ => Err(super::invalid_stored_value()),
+        },
+    }
+}
+
+fn proxy_final(change: &ValidatedProxyProfileChange) -> AppResult<ResourceState> {
+    match change.operation {
+        ProxyProfileOperation::Insert | ProxyProfileOperation::Update => payload_state(
+            change
+                .payload
+                .as_ref()
+                .ok_or_else(super::invalid_stored_value)?,
+        ),
+        ProxyProfileOperation::Delete => Ok(ciphertext_state(true, None)),
     }
 }
 

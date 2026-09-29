@@ -1,8 +1,10 @@
 //! 分页展示真实发布版本及其状态机位置。
 //! 创建、元数据更新、状态迁移和删除分别由独立写处理器承担。
 
+mod catalog;
 pub(crate) mod create;
 pub(crate) mod delete;
+pub(crate) mod policy_apply;
 pub(crate) mod policy_publish;
 pub(crate) mod policy_save;
 pub(crate) mod update;
@@ -13,26 +15,14 @@ use axum::{
     extract::{Query, State},
     response::Html,
 };
-use cloud_domain::{AppResult, AuthenticatedSession};
-use cloud_release::Release;
+use cloud_domain::{AppResult, AuthenticatedSession, normalize_semantic_version};
 use cloud_site::{Locale, PageId, SiteView};
+use serde::Deserialize;
 
 use crate::{AdminPageState, seo::SeoHead};
 
 use super::shared::{self, AdminListQuery};
-
-struct ReleaseRow {
-    id: String,
-    version: String,
-    channel: &'static str,
-    status: &'static str,
-    title_zh: String,
-    title_en: String,
-    notes_zh: String,
-    notes_en: String,
-    published_at: String,
-    updated_at: String,
-}
+use catalog::ReleaseRow;
 
 struct PolicyTargetOption {
     id: String,
@@ -41,11 +31,22 @@ struct PolicyTargetOption {
     eligible: bool,
 }
 
+#[derive(Clone)]
+struct PolicyVersionOption {
+    version: String,
+    mode: &'static str,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct ReleasesQuery {
+    #[serde(flatten)]
+    list: AdminListQuery,
+    tab: Option<String>,
+}
+
 struct PolicyPanel {
     draft_revision: i64,
-    enabled: bool,
-    forced_versions: String,
-    sha256_enabled: bool,
+    versions: Vec<PolicyVersionOption>,
     published_revision: i64,
     targets: Vec<PolicyTargetOption>,
 }
@@ -59,6 +60,7 @@ struct ReleasesTemplate {
     csrf_token: String,
     is_en: bool,
     rows: Vec<ReleaseRow>,
+    tab: String,
     policy: Option<PolicyPanel>,
     policy_error: Option<String>,
     load_error: Option<String>,
@@ -71,12 +73,17 @@ struct ReleasesTemplate {
 pub(crate) async fn page(
     State(state): State<AdminPageState>,
     Extension(session): Extension<AuthenticatedSession>,
-    Query(query): Query<AdminListQuery>,
+    Query(query): Query<ReleasesQuery>,
 ) -> AppResult<Html<String>> {
-    let locale = query.locale();
+    let locale = query.list.locale();
+    let tab = match query.tab.as_deref() {
+        Some("upload") => "upload",
+        Some("uploaded") => "uploaded",
+        _ => "settings",
+    };
     let actor = shared::actor_from_session(&session)?;
-    let page_query = query.page_query();
-    let (policy, policy_error) = match state.download().admin_update_policy(&actor).await {
+    let page_query = query.list.page_query();
+    let (mut policy, policy_error) = match state.download().admin_update_policy(&actor).await {
         Ok(snapshot) => (Some(PolicyPanel::from(snapshot)), None),
         Err(_) => (
             None,
@@ -88,11 +95,11 @@ pub(crate) async fn page(
         ),
     };
     let (rows, total, load_error) = match state.release().list_releases(&actor, page_query).await {
-        Ok(page) => (
-            page.items.into_iter().map(ReleaseRow::from).collect(),
-            page.total,
-            None,
-        ),
+        Ok(page) => {
+            let total = page.total;
+            let rows = catalog::load_rows(&state, &actor, page.items).await;
+            (rows, total, None)
+        }
         Err(_) => (
             Vec::new(),
             0,
@@ -103,9 +110,13 @@ pub(crate) async fn page(
             }),
         ),
     };
-    let previous_href = (page_query.page > 1).then(|| release_href(page_query.page - 1, locale));
+    if let Some(policy) = policy.as_mut() {
+        policy.include_releases(&rows);
+    }
+    let previous_href =
+        (page_query.page > 1).then(|| release_href(page_query.page - 1, locale, tab));
     let next_href = (i64::from(page_query.page) * i64::from(page_query.size) < total)
-        .then(|| release_href(page_query.page + 1, locale));
+        .then(|| release_href(page_query.page + 1, locale, tab));
     let parts = shared::page_parts(PageId::AdminReleases, locale, &session);
     shared::render(&ReleasesTemplate {
         view: parts.view,
@@ -114,6 +125,7 @@ pub(crate) async fn page(
         csrf_token: parts.csrf_token,
         is_en: parts.is_en,
         rows,
+        tab: tab.into(),
         policy,
         policy_error,
         load_error,
@@ -126,19 +138,41 @@ pub(crate) async fn page(
 
 impl From<cloud_download::AdminUpdatePolicySnapshot> for PolicyPanel {
     fn from(value: cloud_download::AdminUpdatePolicySnapshot) -> Self {
-        let selected_id = value.draft.target_release_id;
+        let selected_id = value.published.target_release_id;
+        let mut versions = value
+            .target_releases
+            .iter()
+            .map(|target| target.version.clone())
+            .chain(value.published.forced_versions.iter().cloned())
+            .chain(value.published.disabled_versions.iter().cloned())
+            .chain(value.published.no_update_versions.iter().cloned())
+            .collect::<Vec<_>>();
+        versions.sort();
+        versions.dedup();
         Self {
             draft_revision: value.draft.revision,
-            enabled: value.draft.enabled,
-            forced_versions: value.draft.forced_versions.join("\n"),
-            sha256_enabled: value.draft.sha256_enabled,
+            versions: versions
+                .into_iter()
+                .map(|version| {
+                    let mode = if value.published.disabled_versions.contains(&version) {
+                        "disabled"
+                    } else if value.published.forced_versions.contains(&version) {
+                        "forced"
+                    } else if value.published.no_update_versions.contains(&version) {
+                        "no_update"
+                    } else {
+                        "optional"
+                    };
+                    PolicyVersionOption { version, mode }
+                })
+                .collect(),
             published_revision: value.published.revision,
             targets: value
                 .target_releases
                 .into_iter()
                 .map(|target| PolicyTargetOption {
                     id: target.id.to_string(),
-                    label: format!("{} · {}", target.version, target.readiness),
+                    label: target.version,
                     selected: selected_id == Some(target.id),
                     eligible: target.eligible,
                 })
@@ -147,64 +181,34 @@ impl From<cloud_download::AdminUpdatePolicySnapshot> for PolicyPanel {
     }
 }
 
-impl From<Release> for ReleaseRow {
-    fn from(value: Release) -> Self {
-        Self {
-            id: value.id.to_string(),
-            version: value.version,
-            channel: value.channel.as_str(),
-            status: value.status.as_str(),
-            title_zh: value.title_zh,
-            title_en: value.title_en,
-            notes_zh: value.notes_zh,
-            notes_en: value.notes_en,
-            published_at: value
-                .published_at
-                .map_or_else(|| "—".to_owned(), |at| at.to_rfc3339()),
-            updated_at: value.updated_at.to_rfc3339(),
+impl PolicyPanel {
+    fn include_releases(&mut self, rows: &[ReleaseRow]) {
+        for row in rows {
+            if !self
+                .versions
+                .iter()
+                .any(|version| version.version == row.version)
+            {
+                self.versions.push(PolicyVersionOption {
+                    version: row.version.clone(),
+                    mode: "optional",
+                });
+            }
         }
+        self.versions.sort_by(|left, right| {
+            match (
+                normalize_semantic_version(&left.version),
+                normalize_semantic_version(&right.version),
+            ) {
+                (Some((_, left)), Some((_, right))) => right.cmp(&left),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => right.version.cmp(&left.version),
+            }
+        });
     }
 }
 
-fn release_href(page: u32, locale: Locale) -> String {
-    shared::localized_admin_path(&format!("/admin/releases?page={page}"), locale)
-}
-
-#[cfg(test)]
-mod tests {
-    const TEMPLATE: &str = include_str!("../../../../templates/admin-releases.html");
-
-    #[test]
-    fn update_policy_form_keeps_exactly_the_three_business_choices() {
-        for field in [
-            "name=\"forced_versions\"",
-            "name=\"target_release_id\"",
-            "name=\"sha256_enabled\"",
-            "value=\"publish_update_policy\"",
-        ] {
-            assert!(TEMPLATE.contains(field), "策略后台缺少字段 {field}");
-        }
-        assert!(!TEMPLATE.contains("name=\"download_url\""));
-        assert!(!TEMPLATE.contains("name=\"updater_signature\""));
-    }
-
-    #[test]
-    fn release_page_keeps_one_simple_flow_and_hides_advanced_details() {
-        for marker in [
-            "class=\"release-steps\"",
-            "class=\"release-create-panel\"",
-            "class=\"release-advanced\"",
-            "class=\"release-details\"",
-            "class=\"release-danger\"",
-            "2. 上传三个文件",
-            "3. 发布版本",
-        ] {
-            assert!(TEMPLATE.contains(marker), "发布页缺少渐进式入口 {marker}");
-        }
-        assert_eq!(TEMPLATE.matches("hx-post=\"/admin/releases\"").count(), 1);
-        assert!(TEMPLATE.contains("href=\"/admin/assets?release_id={{ row.id }}"));
-        assert!(TEMPLATE.find("创建版本").unwrap() < TEMPLATE.find("上传三个文件").unwrap());
-        assert!(TEMPLATE.find("上传三个文件").unwrap() < TEMPLATE.find("发布并选择").unwrap());
-        assert!(!TEMPLATE.contains("上传四个文件"));
-    }
+fn release_href(page: u32, locale: Locale, tab: &str) -> String {
+    shared::localized_admin_path(&format!("/admin/releases?tab={tab}&page={page}"), locale)
 }

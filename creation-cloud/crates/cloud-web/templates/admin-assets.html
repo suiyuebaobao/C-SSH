@@ -1,17 +1,28 @@
 {% extends "admin.html" %}
 
+{% block admin_styles %}<link rel="stylesheet" href="/static/css/admin-releases.css?v=20260908-three-tabs">{% endblock %}
+
 {% block admin_content %}
-<section class="admin-section" aria-labelledby="new-download-heading">
+<div class="version-page">
+<nav class="version-tabs" aria-label="{% if is_en %}Client version sections{% else %}客户端版本分区{% endif %}">
+  <a href="/admin/releases{% if is_en %}?lang=en{% endif %}">{% if is_en %}Update settings{% else %}更新设置{% endif %}</a>
+  <a href="/admin/releases?tab=upload{% if is_en %}&amp;lang=en{% endif %}" aria-current="page">{% if is_en %}Upload client{% else %}上传客户端{% endif %}</a>
+  <a href="/admin/releases?tab=uploaded{% if is_en %}&amp;lang=en{% endif %}">{% if is_en %}Uploaded{% else %}已上传{% endif %}</a>
+</nav>
+<section class="admin-section version-file-upload" aria-labelledby="new-download-heading">
   <div class="admin-section-heading">
     <div>
-      <h2 id="new-download-heading">{% if is_en %}Add download{% else %}新增下载{% endif %}</h2>
-      <p>{% if is_en %}Choose a local client file or one HTTPS link.{% else %}选择本地客户端文件，或填写一个 HTTPS 外链。{% endif %}</p>
+      <h2 id="new-download-heading">{% if is_en %}Upload installation files{% else %}上传安装文件{% endif %}</h2>
+      {% if let Some(label) = selected_release_label %}<p>{% if is_en %}Selected version:{% else %}当前版本：{% endif %} {{ label }}</p>{% else %}<p>{% if is_en %}Select a draft version and one formal program type.{% else %}选择一个未公开版本和一种正式程序类型。{% endif %}</p>{% endif %}
     </div>
+    <a class="text-link" href="/admin/releases?tab=uploaded{% if is_en %}&amp;lang=en{% endif %}">{% if is_en %}View uploaded versions →{% else %}查看已上传版本 →{% endif %}</a>
   </div>
   {% if release_options_error %}
   <div class="admin-feedback" data-tone="error" role="alert"><p>{% if is_en %}Release choices are temporarily unavailable.{% else %}版本选项暂时无法读取。{% endif %}</p></div>
-  {% else if release_options.is_empty() %}
-  <div class="admin-empty"><strong>{% if is_en %}No release available{% else %}暂无可选版本{% endif %}</strong><p>{% if is_en %}Create a release first.{% else %}请先创建版本。{% endif %}</p></div>
+  {% else if selected_release_label.is_some() && !selected_release_mutable %}
+  <div class="admin-feedback" role="status"><p>{% if is_en %}This version is published or historical. Its files are read-only.{% else %}该版本已公开或属于历史记录，程序文件只读。{% endif %}</p></div>
+  {% else if !has_mutable_release_options %}
+  <div class="admin-empty"><strong>{% if is_en %}No unpublished version{% else %}暂无未公开版本{% endif %}</strong><p><a href="/admin/releases?tab=upload{% if is_en %}&amp;lang=en{% endif %}">{% if is_en %}Create a version first.{% else %}请先创建版本。{% endif %}</a></p></div>
   {% else %}
   <form
     class="admin-form-grid"
@@ -26,29 +37,24 @@
   >
     {% if is_en %}<input type="hidden" name="lang" value="en">{% endif %}
     <label class="admin-field">{% if is_en %}Release{% else %}版本{% endif %}
-      <select name="release_id" required>{% for release in release_options %}<option value="{{ release.id }}">{{ release.label }}</option>{% endfor %}</select>
+      <select name="release_id" required>{% for release in release_options %}{% if release.mutable || release.selected %}<option value="{{ release.id }}"{% if release.selected %} selected{% endif %}{% if !release.mutable %} disabled{% endif %}>{{ release.label }}</option>{% endif %}{% endfor %}</select>
     </label>
-    <label class="admin-field">{% if is_en %}Platform{% else %}平台{% endif %}
+    <label class="admin-field">{% if is_en %}Program platform{% else %}程序平台{% endif %}
       <select name="platform" data-download-platform required>
         <option value="windows">Windows</option>
-        <option value="linux">Linux</option>
         <option value="android">Android</option>
-        <option value="macos" disabled>macOS · {% if is_en %}planned{% else %}尚未开发{% endif %}</option>
-        <option value="ios" disabled>iOS · {% if is_en %}planned{% else %}尚未开发{% endif %}</option>
       </select>
     </label>
     <label class="admin-field">{% if is_en %}Architecture{% else %}架构{% endif %}
-      <select name="architecture" required>
-        <option value="x86_64">x86_64</option>
-        <option value="aarch64">aarch64</option>
+      <select name="architecture" data-download-architecture required>
+        <option value="x86_64" data-platform="windows">x86_64</option>
+        <option value="aarch64" data-platform="android">arm64</option>
       </select>
     </label>
     <label class="admin-field">{% if is_en %}Package{% else %}包类型{% endif %}
       <select name="package_kind" data-download-package required>
         <option value="exe" data-platform="windows">EXE</option>
         <option value="zip" data-platform="windows">ZIP</option>
-        <option value="appimage" data-platform="linux">AppImage</option>
-        <option value="deb" data-platform="linux">DEB</option>
         <option value="apk" data-platform="android">APK</option>
       </select>
     </label>
@@ -79,7 +85,7 @@
         <p><small>{% if is_en %}If the selected release already has the same platform, architecture and package, these fields are not needed.{% else %}所选版本已有相同平台、架构和包类型时，无需填写这些字段。{% endif %}</small></p>
       </details>
     </div>
-    <button class="button button-primary" type="submit">{% if is_en %}Add download{% else %}新增下载{% endif %}</button>
+    <button class="button button-primary" type="submit">{% if is_en %}Upload this file{% else %}上传这个文件{% endif %}</button>
   </form>
   {% endif %}
 </section>
@@ -197,4 +203,5 @@
   </nav>
   {% endif %}
 </section>
+</div>
 {% endblock %}

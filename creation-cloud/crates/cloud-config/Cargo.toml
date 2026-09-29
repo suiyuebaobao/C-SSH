@@ -7,7 +7,9 @@ rust-version.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+hex.workspace = true
 url.workspace = true
+uuid.workspace = true
 
 [lints]
 workspace = true

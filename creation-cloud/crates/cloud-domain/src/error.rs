@@ -40,6 +40,8 @@ pub enum AppError {
     #[error("{0}")]
     SyncStateChanged(String),
     #[error("{0}")]
+    SyncContractUpgradeRequired(String),
+    #[error("{0}")]
     SyncCapacityExceeded(String),
     #[error("{0}")]
     RateLimited(String),
@@ -104,6 +106,10 @@ impl IntoResponse for AppError {
             Self::Conflict(_) => (StatusCode::CONFLICT, "conflict"),
             Self::SyncResyncRequired { .. } => (StatusCode::CONFLICT, "sync_resync_required"),
             Self::SyncStateChanged(_) => (StatusCode::CONFLICT, "sync_state_changed"),
+            Self::SyncContractUpgradeRequired(_) => (
+                StatusCode::UPGRADE_REQUIRED,
+                "sync_contract_upgrade_required",
+            ),
             Self::SyncCapacityExceeded(_) => (StatusCode::CONFLICT, "sync_capacity_exceeded"),
             Self::RateLimited(_) | Self::RateLimitedAfter { .. } => {
                 (StatusCode::TOO_MANY_REQUESTS, "rate_limited")
@@ -227,6 +233,19 @@ mod tests {
         let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
         assert_eq!(value["code"], "sync_state_changed");
         assert_eq!(value["message_key"], "sync_state_changed");
+    }
+
+    #[tokio::test]
+    async fn sync_contract_upgrade_has_a_stable_boundary() {
+        let response = AppError::SyncContractUpgradeRequired("客户端同步合同需要升级".to_owned())
+            .into_response();
+        assert_eq!(response.status(), StatusCode::UPGRADE_REQUIRED);
+        let body = to_bytes(response.into_body(), 4096)
+            .await
+            .expect("错误正文应可读取");
+        let value: serde_json::Value = serde_json::from_slice(&body).expect("正文应为 JSON");
+        assert_eq!(value["code"], "sync_contract_upgrade_required");
+        assert_eq!(value["message_key"], "sync_contract_upgrade_required");
     }
 
     #[tokio::test]

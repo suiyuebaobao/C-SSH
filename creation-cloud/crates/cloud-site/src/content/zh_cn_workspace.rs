@@ -197,8 +197,8 @@ pub(super) fn admin_releases() -> PageContent {
         PageId::AdminReleases,
         "版本管理｜Creation Cloud",
         "发布控制",
-        "让版本状态可验证地前进",
-        "创建版本、维护中英文说明，并按草稿、校验、发布、撤销或隐藏状态迁移。",
+        "客户端版本",
+        "上传客户端程序，设置各版本的更新与使用方式。",
     )
 }
 
@@ -207,8 +207,8 @@ pub(super) fn admin_assets() -> PageContent {
         PageId::AdminAssets,
         "资产管理｜Creation Cloud",
         "交付资产",
-        "文件身份、来源和校验保持一致",
-        "登记平台资产，完成隔离上传与 SHA256 核验，再管理本站和 HTTPS 外部来源。",
+        "客户端版本",
+        "上传客户端程序，设置各版本的更新与使用方式。",
     )
 }
 
@@ -321,13 +321,27 @@ fn admin_page(
 fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
         nav("用户管理", PageId::AdminUsers, current),
-        nav("首页内容", PageId::AdminSite, current),
-        nav("客户端更新", PageId::AdminReleases, current),
-        nav("下载", PageId::AdminAssets, current),
+        nav(
+            "网站内容",
+            PageId::AdminSite,
+            if current == PageId::AdminSeo {
+                PageId::AdminSite
+            } else {
+                current
+            },
+        ),
+        nav(
+            "客户端版本",
+            PageId::AdminReleases,
+            if current == PageId::AdminAssets {
+                PageId::AdminReleases
+            } else {
+                current
+            },
+        ),
         nav("模型", PageId::AdminModels, current),
         nav("公告", PageId::AdminAnnouncements, current),
         nav("问题反馈", PageId::AdminFeedback, current),
-        nav("SEO", PageId::AdminSeo, current),
         nav("系统设置", PageId::AdminSettings, current),
         nav("操作记录", PageId::AdminAudit, current),
     ]

@@ -9,12 +9,14 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::{
-    AdminSyncRecord, ChangeDataProtectionRequest, DataProtectionMutationResponse,
-    DataProtectionView, HostView, LegacyPullRequest, LegacyPullResponse,
-    MigrateDataProtectionRequest, ProtectionResetChallengeRequest,
+    AdminSyncRecord, CURRENT_SYNC_CONTRACT_VERSION, ChangeDataProtectionRequest,
+    DataProtectionMigrationReceipt, DataProtectionMutationResponse, DataProtectionView,
+    HostMetadataMigrationPreviewRequest, HostMetadataMigrationPreviewResponse,
+    HostMetadataMigrationReceipt, HostMetadataMigrationRequest, HostView, LegacyPullRequest,
+    LegacyPullResponse, MigrateDataProtectionRequest, ProtectionResetChallengeRequest,
     ProtectionResetChallengeResponse, ProtectionResetMailer, PullAckRequest, PullRequest,
-    PullResponse, PushOutcome, PushRequest, RekeySyncRequest, RekeySyncResponse, ResetSyncRequest,
-    ResetSyncResponse, SetupDataProtectionRequest, SyncStateView,
+    PullResponse, PushOutcome, PushReceipt, PushRequest, RekeySyncRequest, RekeySyncResponse,
+    ResetSyncRequest, ResetSyncResponse, SetupDataProtectionRequest, SyncStateView,
     VerifyProtectionResetChallengeRequest, VerifyProtectionResetChallengeResponse,
     actor::{AccountActor, DeviceActor},
     protection_mailer::UnavailableProtectionResetMailer,
@@ -92,8 +94,37 @@ impl Service {
     ) -> AppResult<PushOutcome> {
         let actor = DeviceActor::from_session(session)?;
         let changes = validation::push(&request)?;
-        let request_hash = fingerprint("encrypted-sync-push-v2", &request)?;
-        repository::push(&self.pool, actor, &request, &changes, &request_hash).await
+        let (request_hash, request_hash_scheme) =
+            if request.sync_contract_version == CURRENT_SYNC_CONTRACT_VERSION {
+                (
+                    crate::fingerprint::canonical(&request)?,
+                    "canonical_json_v1",
+                )
+            } else {
+                (
+                    fingerprint("encrypted-sync-push-v2", &request)?,
+                    "legacy_server_struct_v1",
+                )
+            };
+        repository::push(
+            &self.pool,
+            actor,
+            &request,
+            &changes,
+            &request_hash,
+            request_hash_scheme,
+        )
+        .await
+    }
+
+    pub async fn push_receipt(
+        &self,
+        session: &AuthenticatedSession,
+        mutation_id: Uuid,
+    ) -> AppResult<PushReceipt> {
+        validation::host_id(mutation_id)?;
+        let actor = DeviceActor::from_session(session)?;
+        repository::get_push_receipt(&self.pool, actor, mutation_id).await
     }
 
     pub async fn pull(
@@ -113,6 +144,40 @@ impl Service {
         let actor = DeviceActor::from_session(session)?;
         validation::ack(&request)?;
         repository::ack(&self.pool, actor, &request).await
+    }
+
+    pub async fn preview_host_metadata_migration(
+        &self,
+        session: &AuthenticatedSession,
+        request: HostMetadataMigrationPreviewRequest,
+    ) -> AppResult<HostMetadataMigrationPreviewResponse> {
+        let actor = DeviceActor::from_session(session)?;
+        repository::preview_host_metadata_migration(
+            &self.pool,
+            actor,
+            validation::host_metadata_preview(request)?,
+        )
+        .await
+    }
+
+    pub async fn migrate_host_metadata(
+        &self,
+        session: &AuthenticatedSession,
+        request: HostMetadataMigrationRequest,
+    ) -> AppResult<HostMetadataMigrationReceipt> {
+        let actor = DeviceActor::from_session(session)?;
+        let validated = validation::host_metadata_migrate(&request)?;
+        repository::migrate_host_metadata(&self.pool, actor, &request, &validated).await
+    }
+
+    pub async fn host_metadata_migration_receipt(
+        &self,
+        session: &AuthenticatedSession,
+        mutation_id: Uuid,
+    ) -> AppResult<HostMetadataMigrationReceipt> {
+        validation::host_id(mutation_id)?;
+        let actor = DeviceActor::from_session(session)?;
+        repository::get_host_metadata_migration_receipt(&self.pool, actor, mutation_id).await
     }
 
     pub async fn sync_state(&self, session: &AuthenticatedSession) -> AppResult<SyncStateView> {
@@ -148,7 +213,7 @@ impl Service {
     ) -> AppResult<DataProtectionMutationResponse> {
         let actor = DeviceActor::from_session(session)?;
         let (envelope, resources) = validation::migrate_protection(&request)?;
-        let request_hash = fingerprint("data-protection-migrate-v1", &request)?;
+        let request_hash = crate::fingerprint::canonical(&request)?;
         repository::migrate_protection(
             &self.pool,
             actor,
@@ -158,6 +223,16 @@ impl Service {
             &request_hash,
         )
         .await
+    }
+
+    pub async fn data_protection_migration_receipt(
+        &self,
+        session: &AuthenticatedSession,
+        mutation_id: Uuid,
+    ) -> AppResult<DataProtectionMigrationReceipt> {
+        validation::host_id(mutation_id)?;
+        let actor = DeviceActor::from_session(session)?;
+        repository::get_protection_migration_receipt(&self.pool, actor, mutation_id).await
     }
 
     pub async fn change_data_protection(
@@ -304,6 +379,18 @@ impl Service {
         repository::list_admin_sync_records(&self.pool, account_id, page).await
     }
 
+    pub async fn admin_delete_proxy_profile(
+        &self,
+        actor: &AdminActor,
+        account_id: Uuid,
+        resource_id: Uuid,
+    ) -> AppResult<()> {
+        require_admin(actor)?;
+        validate_account_id(account_id)?;
+        validation::host_id(resource_id)?;
+        repository::delete_admin_proxy_profile(&self.pool, actor, account_id, resource_id).await
+    }
+
     pub async fn admin_delete_sync_record(
         &self,
         actor: &AdminActor,
@@ -377,6 +464,7 @@ mod tests {
             status: HostStatus::Active,
         };
         let request = |ciphertext| PushRequest {
+            sync_contract_version: crate::CURRENT_SYNC_CONTRACT_VERSION,
             sync_generation: 1,
             protection_epoch: 1,
             protection_revision: 1,
@@ -385,11 +473,12 @@ mod tests {
             host_changes: vec![HostChange {
                 host_id,
                 operation: HostOperation::Update,
-                metadata: Some(metadata.clone()),
+                metadata: Some(Some(metadata.clone())),
                 ciphertext,
                 expected_revision: Some(1),
             }],
             ai_changes: vec![],
+            proxy_profile_changes: vec![],
         };
         let missing =
             fingerprint("encrypted-sync-push-v2", &request(None)).expect("missing fingerprint");

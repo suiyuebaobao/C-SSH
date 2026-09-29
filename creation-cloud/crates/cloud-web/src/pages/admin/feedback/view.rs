@@ -10,7 +10,7 @@ pub(super) struct FeedbackRow {
     pub(super) id: String,
     pub(super) category: &'static str,
     pub(super) platform: &'static str,
-    pub(super) status: &'static str,
+    pub(super) status_label: &'static str,
     pub(super) status_tone: &'static str,
     pub(super) redacted: bool,
     pub(super) created_at: String,
@@ -26,7 +26,7 @@ pub(super) struct FeedbackDetailView {
     pub(super) app_version: String,
     pub(super) title: String,
     pub(super) description: String,
-    pub(super) status: &'static str,
+    pub(super) status_label: &'static str,
     pub(super) version: i64,
     pub(super) redacted: bool,
     pub(super) redaction_reason: String,
@@ -56,7 +56,7 @@ impl FeedbackRow {
             id: value.id.to_string(),
             category: value.category.as_str(),
             platform: value.platform.as_str(),
-            status: value.status.as_str(),
+            status_label: status_label(value.status, locale),
             status_tone: status_tone(value.status),
             redacted: value.redacted,
             created_at: value.created_at.to_rfc3339(),
@@ -71,6 +71,7 @@ impl FeedbackDetailView {
         page: u32,
         size: u32,
         status_filter: Option<FeedbackStatus>,
+        locale: Locale,
     ) -> Self {
         Self {
             id: value.id.to_string(),
@@ -81,7 +82,7 @@ impl FeedbackDetailView {
             app_version: value.app_version.unwrap_or_else(|| "—".to_owned()),
             title: value.title,
             description: value.description,
-            status: value.status.as_str(),
+            status_label: status_label(value.status, locale),
             version: value.version,
             redacted: value.redacted,
             redaction_reason: value.redaction_reason.unwrap_or_default(),
@@ -101,6 +102,21 @@ const fn status_tone(status: FeedbackStatus) -> &'static str {
         FeedbackStatus::Triaged | FeedbackStatus::InProgress => "",
         FeedbackStatus::Resolved => "success",
         FeedbackStatus::Closed => "danger",
+    }
+}
+
+const fn status_label(status: FeedbackStatus, locale: Locale) -> &'static str {
+    match (status, locale) {
+        (FeedbackStatus::New, Locale::ZhCn) => "新反馈",
+        (FeedbackStatus::Triaged, Locale::ZhCn) => "已分诊",
+        (FeedbackStatus::InProgress, Locale::ZhCn) => "处理中",
+        (FeedbackStatus::Resolved, Locale::ZhCn) => "已解决",
+        (FeedbackStatus::Closed, Locale::ZhCn) => "已关闭",
+        (FeedbackStatus::New, Locale::En) => "New",
+        (FeedbackStatus::Triaged, Locale::En) => "Triaged",
+        (FeedbackStatus::InProgress, Locale::En) => "In progress",
+        (FeedbackStatus::Resolved, Locale::En) => "Resolved",
+        (FeedbackStatus::Closed, Locale::En) => "Closed",
     }
 }
 

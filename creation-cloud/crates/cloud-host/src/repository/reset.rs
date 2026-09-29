@@ -15,13 +15,15 @@ use super::protection::{
 };
 use super::{
     DbTransaction, SyncState, begin, commit, lock_sync_state, require_active_device,
-    require_base_revision, require_protection_version, require_sync_generation, storage,
+    require_base_revision, require_protection_version, require_sync_contract,
+    require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
 struct ResetCounts {
     removed_hosts: i64,
     removed_ai_providers: i64,
+    removed_proxy_profiles: i64,
 }
 
 pub(crate) async fn reset(
@@ -47,6 +49,7 @@ pub(crate) async fn reset(
         ));
     }
     require_sync_generation(state, request.sync_generation)?;
+    require_sync_contract(state, request.sync_contract_version)?;
     require_protection_version(state, request.expected_epoch, request.expected_revision)?;
     require_base_revision(state, request.current_revision)?;
     authorize_reset(
@@ -84,6 +87,7 @@ pub(crate) async fn reset(
         DataProtectionOperation::Reset,
         state,
         request_hash,
+        "data_protection_server_struct_v1",
         result_generation,
         result_epoch,
         result_revision,
@@ -103,7 +107,7 @@ pub(crate) async fn reset(
         result_revision,
         0,
         0,
-        counts.removed_hosts + counts.removed_ai_providers,
+        counts.removed_hosts + counts.removed_ai_providers + counts.removed_proxy_profiles,
     )
     .await?;
     record_account_event(
@@ -192,6 +196,7 @@ fn validate_replay(
         || prior.request_revision != request.expected_revision
         || prior.request_current_revision != request.current_revision
         || prior.request_hash.as_slice() != request_hash
+        || prior.request_hash_scheme != "data_protection_server_struct_v1"
     {
         return Err(AppError::Conflict(
             "mutation_id was already used by a different reset request".to_owned(),
@@ -216,7 +221,9 @@ async fn count_rows(tx: &mut DbTransaction<'_>, account_id: Uuid) -> AppResult<R
              (SELECT count(*)::BIGINT FROM cloud_hosts WHERE account_id=$1)
                  AS removed_hosts,
              (SELECT count(*)::BIGINT FROM cloud_ai_provider_configs WHERE account_id=$1)
-                 AS removed_ai_providers",
+                 AS removed_ai_providers,
+             (SELECT count(*)::BIGINT FROM cloud_proxy_profiles WHERE account_id=$1)
+                 AS removed_proxy_profiles",
     )
     .bind(account_id)
     .fetch_one(&mut **tx)
@@ -234,9 +241,12 @@ async fn purge_account_data(tx: &mut DbTransaction<'_>, account_id: Uuid) -> App
         "DELETE FROM cloud_sync_reset_mutations WHERE account_id=$1",
         "DELETE FROM cloud_sync_push_mutations WHERE account_id=$1",
         "DELETE FROM cloud_data_protection_envelopes WHERE account_id=$1",
-        "DELETE FROM cloud_data_protection_mutations WHERE account_id=$1",
+        "DELETE FROM cloud_data_protection_mutations
+         WHERE account_id=$1 AND operation <> 'migrate'",
         "DELETE FROM cloud_ai_provider_config_versions WHERE account_id=$1",
         "DELETE FROM cloud_ai_provider_configs WHERE account_id=$1",
+        "DELETE FROM cloud_proxy_profile_versions WHERE account_id=$1",
+        "DELETE FROM cloud_proxy_profiles WHERE account_id=$1",
         "DELETE FROM cloud_host_versions WHERE account_id=$1",
         "DELETE FROM cloud_hosts WHERE account_id=$1",
         "DELETE FROM sync_device_checkpoints WHERE account_id=$1",

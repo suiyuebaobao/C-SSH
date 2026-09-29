@@ -46,6 +46,8 @@ pub(crate) async fn handle(
         expected_revision: form.expected_revision,
         enabled,
         forced_versions,
+        disabled_versions: None,
+        no_update_versions: None,
         target_release_id,
         sha256_enabled: form.sha256_enabled.as_deref() == Some("true"),
     };

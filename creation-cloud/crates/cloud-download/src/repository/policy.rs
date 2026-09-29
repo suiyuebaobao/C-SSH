@@ -14,13 +14,15 @@ pub(crate) struct PolicyAudit<'a> {
     pub revision: i64,
     pub enabled: bool,
     pub forced_count: usize,
+    pub disabled_count: usize,
+    pub no_update_count: usize,
     pub target_release_id: Option<Uuid>,
     pub sha256_enabled: bool,
 }
 
 pub(crate) async fn draft(pool: &PgPool) -> AppResult<UpdatePolicyDraftRow> {
     sqlx::query_as(
-        "SELECT revision, enabled, forced_versions, target_release_id, sha256_enabled, updated_at \
+        "SELECT revision, enabled, forced_versions, disabled_versions, no_update_versions, target_release_id, sha256_enabled, updated_at \
          FROM update_policy_draft WHERE singleton = TRUE",
     )
     .fetch_one(pool)
@@ -32,7 +34,7 @@ pub(crate) async fn lock_draft(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> AppResult<UpdatePolicyDraftRow> {
     sqlx::query_as(
-        "SELECT revision, enabled, forced_versions, target_release_id, sha256_enabled, updated_at \
+        "SELECT revision, enabled, forced_versions, disabled_versions, no_update_versions, target_release_id, sha256_enabled, updated_at \
          FROM update_policy_draft WHERE singleton = TRUE FOR UPDATE",
     )
     .fetch_one(&mut **transaction)
@@ -42,7 +44,8 @@ pub(crate) async fn lock_draft(
 
 pub(crate) async fn current(pool: &PgPool) -> AppResult<Option<PublishedUpdatePolicyRow>> {
     sqlx::query_as(
-        "SELECT publication.revision, publication.enabled, publication.forced_versions, \
+        "SELECT publication.revision, publication.enabled, publication.forced_versions, publication.disabled_versions, \
+                publication.no_update_versions, \
                 publication.target_release_id, release.version AS target_version, \
                 publication.sha256_enabled, publication.published_at, publication.published_by \
          FROM update_policy_publication_state AS state \
@@ -86,25 +89,26 @@ pub(crate) async fn save_draft(
     transaction: &mut Transaction<'_, Postgres>,
     actor_id: Uuid,
     expected_revision: i64,
-    enabled: bool,
-    forced_versions: &[String],
-    target_release_id: Option<Uuid>,
-    sha256_enabled: bool,
+    input: &crate::SaveUpdatePolicyDraftInput,
+    disabled_versions: &[String],
+    no_update_versions: &[String],
 ) -> AppResult<UpdatePolicyDraftRow> {
     sqlx::query_as(
         "UPDATE update_policy_draft SET revision = revision + 1, enabled = $3, \
             forced_versions = $4, target_release_id = $5, sha256_enabled = $6, \
-            updated_by = $2, updated_at = now() \
+            disabled_versions = $7, no_update_versions = $8, updated_by = $2, updated_at = now() \
          WHERE singleton = TRUE AND revision = $1 \
-         RETURNING revision, enabled, forced_versions, target_release_id, \
+         RETURNING revision, enabled, forced_versions, disabled_versions, no_update_versions, target_release_id, \
                    sha256_enabled, updated_at",
     )
     .bind(expected_revision)
     .bind(actor_id)
-    .bind(enabled)
-    .bind(forced_versions)
-    .bind(target_release_id)
-    .bind(sha256_enabled)
+    .bind(input.enabled)
+    .bind(&input.forced_versions)
+    .bind(input.target_release_id)
+    .bind(input.sha256_enabled)
+    .bind(disabled_versions)
+    .bind(no_update_versions)
     .fetch_optional(&mut **transaction)
     .await
     .map_err(write_error)?
@@ -222,9 +226,9 @@ pub(crate) async fn publish(
     };
     let row = sqlx::query_as(
         "INSERT INTO update_policy_publications \
-         (revision, enabled, forced_versions, target_release_id, sha256_enabled, published_by) \
-         VALUES ($1, $2, $3, $4, $5, $6) \
-         RETURNING revision, enabled, forced_versions, target_release_id, \
+         (revision, enabled, forced_versions, disabled_versions, no_update_versions, target_release_id, sha256_enabled, published_by) \
+         VALUES ($1, $2, $3, $8, $9, $4, $5, $6) \
+         RETURNING revision, enabled, forced_versions, disabled_versions, no_update_versions, target_release_id, \
                    $7::text AS target_version, sha256_enabled, published_at, published_by",
     )
     .bind(revision)
@@ -234,6 +238,8 @@ pub(crate) async fn publish(
     .bind(draft.sha256_enabled)
     .bind(actor_id)
     .bind(target_version)
+    .bind(&draft.disabled_versions)
+    .bind(&draft.no_update_versions)
     .fetch_one(&mut **transaction)
     .await
     .map_err(write_error)?;
@@ -259,6 +265,8 @@ pub(crate) async fn audit(
         "revision": audit.revision,
         "enabled": audit.enabled,
         "forced_version_count": audit.forced_count,
+        "disabled_version_count": audit.disabled_count,
+        "no_update_version_count": audit.no_update_count,
         "target_release_id": audit.target_release_id,
         "sha256_enabled": audit.sha256_enabled
     });

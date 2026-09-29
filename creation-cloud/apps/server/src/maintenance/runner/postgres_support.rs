@@ -110,6 +110,7 @@ fn test_config(database_url: &str, schema: &str) -> CloudConfig {
         session_ttl: Duration::from_secs(3600),
         environment: "test".to_owned(),
         maintenance: cloud_config::MaintenanceConfig::default(),
+        proxy: cloud_config::ProxyConfig::default(),
         smtp: None,
     }
 }

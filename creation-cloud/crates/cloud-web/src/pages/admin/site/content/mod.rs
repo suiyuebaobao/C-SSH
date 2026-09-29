@@ -34,6 +34,7 @@ pub(crate) async fn create(
     Form(form): Form<CreateContentForm>,
 ) -> Response {
     let locale = shared::locale(form.lang.as_deref());
+    let return_path = super::content_return_path(form.document_key, form.content_locale);
     let actor = match shared::actor_from_session(&session) {
         Ok(actor) => actor,
         Err(error) => return shared::action_error(locale, error),
@@ -44,7 +45,7 @@ pub(crate) async fn create(
         content: None,
     };
     match state.site_content().create_draft(&actor, input).await {
-        Ok(_) => shared::action_success(&headers, "/admin/site", locale),
+        Ok(_) => shared::action_success(&headers, &return_path, locale),
         Err(error) => shared::action_error(locale, error),
     }
 }
@@ -64,8 +65,9 @@ pub(crate) async fn update(
     let result = async {
         let expected_revision = forms::expected_revision(&fields)?;
         let current = state.site_content().get(&actor, content_id).await?;
+        let return_path = super::content_return_path(current.document_key, current.locale);
         let content = forms::apply(&current.content, &fields)?;
-        state
+        let updated = state
             .site_content()
             .update_draft(
                 &actor,
@@ -75,11 +77,12 @@ pub(crate) async fn update(
                     content,
                 },
             )
-            .await
+            .await?;
+        Ok::<_, AppError>((updated, return_path))
     }
     .await;
     match result {
-        Ok(_) => shared::action_success(&headers, "/admin/site", locale),
+        Ok((_, return_path)) => shared::action_success(&headers, &return_path, locale),
         Err(error) => shared::action_error(locale, error),
     }
 }
@@ -211,6 +214,12 @@ async fn transition(
     transition: Transition,
 ) -> Response {
     let locale = shared::locale(form.lang.as_deref());
+    let return_path = match (form.document_key, form.content_locale) {
+        (Some(document_key), Some(content_locale)) => {
+            super::content_return_path(document_key, content_locale)
+        }
+        _ => "/admin/site".to_owned(),
+    };
     let actor = match shared::actor_from_session(&session) {
         Ok(actor) => actor,
         Err(error) => return shared::action_error(locale, error),
@@ -242,7 +251,7 @@ async fn transition(
         }
     };
     match result {
-        Ok(()) => shared::action_success(&headers, "/admin/site", locale),
+        Ok(()) => shared::action_success(&headers, &return_path, locale),
         Err(error) => shared::action_error(locale, error),
     }
 }

@@ -10,6 +10,13 @@
   <div class="container download-list">
     {% match catalog.latest %}
     {% when Some with (release) %}
+    {% if release.version == "0.9.0" %}
+    <aside class="download-manual-notice" aria-label="{% if is_en %}Manual installation required{% else %}必须手动下载安装{% endif %}">
+      <strong>{% if is_en %}0.9.0 must be downloaded and installed manually. Automatic updates from older versions are unavailable.{% else %}0.9.0 必须自行下载并安装，旧版本无法自动更新。{% endif %}</strong>
+      <p>{% if is_en %}Android uses a new signing identity and cannot replace an older official installation directly. Uninstalling clears local data; preserve it first, especially AI conversations and memory, which are not included in Cloud sync.{% else %}Android 使用新签名，无法直接覆盖旧正式版。卸载会清除本地数据，请先确认数据已保全；AI 对话与记忆不包含在 Cloud 同步中。{% endif %}</p>
+      <a href="https://github.com/suiyuebaobao/C-SSH/blob/main/INSTALL{% if is_en %}_EN{% endif %}.md">{% if is_en %}Read installation and data-preservation instructions{% else %}阅读安装与数据保全说明{% endif %} →</a>
+    </aside>
+    {% endif %}
     {% for platform in release.platforms %}
     <section class="download-row">
       <h2>{{ platform.name }}</h2>
@@ -35,15 +42,26 @@
     {% if !release.has_windows %}<div class="download-status"><strong>Windows</strong><span>{% if is_en %}No download available{% else %}暂无可用下载{% endif %}</span></div>{% endif %}
     {% if !release.has_linux %}<div class="download-status"><strong>Linux</strong><span>{% if is_en %}No download available{% else %}暂无可用下载{% endif %}</span></div>{% endif %}
     {% if !release.has_android %}<div class="download-status"><strong>Android</strong><span>{% if is_en %}No download available{% else %}暂无可用下载{% endif %}</span></div>{% endif %}
-    {% if !release.has_macos %}<div class="download-status download-status-planned"><strong>macOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>{% endif %}
-    {% if !release.has_ios %}<div class="download-status download-status-planned"><strong>iOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>{% endif %}
+    {% if release.version == "0.9.0" %}
+    <section class="download-row">
+      <h2>macOS</h2>
+      <div class="download-actions">
+        <a class="download-button" href="https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.0/C-SSH_0.9.0_macOS-arm64.dmg">
+          <span><strong>DMG · 0.9.0</strong><small>{% if is_en %}Apple Silicon (M series) · macOS 13+ · GitHub{% else %}仅 M 系列 · macOS 13+ · GitHub{% endif %}</small></span>
+          <b>{% if is_en %}Manual download{% else %}手动下载{% endif %} →</b>
+        </a>
+        <p>{% if is_en %}Ad-hoc signed, not notarized. No Intel build or automatic updater.{% else %}ad-hoc 签名，未经公证；不提供 Intel 版本或自动更新。{% endif %}</p>
+      </div>
+    </section>
+    {% else if !release.has_macos %}<div class="download-status download-status-planned"><strong>macOS</strong><span>{% if is_en %}No download for this release{% else %}该版本未提供下载{% endif %}</span></div>{% endif %}
+    {% if !release.has_ios %}<div class="download-status download-status-planned"><strong>iOS</strong><span>{% if is_en %}Not published{% else %}尚未发布{% endif %}</span></div>{% endif %}
     {% when None %}
     <div class="download-empty">
       <strong>{% if is_en %}No download is available yet{% else %}暂时没有可用下载{% endif %}</strong>
       <p>{% if is_en %}Please check again later.{% else %}请稍后再来查看。{% endif %}</p>
     </div>
-    <div class="download-status download-status-planned"><strong>macOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>
-    <div class="download-status download-status-planned"><strong>iOS</strong><span>{% if is_en %}Not developed yet{% else %}尚未开发{% endif %}</span></div>
+    <div class="download-status download-status-planned"><strong>macOS</strong><span>{% if is_en %}Not published{% else %}尚未发布{% endif %}</span></div>
+    <div class="download-status download-status-planned"><strong>iOS</strong><span>{% if is_en %}Not published{% else %}尚未发布{% endif %}</span></div>
     {% endmatch %}
   </div>
 </section>

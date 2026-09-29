@@ -54,7 +54,7 @@ pub(crate) async fn handle(
         .update_release(&actor, release_id, input)
         .await
     {
-        Ok(_) => shared::action_success(&headers, "/admin/releases", locale),
+        Ok(_) => shared::action_success(&headers, "/admin/releases?tab=uploaded", locale),
         Err(error) => shared::action_error(locale, error),
     }
 }

@@ -3,6 +3,7 @@
 mod challenge;
 mod core;
 mod legacy;
+mod migration_receipt;
 mod projection;
 
 pub(crate) use challenge::{
@@ -11,6 +12,7 @@ pub(crate) use challenge::{
 };
 pub(crate) use core::{change as change_protection, setup as setup_protection};
 pub(crate) use legacy::{migrate as migrate_protection, pull as legacy_pull};
+pub(crate) use migration_receipt::get as get_migration_receipt;
 pub(crate) use projection::get as get_protection;
 
 pub(super) use core::{

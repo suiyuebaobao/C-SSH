@@ -4,10 +4,13 @@ mod admin_delete;
 mod admin_sync;
 mod ai;
 mod capacity;
+mod host_metadata_migration;
 mod hosts;
 mod protection;
+mod proxy_profile;
 mod pull;
 mod push;
+mod push_receipt;
 mod rekey;
 mod reset;
 
@@ -16,15 +19,24 @@ use cloud_store::PgPool;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-pub(crate) use admin_delete::{host as delete_admin_host, sync_record as delete_admin_sync_record};
+pub(crate) use admin_delete::{
+    host as delete_admin_host, proxy_profile as delete_admin_proxy_profile,
+    sync_record as delete_admin_sync_record,
+};
 pub(crate) use admin_sync::list as list_admin_sync_records;
+pub(crate) use host_metadata_migration::{
+    get_receipt as get_host_metadata_migration_receipt, migrate as migrate_host_metadata,
+    preview as preview_host_metadata_migration,
+};
 pub(crate) use hosts::{count, get, list};
 pub(crate) use protection::{
-    cancel_challenge, change_protection, get_protection, issue_reset_challenge, legacy_pull,
-    mark_challenge_sent, migrate_protection, setup_protection, verify_reset_challenge,
+    cancel_challenge, change_protection, get_migration_receipt as get_protection_migration_receipt,
+    get_protection, issue_reset_challenge, legacy_pull, mark_challenge_sent, migrate_protection,
+    setup_protection, verify_reset_challenge,
 };
 pub(crate) use pull::{ack, pull};
 pub(crate) use push::push;
+pub(crate) use push_receipt::get as get_push_receipt;
 pub(crate) use rekey::rekey;
 pub(crate) use reset::reset;
 
@@ -37,6 +49,7 @@ pub(crate) struct SyncState {
     pub sync_generation: i64,
     pub protection_epoch: i64,
     pub protection_revision: i64,
+    pub minimum_sync_contract_version: i32,
 }
 
 pub(crate) async fn begin(pool: &PgPool) -> AppResult<DbTransaction<'_>> {
@@ -57,9 +70,9 @@ pub(crate) async fn lock_sync_state(
     .await
     .map_err(storage)?;
 
-    let row = sqlx::query_as::<_, (i64, i64, i64, i64, i64)>(
+    let row = sqlx::query_as::<_, (i64, i64, i64, i64, i64, i32)>(
         "SELECT current_revision, compacted_through_revision, sync_generation,
-                protection_epoch, protection_revision
+                protection_epoch, protection_revision, minimum_sync_contract_version
          FROM cloud_host_sync_states
          WHERE account_id = $1
          FOR UPDATE",
@@ -74,7 +87,43 @@ pub(crate) async fn lock_sync_state(
         sync_generation: row.2,
         protection_epoch: row.3,
         protection_revision: row.4,
+        minimum_sync_contract_version: row.5,
     })
+}
+
+pub(crate) async fn lock_existing_sync_state(
+    tx: &mut DbTransaction<'_>,
+    account_id: Uuid,
+) -> AppResult<Option<SyncState>> {
+    let row = sqlx::query_as::<_, (i64, i64, i64, i64, i64, i32)>(
+        "SELECT current_revision, compacted_through_revision, sync_generation,
+                protection_epoch, protection_revision, minimum_sync_contract_version
+         FROM cloud_host_sync_states
+         WHERE account_id = $1
+         FOR UPDATE",
+    )
+    .bind(account_id)
+    .fetch_optional(&mut **tx)
+    .await
+    .map_err(storage)?;
+    Ok(row.map(|row| SyncState {
+        current_revision: row.0,
+        compacted_through_revision: row.1,
+        sync_generation: row.2,
+        protection_epoch: row.3,
+        protection_revision: row.4,
+        minimum_sync_contract_version: row.5,
+    }))
+}
+
+pub(crate) fn require_sync_contract(state: SyncState, requested: u16) -> AppResult<()> {
+    if i32::from(requested) < state.minimum_sync_contract_version {
+        Err(AppError::SyncContractUpgradeRequired(
+            "sync contract低于账号不可逆最低版本，请升级客户端".to_owned(),
+        ))
+    } else {
+        Ok(())
+    }
 }
 
 pub(crate) fn require_protection_version(

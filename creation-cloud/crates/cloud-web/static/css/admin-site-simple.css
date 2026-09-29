@@ -1,4 +1,45 @@
 /* Simple list-and-editor layout for home content and managed media. */
+.website-content-organizer {
+  border-top: 3px solid var(--accent);
+}
+
+.website-content-controls {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.website-content-sections,
+.website-content-languages {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.website-content-sections a,
+.website-content-languages a,
+.website-content-bilingual {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.website-content-sections a[aria-current="page"],
+.website-content-languages a[aria-current="page"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.website-content-bilingual {
+  color: var(--ink-muted);
+}
+
 .site-simple-create,
 .site-simple-history,
 .site-simple-list {
@@ -157,6 +198,11 @@
 }
 
 @media (max-width: 560px) {
+  .website-content-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .site-history-row,
   .site-current-media {
     align-items: flex-start;

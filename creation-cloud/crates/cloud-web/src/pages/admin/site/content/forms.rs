@@ -17,6 +17,8 @@ pub(crate) struct CreateContentForm {
 #[derive(Debug, Deserialize)]
 pub(crate) struct TransitionForm {
     pub(crate) expected_revision: i64,
+    pub(crate) document_key: Option<cloud_site_content::SiteContentDocumentKey>,
+    pub(crate) content_locale: Option<cloud_site::Locale>,
     pub(crate) lang: Option<String>,
 }
 

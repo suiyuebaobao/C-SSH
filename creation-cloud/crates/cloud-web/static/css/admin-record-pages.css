@@ -1,4 +1,9 @@
 /* Simple list-and-editor layouts for users, models and announcements. */
+.admin-feedback-toolbar {
+  grid-template-columns: minmax(180px, 280px) auto auto;
+  justify-content: start;
+}
+
 .admin-model-create {
   margin-bottom: var(--space-4);
 }
@@ -96,19 +101,41 @@
 }
 
 .admin-model-interface {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
   min-width: 0;
   margin: 0;
-  padding: var(--space-3);
   border: 1px solid var(--line);
 }
 
-.admin-model-interface legend {
-  padding: 0 6px;
-  color: var(--ink-muted);
+.admin-model-interface > summary {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  cursor: pointer;
   font-weight: 720;
+  list-style: none;
+}
+
+.admin-model-interface > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-model-interface > summary small {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.admin-model-interface[open] > summary {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-alt);
+}
+
+.admin-model-interface-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-3);
 }
 
 .admin-model-options {
@@ -463,7 +490,7 @@
     grid-column: auto;
   }
 
-  .admin-model-interface {
+  .admin-model-interface-fields {
     grid-template-columns: minmax(0, 1fr);
   }
 }

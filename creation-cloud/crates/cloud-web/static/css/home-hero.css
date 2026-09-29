@@ -1,4 +1,4 @@
-/* 首页首屏：负责强排版、制图品牌 C 与五平台状态轨。 */
+/* 首页首屏：负责强排版、制图品牌 C 与平台状态轨。 */
 .home-hero {
   position: relative;
   min-height: 650px;
@@ -34,19 +34,6 @@
   opacity: 0.72;
 }
 
-.hero-ruler::after {
-  position: absolute;
-  bottom: 0;
-  left: -19px;
-  color: var(--ink-muted);
-  content: "SYSTEM / ARCHITECTURE";
-  font-family: var(--font-mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.08em;
-  transform: rotate(180deg);
-  writing-mode: vertical-rl;
-}
-
 .hero-copy h1 {
   max-width: 690px;
   margin: var(--space-4) 0 var(--space-5);
@@ -77,17 +64,6 @@
   place-items: center;
   border: 1px dashed var(--line-soft);
   background: var(--paper-raised);
-}
-
-.blueprint-label {
-  position: absolute;
-  z-index: 3;
-  top: 15px;
-  left: 16px;
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.07em;
 }
 
 .blueprint-axis {
@@ -187,38 +163,9 @@
 .home-platform-grid {
   display: grid;
   min-width: 0;
-  grid-template-columns: 128px repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-3);
   align-items: stretch;
-}
-
-.home-platform-label {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  color: var(--ink-soft);
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  font-weight: 740;
-  letter-spacing: 0.06em;
-}
-
-.home-platform-label i {
-  width: 20px;
-  height: 2px;
-  margin-block: 14px;
-  background: var(--accent);
-}
-
-.home-platform-label h2 {
-  margin: 0;
-  font: inherit;
-  letter-spacing: inherit;
-}
-
-.home-platform-label small {
-  color: var(--ink-muted);
 }
 
 .home-platform-item {
@@ -296,12 +243,7 @@
   }
 
   .home-platform-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .home-platform-label {
-    grid-column: 1 / -1;
-    min-height: 72px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -330,10 +272,6 @@
 @media (max-width: 420px) {
   .hero-copy {
     padding-left: 30px;
-  }
-
-  .hero-ruler::after {
-    display: none;
   }
 
   .hero-blueprint {

@@ -1,26 +1,34 @@
 //! 在事务前校验 Host、AI 密文资源、批次上限和手动同步游标。
 
-use std::{collections::HashSet, net::IpAddr};
+use std::collections::HashSet;
 
 use cloud_domain::{AppError, AppResult};
 use uuid::Uuid;
 
 use crate::{
-    HostChange, HostMetadataInput, HostOperation, LegacyPullRequest, PullAckRequest, PullMode,
-    PullRequest, PushRequest, RekeyResourceCandidate, RekeySyncRequest, ResetAuthorization,
-    ResetSyncRequest, ResourceKind, VerifyProtectionResetChallengeRequest,
+    HostOperation, LegacyPullRequest, PullAckRequest, PullMode, PullRequest, PushRequest,
+    RekeyResourceCandidate, RekeySyncRequest, ResetAuthorization, ResetSyncRequest, ResourceKind,
+    VerifyProtectionResetChallengeRequest,
 };
 
+mod contract;
+mod host_metadata;
 mod opaque;
 mod protection;
+mod rekey_resource;
 
+pub(crate) use host_metadata::{
+    ValidatedHostMetadataCandidate, ValidatedHostMetadataMigration,
+    migrate as host_metadata_migrate, preview as host_metadata_preview,
+};
 pub(crate) use protection::{
     ValidatedEnvelope, change_protection, migrate_protection, setup_protection,
 };
 
 #[cfg(test)]
 pub(crate) use opaque::MAX_NONCE_BYTES;
-pub(crate) use opaque::{ValidatedAiChange, ValidatedAiPayload};
+pub(crate) use opaque::{ValidatedAiChange, ValidatedAiPayload, ValidatedProxyProfileChange};
+pub(crate) use rekey_resource::ValidatedRekeyResource;
 
 pub(crate) const MAX_CIPHERTEXT_BYTES: usize = 256 * 1024;
 const MAX_PULL_DECISIONS: usize = MAX_REKEY_RESOURCES;
@@ -43,18 +51,27 @@ pub(crate) fn canonical_ai_auxiliary_size(
 pub(crate) struct ValidatedChange {
     pub host_id: Uuid,
     pub operation: HostOperation,
-    pub metadata: Option<HostMetadataInput>,
     pub ciphertext: Option<Option<Vec<u8>>>,
     pub expected_revision: Option<i64>,
+    pub metadata_encrypted: bool,
 }
 
 #[derive(Clone, Debug)]
 pub(crate) struct ValidatedPush {
     pub host_changes: Vec<ValidatedChange>,
     pub ai_changes: Vec<ValidatedAiChange>,
+    pub proxy_profile_changes: Vec<ValidatedProxyProfileChange>,
 }
 
 pub(crate) fn push(request: &PushRequest) -> AppResult<ValidatedPush> {
+    contract::validate(request.sync_contract_version)?;
+    contract::require_proxy_profiles(
+        request.sync_contract_version,
+        !request.proxy_profile_changes.is_empty(),
+    )?;
+    if !request.host_changes.is_empty() {
+        host_metadata::require_current(request.sync_contract_version)?;
+    }
     generation(request.sync_generation)?;
     protection_version(request.protection_epoch, request.protection_revision, true)?;
     if request.base_revision < 0 {
@@ -65,6 +82,7 @@ pub(crate) fn push(request: &PushRequest) -> AppResult<ValidatedPush> {
         .host_changes
         .len()
         .checked_add(request.ai_changes.len())
+        .and_then(|count| count.checked_add(request.proxy_profile_changes.len()))
         .ok_or_else(|| AppError::Validation("同步变更数量过大".to_owned()))?;
     if count == 0 {
         return Err(AppError::Validation(
@@ -86,7 +104,7 @@ pub(crate) fn push(request: &PushRequest) -> AppResult<ValidatedPush> {
                 "同一次 mutation 不得重复修改同一主机".to_owned(),
             ));
         }
-        host_changes.push(host_change_value(change)?);
+        host_changes.push(host_metadata::change_value(change)?);
     }
 
     let mut ai_ids = HashSet::with_capacity(request.ai_changes.len());
@@ -100,14 +118,31 @@ pub(crate) fn push(request: &PushRequest) -> AppResult<ValidatedPush> {
         }
         ai_changes.push(opaque::change_value(change, MAX_CIPHERTEXT_BYTES)?);
     }
-    enforce_payload_totals(&host_changes, &ai_changes, "push")?;
+    let mut proxy_profile_ids = HashSet::with_capacity(request.proxy_profile_changes.len());
+    let mut proxy_profile_changes = Vec::with_capacity(request.proxy_profile_changes.len());
+    for change in &request.proxy_profile_changes {
+        require_uuid(change.resource_id, "resource_id")?;
+        if !proxy_profile_ids.insert(change.resource_id) {
+            return Err(AppError::Validation(
+                "同一次 mutation 不得重复修改同一代理线路".to_owned(),
+            ));
+        }
+        proxy_profile_changes.push(opaque::proxy_profile_change_value(
+            change,
+            MAX_CIPHERTEXT_BYTES,
+        )?);
+    }
+    enforce_payload_totals(&host_changes, &ai_changes, &proxy_profile_changes, "push")?;
     Ok(ValidatedPush {
         host_changes,
         ai_changes,
+        proxy_profile_changes,
     })
 }
 
 pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
+    contract::validate(request.sync_contract_version)?;
+    host_metadata::require_current(request.sync_contract_version)?;
     generation(request.sync_generation)?;
     protection_version(request.protection_epoch, request.protection_revision, true)?;
     if request.since_revision < 0 {
@@ -145,6 +180,8 @@ pub(crate) fn pull(request: PullRequest) -> AppResult<PullRequest> {
 }
 
 pub(crate) fn ack(request: &PullAckRequest) -> AppResult<()> {
+    contract::validate(request.sync_contract_version)?;
+    host_metadata::require_current(request.sync_contract_version)?;
     generation(request.sync_generation)?;
     protection_version(request.protection_epoch, request.protection_revision, true)?;
     if request.acknowledged_revision < 0 {
@@ -181,46 +218,8 @@ pub(crate) fn ack(request: &PullAckRequest) -> AppResult<()> {
     Ok(())
 }
 
-#[derive(Clone, Debug)]
-pub(crate) enum ValidatedRekeyResource {
-    Host {
-        resource_id: Uuid,
-        cloud_revision: i64,
-        ciphertext: Vec<u8>,
-    },
-    AiProviderAccount {
-        resource_id: Uuid,
-        cloud_revision: i64,
-        payload: ValidatedAiPayload,
-    },
-}
-
-impl ValidatedRekeyResource {
-    pub(crate) const fn resource_kind(&self) -> ResourceKind {
-        match self {
-            Self::Host { .. } => ResourceKind::Host,
-            Self::AiProviderAccount { .. } => ResourceKind::AiProviderAccount,
-        }
-    }
-
-    pub(crate) const fn resource_id(&self) -> Uuid {
-        match self {
-            Self::Host { resource_id, .. } | Self::AiProviderAccount { resource_id, .. } => {
-                *resource_id
-            }
-        }
-    }
-
-    pub(crate) const fn cloud_revision(&self) -> i64 {
-        match self {
-            Self::Host { cloud_revision, .. } | Self::AiProviderAccount { cloud_revision, .. } => {
-                *cloud_revision
-            }
-        }
-    }
-}
-
 pub(crate) fn reset(request: &ResetSyncRequest) -> AppResult<()> {
+    contract::validate(request.sync_contract_version)?;
     generation(request.sync_generation)?;
     protection_version(request.expected_epoch, request.expected_revision, false)?;
     if request.current_revision < 0 {
@@ -248,6 +247,8 @@ pub(crate) fn reset(request: &ResetSyncRequest) -> AppResult<()> {
 }
 
 pub(crate) fn legacy_pull(request: LegacyPullRequest) -> AppResult<LegacyPullRequest> {
+    contract::validate(request.sync_contract_version)?;
+    host_metadata::require_current(request.sync_contract_version)?;
     generation(request.sync_generation)?;
     if request.expected_epoch != 0 || request.expected_revision != 0 {
         return Err(AppError::Validation(
@@ -296,6 +297,21 @@ pub(crate) fn legacy_pull(request: LegacyPullRequest) -> AppResult<LegacyPullReq
 }
 
 pub(crate) fn rekey(request: &RekeySyncRequest) -> AppResult<Vec<ValidatedRekeyResource>> {
+    contract::validate(request.sync_contract_version)?;
+    contract::require_proxy_profiles(
+        request.sync_contract_version,
+        request
+            .resources
+            .iter()
+            .any(|resource| matches!(resource, RekeyResourceCandidate::ProxyProfile { .. })),
+    )?;
+    if request
+        .resources
+        .iter()
+        .any(|resource| matches!(resource, RekeyResourceCandidate::Host { .. }))
+    {
+        host_metadata::require_current(request.sync_contract_version)?;
+    }
     generation(request.sync_generation)?;
     require_uuid(request.mutation_id, "mutation_id")?;
     resource_candidates(&request.resources, "rekey")
@@ -361,6 +377,31 @@ pub(crate) fn resource_candidates(
                     payload,
                 }
             }
+            RekeyResourceCandidate::ProxyProfile {
+                ciphertext,
+                nonce,
+                envelope_metadata,
+                ..
+            } => {
+                let payload = opaque::payload_parts(
+                    ciphertext,
+                    nonce,
+                    envelope_metadata,
+                    MAX_CIPHERTEXT_BYTES,
+                )?;
+                ciphertext_total =
+                    add_total(ciphertext_total, payload.ciphertext.len(), "ciphertext")?;
+                auxiliary_total = add_total(
+                    auxiliary_total,
+                    opaque::auxiliary_size(&payload)?,
+                    "proxy profile envelope",
+                )?;
+                ValidatedRekeyResource::ProxyProfile {
+                    resource_id,
+                    cloud_revision,
+                    payload,
+                }
+            }
         };
         enforce_totals(ciphertext_total, auxiliary_total, scope)?;
         validated.push(value);
@@ -387,66 +428,18 @@ fn resource_identity(resource: &RekeyResourceCandidate) -> (ResourceKind, Uuid, 
             *resource_id,
             *cloud_revision,
         ),
-    }
-}
-
-fn host_change_value(change: &HostChange) -> AppResult<ValidatedChange> {
-    let ciphertext = decode_ciphertext(change.ciphertext.as_ref())?;
-    match change.operation {
-        HostOperation::Insert => {
-            if change.expected_revision.is_some() {
-                return Err(AppError::Validation(
-                    "insert 不得携带 expected_revision".to_owned(),
-                ));
-            }
-            let metadata = change
-                .metadata
-                .clone()
-                .ok_or_else(|| AppError::Validation("insert 必须携带 metadata".to_owned()))?;
-            validate_metadata(&metadata)?;
-            Ok(ValidatedChange {
-                host_id: change.host_id,
-                operation: change.operation,
-                metadata: Some(metadata),
-                ciphertext,
-                expected_revision: None,
-            })
-        }
-        HostOperation::Update => {
-            let expected_revision = positive_expected(change.expected_revision)?;
-            let metadata = change
-                .metadata
-                .clone()
-                .ok_or_else(|| AppError::Validation("update 必须携带 metadata".to_owned()))?;
-            validate_metadata(&metadata)?;
-            Ok(ValidatedChange {
-                host_id: change.host_id,
-                operation: change.operation,
-                metadata: Some(metadata),
-                ciphertext,
-                expected_revision: Some(expected_revision),
-            })
-        }
-        HostOperation::Delete => {
-            if change.metadata.is_some() || change.ciphertext.is_some() {
-                return Err(AppError::Validation(
-                    "delete 只能携带主机标识和 expected_revision".to_owned(),
-                ));
-            }
-            Ok(ValidatedChange {
-                host_id: change.host_id,
-                operation: change.operation,
-                metadata: None,
-                ciphertext: None,
-                expected_revision: Some(positive_expected(change.expected_revision)?),
-            })
-        }
+        RekeyResourceCandidate::ProxyProfile {
+            resource_id,
+            cloud_revision,
+            ..
+        } => (ResourceKind::ProxyProfile, *resource_id, *cloud_revision),
     }
 }
 
 fn enforce_payload_totals(
     host_changes: &[ValidatedChange],
     ai_changes: &[ValidatedAiChange],
+    proxy_profile_changes: &[ValidatedProxyProfileChange],
     scope: &str,
 ) -> AppResult<()> {
     let mut ciphertext_total = 0_usize;
@@ -459,6 +452,12 @@ fn enforce_payload_totals(
                 .as_ref()
                 .map(|payload| payload.ciphertext.len())
         }))
+        .chain(proxy_profile_changes.iter().filter_map(|change| {
+            change
+                .payload
+                .as_ref()
+                .map(|payload| payload.ciphertext.len())
+        }))
     {
         ciphertext_total = add_total(ciphertext_total, size, "ciphertext")?;
     }
@@ -466,6 +465,11 @@ fn enforce_payload_totals(
     for payload in ai_changes
         .iter()
         .filter_map(|change| change.payload.as_ref())
+        .chain(
+            proxy_profile_changes
+                .iter()
+                .filter_map(|change| change.payload.as_ref()),
+        )
     {
         auxiliary_total = add_total(
             auxiliary_total,

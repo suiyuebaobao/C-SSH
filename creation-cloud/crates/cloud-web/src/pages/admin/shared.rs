@@ -178,6 +178,7 @@ fn error_status(error: &AppError) -> StatusCode {
         | AppError::SyncResyncRequired { .. }
         | AppError::SyncStateChanged(_)
         | AppError::SyncCapacityExceeded(_) => StatusCode::CONFLICT,
+        AppError::SyncContractUpgradeRequired(_) => StatusCode::UPGRADE_REQUIRED,
         AppError::RateLimited(_) | AppError::RateLimitedAfter { .. } => {
             StatusCode::TOO_MANY_REQUESTS
         }

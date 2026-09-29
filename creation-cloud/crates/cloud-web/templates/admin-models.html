@@ -16,21 +16,27 @@
       <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="name" required maxlength="100" placeholder="DeepSeek V4 Pro"></label>
       <label class="admin-field">{% if is_en %}Vendor{% else %}厂商{% endif %}<input name="provider" required maxlength="64" placeholder="DeepSeek"></label>
       <label class="admin-field">{% if is_en %}Context window{% else %}上下文窗口{% endif %}<input name="context_length" type="number" min="4096" max="2000000" value="128000" required></label>
-      <fieldset class="admin-model-interface" data-api-format="openai_compatible">
-        <legend>{% if is_en %}OpenAI-compatible interface{% else %}OpenAI 兼容接口{% endif %}</legend>
-        <label class="admin-field">{% if is_en %}Base URL{% else %}Base URL{% endif %}<input name="openai_base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1"></label>
-        <label class="admin-field">{% if is_en %}Model ID{% else %}Model ID{% endif %}<input name="openai_model_name" maxlength="128" placeholder="example-model"></label>
-      </fieldset>
-      <fieldset class="admin-model-interface" data-api-format="anthropic_compatible">
-        <legend>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</legend>
-        <label class="admin-field">{% if is_en %}Base URL{% else %}Base URL{% endif %}<input name="anthropic_base_url" type="url" maxlength="512" placeholder="https://api.example.com/anthropic"></label>
-        <label class="admin-field">{% if is_en %}Model ID{% else %}Model ID{% endif %}<input name="anthropic_model_name" maxlength="128" placeholder="example-model"></label>
-      </fieldset>
-      <fieldset class="admin-model-interface" data-api-format="responses_compatible">
-        <legend>{% if is_en %}Responses-compatible interface{% else %}Responses 兼容接口{% endif %}</legend>
-        <label class="admin-field">Base URL<input name="responses_base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1"></label>
-        <label class="admin-field">Model ID<input name="responses_model_name" maxlength="128" placeholder="example-model"></label>
-      </fieldset>
+      <details class="admin-model-interface" data-api-format="openai_compatible" data-configured="true" open>
+        <summary><span>{% if is_en %}OpenAI-compatible interface{% else %}OpenAI 兼容接口{% endif %}</span><small>{% if is_en %}Default interface{% else %}默认接口{% endif %}</small></summary>
+        <div class="admin-model-interface-fields">
+          <label class="admin-field">Base URL<input name="openai_base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1"></label>
+          <label class="admin-field">Model ID<input name="openai_model_name" maxlength="128" placeholder="example-model"></label>
+        </div>
+      </details>
+      <details class="admin-model-interface" data-api-format="anthropic_compatible" data-configured="false">
+        <summary><span>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</span><small>{% if is_en %}Add when needed{% else %}按需添加{% endif %}</small></summary>
+        <div class="admin-model-interface-fields">
+          <label class="admin-field">Base URL<input name="anthropic_base_url" type="url" maxlength="512" placeholder="https://api.example.com/anthropic"></label>
+          <label class="admin-field">Model ID<input name="anthropic_model_name" maxlength="128" placeholder="example-model"></label>
+        </div>
+      </details>
+      <details class="admin-model-interface" data-api-format="responses_compatible" data-configured="false">
+        <summary><span>{% if is_en %}Responses-compatible interface{% else %}Responses 兼容接口{% endif %}</span><small>{% if is_en %}Add when needed{% else %}按需添加{% endif %}</small></summary>
+        <div class="admin-model-interface-fields">
+          <label class="admin-field">Base URL<input name="responses_base_url" type="url" maxlength="512" placeholder="https://api.example.com/v1"></label>
+          <label class="admin-field">Model ID<input name="responses_model_name" maxlength="128" placeholder="example-model"></label>
+        </div>
+      </details>
       <div class="admin-model-options">
         <label><input name="enabled" type="checkbox" value="true" checked> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
       </div>
@@ -61,21 +67,27 @@
           <label class="admin-field">{% if is_en %}Display name{% else %}显示名称{% endif %}<input name="name" value="{{ row.name }}" required maxlength="100"></label>
           <label class="admin-field">{% if is_en %}Vendor{% else %}厂商{% endif %}<input name="provider" value="{{ row.provider }}" required maxlength="64"></label>
           <label class="admin-field">{% if is_en %}Context window{% else %}上下文窗口{% endif %}<input name="context_length" type="number" min="4096" max="2000000" value="{{ row.context_length }}" required></label>
-          <fieldset class="admin-model-interface" data-api-format="openai_compatible">
-            <legend>{% if is_en %}OpenAI-compatible interface{% else %}OpenAI 兼容接口{% endif %}</legend>
-            <label class="admin-field">Base URL<input name="openai_base_url" type="url" value="{{ row.openai_base_url }}" maxlength="512"></label>
-            <label class="admin-field">Model ID<input name="openai_model_name" value="{{ row.openai_model_name }}" maxlength="128"></label>
-          </fieldset>
-          <fieldset class="admin-model-interface" data-api-format="anthropic_compatible">
-            <legend>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</legend>
-            <label class="admin-field">Base URL<input name="anthropic_base_url" type="url" value="{{ row.anthropic_base_url }}" maxlength="512"></label>
-            <label class="admin-field">Model ID<input name="anthropic_model_name" value="{{ row.anthropic_model_name }}" maxlength="128"></label>
-          </fieldset>
-          <fieldset class="admin-model-interface" data-api-format="responses_compatible">
-            <legend>{% if is_en %}Responses-compatible interface{% else %}Responses 兼容接口{% endif %}</legend>
-            <label class="admin-field">Base URL<input name="responses_base_url" type="url" value="{{ row.responses_base_url }}" maxlength="512"></label>
-            <label class="admin-field">Model ID<input name="responses_model_name" value="{{ row.responses_model_name }}" maxlength="128"></label>
-          </fieldset>
+          <details class="admin-model-interface" data-api-format="openai_compatible" data-configured="{{ row.has_openai_interface }}"{% if row.has_openai_interface %} open{% endif %}>
+            <summary><span>{% if is_en %}OpenAI-compatible interface{% else %}OpenAI 兼容接口{% endif %}</span><small>{% if row.has_openai_interface %}{% if is_en %}Configured{% else %}已配置{% endif %}{% else %}{% if is_en %}Add when needed{% else %}按需添加{% endif %}{% endif %}</small></summary>
+            <div class="admin-model-interface-fields">
+              <label class="admin-field">Base URL<input name="openai_base_url" type="url" value="{{ row.openai_base_url }}" maxlength="512"></label>
+              <label class="admin-field">Model ID<input name="openai_model_name" value="{{ row.openai_model_name }}" maxlength="128"></label>
+            </div>
+          </details>
+          <details class="admin-model-interface" data-api-format="anthropic_compatible" data-configured="{{ row.has_anthropic_interface }}"{% if row.has_anthropic_interface %} open{% endif %}>
+            <summary><span>{% if is_en %}Anthropic-compatible interface{% else %}Anthropic 兼容接口{% endif %}</span><small>{% if row.has_anthropic_interface %}{% if is_en %}Configured{% else %}已配置{% endif %}{% else %}{% if is_en %}Add when needed{% else %}按需添加{% endif %}{% endif %}</small></summary>
+            <div class="admin-model-interface-fields">
+              <label class="admin-field">Base URL<input name="anthropic_base_url" type="url" value="{{ row.anthropic_base_url }}" maxlength="512"></label>
+              <label class="admin-field">Model ID<input name="anthropic_model_name" value="{{ row.anthropic_model_name }}" maxlength="128"></label>
+            </div>
+          </details>
+          <details class="admin-model-interface" data-api-format="responses_compatible" data-configured="{{ row.has_responses_interface }}"{% if row.has_responses_interface %} open{% endif %}>
+            <summary><span>{% if is_en %}Responses-compatible interface{% else %}Responses 兼容接口{% endif %}</span><small>{% if row.has_responses_interface %}{% if is_en %}Configured{% else %}已配置{% endif %}{% else %}{% if is_en %}Add when needed{% else %}按需添加{% endif %}{% endif %}</small></summary>
+            <div class="admin-model-interface-fields">
+              <label class="admin-field">Base URL<input name="responses_base_url" type="url" value="{{ row.responses_base_url }}" maxlength="512"></label>
+              <label class="admin-field">Model ID<input name="responses_model_name" value="{{ row.responses_model_name }}" maxlength="128"></label>
+            </div>
+          </details>
           <div class="admin-model-options">
             <label><input name="enabled" type="checkbox" value="true"{% if row.enabled %} checked{% endif %}> {% if is_en %}Enabled{% else %}启用{% endif %}</label>
           </div>

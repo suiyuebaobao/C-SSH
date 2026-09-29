@@ -18,6 +18,17 @@ impl Service {
             .then(|| u64::try_from(policy.revision))
             .transpose()
             .map_err(|_| AppError::Storage("版本策略修订超出客户端范围".into()))?;
+        if policy.disabled_versions.contains(&query.current_text) {
+            if query.policy_version == 1 {
+                return Err(AppError::Forbidden("此版本已停用，请安装可用版本".into()));
+            }
+            let mut response = no_update(&query, policy_revision, policy.sha256_enabled);
+            response.disabled = Some(true);
+            return Ok(response);
+        }
+        if policy.no_update_versions.contains(&query.current_text) {
+            return Ok(no_update(&query, policy_revision, policy.sha256_enabled));
+        }
         if !policy.enabled {
             return Ok(no_update(&query, policy_revision, policy.sha256_enabled));
         }
@@ -85,6 +96,7 @@ impl Service {
             Locale::En => (release.title_en, release.notes_en),
         };
         Ok(UpdateCheckResponse {
+            disabled: (query.policy_version == 2).then_some(false),
             update_available: true,
             current_version: query.current_text,
             latest: Some(LatestUpdate {
@@ -162,6 +174,7 @@ enum Locale {
 
 #[derive(Debug)]
 struct ValidatedQuery {
+    policy_version: u8,
     platform: String,
     architecture: String,
     package_kind: String,
@@ -175,6 +188,10 @@ impl TryFrom<UpdateCheckQuery> for ValidatedQuery {
     type Error = AppError;
 
     fn try_from(query: UpdateCheckQuery) -> AppResult<Self> {
+        let policy_version = query.policy_version.unwrap_or(1);
+        if !matches!(policy_version, 1 | 2) {
+            return Err(AppError::Validation("版本策略协议不受支持".into()));
+        }
         if query.channel != "stable" {
             return Err(AppError::Validation("客户端更新渠道只允许 stable".into()));
         }
@@ -197,6 +214,7 @@ impl TryFrom<UpdateCheckQuery> for ValidatedQuery {
         let (current_text, current_version) = normalize_semantic_version(&query.current_version)
             .ok_or_else(|| AppError::Validation("current_version 必须是有效语义版本".into()))?;
         Ok(Self {
+            policy_version,
             platform: query.platform,
             architecture: query.architecture,
             package_kind: query.package_kind,
@@ -214,6 +232,7 @@ fn no_update(
     sha256_enabled: bool,
 ) -> UpdateCheckResponse {
     UpdateCheckResponse {
+        disabled: (query.policy_version == 2).then_some(false),
         update_available: false,
         current_version: query.current_text.clone(),
         latest: None,
@@ -268,6 +287,7 @@ mod tests {
 
     fn query(platform: &str, architecture: &str, package_kind: &str) -> UpdateCheckQuery {
         UpdateCheckQuery {
+            policy_version: None,
             platform: platform.into(),
             architecture: architecture.into(),
             package_kind: package_kind.into(),

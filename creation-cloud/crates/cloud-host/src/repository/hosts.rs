@@ -3,24 +3,18 @@
 use chrono::{DateTime, Utc};
 use cloud_domain::{AppError, AppResult, Page, PageQuery};
 use cloud_store::PgPool;
-use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 
-use crate::{HostStatus, HostView};
+use crate::HostView;
 
-use super::{invalid_stored_value, storage};
+use super::storage;
 
 #[derive(Clone, Debug, FromRow)]
 struct HostViewRow {
     pub id: Uuid,
-    pub address: String,
-    pub port: i32,
-    pub name: String,
-    pub platform: String,
-    pub tags: Value,
-    pub status: String,
     pub secret_present: bool,
+    pub metadata_encrypted: bool,
     pub source_device_id: Uuid,
     pub revision: i64,
     pub is_deleted: bool,
@@ -30,22 +24,14 @@ struct HostViewRow {
 
 impl HostViewRow {
     fn view(self) -> AppResult<HostView> {
-        let port = u16::try_from(self.port).map_err(|_| invalid_stored_value())?;
-        let tags =
-            serde_json::from_value::<Vec<String>>(self.tags).map_err(|_| invalid_stored_value())?;
-        let status = HostStatus::parse(&self.status).ok_or_else(invalid_stored_value)?;
         Ok(HostView {
             id: self.id,
-            address: self.address,
-            port,
-            name: self.name,
-            platform: self.platform,
-            tags,
-            status,
             revision: self.revision,
             source_device_id: self.source_device_id,
             deleted: self.is_deleted,
             secret_present: self.secret_present,
+            metadata_encrypted: self.metadata_encrypted,
+            host_metadata_migration_required: !self.metadata_encrypted,
             created_at: self.created_at,
             updated_at: self.updated_at,
         })
@@ -54,15 +40,16 @@ impl HostViewRow {
 
 #[derive(Clone, Debug, FromRow)]
 pub(crate) struct HostRow {
-    pub address: String,
-    pub port: i32,
-    pub name: String,
-    pub platform: String,
-    pub tags: Value,
-    pub status: String,
+    pub address: Option<String>,
+    pub port: Option<i32>,
+    pub name: Option<String>,
+    pub platform: Option<String>,
+    pub tags: Option<serde_json::Value>,
+    pub status: Option<String>,
     pub ciphertext: Option<Vec<u8>>,
     pub revision: i64,
     pub is_deleted: bool,
+    pub metadata_encrypted: bool,
 }
 
 pub(crate) async fn count(pool: &PgPool, account_id: Uuid) -> AppResult<i64> {
@@ -85,8 +72,7 @@ pub(crate) async fn list(
     let page = page.normalized();
     let total = count(pool, account_id).await?;
     let rows = sqlx::query_as::<_, HostViewRow>(
-        "SELECT id, address, port, name, platform, tags, status,
-                (ciphertext IS NOT NULL) AS secret_present,
+        "SELECT id, (ciphertext IS NOT NULL) AS secret_present, metadata_encrypted,
                 source_device_id, revision, is_deleted, created_at, updated_at
          FROM cloud_hosts
          WHERE account_id = $1 AND NOT is_deleted
@@ -113,8 +99,7 @@ pub(crate) async fn list(
 
 pub(crate) async fn get(pool: &PgPool, account_id: Uuid, host_id: Uuid) -> AppResult<HostView> {
     let row = sqlx::query_as::<_, HostViewRow>(
-        "SELECT id, address, port, name, platform, tags, status,
-                (ciphertext IS NOT NULL) AS secret_present,
+        "SELECT id, (ciphertext IS NOT NULL) AS secret_present, metadata_encrypted,
                 source_device_id, revision, is_deleted, created_at, updated_at
          FROM cloud_hosts
          WHERE account_id = $1 AND id = $2 AND NOT is_deleted",
@@ -135,7 +120,7 @@ pub(crate) async fn lock_current(
 ) -> AppResult<Option<HostRow>> {
     sqlx::query_as::<_, HostRow>(
         "SELECT address, port, name, platform, tags, status, ciphertext,
-                revision, is_deleted
+                revision, is_deleted, metadata_encrypted
          FROM cloud_hosts
          WHERE account_id = $1 AND id = $2
          FOR UPDATE",

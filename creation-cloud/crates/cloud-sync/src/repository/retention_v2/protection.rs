@@ -12,6 +12,7 @@ WITH candidates AS (
     FROM cloud_data_protection_mutations AS mutation
     JOIN cloud_host_sync_states AS state ON state.account_id = mutation.account_id
     WHERE mutation.account_id = ANY($1::uuid[]) AND mutation.created_at < $2
+      AND mutation.operation <> 'migrate'
       AND NOT (
           mutation.result_generation = state.sync_generation
           AND mutation.result_epoch = state.protection_epoch

@@ -2,7 +2,33 @@
 
 # 更新列表
 
-完整安装包请前往 [GitHub Releases](../../releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
+## 0.9.0 — 三端发布（必须手动安装）
+
+0.9.0 必须自行下载并安装，旧版本无法自动更新。
+
+发布平台：Windows x64（NSIS、便携ZIP）、M系列Mac arm64（DMG）、Android arm64（APK）。iOS本次不上传，Linux客户端保持冻结。
+
+新增与完善：
+- M系列Mac客户端及DMG分发，复用共享运行时和桌面能力。
+- 主机新增IPv4／域名选择，端口独立；域名解析兼容IPv6，已有IPv6主机保持可用。
+- 设置中增加官方／自建Creation Cloud选择，账号、同步和更新来源按云隔离。
+- Windows服务器采用手动Setup与Windows账号接入，移除自动安装／OCR流程。
+- Windows Agent持久终端Terminal2／psmux，普通OpenSSH路径继续保留。
+- 全局／项目／主机AI历史范围、终端输入、RDP登录就绪、主机刷新、系统信息和共享数据迁移修复。
+
+验证：
+- Windows测试VM通过安装、启动、卸载及0.8.8到0.9.0的手动升级与data保留。
+- Mac通过arm64构建、DMG挂载、版本和ad-hoc签名完整性核对。
+- Android通过包级检查及SDK Emulator同签名测试包升级、启动和原数据保留；不代表旧正式版可覆盖，也不代表真机验收。
+
+安装提示：
+- Android使用新签名，无法直接覆盖旧正式版；卸载会清除本地数据。AI对话和记忆不包含在Cloud同步中，无法确认数据已保全时请保留旧版。
+- Mac只支持M系列，最低系统目标macOS13，ad-hoc签名、未经公证，无自动更新。
+- Windows安装器没有Authenticode签名；需要已安装WebView2 Runtime。
+- 本次不向旧客户端投放自动更新，请使用官方手动下载入口。
+
+
+完整安装包请前往 [GitHub Releases](https://github.com/suiyuebaobao/C-SSH/releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
 
 ## v0.8.9（未发布）— Windows 管理双入口与本地可用性
 

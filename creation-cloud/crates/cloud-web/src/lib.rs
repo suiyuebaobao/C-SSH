@@ -223,6 +223,10 @@ pub fn admin_router_with_state(state: AdminPageState) -> Router {
             post(pages::admin::releases::delete::handle),
         )
         .route(
+            "/update-policy/apply",
+            post(pages::admin::releases::policy_apply::handle),
+        )
+        .route(
             "/update-policy/draft",
             post(pages::admin::releases::policy_save::handle),
         )

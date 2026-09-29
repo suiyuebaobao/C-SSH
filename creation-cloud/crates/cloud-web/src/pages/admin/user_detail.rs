@@ -11,7 +11,7 @@ use axum::{
 use cloud_admin::{AdminDeviceListQuery, AdminUser};
 use cloud_device::SessionView;
 use cloud_domain::{AppResult, AuthenticatedSession, PageQuery};
-use cloud_host::{AdminSyncDirection, AdminSyncRecord, HostStatus, HostView};
+use cloud_host::{AdminSyncDirection, AdminSyncRecord, HostView};
 use cloud_site::{Locale, PageId, SiteView};
 use serde::Deserialize;
 use uuid::Uuid;
@@ -70,14 +70,11 @@ impl From<AdminUser> for UserSummary {
 
 struct HostRow {
     id: String,
-    name: String,
-    endpoint: String,
-    platform: String,
-    tags: String,
-    status: &'static str,
     revision: i64,
     source_device: String,
     secret_present: bool,
+    metadata_encrypted: bool,
+    migration_required: bool,
     updated_at: String,
 }
 
@@ -287,21 +284,14 @@ fn valid_tab(value: Option<&str>) -> &'static str {
 fn host_row(value: HostView, names: &HashMap<Uuid, String>) -> HostRow {
     HostRow {
         id: value.id.to_string(),
-        name: value.name,
-        endpoint: format!("{}:{}", value.address, value.port),
-        platform: value.platform,
-        tags: value.tags.join(" · "),
-        status: match value.status {
-            HostStatus::Active => "active",
-            HostStatus::Disabled => "disabled",
-            HostStatus::Archived => "archived",
-        },
         revision: value.revision,
         source_device: names
             .get(&value.source_device_id)
             .cloned()
             .unwrap_or_else(|| value.source_device_id.to_string()),
         secret_present: value.secret_present,
+        metadata_encrypted: value.metadata_encrypted,
+        migration_required: value.host_metadata_migration_required,
         updated_at: value.updated_at.format("%Y-%m-%d %H:%M UTC").to_string(),
     }
 }
@@ -438,14 +428,11 @@ mod tests {
             "hosts",
             vec![HostRow {
                 id: host_id.clone(),
-                name: "Host".into(),
-                endpoint: "192.0.2.10:22".into(),
-                platform: "linux".into(),
-                tags: String::new(),
-                status: "active",
                 revision: 3,
                 source_device: "device".into(),
                 secret_present: true,
+                metadata_encrypted: true,
+                migration_required: false,
                 updated_at: "now".into(),
             }],
             Vec::new(),

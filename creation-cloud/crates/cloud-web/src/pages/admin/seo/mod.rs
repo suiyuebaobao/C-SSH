@@ -14,12 +14,19 @@ use axum::{
     response::Html,
 };
 use cloud_domain::{AppResult, AuthenticatedSession};
-use cloud_seo::SeoTopic;
+use cloud_seo::{SeoLocale, SeoTopic};
 use cloud_site::{Locale, PageId, SiteView};
+use serde::Deserialize;
 
 use crate::{AdminPageState, seo::SeoHead};
 
-use super::shared::{self, AdminListQuery};
+use super::shared;
+
+#[derive(Debug, Default, Deserialize)]
+pub(crate) struct SeoPageQuery {
+    lang: Option<String>,
+    content_lang: Option<String>,
+}
 
 struct TopicRow {
     id: String,
@@ -38,6 +45,7 @@ struct SeoTopicsTemplate {
     session_identity: Option<String>,
     csrf_token: String,
     is_en: bool,
+    content_lang: &'static str,
     rows: Vec<TopicRow>,
     load_error: Option<String>,
 }
@@ -45,12 +53,20 @@ struct SeoTopicsTemplate {
 pub(crate) async fn page(
     State(state): State<AdminPageState>,
     Extension(session): Extension<AuthenticatedSession>,
-    Query(query): Query<AdminListQuery>,
+    Query(query): Query<SeoPageQuery>,
 ) -> AppResult<Html<String>> {
-    let locale = query.locale();
+    let locale = shared::locale(query.lang.as_deref());
+    let content_locale = selected_content_locale(query.content_lang.as_deref(), locale)?;
     let actor = shared::actor_from_session(&session)?;
     let (rows, load_error) = match state.seo().list_topics(&actor).await {
-        Ok(topics) => (topics.into_iter().map(TopicRow::from).collect(), None),
+        Ok(topics) => (
+            topics
+                .into_iter()
+                .filter(|topic| topic.locale == content_locale)
+                .map(TopicRow::from)
+                .collect(),
+            None,
+        ),
         Err(_) => (
             Vec::new(),
             Some(if locale == Locale::En {
@@ -67,9 +83,26 @@ pub(crate) async fn page(
         session_identity: Some(parts.session_identity),
         csrf_token: parts.csrf_token,
         is_en: parts.is_en,
+        content_lang: content_locale.as_str(),
         rows,
         load_error,
     })
+}
+
+fn selected_content_locale(value: Option<&str>, ui_locale: Locale) -> AppResult<SeoLocale> {
+    match value.map(str::trim) {
+        None | Some("") if ui_locale == Locale::En => Ok(SeoLocale::En),
+        None | Some("") => Ok(SeoLocale::ZhCn),
+        Some("zh-CN") => Ok(SeoLocale::ZhCn),
+        Some("en") => Ok(SeoLocale::En),
+        Some(_) => Err(cloud_domain::AppError::Validation(
+            "SEO 内容语种无效".to_owned(),
+        )),
+    }
+}
+
+pub(crate) fn return_path(content_locale: SeoLocale) -> String {
+    format!("/admin/seo?content_lang={}", content_locale.as_str())
 }
 
 impl From<SeoTopic> for TopicRow {

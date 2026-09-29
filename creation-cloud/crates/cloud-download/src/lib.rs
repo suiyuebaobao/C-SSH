@@ -37,13 +37,13 @@ mod policy_migration_tests;
 mod validation_tests;
 
 pub use model::{
-    AdminUpdatePolicySnapshot, AssetInspectionStatus, CreateSourceInput, DownloadAggregationReport,
-    DownloadHistoryItem, InstalledIdentityEntryInput, LatestUpdate, PublicAsset, PublicRelease,
-    PublicSource, PublishUpdatePolicyInput, PublishedAssetInspectionReport, PublishedUpdatePolicy,
-    RecordInstalledIdentitiesInput, RecordInstalledIdentitiesResult, ReleaseSource,
-    SaveUpdatePolicyDraftInput, SourceKind, UpdateAsset, UpdateCheckQuery, UpdateCheckResponse,
-    UpdateIdentityStatus, UpdatePolicyDraft, UpdatePolicyTargetRelease, UpdateSource,
-    UpdateSourceInput,
+    AdminUpdatePolicySnapshot, ApplyUpdatePolicyInput, AssetInspectionStatus, CreateSourceInput,
+    DownloadAggregationReport, DownloadHistoryItem, InstalledIdentityEntryInput, LatestUpdate,
+    PublicAsset, PublicRelease, PublicSource, PublishUpdatePolicyInput,
+    PublishedAssetInspectionReport, PublishedUpdatePolicy, RecordInstalledIdentitiesInput,
+    RecordInstalledIdentitiesResult, ReleaseSource, SaveUpdatePolicyDraftInput, SourceKind,
+    UpdateAsset, UpdateCheckQuery, UpdateCheckResponse, UpdateIdentityStatus, UpdatePolicyDraft,
+    UpdatePolicyTargetRelease, UpdateSource, UpdateSourceInput,
 };
 pub use router::{account_router, management_router, public_router, update_router};
 pub use service::Service;

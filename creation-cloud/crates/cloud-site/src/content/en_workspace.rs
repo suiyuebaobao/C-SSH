@@ -201,8 +201,8 @@ pub(super) fn admin_releases() -> PageContent {
         PageId::AdminReleases,
         "Releases | Creation Cloud Admin",
         "Release control",
-        "Move releases through verified states",
-        "Create releases, maintain bilingual notes, and move from draft through validation, publication, revocation, or hiding.",
+        "Client versions",
+        "Upload client programs and choose how each version can update and be used.",
     )
 }
 
@@ -211,8 +211,8 @@ pub(super) fn admin_assets() -> PageContent {
         PageId::AdminAssets,
         "Assets | Creation Cloud Admin",
         "Delivery assets",
-        "Keep file identity, sources, and verification aligned",
-        "Register platform assets, complete quarantined SHA256-verified uploads, and manage local or HTTPS external sources.",
+        "Client versions",
+        "Upload client programs and choose how each version can update and be used.",
     )
 }
 
@@ -325,13 +325,27 @@ fn admin_page(
 fn admin_navigation(current: PageId) -> Vec<NavigationItem> {
     vec![
         nav("Users", PageId::AdminUsers, current),
-        nav("Home content", PageId::AdminSite, current),
-        nav("Client updates", PageId::AdminReleases, current),
-        nav("Downloads", PageId::AdminAssets, current),
+        nav(
+            "Website content",
+            PageId::AdminSite,
+            if current == PageId::AdminSeo {
+                PageId::AdminSite
+            } else {
+                current
+            },
+        ),
+        nav(
+            "Client versions",
+            PageId::AdminReleases,
+            if current == PageId::AdminAssets {
+                PageId::AdminReleases
+            } else {
+                current
+            },
+        ),
         nav("Models", PageId::AdminModels, current),
         nav("Announcements", PageId::AdminAnnouncements, current),
         nav("Feedback", PageId::AdminFeedback, current),
-        nav("SEO", PageId::AdminSeo, current),
         nav("System settings", PageId::AdminSettings, current),
         nav("Activity", PageId::AdminAudit, current),
     ]

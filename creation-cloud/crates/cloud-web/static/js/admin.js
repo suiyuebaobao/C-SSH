@@ -308,6 +308,29 @@ function adminSyncDownloadPackages(form) {
   adminSyncUpdaterSignature(form);
 }
 
+function adminSyncDownloadArchitecture(form) {
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+  const platform = form.querySelector("[data-download-platform]");
+  const architecture = form.querySelector("[data-download-architecture]");
+  if (!(platform instanceof HTMLSelectElement) || !(architecture instanceof HTMLSelectElement)) {
+    return;
+  }
+  for (const option of architecture.options) {
+    const matches = option.dataset.platform === platform.value;
+    option.disabled = !matches;
+    option.hidden = !matches;
+  }
+  const selected = architecture.selectedOptions[0];
+  if (!selected || selected.disabled) {
+    const firstAvailable = Array.from(architecture.options).find((option) => !option.disabled);
+    if (firstAvailable) {
+      architecture.value = firstAvailable.value;
+    }
+  }
+}
+
 function adminSetupDownloadForms(root = document) {
   for (const form of root.querySelectorAll("[data-download-create]")) {
     if (!(form instanceof HTMLFormElement) || form.dataset.downloadReady === "true") {
@@ -321,6 +344,7 @@ function adminSetupDownloadForms(root = document) {
       }
       if (target instanceof HTMLSelectElement && target.matches("[data-download-platform]")) {
         adminSyncDownloadPackages(form);
+        adminSyncDownloadArchitecture(form);
       }
       if (target instanceof HTMLSelectElement && target.matches("[data-download-package]")) {
         adminSyncUpdaterSignature(form);
@@ -328,7 +352,37 @@ function adminSetupDownloadForms(root = document) {
     });
     adminSyncDownloadMethod(form);
     adminSyncDownloadPackages(form);
+    adminSyncDownloadArchitecture(form);
   }
+}
+
+function adminSetupReleaseSearch(root = document) {
+  const input = root.querySelector("[data-release-search]");
+  const list = root.querySelector("[data-release-list]");
+  const empty = root.querySelector("[data-release-search-empty]");
+  if (!(input instanceof HTMLInputElement) || !(list instanceof HTMLElement)) {
+    return;
+  }
+  const rows = Array.from(list.querySelectorAll("[data-release-row]"));
+  const apply = () => {
+    const query = input.value.trim().toLocaleLowerCase();
+    let visible = 0;
+    for (const row of rows) {
+      if (!(row instanceof HTMLElement)) {
+        continue;
+      }
+      const matches = !query || (row.dataset.releaseVersion ?? "").toLocaleLowerCase().includes(query);
+      row.hidden = !matches;
+      if (matches) {
+        visible += 1;
+      }
+    }
+    if (empty instanceof HTMLElement) {
+      empty.hidden = visible !== 0 || rows.length === 0;
+    }
+  };
+  input.addEventListener("input", apply);
+  apply();
 }
 
 function adminMaintenanceItem(status) {
@@ -401,6 +455,7 @@ async function adminLoadMaintenance(panel) {
 
 document.addEventListener("DOMContentLoaded", () => {
   adminSetupDownloadForms();
+  adminSetupReleaseSearch();
   const panel = document.querySelector("[data-maintenance-panel]");
   adminLoadMaintenance(panel);
   panel?.querySelector("[data-maintenance-refresh]")?.addEventListener("click", () => {

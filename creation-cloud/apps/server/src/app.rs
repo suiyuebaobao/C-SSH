@@ -11,7 +11,9 @@ use axum::{
 use cloud_config::CloudConfig;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
-use crate::{admin_overview, client_config, http_trace, request_id, services::AppServices};
+use crate::{
+    admin_overview, client_config, http_trace, proxy_headers, request_id, services::AppServices,
+};
 
 pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let seo = cloud_web::SeoConfig::from_validated_origin(
@@ -27,6 +29,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let host_service = services.host.clone();
     let model_service = services.model.clone();
     let notification_service = services.notification.clone();
+    let proxy_service = services.proxy.clone();
     let download_service = services.download.clone();
     let seo_topic_service = services.seo.clone();
     let site_content_service = services.site_content.clone();
@@ -133,6 +136,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/notifications",
             cloud_notification::account_router(notification_service),
         )
+        .nest("/proxy", cloud_proxy::router(proxy_service))
         .layer(middleware::from_fn(cloud_auth::require_csrf))
         .route_layer(middleware::from_fn_with_state(
             auth_service.clone(),
@@ -203,6 +207,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .layer(middleware::from_fn(noindex_private_routes))
         .layer(CompressionLayer::new())
         .layer(TraceLayer::new_for_http().make_span_with(http_trace::make_span))
+        .layer(middleware::from_fn(proxy_headers::attach))
         .layer(middleware::from_fn(request_id::attach))
 }
 
@@ -273,6 +278,7 @@ mod tests {
     use super::*;
 
     mod notification_route_tests;
+    mod proxy_route_tests;
     mod sync_route_tests;
     mod update_route_tests;
 
@@ -291,6 +297,7 @@ mod tests {
             session_ttl: Duration::from_secs(3600),
             environment: "development".to_owned(),
             maintenance: cloud_config::MaintenanceConfig::default(),
+            proxy: cloud_config::ProxyConfig::default(),
             smtp: None,
         };
         let services = AppServices::new(pool, &config).expect("测试服务应可装配");

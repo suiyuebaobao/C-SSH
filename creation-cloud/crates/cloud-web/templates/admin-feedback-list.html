@@ -15,23 +15,16 @@
       {% if is_en %}Status{% else %}状态{% endif %}
       <select name="status">
         <option value="">{% if is_en %}All statuses{% else %}全部状态{% endif %}</option>
-        <option value="new"{% if status_filter == "new" %} selected{% endif %}>new</option>
-        <option value="triaged"{% if status_filter == "triaged" %} selected{% endif %}>triaged</option>
-        <option value="in_progress"{% if status_filter == "in_progress" %} selected{% endif %}>in_progress</option>
-        <option value="resolved"{% if status_filter == "resolved" %} selected{% endif %}>resolved</option>
-        <option value="closed"{% if status_filter == "closed" %} selected{% endif %}>closed</option>
+        <option value="new"{% if status_filter == "new" %} selected{% endif %}>{% if is_en %}New{% else %}新反馈{% endif %}</option>
+        <option value="triaged"{% if status_filter == "triaged" %} selected{% endif %}>{% if is_en %}Triaged{% else %}已分诊{% endif %}</option>
+        <option value="in_progress"{% if status_filter == "in_progress" %} selected{% endif %}>{% if is_en %}In progress{% else %}处理中{% endif %}</option>
+        <option value="resolved"{% if status_filter == "resolved" %} selected{% endif %}>{% if is_en %}Resolved{% else %}已解决{% endif %}</option>
+        <option value="closed"{% if status_filter == "closed" %} selected{% endif %}>{% if is_en %}Closed{% else %}已关闭{% endif %}</option>
       </select>
     </label>
-    <label class="admin-field">
-      {% if is_en %}Rows per page{% else %}每页数量{% endif %}
-      <select name="size">
-        <option value="10"{% if page_size == 10 %} selected{% endif %}>10</option>
-        <option value="20"{% if page_size == 20 %} selected{% endif %}>20</option>
-        <option value="50"{% if page_size == 50 %} selected{% endif %}>50</option>
-        <option value="100"{% if page_size == 100 %} selected{% endif %}>100</option>
-      </select>
-    </label>
+    <input type="hidden" name="size" value="{{ page_size }}">
     <button class="button button-primary" type="submit">{% if is_en %}Filter{% else %}筛选{% endif %}</button>
+    {% if status_filter != "" %}<a class="button button-secondary" href="/admin/feedback?size={{ page_size }}{% if is_en %}&amp;lang=en{% endif %}">{% if is_en %}Clear{% else %}清除{% endif %}</a>{% endif %}
   </form>
 
   {% if let Some(message) = list_error %}
@@ -61,7 +54,7 @@
           <td><span class="admin-mono">{{ row.id }}</span></td>
           <td><span class="status-badge">{{ row.category }}</span> <span class="status-badge">{{ row.platform }}</span></td>
           <td>
-            <span class="status-badge"{% if row.status_tone != "" %} data-tone="{{ row.status_tone }}"{% endif %}>{{ row.status }}</span>
+            <span class="status-badge"{% if row.status_tone != "" %} data-tone="{{ row.status_tone }}"{% endif %}>{{ row.status_label }}</span>
             {% if row.redacted %}<span class="status-badge" data-tone="danger">{% if is_en %}redacted{% else %}已脱敏{% endif %}</span>{% endif %}
           </td>
           <td class="admin-mono">{{ row.created_at }}</td>
@@ -111,7 +104,7 @@
     <div><dt>{% if is_en %}Masked account{% else %}脱敏账号{% endif %}</dt><dd class="admin-mono">{{ detail.masked_account_id }}</dd></div>
     <div><dt>{% if is_en %}Category / platform{% else %}类别 / 平台{% endif %}</dt><dd>{{ detail.category }} / {{ detail.platform }}</dd></div>
     <div><dt>{% if is_en %}App version{% else %}应用版本{% endif %}</dt><dd class="admin-mono">{{ detail.app_version }}</dd></div>
-    <div><dt>{% if is_en %}Status / version{% else %}状态 / 版本{% endif %}</dt><dd>{{ detail.status }} / {{ detail.version }}</dd></div>
+    <div><dt>{% if is_en %}Status / version{% else %}状态 / 版本{% endif %}</dt><dd>{{ detail.status_label }} / {{ detail.version }}</dd></div>
     <div><dt>{% if is_en %}Created / updated{% else %}创建 / 更新时间{% endif %}</dt><dd class="admin-mono">{{ detail.created_at }}<br>{{ detail.updated_at }}</dd></div>
   </dl>
 

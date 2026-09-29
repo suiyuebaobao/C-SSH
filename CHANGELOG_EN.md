@@ -2,7 +2,33 @@
 
 # Changelog
 
-Download complete installers from [GitHub Releases](../../releases). Each release includes binaries, release notes, and verification details.
+## 0.9.0 — Three clients; manual installation required
+
+Download and install 0.9.0 manually. Automatic updates from older versions are unavailable.
+
+Platforms: Windows x64 (NSIS and portable ZIP), Apple Silicon Mac arm64 (DMG), and Android arm64 (APK). iOS is not uploaded; the Linux client remains frozen.
+
+Added and improved:
+- Apple Silicon Mac client and DMG distribution with shared runtime and desktop capabilities.
+- IPv4/Domain host selection with separate ports; domains can resolve to IPv6, and existing IPv6 hosts remain usable.
+- Official or self-hosted Creation Cloud selection, with isolated login, sync and update sources.
+- Manual Windows server Setup and Windows-account onboarding; automatic installation/OCR removed.
+- Windows Agent persistent terminals through Terminal2/psmux, with standard OpenSSH retained.
+- Fixes for global/project/host AI-history scope, terminal input, RDP logon readiness, host refresh, system information and shared migration.
+
+Verified:
+- Windows test VM: installation, startup, uninstallation and manual 0.8.8-to-0.9.0 upgrade with data retained.
+- Mac: arm64 build, mounted DMG, version and ad-hoc signature integrity.
+- Android: package checks and same-signer test-build upgrade, startup and data preservation in SDK Emulator; not an older-official-signature or physical-phone claim.
+
+Installation notes:
+- Android has a new signature and cannot replace an older official build directly. Uninstalling removes local data; Cloud excludes AI conversations and memory. Keep the old app if needed data is not safely preserved.
+- Mac is M-series only, targets macOS13+, is ad-hoc signed/not notarized and has no automatic updater.
+- Windows installers have no Authenticode signature and require WebView2 Runtime.
+- No automatic update to this release is offered to older clients; use the official manual downloads.
+
+
+Download complete installers from [GitHub Releases](https://github.com/suiyuebaobao/C-SSH/releases). Each release includes binaries, release notes, and verification details.
 
 ## v0.8.9 (Unreleased) — Windows Installation Choices And Local Availability
 

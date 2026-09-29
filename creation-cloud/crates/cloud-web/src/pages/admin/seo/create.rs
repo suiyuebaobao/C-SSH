@@ -25,6 +25,7 @@ pub(crate) async fn handle(
     Form(form): Form<CreateSeoTopicForm>,
 ) -> Response {
     let locale = shared::locale(form.lang.as_deref());
+    let return_path = super::return_path(form.locale);
     let actor = match shared::actor_from_session(&session) {
         Ok(actor) => actor,
         Err(error) => return shared::action_error(locale, error),
@@ -36,7 +37,7 @@ pub(crate) async fn handle(
         enabled: form.enabled,
     };
     match state.seo().create_topic(&actor, input).await {
-        Ok(_) => shared::action_success(&headers, "/admin/seo", locale),
+        Ok(_) => shared::action_success(&headers, &return_path, locale),
         Err(error) => shared::action_error(locale, error),
     }
 }

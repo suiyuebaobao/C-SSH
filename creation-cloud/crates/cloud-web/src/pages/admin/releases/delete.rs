@@ -33,7 +33,7 @@ pub(crate) async fn handle(
         Err(error) => return shared::action_error(locale, error),
     };
     match state.release().delete_release(&actor, release_id).await {
-        Ok(()) => shared::action_success(&headers, "/admin/releases", locale),
+        Ok(()) => shared::action_success(&headers, "/admin/releases?tab=uploaded", locale),
         Err(error) => shared::action_error(locale, error),
     }
 }

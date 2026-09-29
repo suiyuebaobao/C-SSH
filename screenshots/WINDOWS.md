@@ -1,135 +1,113 @@
-# C-SSH 0.8.9 · Windows 界面图集 / Screenshot Gallery
+# Windows 0.9.0 完整图集
 
-[返回首页 / Home](../README.md) · [图集目录 / Index](README.md)
+[Index](README.md) · [Features](../FEATURES.md)
 
-共 31 张。当前 0.8.9 前端的离线示例界面，使用示例主机、RFC 5737 地址和 example.com；没有连接服务器、Cloud 或 AI provider。长页面按实际滚动位置展示。
+以下为 0.9.0 真实 Vue 界面，使用合成示例数据在后台浏览器中渲染，不连接真实服务器。图集展示界面，不代表原生程序、真机或远端验收。公开截图已隐藏个人联系方式。
 
-31 screens from the current 0.8.9 frontend with offline sample data. No server, Cloud or AI-provider connection was made. Long pages are shown at their captured scroll positions.
+## 主机与项目
 
-安装三张图复用 2026-09-13 的PC隔离窗口产品界面；进度图为状态回放。其余图为后台浏览器渲染，不是原生安装、真机或业务链验收证据。0.8.9 程序尚未上传。
+![主机与项目](v0.9.0/windows-hosts.png)
 
-The three installation images reuse September 13 product UI captures; progress is a state replay. Other images are background browser renders, not native-device or functional acceptance evidence. 0.8.9 binaries are not uploaded.
+## 新增 IPv4 主机
 
-## 01 · 主机管理 / Host management
+![新增 IPv4 主机](v0.9.0/windows-add-ipv4.png)
 
-<a href="v0.8.9/windows-hosts.png"><img width="1080" src="v0.8.9/windows-hosts.png" alt="C-SSH 0.8.9 Host management" /></a>
+## 新增域名主机
 
-## 02 · 新增 Windows 主机与三种访问模式 / Add a Windows host and choose an access mode
+![新增域名主机](v0.9.0/windows-add-domain.png)
 
-<a href="v0.8.9/windows-add-server.png"><img width="1080" src="v0.8.9/windows-add-server.png" alt="C-SSH 0.8.9 Add a Windows host and choose an access mode" /></a>
+## Windows 管理接入
 
-## 03 · 远程桌面连接入口 / Remote desktop connection entry
+![Windows 管理接入](v0.9.0/windows-add-windows.png)
 
-<a href="v0.8.9/windows-rdp-entry.png"><img width="1080" src="v0.8.9/windows-rdp-entry.png" alt="C-SSH 0.8.9 Remote desktop connection entry" /></a>
+## 持久终端
 
-## 04 · 自动或手动安装 / Automatic or manual installation
+![持久终端](v0.9.0/windows-terminal-connected.png)
 
-<a href="v0.8.9/windows-install-choice.png"><img width="1080" src="v0.8.9/windows-install-choice.png" alt="C-SSH 0.8.9 Automatic or manual installation" /></a>
+## 监控总览
 
-## 05 · 手动 Setup 流程 / Manual Setup workflow
+![监控总览](v0.9.0/windows-monitor.png)
 
-<a href="v0.8.9/windows-manual-install.png"><img width="1080" src="v0.8.9/windows-manual-install.png" alt="C-SSH 0.8.9 Manual Setup workflow" /></a>
+## 主机监控详情
 
-## 06 · 自动安装进度与手动接管 / Installation progress and manual takeover
+![主机监控详情](v0.9.0/windows-monitor-detail.png)
 
-<a href="v0.8.9/windows-install-progress.png"><img width="1080" src="v0.8.9/windows-install-progress.png" alt="C-SSH 0.8.9 Installation progress and manual takeover" /></a>
+## 历史指标与进程
 
-## 07 · 终端 / Terminal
+![历史指标与进程](v0.9.0/windows-monitor-history.png)
 
-<a href="v0.8.9/windows-terminal.png"><img width="1080" src="v0.8.9/windows-terminal.png" alt="C-SSH 0.8.9 Terminal" /></a>
+## 文件管理
 
-## 08 · 文件管理 / File manager
+![文件管理](v0.9.0/windows-files.png)
 
-<a href="v0.8.9/windows-files.png"><img width="1080" src="v0.8.9/windows-files.png" alt="C-SSH 0.8.9 File manager" /></a>
+## 全局 AI
 
-## 09 · 跨主机监控 / Fleet monitoring
+![全局 AI](v0.9.0/windows-ai-global.png)
 
-<a href="v0.8.9/windows-monitor-overview.png"><img width="1080" src="v0.8.9/windows-monitor-overview.png" alt="C-SSH 0.8.9 Fleet monitoring" /></a>
+## 项目 AI
 
-## 10 · 监控详情与趋势 / Monitoring details and trends
+![项目 AI](v0.9.0/windows-ai-project.png)
 
-<a href="v0.8.9/windows-monitor-charts.png"><img width="1080" src="v0.8.9/windows-monitor-charts.png" alt="C-SSH 0.8.9 Monitoring details and trends" /></a>
+## 主机 AI
 
-## 11 · 主机 AI 示例对话 / Host AI sample conversation
+![主机 AI](v0.9.0/windows-ai-host.png)
 
-<a href="v0.8.9/windows-ai-host.png"><img width="1080" src="v0.8.9/windows-ai-host.png" alt="C-SSH 0.8.9 Host AI sample conversation" /></a>
+## 系统管理
 
-## 12 · 项目 AI 示例对话 / Project AI sample conversation
+![系统管理](v0.9.0/windows-sysmgmt.png)
 
-<a href="v0.8.9/windows-ai-project.png"><img width="1080" src="v0.8.9/windows-ai-project.png" alt="C-SSH 0.8.9 Project AI sample conversation" /></a>
+## 应用中心
 
-## 13 · 全局 AI 示例对话 / Global AI sample conversation
+![应用中心](v0.9.0/windows-appcenter.png)
 
-<a href="v0.8.9/windows-ai-global.png"><img width="1080" src="v0.8.9/windows-ai-global.png" alt="C-SSH 0.8.9 Global AI sample conversation" /></a>
+## 端口映射
 
-## 14 · AI 模型账户 / AI model accounts
+![端口映射](v0.9.0/windows-ports.png)
 
-<a href="v0.8.9/windows-ai-models.png"><img width="1080" src="v0.8.9/windows-ai-models.png" alt="C-SSH 0.8.9 AI model accounts" /></a>
+## 命令库
 
-## 15 · 端口映射 / Port forwarding
+![命令库](v0.9.0/windows-snippets.png)
 
-<a href="v0.8.9/windows-port-forwarding.png"><img width="1080" src="v0.8.9/windows-port-forwarding.png" alt="C-SSH 0.8.9 Port forwarding" /></a>
+## 访问授权
 
-## 16 · 群发执行 / Broadcast execution
+![访问授权](v0.9.0/windows-grants.png)
 
-<a href="v0.8.9/windows-broadcast.png"><img width="1080" src="v0.8.9/windows-broadcast.png" alt="C-SSH 0.8.9 Broadcast execution" /></a>
+## 诊断日志
 
-## 17 · 常用命令库 / Command library
+![诊断日志](v0.9.0/windows-diagnostics.png)
 
-<a href="v0.8.9/windows-command-library-full.png"><img width="1080" src="v0.8.9/windows-command-library-full.png" alt="C-SSH 0.8.9 Command library" /></a>
+## 账号与同步
 
-## 18 · 进程管理 / Process management
+![账号与同步](v0.9.0/windows-settings-section-account.png)
 
-<a href="v0.8.9/windows-system-processes.png"><img width="1080" src="v0.8.9/windows-system-processes.png" alt="C-SSH 0.8.9 Process management" /></a>
+## 自建云设置
 
-## 19 · 防火墙端口 / Firewall ports
+![自建云设置](v0.9.0/windows-cloud-selfhost.png)
 
-<a href="v0.8.9/windows-firewall.png"><img width="1080" src="v0.8.9/windows-firewall.png" alt="C-SSH 0.8.9 Firewall ports" /></a>
+## 代理线路
 
-## 20 · 应用中心 / App Center
+![代理线路](v0.9.0/windows-settings-section-proxy-profiles.png)
 
-<a href="v0.8.9/windows-app-center.png"><img width="1080" src="v0.8.9/windows-app-center.png" alt="C-SSH 0.8.9 App Center" /></a>
+## AI 模型设置
 
-## 21 · 访问授权 / Access grants
+![AI 模型设置](v0.9.0/windows-settings-section-ai.png)
 
-<a href="v0.8.9/windows-access-grants.png"><img width="1080" src="v0.8.9/windows-access-grants.png" alt="C-SSH 0.8.9 Access grants" /></a>
+## 外观
 
-## 22 · 代理线路 / Proxy profiles
+![外观](v0.9.0/windows-settings-section-appearance.png)
 
-<a href="v0.8.9/windows-proxy-profiles.png"><img width="1080" src="v0.8.9/windows-proxy-profiles.png" alt="C-SSH 0.8.9 Proxy profiles" /></a>
+## 语言
 
-## 23 · 外观设置 / Appearance
+![语言](v0.9.0/windows-settings-section-language.png)
 
-<a href="v0.8.9/windows-appearance.png"><img width="1080" src="v0.8.9/windows-appearance.png" alt="C-SSH 0.8.9 Appearance" /></a>
+## 数据保护
 
-## 24 · 监控采集设置 / Monitoring collection settings
+![数据保护](v0.9.0/windows-settings-section-security.png)
 
-<a href="v0.8.9/windows-collection.png"><img width="1080" src="v0.8.9/windows-collection.png" alt="C-SSH 0.8.9 Monitoring collection settings" /></a>
+## 监控采集设置
 
-## 25 · 数据保护设置 / Data protection
+![监控采集设置](v0.9.0/windows-settings-section-collection.png)
 
-<a href="v0.8.9/windows-data-protection.png"><img width="1080" src="v0.8.9/windows-data-protection.png" alt="C-SSH 0.8.9 Data protection" /></a>
+## 关于
 
-## 26 · 可选账号登录与本地模式 / Optional account login and local mode
-
-<a href="v0.8.9/windows-cloud-account.png"><img width="1080" src="v0.8.9/windows-cloud-account.png" alt="C-SSH 0.8.9 Optional account login and local mode" /></a>
-
-## 27 · 云同步变化清单 / Cloud sync change preview
-
-<a href="v0.8.9/windows-cloud-sync.png"><img width="1080" src="v0.8.9/windows-cloud-sync.png" alt="C-SSH 0.8.9 Cloud sync change preview" /></a>
-
-## 28 · 诊断日志默认关闭 / Diagnostics off by default
-
-<a href="v0.8.9/windows-diagnostics.png"><img width="1080" src="v0.8.9/windows-diagnostics.png" alt="C-SSH 0.8.9 Diagnostics off by default" /></a>
-
-## 29 · 关于与更新入口 / About and update entry
-
-<a href="v0.8.9/windows-about.png"><img width="1080" src="v0.8.9/windows-about.png" alt="C-SSH 0.8.9 About and update entry" /></a>
-
-## 30 · 版本缓存故障时继续本地使用 / Local use during a version-cache failure
-
-<a href="v0.8.9/windows-local-mode.png"><img width="1080" src="v0.8.9/windows-local-mode.png" alt="C-SSH 0.8.9 Local use during a version-cache failure" /></a>
-
-## 31 · 账号概览与数据保护状态 / Account overview and data protection
-
-<a href="v0.8.9/windows-account-overview.png"><img width="1080" src="v0.8.9/windows-account-overview.png" alt="C-SSH 0.8.9 account overview with translated protection status" /></a>
+![关于](v0.9.0/windows-settings-about.png)

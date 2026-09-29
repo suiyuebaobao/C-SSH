@@ -25,13 +25,13 @@
           {% for host in hosts %}
           <article class="console-record">
             <div class="console-record-heading">
-              <div><strong>{{ host.name }}</strong><small>{{ host.address }}:{{ host.port }} · {{ host.platform }}</small></div>
-              <span class="console-status">{{ host.status }}</span>
+              <div><strong>{% if is_en %}Encrypted host{% else %}加密主机{% endif %}</strong><small>{{ host.id }}</small></div>
+              <span class="console-status">{% if host.migration_required %}{% if is_en %}Migration required{% else %}需要迁移{% endif %}{% else %}{% if is_en %}Opaque{% else %}不透明密文{% endif %}{% endif %}</span>
             </div>
             <dl class="console-definition-grid console-definition-grid-compact">
-              <div><dt>{% if is_en %}Tags{% else %}标签{% endif %}</dt><dd>{% if host.tags.is_empty() %}—{% else %}{{ host.tags }}{% endif %}</dd></div>
               <div><dt>{% if is_en %}Revision{% else %}修订号{% endif %}</dt><dd>{{ host.revision }}</dd></div>
-              <div><dt>{% if is_en %}Encrypted fields{% else %}加密字段{% endif %}</dt><dd>{% if host.secret_present %}{% if is_en %}Present{% else %}已保存密文{% endif %}{% else %}—{% endif %}</dd></div>
+              <div><dt>{% if is_en %}Opaque payload{% else %}不透明载荷{% endif %}</dt><dd>{% if host.secret_present && host.metadata_encrypted %}{% if is_en %}Present{% else %}已保存{% endif %}{% else %}{% if is_en %}Client migration required{% else %}需要客户端迁移{% endif %}{% endif %}</dd></div>
+              <div><dt>{% if is_en %}Source device{% else %}来源设备{% endif %}</dt><dd>{{ host.source_device_id }}</dd></div>
               <div><dt>{% if is_en %}Updated{% else %}更新时间{% endif %}</dt><dd>{{ host.updated_at }}</dd></div>
             </dl>
           </article>

@@ -8,23 +8,24 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    AiProviderOperation, HostMetadataInput, HostOperation, PushOutcome, PushRequest, ResourceKind,
-    ResourceRevision,
+    AiProviderOperation, HostOperation, ProxyProfileOperation, PushOutcome, PushRequest,
+    ResourceKind, ResourceRevision,
     actor::DeviceActor,
-    validation::{ValidatedAiChange, ValidatedChange, ValidatedPush},
+    validation::{ValidatedAiChange, ValidatedChange, ValidatedProxyProfileChange, ValidatedPush},
 };
 
 use super::{
     DbTransaction,
     ai::{self, AiRow, AiWriteValue},
     begin,
-    capacity::enforce_encrypted_resource_limit,
+    capacity::{CapacityInputs, enforce_encrypted_resource_limit},
     commit,
     hosts::{HostRow, lock_current},
     lock_sync_state,
+    proxy_profile::{self, ProxyProfileRow, ProxyProfileWriteValue},
     pull::{safe_checkpoint_revision, save_checkpoint},
     require_active_device, require_base_revision, require_configured_envelope,
-    require_protection_version, require_sync_generation, storage,
+    require_protection_version, require_sync_contract, require_sync_generation, storage,
 };
 
 #[derive(FromRow)]
@@ -34,6 +35,7 @@ struct MutationRow {
     request_protection_epoch: i64,
     request_protection_revision: i64,
     request_hash: Vec<u8>,
+    request_hash_scheme: String,
     outcome: String,
     result_revision: i64,
     changed_count: i32,
@@ -54,14 +56,15 @@ struct MutationResult<'a> {
 }
 
 pub(super) struct WriteValue {
-    pub(super) address: String,
-    pub(super) port: i32,
-    pub(super) name: String,
-    pub(super) platform: String,
-    pub(super) tags: Value,
-    pub(super) status: String,
+    pub(super) address: Option<String>,
+    pub(super) port: Option<i32>,
+    pub(super) name: Option<String>,
+    pub(super) platform: Option<String>,
+    pub(super) tags: Option<Value>,
+    pub(super) status: Option<String>,
     pub(super) ciphertext: Option<Vec<u8>>,
     pub(super) deleted: bool,
+    pub(super) metadata_encrypted: bool,
 }
 
 pub(crate) async fn push(
@@ -70,22 +73,33 @@ pub(crate) async fn push(
     request: &PushRequest,
     changes: &ValidatedPush,
     request_hash: &[u8; 32],
+    request_hash_scheme: &str,
 ) -> AppResult<PushOutcome> {
     let account_id = actor.account_id();
     let mut tx = begin(pool).await?;
     require_active_device(&mut tx, account_id, actor.device_id()).await?;
     let state = lock_sync_state(&mut tx, account_id).await?;
     require_sync_generation(state, request.sync_generation)?;
-    if let Some(outcome) = replay_mutation(
-        &mut tx,
-        actor,
-        request.sync_generation,
-        request.protection_epoch,
-        request.protection_revision,
-        request.client_mutation_id,
-        request_hash,
-    )
-    .await?
+    require_sync_contract(state, request.sync_contract_version)?;
+    if !changes.host_changes.is_empty() {
+        let legacy_host_present = sqlx::query_scalar::<_, bool>(
+            "SELECT EXISTS(SELECT 1 FROM cloud_hosts
+                           WHERE account_id=$1 AND NOT metadata_encrypted)
+                 OR EXISTS(SELECT 1 FROM cloud_host_versions
+                           WHERE account_id=$1 AND NOT metadata_encrypted)",
+        )
+        .bind(account_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(storage)?;
+        if legacy_host_present {
+            return Err(AppError::SyncContractUpgradeRequired(
+                "Host metadata迁移完成前不能提交普通Host变更".to_owned(),
+            ));
+        }
+    }
+    if let Some(outcome) =
+        replay_mutation(&mut tx, actor, request, request_hash, request_hash_scheme).await?
     {
         commit(tx).await?;
         return Ok(outcome);
@@ -97,19 +111,27 @@ pub(crate) async fn push(
     // 所有行锁与 expected revision 检查必须在任何业务写入之前完成。
     let host_rows = precheck_hosts(&mut tx, account_id, &changes.host_changes).await?;
     let ai_rows = precheck_ai(&mut tx, account_id, &changes.ai_changes).await?;
+    let proxy_rows =
+        precheck_proxy_profiles(&mut tx, account_id, &changes.proxy_profile_changes).await?;
     enforce_encrypted_resource_limit(
         &mut tx,
         account_id,
-        &changes.host_changes,
-        &host_rows,
-        &changes.ai_changes,
-        &ai_rows,
+        CapacityInputs {
+            host_changes: &changes.host_changes,
+            host_rows: &host_rows,
+            ai_changes: &changes.ai_changes,
+            ai_rows: &ai_rows,
+            proxy_changes: &changes.proxy_profile_changes,
+            proxy_rows: &proxy_rows,
+        },
     )
     .await?;
 
     let mut revision = state.current_revision;
     let mut changed_count = 0_usize;
-    let mut revisions = Vec::with_capacity(changes.host_changes.len() + changes.ai_changes.len());
+    let mut revisions = Vec::with_capacity(
+        changes.host_changes.len() + changes.ai_changes.len() + changes.proxy_profile_changes.len(),
+    );
     for (change, current) in changes.host_changes.iter().zip(host_rows.iter()) {
         let result_revision = if let Some(value) = host_write_value(change, current.as_ref()) {
             revision = next_revision(revision)?;
@@ -146,16 +168,40 @@ pub(crate) async fn push(
             cloud_revision: result_revision,
         });
     }
+    for (change, current) in changes.proxy_profile_changes.iter().zip(proxy_rows.iter()) {
+        let result_revision =
+            if let Some(value) = proxy_profile_write_value(change, current.as_ref()) {
+                revision = next_revision(revision)?;
+                proxy_profile::write(&mut tx, actor, change.resource_id, revision, value).await?;
+                changed_count += 1;
+                revision
+            } else {
+                current
+                    .as_ref()
+                    .map(|row| row.revision)
+                    .ok_or_else(super::invalid_stored_value)?
+            };
+        revisions.push(ResourceRevision {
+            resource_kind: ResourceKind::ProxyProfile,
+            resource_id: change.resource_id,
+            cloud_revision: result_revision,
+        });
+    }
     revisions.sort_unstable_by_key(|result| result.cloud_revision);
 
-    if changed_count > 0 {
+    if changed_count > 0 || !changes.host_changes.is_empty() {
         sqlx::query(
             "UPDATE cloud_host_sync_states
-             SET current_revision = $2, updated_at = now()
+             SET current_revision = $2,
+                 minimum_sync_contract_version = CASE WHEN $3
+                     THEN GREATEST(minimum_sync_contract_version, 4)
+                     ELSE minimum_sync_contract_version END,
+                 updated_at = now()
              WHERE account_id = $1",
         )
         .bind(account_id)
         .bind(revision)
+        .bind(!changes.host_changes.is_empty())
         .execute(&mut *tx)
         .await
         .map_err(storage)?;
@@ -174,7 +220,15 @@ pub(crate) async fn push(
         changed_count,
         revisions: &revisions,
     };
-    insert_mutation(&mut tx, actor, request, request_hash, &mutation).await?;
+    insert_mutation(
+        &mut tx,
+        actor,
+        request,
+        request_hash,
+        request_hash_scheme,
+        &mutation,
+    )
+    .await?;
     record_account_event(
         &mut tx,
         account_id,
@@ -268,31 +322,59 @@ async fn precheck_ai(
     Ok(rows)
 }
 
+async fn precheck_proxy_profiles(
+    tx: &mut DbTransaction<'_>,
+    account_id: Uuid,
+    changes: &[ValidatedProxyProfileChange],
+) -> AppResult<Vec<Option<ProxyProfileRow>>> {
+    let mut rows = Vec::with_capacity(changes.len());
+    for change in changes {
+        let current = proxy_profile::lock_current(tx, account_id, change.resource_id).await?;
+        let matches = match change.operation {
+            ProxyProfileOperation::Insert => current.is_none(),
+            ProxyProfileOperation::Update | ProxyProfileOperation::Delete => {
+                current.as_ref().map(|row| row.revision) == change.expected_revision
+            }
+        };
+        if !matches {
+            return Err(AppError::SyncStateChanged(
+                "proxy profile expected_revision no longer matches cloud state".to_owned(),
+            ));
+        }
+        rows.push(current);
+    }
+    Ok(rows)
+}
+
 fn host_write_value(change: &ValidatedChange, current: Option<&HostRow>) -> Option<WriteValue> {
     match change.operation {
         HostOperation::Insert | HostOperation::Update => {
-            let metadata = change.metadata.as_ref()?;
-            let ciphertext = match &change.ciphertext {
-                Some(value) => value.clone(),
-                None if change.operation == HostOperation::Update => {
-                    current.and_then(|row| row.ciphertext.clone())
-                }
-                None => None,
+            let ciphertext = change.ciphertext.as_ref()?.clone()?;
+            let value = WriteValue {
+                address: None,
+                port: None,
+                name: None,
+                platform: None,
+                tags: None,
+                status: None,
+                ciphertext: Some(ciphertext),
+                deleted: false,
+                metadata_encrypted: change.metadata_encrypted,
             };
-            let value = from_metadata(metadata, ciphertext);
             (!current.is_some_and(|row| same_value(row, &value))).then_some(value)
         }
         HostOperation::Delete => {
             let current = current?;
-            (!current.is_deleted).then(|| WriteValue {
-                address: current.address.clone(),
-                port: current.port,
-                name: current.name.clone(),
-                platform: current.platform.clone(),
-                tags: current.tags.clone(),
-                status: current.status.clone(),
+            (!current.is_deleted).then_some(WriteValue {
+                address: None,
+                port: None,
+                name: None,
+                platform: None,
+                tags: None,
+                status: None,
                 ciphertext: None,
                 deleted: true,
+                metadata_encrypted: true,
             })
         }
     }
@@ -311,19 +393,19 @@ fn ai_write_value(change: &ValidatedAiChange, current: Option<&AiRow>) -> Option
     }
 }
 
-pub(super) fn from_metadata(
-    metadata: &HostMetadataInput,
-    ciphertext: Option<Vec<u8>>,
-) -> WriteValue {
-    WriteValue {
-        address: metadata.address.clone(),
-        port: i32::from(metadata.port),
-        name: metadata.name.clone(),
-        platform: metadata.platform.clone(),
-        tags: serde_json::json!(metadata.tags),
-        status: metadata.status.as_str().to_owned(),
-        ciphertext,
-        deleted: false,
+fn proxy_profile_write_value(
+    change: &ValidatedProxyProfileChange,
+    current: Option<&ProxyProfileRow>,
+) -> Option<ProxyProfileWriteValue> {
+    match change.operation {
+        ProxyProfileOperation::Insert | ProxyProfileOperation::Update => {
+            let value = ProxyProfileWriteValue::from_payload(change.payload.as_ref()?);
+            (!current.is_some_and(|row| proxy_profile::same_value(row, &value))).then_some(value)
+        }
+        ProxyProfileOperation::Delete => {
+            let current = current?;
+            (!current.is_deleted).then(ProxyProfileWriteValue::tombstone)
+        }
     }
 }
 
@@ -336,6 +418,7 @@ pub(super) fn same_value(current: &HostRow, value: &WriteValue) -> bool {
         && current.status == value.status
         && current.ciphertext == value.ciphertext
         && current.is_deleted == value.deleted
+        && current.metadata_encrypted == value.metadata_encrypted
 }
 
 pub(super) async fn write_host(
@@ -348,8 +431,8 @@ pub(super) async fn write_host(
     sqlx::query(
         "INSERT INTO cloud_hosts
              (account_id, id, address, port, name, platform, tags, status,
-              ciphertext, source_device_id, revision, is_deleted)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+               ciphertext, source_device_id, revision, is_deleted, metadata_encrypted)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
          ON CONFLICT (account_id, id) DO UPDATE SET
              address = EXCLUDED.address, port = EXCLUDED.port,
              name = EXCLUDED.name, platform = EXCLUDED.platform,
@@ -357,6 +440,7 @@ pub(super) async fn write_host(
              ciphertext = EXCLUDED.ciphertext,
              source_device_id = EXCLUDED.source_device_id,
              revision = EXCLUDED.revision, is_deleted = EXCLUDED.is_deleted,
+             metadata_encrypted = EXCLUDED.metadata_encrypted,
              updated_at = now()",
     )
     .bind(actor.account_id())
@@ -371,14 +455,15 @@ pub(super) async fn write_host(
     .bind(actor.device_id())
     .bind(revision)
     .bind(value.deleted)
+    .bind(value.metadata_encrypted)
     .execute(&mut **tx)
     .await
     .map_err(storage)?;
     sqlx::query(
         "INSERT INTO cloud_host_versions
              (account_id, host_id, revision, address, port, name, platform,
-              tags, status, ciphertext, source_device_id, is_deleted)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
+               tags, status, ciphertext, source_device_id, is_deleted, metadata_encrypted)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)",
     )
     .bind(actor.account_id())
     .bind(host_id)
@@ -392,6 +477,7 @@ pub(super) async fn write_host(
     .bind(value.ciphertext)
     .bind(actor.device_id())
     .bind(value.deleted)
+    .bind(value.metadata_encrypted)
     .execute(&mut **tx)
     .await
     .map_err(storage)?;

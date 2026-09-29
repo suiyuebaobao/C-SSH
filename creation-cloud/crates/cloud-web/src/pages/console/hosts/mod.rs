@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::{Extension, extract::Query, extract::State, response::Html};
 use cloud_domain::{AppResult, AuthenticatedSession};
-use cloud_host::{HostStatus, HostView};
+use cloud_host::HostView;
 use cloud_site::{PageId, SiteView};
 
 use crate::{ConsolePageState, query::LocaleQuery, seo::SeoHead};
@@ -11,38 +11,26 @@ use crate::{ConsolePageState, query::LocaleQuery, seo::SeoHead};
 use super::common;
 
 struct HostRow {
-    name: String,
-    address: String,
-    port: u16,
-    platform: String,
-    status: &'static str,
-    tags: String,
+    id: String,
     revision: i64,
     secret_present: bool,
+    metadata_encrypted: bool,
+    migration_required: bool,
+    source_device_id: String,
     updated_at: String,
 }
 
 impl From<HostView> for HostRow {
     fn from(value: HostView) -> Self {
         Self {
-            name: value.name,
-            address: value.address,
-            port: value.port,
-            platform: value.platform,
-            status: status(value.status),
-            tags: value.tags.join(", "),
+            id: value.id.to_string(),
             revision: value.revision,
             secret_present: value.secret_present,
+            metadata_encrypted: value.metadata_encrypted,
+            migration_required: value.host_metadata_migration_required,
+            source_device_id: value.source_device_id.to_string(),
             updated_at: value.updated_at.to_rfc3339(),
         }
-    }
-}
-
-fn status(value: HostStatus) -> &'static str {
-    match value {
-        HostStatus::Active => "active",
-        HostStatus::Disabled => "disabled",
-        HostStatus::Archived => "archived",
     }
 }
 

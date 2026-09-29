@@ -1,8 +1,7 @@
 //! 对 Host 与 AI provider 账号的完整密文集合执行原子 rekey 和 generation CAS。
 
-use cloud_domain::{AppError, AppResult, current_request_id, mark_semantic_audit_recorded};
+use cloud_domain::{AppError, AppResult, mark_semantic_audit_recorded};
 use cloud_store::PgPool;
-use serde_json::{Value, json};
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -17,20 +16,17 @@ use super::{
     begin,
     capacity::require_current_within_limit,
     commit, lock_sync_state,
+    proxy_profile::{self, ProxyProfileWriteValue},
     pull::record_rekey_snapshot,
     push::{WriteValue, write_host},
-    require_active_device, require_sync_generation, storage,
+    require_active_device, require_sync_contract, require_sync_generation, storage,
 };
+
+mod audit;
 
 #[derive(FromRow)]
 struct CurrentEncryptedHost {
     id: Uuid,
-    address: String,
-    port: i32,
-    name: String,
-    platform: String,
-    tags: Value,
-    status: String,
     revision: i64,
 }
 
@@ -43,6 +39,7 @@ struct CurrentEncryptedAi {
 enum CurrentEncryptedResource {
     Host(CurrentEncryptedHost),
     AiProviderAccount(CurrentEncryptedAi),
+    ProxyProfile(CurrentEncryptedAi),
 }
 
 impl CurrentEncryptedResource {
@@ -50,6 +47,7 @@ impl CurrentEncryptedResource {
         match self {
             Self::Host(_) => ResourceKind::Host,
             Self::AiProviderAccount(_) => ResourceKind::AiProviderAccount,
+            Self::ProxyProfile(_) => ResourceKind::ProxyProfile,
         }
     }
 
@@ -57,6 +55,7 @@ impl CurrentEncryptedResource {
         match self {
             Self::Host(value) => value.id,
             Self::AiProviderAccount(value) => value.id,
+            Self::ProxyProfile(value) => value.id,
         }
     }
 
@@ -64,6 +63,7 @@ impl CurrentEncryptedResource {
         match self {
             Self::Host(value) => value.revision,
             Self::AiProviderAccount(value) => value.revision,
+            Self::ProxyProfile(value) => value.revision,
         }
     }
 }
@@ -120,6 +120,22 @@ pub(crate) async fn rekey(
     }
 
     require_sync_generation(state, request.sync_generation)?;
+    require_sync_contract(state, request.sync_contract_version)?;
+    let legacy_host_present = sqlx::query_scalar::<_, bool>(
+        "SELECT EXISTS(SELECT 1 FROM cloud_hosts
+                       WHERE account_id=$1 AND NOT metadata_encrypted)
+             OR EXISTS(SELECT 1 FROM cloud_host_versions
+                       WHERE account_id=$1 AND NOT metadata_encrypted)",
+    )
+    .bind(actor.account_id())
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(storage)?;
+    if legacy_host_present {
+        return Err(AppError::SyncContractUpgradeRequired(
+            "Host metadata迁移完成前不能执行rekey".to_owned(),
+        ));
+    }
     require_current_within_limit(&mut tx, actor.account_id()).await?;
     let current = lock_encrypted_resources(&mut tx, actor.account_id()).await?;
     require_complete_candidate(&current, candidates)?;
@@ -132,6 +148,7 @@ pub(crate) async fn rekey(
     let mut revisions = Vec::with_capacity(current.len());
     let mut changed_hosts = 0_usize;
     let mut changed_ai = 0_usize;
+    let mut changed_proxy_profiles = 0_usize;
     for (stored, candidate) in current.into_iter().zip(candidates) {
         revision = revision
             .checked_add(1)
@@ -149,14 +166,15 @@ pub(crate) async fn rekey(
                     host.id,
                     revision,
                     WriteValue {
-                        address: host.address,
-                        port: host.port,
-                        name: host.name,
-                        platform: host.platform,
-                        tags: host.tags,
-                        status: host.status,
+                        address: None,
+                        port: None,
+                        name: None,
+                        platform: None,
+                        tags: None,
+                        status: None,
                         ciphertext: Some(ciphertext.clone()),
                         deleted: false,
+                        metadata_encrypted: true,
                     },
                 )
                 .await?;
@@ -175,6 +193,20 @@ pub(crate) async fn rekey(
                 )
                 .await?;
                 changed_ai += 1;
+            }
+            (
+                CurrentEncryptedResource::ProxyProfile(_),
+                ValidatedRekeyResource::ProxyProfile { payload, .. },
+            ) => {
+                proxy_profile::write(
+                    &mut tx,
+                    actor,
+                    resource_id,
+                    revision,
+                    ProxyProfileWriteValue::from_payload(payload),
+                )
+                .await?;
+                changed_proxy_profiles += 1;
             }
             _ => return Err(super::invalid_stored_value()),
         }
@@ -236,7 +268,7 @@ pub(crate) async fn rekey(
         &revisions,
     )
     .await?;
-    audit_rekey(
+    audit::record(
         &mut tx,
         actor,
         request.mutation_id,
@@ -245,6 +277,7 @@ pub(crate) async fn rekey(
         revision,
         changed_hosts,
         changed_ai,
+        changed_proxy_profiles,
     )
     .await?;
     commit(tx).await?;
@@ -308,9 +341,10 @@ async fn lock_encrypted_resources(
     account_id: Uuid,
 ) -> AppResult<Vec<CurrentEncryptedResource>> {
     let hosts = sqlx::query_as::<_, CurrentEncryptedHost>(
-        "SELECT id, address, port, name, platform, tags, status, revision
+        "SELECT id, revision
          FROM cloud_hosts
          WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL
+           AND metadata_encrypted
          ORDER BY id FOR UPDATE",
     )
     .bind(account_id)
@@ -326,12 +360,26 @@ async fn lock_encrypted_resources(
     .fetch_all(&mut **tx)
     .await
     .map_err(storage)?;
+    let profiles = sqlx::query_as::<_, CurrentEncryptedAi>(
+        "SELECT id, revision FROM cloud_proxy_profiles
+         WHERE account_id = $1 AND NOT is_deleted AND ciphertext IS NOT NULL
+         ORDER BY id FOR UPDATE",
+    )
+    .bind(account_id)
+    .fetch_all(&mut **tx)
+    .await
+    .map_err(storage)?;
     let mut resources = hosts
         .into_iter()
         .map(CurrentEncryptedResource::Host)
         .chain(
             ai.into_iter()
                 .map(CurrentEncryptedResource::AiProviderAccount),
+        )
+        .chain(
+            profiles
+                .into_iter()
+                .map(CurrentEncryptedResource::ProxyProfile),
         )
         .collect::<Vec<_>>();
     resources.sort_unstable_by_key(|resource| (resource.kind().as_str(), resource.id()));
@@ -429,6 +477,8 @@ async fn purge_prior_ciphertext_versions(
          WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
         "DELETE FROM cloud_ai_provider_config_versions
          WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
+        "DELETE FROM cloud_proxy_profile_versions
+         WHERE account_id = $1 AND revision <= $2 AND ciphertext IS NOT NULL",
     ] {
         sqlx::query(statement)
             .bind(account_id)
@@ -437,45 +487,6 @@ async fn purge_prior_ciphertext_versions(
             .await
             .map_err(storage)?;
     }
-    Ok(())
-}
-
-#[allow(clippy::too_many_arguments)]
-async fn audit_rekey(
-    tx: &mut DbTransaction<'_>,
-    actor: DeviceActor,
-    mutation_id: Uuid,
-    previous_generation: i64,
-    next_generation: i64,
-    result_revision: i64,
-    changed_hosts: usize,
-    changed_ai: usize,
-) -> AppResult<()> {
-    let request_id = current_request_id().unwrap_or_else(|| Uuid::now_v7().to_string());
-    let details = json!({
-        "mutation_id": mutation_id,
-        "device_id": actor.device_id(),
-        "changed_hosts": i64::try_from(changed_hosts).unwrap_or(i64::MAX),
-        "changed_ai_providers": i64::try_from(changed_ai).unwrap_or(i64::MAX),
-        "result_revision": result_revision,
-        "previous_sync_generation": previous_generation,
-        "sync_generation": next_generation
-    });
-    sqlx::query(
-        "INSERT INTO audit_events
-             (id, actor_account_id, action, resource_kind, resource_id,
-              outcome, request_id, details)
-         VALUES ($1,$2,'sync.encrypted_data_rekey_v2','sync_account',$3,
-                 'success',$4,$5)",
-    )
-    .bind(Uuid::now_v7())
-    .bind(actor.account_id())
-    .bind(actor.account_id().to_string())
-    .bind(request_id)
-    .bind(details)
-    .execute(&mut **tx)
-    .await
-    .map_err(|_| AppError::Storage("failed to persist encrypted sync rekey audit".to_owned()))?;
     Ok(())
 }
 
@@ -509,7 +520,7 @@ mod tests {
             payload: crate::validation::ValidatedAiPayload {
                 ciphertext: vec![1],
                 nonce: vec![2],
-                envelope_metadata: json!({"v": 1}),
+                envelope_metadata: serde_json::json!({"v": 1}),
             },
         }
     }

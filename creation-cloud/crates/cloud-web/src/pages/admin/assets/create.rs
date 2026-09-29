@@ -51,7 +51,11 @@ pub(crate) async fn handle(
     };
     let locale = shared::locale(form.lang.as_deref());
     match create_download(&state, &actor, form).await {
-        Ok(()) => shared::action_success(&headers, "/admin/assets", locale),
+        Ok(release_id) => shared::action_success(
+            &headers,
+            &format!("/admin/assets?release_id={release_id}"),
+            locale,
+        ),
         Err(error) => shared::action_error(locale, error),
     }
 }
@@ -150,7 +154,7 @@ async fn create_download(
     state: &AdminPageState,
     actor: &cloud_domain::AdminActor,
     mut form: NewDownloadForm,
-) -> AppResult<()> {
+) -> AppResult<Uuid> {
     let release_id = required(form.release_id.take(), "发布版本")?
         .parse::<Uuid>()
         .map_err(|_| AppError::Validation("发布版本无效".into()))?;
@@ -189,7 +193,7 @@ async fn create_download(
                     form.updater_signature.as_deref(),
                 )
                 .await?;
-            Ok(())
+            Ok(release_id)
         }
         "external" => {
             if form.local_upload.is_some() {
@@ -207,7 +211,7 @@ async fn create_download(
                     .download()
                     .create_external_source(actor, asset.id, &external_url)
                     .await?;
-                return Ok(());
+                return Ok(release_id);
             }
 
             let file_name = required(form.file_name.take(), "文件名")?;
@@ -231,7 +235,7 @@ async fn create_download(
                     &external_url,
                 )
                 .await?;
-            Ok(())
+            Ok(release_id)
         }
         _ => Err(AppError::Validation(
             "下载方式只允许本地上传或外链下载".into(),

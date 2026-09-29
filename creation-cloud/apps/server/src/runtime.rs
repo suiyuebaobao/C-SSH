@@ -7,6 +7,7 @@ use tracing::info;
 use crate::{
     app,
     maintenance::{Runner, Supervisor},
+    proxy_internal,
     services::AppServices,
     shutdown,
 };
@@ -14,6 +15,7 @@ use crate::{
 enum RuntimeExit {
     ShutdownSignal,
     ServerFinished(std::result::Result<std::io::Result<()>, tokio::task::JoinError>),
+    ProxyServerFinished(std::result::Result<std::io::Result<()>, tokio::task::JoinError>),
     SupervisorFailed,
 }
 
@@ -23,6 +25,12 @@ pub async fn serve(services: AppServices, config: cloud_config::CloudConfig) -> 
     let router = app::build(services.clone(), config.clone());
     let listener = tokio::net::TcpListener::bind(config.bind_addr).await?;
     let (shutdown_sender, shutdown_receiver) = watch::channel(false);
+    let mut proxy_server = proxy_internal::start(
+        services.proxy.clone(),
+        &config.proxy,
+        shutdown_receiver.clone(),
+    )
+    .await?;
     let mut supervisor = Supervisor::start(Runner::new(services, config.maintenance.clone()));
     let mut server = tokio::spawn(async move {
         axum::serve(listener, router)
@@ -35,6 +43,7 @@ pub async fn serve(services: AppServices, config: cloud_config::CloudConfig) -> 
         biased;
         () = supervisor.wait_for_unexpected_exit() => RuntimeExit::SupervisorFailed,
         result = &mut server => RuntimeExit::ServerFinished(result),
+        result = optional_server_exit(&mut proxy_server) => RuntimeExit::ProxyServerFinished(result),
         () = shutdown::signal() => RuntimeExit::ShutdownSignal,
     };
     let deadline = Instant::now() + config.maintenance.shutdown_timeout;
@@ -42,28 +51,65 @@ pub async fn serve(services: AppServices, config: cloud_config::CloudConfig) -> 
     let _ = shutdown_sender.send(true);
     match exit {
         RuntimeExit::ServerFinished(server_result) => {
-            let supervisor_result = supervisor.shutdown_until(deadline).await;
+            let (proxy_result, supervisor_result) = tokio::join!(
+                wait_for_optional_server(&mut proxy_server, deadline),
+                supervisor.shutdown_until(deadline),
+            );
             let server_result = completed_server_result(server_result);
             supervisor_result?;
+            proxy_result?;
             server_result
         }
-        RuntimeExit::SupervisorFailed => {
+        RuntimeExit::ProxyServerFinished(proxy_result) => {
             let (server_result, supervisor_result) = tokio::join!(
                 wait_for_server(&mut server, deadline),
+                supervisor.shutdown_until(deadline),
+            );
+            let proxy_result = completed_server_result(proxy_result);
+            supervisor_result?;
+            server_result?;
+            proxy_result
+        }
+        RuntimeExit::SupervisorFailed => {
+            let (server_result, proxy_result, supervisor_result) = tokio::join!(
+                wait_for_server(&mut server, deadline),
+                wait_for_optional_server(&mut proxy_server, deadline),
                 supervisor.shutdown_until(deadline),
             );
             // 运行期维护失败是本次退出的直接原因，必须优先传播固定错误。
             supervisor_result?;
-            server_result
+            server_result?;
+            proxy_result
         }
         RuntimeExit::ShutdownSignal => {
-            let (server_result, supervisor_result) = tokio::join!(
+            let (server_result, proxy_result, supervisor_result) = tokio::join!(
                 wait_for_server(&mut server, deadline),
+                wait_for_optional_server(&mut proxy_server, deadline),
                 supervisor.shutdown_until(deadline),
             );
             supervisor_result?;
-            server_result
+            server_result?;
+            proxy_result
         }
+    }
+}
+
+async fn optional_server_exit(
+    server: &mut Option<JoinHandle<std::io::Result<()>>>,
+) -> std::result::Result<std::io::Result<()>, tokio::task::JoinError> {
+    match server.as_mut() {
+        Some(server) => server.await,
+        None => std::future::pending().await,
+    }
+}
+
+async fn wait_for_optional_server(
+    server: &mut Option<JoinHandle<std::io::Result<()>>>,
+    deadline: Instant,
+) -> Result<()> {
+    match server.as_mut() {
+        Some(server) => wait_for_server(server, deadline).await,
+        None => Ok(()),
     }
 }
 

@@ -1,107 +1,77 @@
-# C-SSH 0.8.9 · Android 界面图集 / Screenshot Gallery
+# Android 0.9.0 完整图集
 
-[返回首页 / Home](../README.md) · [图集目录 / Index](README.md)
+[Index](README.md) · [Features](../FEATURES.md)
 
-共 24 张。当前 0.8.9 前端的离线示例界面，使用示例主机、RFC 5737 地址和 example.com；没有连接服务器、Cloud 或 AI provider。长页面按实际滚动位置展示。
+以下为 0.9.0 真实 Vue 界面，使用合成示例数据在后台浏览器中渲染，不连接真实服务器。图集展示界面，不代表原生程序、真机或远端验收。公开截图已隐藏个人联系方式。
 
-24 screens from the current 0.8.9 frontend with offline sample data. No server, Cloud or AI-provider connection was made. Long pages are shown at their captured scroll positions.
+## 主机与项目
 
-安装三张图复用 2026-09-13 的MuMu产品界面；进度图为状态回放。其余图为后台浏览器渲染，不是原生安装、真机或业务链验收证据。0.8.9 程序尚未上传。
+![主机与项目](v0.9.0/android-hosts.png)
 
-The three installation images reuse September 13 product UI captures; progress is a state replay. Other images are background browser renders, not native-device or functional acceptance evidence. 0.8.9 binaries are not uploaded.
+## 新增 IPv4 主机
 
-## 01 · 主机清单 / Hosts
+![新增 IPv4 主机](v0.9.0/android-add-ipv4.png)
 
-<a href="v0.8.9/android-hosts.png"><img width="412" src="v0.8.9/android-hosts.png" alt="C-SSH 0.8.9 Hosts" /></a>
+## 新增域名主机
 
-## 02 · Windows 三种访问模式 / Windows access modes
+![新增域名主机](v0.9.0/android-add-domain.png)
 
-<a href="v0.8.9/android-add-windows-server.png"><img width="412" src="v0.8.9/android-add-windows-server.png" alt="C-SSH 0.8.9 Windows access modes" /></a>
+## Windows 管理接入
 
-## 03 · 自动或手动安装 / Automatic or manual installation
+![Windows 管理接入](v0.9.0/android-add-windows.png)
 
-<a href="v0.8.9/android-install-choice.png"><img width="412" src="v0.8.9/android-install-choice.png" alt="C-SSH 0.8.9 Automatic or manual installation" /></a>
+## 终端入口
 
-## 04 · 手动导出 Setup / Manual Setup export
+![终端入口](v0.9.0/android-terminal.png)
 
-<a href="v0.8.9/android-manual-install.png"><img width="412" src="v0.8.9/android-manual-install.png" alt="C-SSH 0.8.9 Manual Setup export" /></a>
+## 监控总览
 
-## 05 · 安装进度与接管入口 / Installation progress and takeover
+![监控总览](v0.9.0/android-monitor.png)
 
-<a href="v0.8.9/android-install-progress.png"><img width="412" src="v0.8.9/android-install-progress.png" alt="C-SSH 0.8.9 Installation progress and takeover" /></a>
+## 文件管理
 
-## 06 · 移动终端 / Mobile terminal
+![文件管理](v0.9.0/android-files.png)
 
-<a href="v0.8.9/android-terminal.png"><img width="412" src="v0.8.9/android-terminal.png" alt="C-SSH 0.8.9 Mobile terminal" /></a>
+## 全局 AI
 
-## 07 · 文件管理 / File manager
+![全局 AI](v0.9.0/android-ai-global.png)
 
-<a href="v0.8.9/android-files.png"><img width="412" src="v0.8.9/android-files.png" alt="C-SSH 0.8.9 File manager" /></a>
+## 项目 AI
 
-## 08 · 监控与 Top 进程 / Monitoring and top processes
+![项目 AI](v0.9.0/android-ai-project.png)
 
-<a href="v0.8.9/android-monitor.png"><img width="412" src="v0.8.9/android-monitor.png" alt="C-SSH 0.8.9 Monitoring and top processes" /></a>
+## 主机 AI
 
-## 09 · 系统信息 / System information
+![主机 AI](v0.9.0/android-ai-host.png)
 
-<a href="v0.8.9/android-system.png"><img width="412" src="v0.8.9/android-system.png" alt="C-SSH 0.8.9 System information" /></a>
+## 系统管理
 
-## 10 · 防火墙与系统操作 / Firewall and system actions
+![系统管理](v0.9.0/android-sysmgmt.png)
 
-<a href="v0.8.9/android-firewall.png"><img width="412" src="v0.8.9/android-firewall.png" alt="C-SSH 0.8.9 Firewall and system actions" /></a>
+## 诊断日志
 
-## 11 · AI 示例对话 / AI sample conversation
+![诊断日志](v0.9.0/android-diagnostics.png)
 
-<a href="v0.8.9/android-ai-conversation.png"><img width="412" src="v0.8.9/android-ai-conversation.png" alt="C-SSH 0.8.9 AI sample conversation" /></a>
+## 自建云设置
 
-## 12 · AI 历史对话 / AI conversation history
+![自建云设置](v0.9.0/android-cloud-selfhost.png)
 
-<a href="v0.8.9/android-ai-host.png"><img width="412" src="v0.8.9/android-ai-host.png" alt="C-SSH 0.8.9 AI conversation history" /></a>
+## 关于
 
-## 13 · 模型账户与绑定 / Model accounts and bindings
+![关于](v0.9.0/android-settings-about.png)
 
-<a href="v0.8.9/android-ai-models.png"><img width="412" src="v0.8.9/android-ai-models.png" alt="C-SSH 0.8.9 Model accounts and bindings" /></a>
+## 设置
 
-## 14 · 本地模式与可选登录 / Local mode and optional login
+![设置](v0.9.0/android-settings.png)
 
-<a href="v0.8.9/android-local-account.png"><img width="412" src="v0.8.9/android-local-account.png" alt="C-SSH 0.8.9 Local mode and optional login" /></a>
+## 代理线路
 
-## 15 · 账号概览 / Account overview
+![代理线路](v0.9.0/android-settings-proxy.png)
 
-<a href="v0.8.9/android-cloud-account.png"><img width="412" src="v0.8.9/android-cloud-account.png" alt="C-SSH 0.8.9 Account overview" /></a>
+## 外观
 
-## 16 · 手动同步入口 / Manual sync entry
+![外观](v0.9.0/android-settings-appearance.png)
 
-<a href="v0.8.9/android-cloud-sync.png"><img width="412" src="v0.8.9/android-cloud-sync.png" alt="C-SSH 0.8.9 Manual sync entry" /></a>
+## 个人页
 
-## 17 · 紧凑同步变化清单 / Compact sync change preview
-
-<a href="v0.8.9/android-cloud-changes-final.png"><img width="412" src="v0.8.9/android-cloud-changes-final.png" alt="C-SSH 0.8.9 Compact sync change preview" /></a>
-
-## 18 · 登录设备会话 / Device sessions
-
-<a href="v0.8.9/android-cloud-devices.png"><img width="412" src="v0.8.9/android-cloud-devices.png" alt="C-SSH 0.8.9 Device sessions" /></a>
-
-## 19 · 数据保护设置 / Data protection
-
-<a href="v0.8.9/android-data-protection.png"><img width="412" src="v0.8.9/android-data-protection.png" alt="C-SSH 0.8.9 Data protection" /></a>
-
-## 20 · 外观与监控采集 / Appearance and collection
-
-<a href="v0.8.9/android-appearance.png"><img width="412" src="v0.8.9/android-appearance.png" alt="C-SSH 0.8.9 Appearance and collection" /></a>
-
-## 21 · 代理线路 / Proxy profiles
-
-<a href="v0.8.9/android-proxy-profiles.png"><img width="412" src="v0.8.9/android-proxy-profiles.png" alt="C-SSH 0.8.9 Proxy profiles" /></a>
-
-## 22 · 诊断日志默认关闭 / Diagnostics off by default
-
-<a href="v0.8.9/android-diagnostics.png"><img width="412" src="v0.8.9/android-diagnostics.png" alt="C-SSH 0.8.9 Diagnostics off by default" /></a>
-
-## 23 · 语言、关于与更新 / Language, about and updates
-
-<a href="v0.8.9/android-about.png"><img width="412" src="v0.8.9/android-about.png" alt="C-SSH 0.8.9 Language, about and updates" /></a>
-
-## 24 · 非阻断本地模式提示 / Nonblocking local-mode notice
-
-<a href="v0.8.9/android-local-mode.png"><img width="412" src="v0.8.9/android-local-mode.png" alt="C-SSH 0.8.9 Nonblocking local-mode notice" /></a>
+![个人页](v0.9.0/android-me.png)
