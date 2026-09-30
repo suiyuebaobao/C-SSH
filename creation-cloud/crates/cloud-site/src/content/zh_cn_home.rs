@@ -12,7 +12,7 @@ pub(super) fn page_content() -> PageContent {
     let sections = sections(&platforms);
     let home_page = HomePageContent {
         status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
-        status_note: "0.9.0 · Windows / M系列Mac / Android · 必须手动下载安装".into(),
+        status_note: "0.9.1 · Windows / M系列Mac / Android · 必须手动下载安装".into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
         platform_note: "3 RELEASED / iOS NOT PUBLISHED".into(),
@@ -29,7 +29,7 @@ pub(super) fn page_content() -> PageContent {
         seo_topics_label: "已发布的 SEO 主题词".into(),
         final_code: "NEXT STEP / START HERE".into(),
         final_heading: "下载前，先保全已有数据".into(),
-        final_lead: "不能。本次必须自行下载并安装。Windows使用新更新签名，Android使用新安装签名；请阅读安装说明，不要直接卸载尚未备份的旧版。".into(),
+        final_lead: "本次仅通过公告告知，不推送升级提醒，不强制更新。请手动下载安装，并先阅读安装与数据保全说明；Mac自动更新延期。".into(),
         qr_placeholder_code: "QR".into(),
         qr_placeholder_waiting: "WAITING".into(),
         media_slot: None,
@@ -47,15 +47,15 @@ pub(super) fn page_content() -> PageContent {
 
     page(
         PageId::Home,
-        "C-SSH 0.9.0 | Windows · Mac · Android",
-        "C-SSH 0.9.0 支持Windows、M系列Mac和Android，提供SSH、RDP、持久终端、监控、文件、三作用域AI及可选自建云；本次必须手动下载，旧版无法自动更新。",
-        "C-SSH 0.9.0 / MANUAL DOWNLOAD",
-        "C-SSH 0.9.0，把服务器运维放进同一工作台",
-        "Windows、M系列Mac与Android：主机、持久终端、远程桌面、监控、文件和AI助手统一使用。本次必须自行下载并安装，旧版本无法自动更新。iOS本次不提供下载。",
+        "C-SSH 0.9.1 | Windows · Mac · Android",
+        "C-SSH 0.9.1 支持Windows、M系列Mac和Android，提供SSH、RDP、持久终端、监控、文件、三作用域AI及可选自建云；本次仅发布公告，手动下载安装，不推送升级提醒或强制更新。",
+        "C-SSH 0.9.1 / MANUAL DOWNLOAD",
+        "C-SSH 0.9.1，把服务器运维放进同一工作台",
+        "Windows、M系列Mac与Android：主机、持久终端、远程桌面、监控、文件和AI助手统一使用。本次仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。iOS本次不提供下载。",
     )
     .with_actions(vec![
         action(
-            "手动下载 0.9.0",
+            "手动下载 0.9.1",
             "/downloads",
             "button button-primary",
         ),
@@ -114,12 +114,12 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                     "NODE 01",
                     "三个客户端",
                     "Windows x64、M系列Mac arm64和Android arm64共享核心能力，按桌面和手机布局使用。",
-                    "0.9.0 · 手动安装",
+                    "0.9.1 · 手动安装",
                 ),
                 item(
                     "LINK 02",
                     "SSH与RDP连接",
-                    "IPv4或域名分别填写地址和端口；域名解析继续兼容IPv4及IPv6，已有IPv6主机仍可连接。",
+                    "在同一地址框直接输入IPv4或域名，自动识别格式；端口独立填写，已有IPv6主机保持兼容。",
                     "PURE SSH",
                 ),
                 item(
@@ -142,9 +142,9 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 ),
                 item(
                     "PURE SSH",
-                    "一次手动安装",
-                    "首次管理Windows服务器时，在服务器手动运行配套Setup，再从客户端通过Windows账号连接。",
-                    "没有自动投放或OCR安装",
+                    "内置Windows安装包",
+                    "添加Windows管理主机时，可从客户端保存内置安装ZIP；Android还可系统分享。传到服务器后解压并手动运行Setup。",
+                    "安装包离线可取 · 不自动安装",
                 ),
                 item(
                     "RESIDENT AGENT",
@@ -225,19 +225,19 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 01",
                     "手动下载安装",
-                    "本次0.9.0没有自动升级入口，请从官网下载页或官方GitHub选择匹配平台的安装包。",
+                    "本次0.9.1只通过公告告知，请从官网下载页或官方GitHub手动下载匹配平台的安装包。",
                     "核对版本和SHA256",
                 ),
                 item(
                     "STEP 02",
                     "保护已有数据",
-                    "Windows安装与Mac替换应用时保留原数据；Android旧正式版签名不同，卸载前必须确认数据已保全。",
+                    "Windows安装与Mac替换应用时保留原数据；不同签名的Android旧版不能直接覆盖，卸载前必须确认数据已保全。",
                     "AI历史不参与云同步",
                 ),
                 item(
                     "STEP 03",
                     "持久终端",
-                    "选择IPv4或域名，填写独立端口与凭据；根据目标选择Agent、普通SSH或Windows访问方式。",
+                    "直接填写IPv4或域名、独立端口与凭据；根据目标选择Agent、普通SSH或Windows访问方式。",
                     "先确认主机身份",
                 ),
                 item(
@@ -264,7 +264,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "platforms",
             HomeLayout::Platforms,
             "Windows、Mac与Android，iOS本次不发布",
-            "0.9.0发布Windows、M系列Mac和Android；必须手动下载安装。iOS本次不提供下载，Linux客户端保持冻结。",
+            "0.9.1发布Windows、M系列Mac和Android；必须手动下载安装。iOS本次不提供下载，Linux客户端保持冻结。",
             platform_items(platforms),
         ),
         section(
@@ -326,8 +326,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "RELEASE",
                     "手动下载与更新来源",
-                    "0.9.0必须手动下载；使用自建云时，后续更新检查走所选云，由其管理员上传来自官网的版本与原签名。",
-                    "本次不向旧客户端投放自动更新",
+                    "0.9.1必须手动下载；使用自建云时，后续更新检查走所选云，由其管理员上传来自官网的版本与原签名。",
+                    "仅公告告知 · 不推送升级提醒或强制更新",
                 ),
             ],
         ),
@@ -337,8 +337,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
 fn faqs() -> Vec<HomeFaqItem> {
     vec![
         HomeFaqItem::new(
-            "0.9.0能从旧版自动更新吗？",
-            "不能。本次必须自行下载并安装。Windows使用新更新签名，Android使用新安装签名；请阅读安装说明，不要直接卸载尚未备份的旧版。",
+            "0.9.1能从旧版自动更新吗？",
+            "本次仅通过公告告知，不推送升级提醒，不强制更新。请手动下载安装，并先阅读安装与数据保全说明；Mac自动更新延期。",
         ),
         HomeFaqItem::new(
             "这次有哪些平台？",
@@ -346,7 +346,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "Android旧数据怎么办？",
-            "旧正式版签名不同，不能直接覆盖。卸载会清除本地数据；请先确认所需数据已有独立备份。Cloud同步不包含AI对话与记忆，无法确认数据保全时请保留旧版。",
+            "不同签名的旧版不能直接覆盖。卸载会清除本地数据；请先确认所需数据已有独立备份。Cloud同步不包含AI对话与记忆，无法确认数据保全时请保留旧版。",
         ),
         HomeFaqItem::new(
             "必须使用官方云吗？",
@@ -358,7 +358,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "Mac有哪些安装限制？",
-            "只提供M系列arm64版本，最低系统目标为macOS13。DMG内应用采用ad-hoc签名且未公证，系统可能要求确认；当前没有Mac自动更新。",
+            "只提供M系列arm64版本，最低系统目标为macOS13。DMG内应用采用ad-hoc签名且未公证，系统可能要求确认；Mac自动更新延期，本次请手动安装。",
         ),
     ]
 }

@@ -2,6 +2,23 @@
 
 # Changelog
 
+## 0.9.1 — Address detection and embedded Windows Setup export
+
+2026-09-30. Windows x64 NSIS/Portable, Apple Silicon Mac arm64 DMG and Android arm64 APK. Notices and manual downloads only; no upgrade prompt or forced update. No iOS release; the Linux client stays frozen.
+
+Added:
+- Enter an IPv4 address or domain directly with automatic detection and a separate port; the address-type selector is removed. Existing IPv6 hosts remain compatible.
+- Embedded Windows management Setup ZIP with offline export in DVC, missing-component and maintenance flows; Android also offers system sharing. RDP-only hides the card. No host/credential is exported and the client never runs the EXE.
+- Component version 0.9.1; ZIP size 13,308,604 bytes. Setup and Agent/psmux maintenance keep the same verified source.
+
+Fixed and verified:
+- Existing Setup conflicts remain fail-closed. Portable instructions require backing up the old EXE/Setup while preserving data. Windows ordinary-user manual upgrades and data retention passed.
+- Mac arm64/version/ad-hoc signature/DMG mounting and unique embedded-resource checks passed. No notarization, automatic-update or minimum-OS/every-model claim is made.
+- Android keeps the 0.9.0 signer; replacement, startup, retained settings and system export/share are verified in Android SDK Emulator. This does not claim a physical phone or recipient delivery.
+- Earlier Android signer limitations remain. Uninstalling clears local AI history/memory; preserve data first. 0.9.0 does not require uninstalling.
+
+[Installation](INSTALL_EN.md) · [New form samples](screenshots/v0.9.1/README_EN.md) · [v0.9.1 downloads](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.1)
+
 ## 0.9.0 — Three clients; manual installation required
 
 Download and install 0.9.0 manually. Automatic updates from older versions are unavailable.

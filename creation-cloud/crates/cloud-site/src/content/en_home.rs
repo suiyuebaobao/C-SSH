@@ -13,7 +13,7 @@ pub(super) fn page_content() -> PageContent {
     let home_page = HomePageContent {
         status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
         status_note:
-            "0.9.0 requires manual installation; no automatic update from older versions"
+            "0.9.1 · Manual installation · No upgrade reminders or forced updates"
                 .into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
@@ -34,7 +34,7 @@ pub(super) fn page_content() -> PageContent {
         final_code: "NEXT STEP / START HERE".into(),
         final_heading: "Preserve your data before installing".into(),
         final_lead:
-            "No. Download and install it manually. Windows uses a new updater signing key and Android a new installation signature. Read the installation guide and preserve data before uninstalling an old app."
+            "This release is communicated by announcement only, without upgrade reminders or forced updates. Download and install it manually, and read the installation and data-preservation guide first. The Mac automatic updater is deferred."
                 .into(),
         qr_placeholder_code: "QR".into(),
         qr_placeholder_waiting: "WAITING".into(),
@@ -53,20 +53,20 @@ pub(super) fn page_content() -> PageContent {
 
     page(
         PageId::Home,
-        "C-SSH 0.9.0 | Windows · Mac · Android",
-        "C-SSH 0.9.0 for Windows, Apple Silicon Mac and Android: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Manual installation required; no automatic upgrade from older versions.",
-        "C-SSH 0.9.0 / MANUAL DOWNLOAD",
-        "C-SSH 0.9.0: one workspace for server operations",
-        "Windows, Apple Silicon Mac and Android bring hosts, persistent terminals, remote desktops, monitoring, files and AI together. This release requires a manual download and installation; automatic updates from older versions are unavailable. iOS is not published in this release.",
+        "C-SSH 0.9.1 | Windows · Mac · Android",
+        "C-SSH 0.9.1 for Windows, Apple Silicon Mac and Android: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
+        "C-SSH 0.9.1 / MANUAL DOWNLOAD",
+        "C-SSH 0.9.1: one workspace for server operations",
+        "Windows, Apple Silicon Mac and Android bring hosts, persistent terminals, remote desktops, monitoring, files and AI together. This release is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. iOS is not published in this release.",
     )
     .with_actions(vec![
         action(
-            "Download 0.9.0 manually",
-            "/docs/getting-started",
+            "Download 0.9.1 manually",
+            "/en/downloads",
             "button button-primary",
         ),
-        action("Complete feature guide", "/changelog", "button button-secondary"),
-        action("Full screenshot gallery", "/docs/getting-started#add-host", "text-link"),
+        action("Complete feature guide", "https://github.com/suiyuebaobao/C-SSH/blob/main/FEATURES_EN.md", "button button-secondary"),
+        action("Full screenshot gallery", "https://github.com/suiyuebaobao/C-SSH/blob/main/screenshots/README.md", "text-link"),
     ])
     .with_home_page(home_page)
 }
@@ -120,12 +120,12 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                     "NODE 01",
                     "Three clients",
                     "Windows x64, Apple Silicon Mac arm64 and Android arm64 share core capabilities with desktop and phone layouts.",
-                    "0.9.0 · Manual installation",
+                    "0.9.1 · Manual installation",
                 ),
                 item(
                     "LINK 02",
                     "SSH and RDP connections",
-                    "Enter an IPv4 address or domain and a separate port. Domains may resolve to IPv4 or IPv6; existing IPv6 hosts remain compatible.",
+                    "Enter an IPv4 address or domain in one field; the format is detected automatically. The port remains separate, and existing IPv6 hosts remain compatible.",
                     "PURE SSH",
                 ),
                 item(
@@ -148,9 +148,9 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 ),
                 item(
                     "PURE SSH",
-                    "One manual server setup",
-                    "For Windows management, run the supplied Setup on the server once, then connect with a Windows account.",
-                    "No automatic deployment or OCR installation",
+                    "Built-in Windows setup package",
+                    "When adding a Windows management host, save the built-in setup ZIP from the client or share it from Android. Transfer it to the server, extract it and run Setup manually.",
+                    "Available offline · Manual server installation",
                 ),
                 item(
                     "RESIDENT AGENT",
@@ -231,19 +231,19 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 01",
                     "Download manually",
-                    "There is no automatic upgrade to 0.9.0. Select the appropriate package on the website or official GitHub release.",
+                    "0.9.1 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
                     "Check version and SHA256",
                 ),
                 item(
                     "STEP 02",
                     "Preserve existing data",
-                    "Keep data when installing Windows or replacing the Mac app. Older official Android builds use a different signature; preserve data before uninstalling.",
+                    "Keep data when installing Windows or replacing the Mac app. An older Android build with a different signature cannot be replaced directly; preserve data before uninstalling.",
                     "Cloud does not sync AI history",
                 ),
                 item(
                     "STEP 03",
                     "Add your first host",
-                    "Choose IPv4 or Domain, enter a separate port and credentials, then select Agent, standard SSH or the appropriate Windows connection.",
+                    "Enter an IPv4 address or domain, a separate port and credentials, then select Agent, standard SSH or the appropriate Windows connection.",
                     "Verify server identity first",
                 ),
                 item(
@@ -270,7 +270,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "platforms",
             HomeLayout::Platforms,
             "Windows, Mac and Android; iOS is not published",
-            "0.9.0 ships for Windows, Apple Silicon Mac and Android and requires manual installation. iOS is not published; the Linux client remains frozen.",
+            "0.9.1 ships for Windows, Apple Silicon Mac and Android and requires manual installation. iOS is not published; the Linux client remains frozen.",
             platform_items(platforms),
         ),
         section(
@@ -332,8 +332,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "RELEASE",
                     "Manual download and update source",
-                    "0.9.0 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
-                    "No automatic update to this release",
+                    "0.9.1 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
+                    "Announcement only · No upgrade reminders or forced updates",
                 ),
             ],
         ),
@@ -343,8 +343,8 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
 fn faqs() -> Vec<HomeFaqItem> {
     vec![
         HomeFaqItem::new(
-            "Can older versions automatically update to 0.9.0?",
-            "No. Download and install it manually. Windows uses a new updater signing key and Android a new installation signature. Read the installation guide and preserve data before uninstalling an old app.",
+            "Can older versions automatically update to 0.9.1?",
+            "This release is communicated by announcement only, without upgrade reminders or forced updates. Download and install it manually, and read the installation and data-preservation guide first. The Mac automatic updater is deferred.",
         ),
         HomeFaqItem::new(
             "Which platforms are included?",
@@ -352,7 +352,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "What happens to old Android data?",
-            "The previous official signature differs, so the new APK cannot replace it directly. Uninstalling clears local data. Preserve needed data first; Cloud sync excludes AI conversations and memory. Keep the old app if you cannot confirm a backup.",
+            "An older installation with a different signature cannot be replaced directly. Uninstalling clears local data. Preserve needed data first; Cloud sync excludes AI conversations and memory. Keep the old app if you cannot confirm a backup.",
         ),
         HomeFaqItem::new(
             "Is the official Cloud required?",
@@ -364,7 +364,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "What should Mac users know?",
-            "The DMG targets Apple Silicon M-series Macs and macOS 13 or later. It is ad-hoc signed and not notarized, so system confirmation may be required. There is no Mac automatic updater in this release.",
+            "The DMG targets Apple Silicon M-series Macs and macOS 13 or later. It is ad-hoc signed and not notarized, so system confirmation may be required. The Mac automatic updater is deferred; install this release manually.",
         ),
     ]
 }

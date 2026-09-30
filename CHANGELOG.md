@@ -2,6 +2,23 @@
 
 # 更新列表
 
+## 0.9.1 — 地址自动识别与Windows安装包导出
+
+2026-09-30。Windows x64 NSIS／Portable、M系列Mac arm64 DMG、Android arm64 APK；仅公告告知手动下载安装，不弹升级提醒、不强制更新。iOS不上传，Linux客户端冻结。
+
+新增：
+- 直接输入IPv4或域名并自动识别，移除地址类型下拉选择；端口独立，既有IPv6主机兼容保持。
+- 三端内置Windows服务器管理Setup ZIP，DVC管理、组件缺失与维护入口可离线导出；Android另有系统分享。纯RDP隐藏，不带主机或凭据，不在客户端运行EXE。
+- 组件版本0.9.1，ZIP13,308,604字节；Setup与Agent／psmux维护继续同源。
+
+修复与验证：
+- Windows新旧Setup冲突继续失败关闭，Portable升级说明明确备份旧EXE／Setup并保留data；NSIS与Portable普通用户手动升级及数据保持通过。
+- Mac完成arm64、包版本、ad-hoc签名、DMG挂载与唯一内嵌资源核对；未公证，无自动更新，不外推最低系统运行或全部M系列。
+- Android沿用0.9.0签名，覆盖安装、启动、设置保持及系统保存／分享在SDK Emulator定向验证；不宣称物理手机或收件人已收到。
+- 更早Android正式签名仍可能不能覆盖；卸载会清除本地AI历史和记忆，需先保全。0.9.0用户无需卸载。
+
+[安装说明](INSTALL.md) · [新增入口示例](screenshots/v0.9.1/README.md) · [v0.9.1下载](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.1)
+
 ## 0.9.0 — 三端发布（必须手动安装）
 
 0.9.0 必须自行下载并安装，旧版本无法自动更新。
