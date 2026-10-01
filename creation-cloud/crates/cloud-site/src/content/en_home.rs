@@ -13,11 +13,11 @@ pub(super) fn page_content() -> PageContent {
     let home_page = HomePageContent {
         status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
         status_note:
-            "0.9.1 · Manual installation · No upgrade reminders or forced updates"
+            "0.9.2 · Manual installation · No upgrade reminders or forced updates"
                 .into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
-        platform_note: "3 RELEASED / iOS NOT PUBLISHED".into(),
+        platform_note: "4 RELEASED / iOS NOT PUBLISHED".into(),
         platforms,
         sections,
         faq_side_label: "FAQ / DECISION QUESTIONS".into(),
@@ -53,15 +53,15 @@ pub(super) fn page_content() -> PageContent {
 
     page(
         PageId::Home,
-        "C-SSH 0.9.1 | Windows · Mac · Android",
-        "C-SSH 0.9.1 for Windows, Apple Silicon Mac and Android: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
-        "C-SSH 0.9.1 / MANUAL DOWNLOAD",
-        "C-SSH 0.9.1: one workspace for server operations",
-        "Windows, Apple Silicon Mac and Android bring hosts, persistent terminals, remote desktops, monitoring, files and AI together. This release is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. iOS is not published in this release.",
+        "C-SSH 0.9.2 | Windows · Mac · Android · Linux",
+        "C-SSH 0.9.2 for Windows x64/ARM64, Apple Silicon Mac, Android and Linux: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
+        "C-SSH 0.9.2 / MANUAL DOWNLOAD",
+        "C-SSH 0.9.2: one workspace for server operations",
+        "Windows x64/ARM64, Apple Silicon Mac, Android and Linux bring hosts, persistent terminals, remote desktops, monitoring, files and AI together. This release is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. iOS is not published in this release.",
     )
     .with_actions(vec![
         action(
-            "Download 0.9.1 manually",
+            "Download 0.9.2 manually",
             "/en/downloads",
             "button button-primary",
         ),
@@ -76,7 +76,7 @@ fn platforms() -> Vec<HomePlatform> {
         HomePlatform::current(
             "W",
             "Windows",
-            "Desktop client",
+            "x64 / ARM64",
             "Complete desktop operations",
             "Independent native client",
             "See downloads for live records",
@@ -96,6 +96,14 @@ fn platforms() -> Vec<HomePlatform> {
             "Apple Silicon desktop client",
             "Ad-hoc signed · Not notarized",
             "DMG · Manual download",
+        ),
+        HomePlatform::current(
+            "L",
+            "Linux",
+            "x86_64 / ARM64",
+            "Complete desktop client",
+            "Verified on Ubuntu 24.04 / X11",
+            "deb / AppImage · Manual download",
         ),
         HomePlatform::planned(
             "i",
@@ -120,7 +128,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                     "NODE 01",
                     "Three clients",
                     "Windows x64, Apple Silicon Mac arm64 and Android arm64 share core capabilities with desktop and phone layouts.",
-                    "0.9.1 · Manual installation",
+                    "0.9.2 · Manual installation",
                 ),
                 item(
                     "LINK 02",
@@ -231,7 +239,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 01",
                     "Download manually",
-                    "0.9.1 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
+                    "0.9.2 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
                     "Check version and SHA256",
                 ),
                 item(
@@ -270,7 +278,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "platforms",
             HomeLayout::Platforms,
             "Windows, Mac and Android; iOS is not published",
-            "0.9.1 ships for Windows, Apple Silicon Mac and Android and requires manual installation. iOS is not published; the Linux client remains frozen.",
+            "0.9.2 ships for Windows x64/ARM64, Apple Silicon Mac, Android and Linux and requires manual installation. Linux offers x86_64 and ARM64 packages; iOS is not published.",
             platform_items(platforms),
         ),
         section(
@@ -332,7 +340,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "RELEASE",
                     "Manual download and update source",
-                    "0.9.1 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
+                    "0.9.2 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
                     "Announcement only · No upgrade reminders or forced updates",
                 ),
             ],
@@ -343,7 +351,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
 fn faqs() -> Vec<HomeFaqItem> {
     vec![
         HomeFaqItem::new(
-            "Can older versions automatically update to 0.9.1?",
+            "Can older versions automatically update to 0.9.2?",
             "This release is communicated by announcement only, without upgrade reminders or forced updates. Download and install it manually, and read the installation and data-preservation guide first. The Mac automatic updater is deferred.",
         ),
         HomeFaqItem::new(

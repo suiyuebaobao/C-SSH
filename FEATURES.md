@@ -1,4 +1,4 @@
-# C-SSH 0.9.1 功能详解
+# C-SSH 0.9.2 功能详解
 
 [返回首页](README.md) · [安装说明](INSTALL.md) · [图集](screenshots/README.md)
 
@@ -8,7 +8,7 @@
 
 ### 三个客户端
 
-Windows x64、M系列Mac arm64和Android arm64共享核心能力，按桌面和手机布局使用。 0.9.1 · 手动安装。
+Windows x64／ARM64、M系列Mac arm64、Android arm64及Linux x86_64／ARM64共享核心能力，按桌面和手机布局使用。 0.9.2 · 手动安装。
 
 ### SSH与RDP连接
 
@@ -28,7 +28,7 @@ Linux使用tmux；Windows使用配套Agent的Terminal2／psmux。关闭客户端
 
 ### 一次手动安装
 
-Windows、Mac及Android均可离线保存内置Setup ZIP，Android另可系统分享；把ZIP交给目标Windows服务器解压运行，再从客户端通过Windows账号连接。 没有自动投放或OCR安装。
+Windows、Mac、Linux及Android均可离线保存内置Setup ZIP，Android另可系统分享；把ZIP交给目标Windows服务器解压运行，再从客户端通过Windows账号连接。 没有自动投放或OCR安装。
 
 ### 本地优先
 
@@ -54,7 +54,7 @@ CPU、内存、磁盘、负载、网络及磁盘IO；实时曲线、历史区间
 
 ### 端口映射与群发
 
-Windows和Mac提供SSH端口映射、常用命令库、批量执行和逐机结果；Android不提供这两类页面。 桌面功能。
+Windows、Mac和Linux提供SSH端口映射、常用命令库、批量执行和逐机结果；Android不提供这两类页面。 桌面功能。
 
 ### 三作用域AI
 
@@ -96,10 +96,10 @@ Windows和Mac提供SSH端口映射、常用命令库、批量执行和逐机结�
 
 ### 手动下载与更新来源
 
-0.9.1必须手动下载；使用自建云时，后续更新检查走所选云，由其管理员上传来自官网的版本与原签名。 本次不向旧客户端投放自动更新。
+0.9.2必须手动下载；使用自建云时，后续更新检查走所选云，由其管理员上传来自官网的版本与原签名。 本次不向旧客户端投放自动更新。
 
 ## 平台差异
 
-Windows和Mac提供端口映射、命令库、群发执行、独立RDP窗口及桌面访问授权入口；Android侧重手机操作，没有端口映射和群发页面。Windows远端能力需要配套组件与握手，普通OpenSSH不等于全部Agent能力。
+Windows、Mac和Linux提供端口映射、命令库、群发执行、独立RDP窗口及桌面访问授权入口；Android侧重手机操作，没有端口映射和群发页面。Windows远端能力需要配套组件与握手，普通OpenSSH不等于全部Agent能力。
 
 Mac仅M系列，未公证且没有自动更新；iOS本次不发布。诊断和恢复证据按测试环境区分，不承诺所有断网、重启或服务器配置组合均可恢复。

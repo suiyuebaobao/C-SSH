@@ -70,11 +70,11 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "下载 C-SSH｜Windows、Mac 与 Android",
-        "下载 C-SSH SSH 终端与服务器运维客户端的 Windows、M系列Mac与Android最新版；Linux 客户端已停止开发，不提供安装包。",
+        "下载 C-SSH｜Windows、Mac、Android 与 Linux",
+        "下载 C-SSH SSH 终端与服务器运维客户端的 Windows x64／ARM64、M系列Mac、Android与Linux最新版；Linux提供两种架构的deb和AppImage。",
         "DOWNLOADS / DIRECT",
         "下载 C-SSH",
-        "0.9.1 仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。安装前请阅读数据保全说明。",
+        "0.9.2 仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。安装前请阅读数据保全说明。",
     )
     .with_sections(vec![section(
         "builds",

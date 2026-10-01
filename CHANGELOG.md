@@ -2,6 +2,17 @@
 
 # 更新列表
 
+## 0.9.2 — Linux与Windows ARM64
+
+2026-10-02。四个平台、十项安装包；iOS不上传。
+
+- **Linux 桌面客户端**：新增 x86_64／ARM64 的 deb 和 AppImage，复用桌面主机、SSH／Agent、持久终端、RDP／DVC、监控、文件、AI、代理、端口映射和群发能力。
+- **Windows ARM64 原生版**：提供 NSIS 和 Portable，已在 Windows 11 ARM64 的普通用户环境验证；远端 Windows 管理组件继续使用 x64。
+- **Windows 旧系统终端**：配套 psmux 增加 WinPTY 后端，供缺少 ConPTY 的 Server 2016 使用；现代 Windows 保持 ConPTY。管理组件使用静态 CRT，减少干净系统上的运行库依赖。
+- **稳定性修复**：主机编辑／删除等待、Windows 域名接入、文件覆盖权限收尾及 Linux 旧库迁移。
+- **公告更简洁**：移除公告界面的同步消息列表，云同步功能保留。
+- **手动下载安装**：本次通过公告告知，不弹升级提醒、不强制更新。
+
 ## 0.9.1 — 地址自动识别与Windows安装包导出
 
 2026-09-30。Windows x64 NSIS／Portable、M系列Mac arm64 DMG、Android arm64 APK；仅公告告知手动下载安装，不弹升级提醒、不强制更新。iOS不上传，Linux客户端冻结。

@@ -40,11 +40,11 @@ pub(super) fn security() -> PageContent {
 pub(super) fn downloads() -> PageContent {
     page(
         PageId::Downloads,
-        "Download C-SSH for Windows, Apple Silicon Mac and Android",
-        "Download the latest C-SSH SSH terminal and server operations client for Windows, Apple Silicon Mac and Android. The Linux client is discontinued and is not offered for download.",
+        "Download C-SSH for Windows x64/ARM64, Apple Silicon Mac, Android and Linux",
+        "Download the latest C-SSH SSH terminal and server operations client for Windows x64/ARM64, Apple Silicon Mac, Android and Linux. Linux offers deb and AppImage packages for x86_64 and ARM64.",
         "DOWNLOADS / DIRECT",
         "Download C-SSH",
-        "0.9.1 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
+        "0.9.2 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
     )
     .with_sections(vec![section(
         "builds",

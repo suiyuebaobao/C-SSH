@@ -1,34 +1,42 @@
 [中文](README.md) | **English**
 
-# C-SSH 0.9.1
+# C-SSH 0.9.2
 
-A server-operations workspace for **Windows, Apple Silicon Mac and Android**: hosts, persistent terminals, RDP, monitoring, files and scoped AI. Local features work without a Cloud login.
+A server-operations workspace for **Windows, Apple Silicon Mac, Android and Linux**: hosts, persistent terminals, RDP, monitoring, files and scoped AI. Local features work without a Cloud login.
 
-> **0.9.1 is announced through notices only. Download and install manually; no upgrade prompt or forced update is sent.**
+> **0.9.2 is announced through notices only. Download and install manually; no upgrade prompt or forced update is sent.**
 >
-> Android keeps the 0.9.0 signer and can replace 0.9.0. Earlier official builds with a different signer cannot be replaced directly. Uninstalling clears local data. Read the [installation and data-preservation guide](INSTALL_EN.md), especially the note that AI conversations and memory are not included in Cloud sync. The Mac DMG is Apple Silicon only, ad-hoc signed and not notarized.
+> Android keeps the 0.9.0 signer and can replace 0.9.0 and 0.9.1. Earlier official builds with a different signer cannot be replaced directly. Uninstalling clears local data. Read the [installation and data-preservation guide](INSTALL_EN.md), especially the note that AI conversations and memory are not included in Cloud sync. The Mac DMG is Apple Silicon only, ad-hoc signed and not notarized.
 
 ## Downloads
 
-| Platform | Official 0.9.1 download |
+| Platform | Official 0.9.2 download |
 |---|---|
-| Windows x64 · NSIS | [C-SSH_0.9.1_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.1/C-SSH_0.9.1_x64-setup.exe) |
-| Windows x64 · Portable | [C-SSH_0.9.1_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.1/C-SSH_0.9.1_portable-Windows-x64.zip) |
-| macOS · Apple Silicon | [C-SSH_0.9.1_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.1/C-SSH_0.9.1_macOS-arm64.dmg) |
-| Android · arm64 | [C-SSH_0.9.1_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.1/C-SSH_0.9.1_android-arm64.apk) |
+| Windows x64 · NSIS | [C-SSH_0.9.2_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_x64-setup.exe) |
+| Windows x64 · Portable | [C-SSH_0.9.2_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_portable-Windows-x64.zip) |
+| macOS · Apple Silicon | [C-SSH_0.9.2_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_macOS-arm64.dmg) |
+| Android · arm64 | [C-SSH_0.9.2_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_android-arm64.apk) |
+| Windows 11 ARM64 · NSIS | [C-SSH_0.9.2_arm64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_arm64-setup.exe) |
+| Windows 11 ARM64 · Portable | [C-SSH_0.9.2_portable-Windows-arm64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_portable-Windows-arm64.zip) |
+| Linux x86_64 · deb | [C-SSH_0.9.2_amd64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_amd64.deb) |
+| Linux x86_64 · AppImage | [C-SSH_0.9.2_amd64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_amd64.AppImage) |
+| Linux ARM64 · deb | [C-SSH_0.9.2_arm64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_arm64.deb) |
+| Linux ARM64 · AppImage | [C-SSH_0.9.2_aarch64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_aarch64.AppImage) |
 
-[Website](https://c-ssh.com/en) · [Website downloads](https://c-ssh.com/en/downloads) · [Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.1) · [Installation](INSTALL_EN.md)
+[Website](https://c-ssh.com/en) · [Website downloads](https://c-ssh.com/en/downloads) · [Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.2) · [Installation](INSTALL_EN.md)
 
-iOS is not uploaded in this release. No Intel Mac, Linux client, MSI, AAB or x86 Android release package is provided. Windows requires WebView2 Runtime. Minimum package targets are macOS 13 and Android 7.0/API 24; this does not mean every supported OS has been tested.
+iOS is not uploaded in this release. No Intel Mac, MSI, AAB or x86 Android release package is provided. Windows requires WebView2 Runtime. Minimum package targets are macOS 13 and Android 7.0/API 24; this does not mean every supported OS has been tested.
 
 ## What changed
 
-- **Automatic address detection:** enter an IPv4 address or domain directly, with a separate port. The address-type selector is removed; existing IPv6 hosts stay compatible.
-- **Embedded Windows management installer:** the DVC host form in Windows, Mac and Android exports a standard Setup ZIP. Android also offers system sharing; RDP-only mode hides the card. A Windows client download is no longer required to obtain Setup.
-- **Offline export:** component version 0.9.1, ZIP size 13,308,604 bytes. No host, account or credential is exported, no remote connection is made and the client does not execute the EXE.
-- **Notice-only manual upgrade:** no upgrade prompt or forced update is sent. Mac automatic updates are deferred; installation continues through a DMG.
+- **Linux desktop client:** x86_64 and ARM64 deb/AppImage packages, sharing desktop hosts, SSH/Agent, persistent terminals, RDP/DVC, monitoring, files, AI, proxies, port forwarding and broadcasts.
+- **Native Windows ARM64:** NSIS and Portable packages, validated under an ordinary user on Windows 11 ARM64. Remote Windows management components remain x64.
+- **Older Windows terminals:** the bundled psmux adds a WinPTY backend for Server 2016 without ConPTY. Modern Windows keeps ConPTY. Management components use the static CRT to reduce runtime dependencies on clean systems.
+- **Reliability fixes:** host edit/delete waits, Windows domain connections, file-overwrite permission cleanup and Linux legacy-database migration.
+- **Cleaner announcements:** sync-operation messages are removed from the announcement dialog; Cloud sync remains available.
+- **Manual installation:** announced through notices, without upgrade prompts or forced updates.
 
-Existing self-hosted Cloud, Windows RDP/DVC and Terminal2/psmux, proxies and scoped AI remain available. See the [changelog](CHANGELOG_EN.md).
+[Full changelog](CHANGELOG_EN.md)
 
 ## Capabilities
 
@@ -42,7 +50,7 @@ Existing self-hosted Cloud, Windows RDP/DVC and Terminal2/psmux, proxies and sco
 | Files | Browse, upload, download, create, rename, delete, edit text and verify hashes; native mobile file pickers |
 | AI | Global/project/host scope, model accounts/bindings, permissions, confirmations, stop, history and local memory |
 | System and apps | System information, processes, firewall and services; desktop Docker/systemd/Windows-service tools depend on server capabilities |
-| Desktop tools | Windows/Mac port forwarding, saved commands, broadcasts, per-host results and access grants |
+| Desktop tools | Windows/Mac/Linux port forwarding, saved commands, broadcasts, per-host results and access grants |
 | Proxies | Direct, saved SOCKS5/HTTP CONNECT and explicitly selected official routes; no silent direct fallback |
 | Cloud | Optional login, devices, explicit encrypted host/proxy/model-account sync and self-hosted service selection |
 | Preferences | Nine languages, appearance, collection and data protection; diagnostic logging is off by default |
@@ -58,12 +66,13 @@ The [new 0.9.1 form](screenshots/v0.9.1/README_EN.md) and retained 0.9.0 full ga
 ![Windows host form and Setup export](screenshots/v0.9.1/windows-add-host-setup.png)
 ![Mac monitoring](screenshots/v0.9.0/macos-monitor-detail.png)
 
-## Validation boundaries
+## Validation scope
 
-- Windows test VM: same-build NSIS/Portable checks, installation/startup/uninstallation, **manual** 0.9.0-to-0.9.1 installer upgrade and data preservation.
-- Mac: arm64 build, DMG mounting, version/architecture and ad-hoc signature integrity. Not notarized; this is not verification of every Mac model or the minimum OS.
-- Android: package/version/ABI/signature/16KiB alignment/deployment assets and same-signer 0.9.0 upgrade, startup, retained settings and system export/share in Android SDK Emulator. Earlier signer limitations remain; no physical-phone claim is made.
-- Focused address, UI, Cloud-isolation and shared-runtime checks passed. Public IPv6, every OS combination and all degraded-network scenarios are outside the verified scope.
+- Windows x64/ARM64: isolated ordinary-user NSIS/Portable installation, startup, uninstall, manual 0.9.1-to-0.9.2 upgrade and data preservation. ARM64 also has live SSH/file/tmux and Server 2022 RDP/DVC/Terminal2 reconnection evidence.
+- Mac: arm64, DMG mount, version, embedded resources and complete ad-hoc signature checks passed. Not notarized; this is not validation of every Mac model or the minimum OS.
+- Android: package/version/ABI/original signer/16KiB alignment/resources passed; SDK Emulator upgrade from 0.9.1 retained settings and launched normally. No physical-phone claim.
+- Linux: ARM64 and x86_64 Ubuntu 24.04.5 VMs, actual deb/AppImage startup, Secret Service, cold recovery and desktop feature checks. Other distributions and Wayland remain unvalidated; GPU-less Xvfb fixtures used a test-only WebKit graphics setting.
+- Server 2016 WinPTY integration has live development-candidate evidence; this release's 0.9.2 Setup was also tested on local Server 2022. Issue #57's original installer error 46 was not reproduced and is not claimed fixed. Initial monitoring and immediate-detach close rejections remain recorded; later success is not a root-cause fix.
 
 ## Data and source code
 
@@ -73,10 +82,16 @@ This public repository contains product information, screenshots, downloads and 
 
 ## SHA256
 
-- `87738a053666b9a44503cfba10f70db2a075d80c4f703fd857d6c7933974d49f`  `C-SSH_0.9.1_x64-setup.exe`
-- `a19dd017d41e79fbd8cdfd1bdb159828eb4368c131b381fcdf537fdc543b3eba`  `C-SSH_0.9.1_portable-Windows-x64.zip`
-- `bc0aa6ffb0459e66ea7efc8536c1c6fe8076b3cf1a4dec7c9bcc96a0b91f0a74`  `C-SSH_0.9.1_macOS-arm64.dmg`
-- `9cf10f2049a6824ff9bb5cd5af95f3576a3964d3700ee0ccc77ccff63c74a20e`  `C-SSH_0.9.1_android-arm64.apk`
+- `eb55cf041a5c430ceb9264e278f54c889436322db0e4fffacfcf46bca45b818a`  `C-SSH_0.9.2_android-arm64.apk`
+- `c20223ed8751abe9f8484672eb5c589d8c51c4f21fb9ec7dfb8c116ab01316fa`  `C-SSH_0.9.2_aarch64.AppImage`
+- `34a2d102a3934a2cbbf013c5eca364381d9b8eab20a714fd0b2315543e081e51`  `C-SSH_0.9.2_amd64.AppImage`
+- `13be972dcfc6bf860e3b587237493f4dca4b0b7df909b8976db7539780031142`  `C-SSH_0.9.2_amd64.deb`
+- `287d2a4c0c193f9b9e1d9ea4c352b11b40b93ec32018d0eb88ec4a07cba630b9`  `C-SSH_0.9.2_arm64.deb`
+- `4c12425965724d76f004b9d7bfe8744d6c56cc81d859ad906c0a2618af7a50b1`  `C-SSH_0.9.2_macOS-arm64.dmg`
+- `0f72009dfd5b91b70e699d7ce29f13b329ed929b2bb1f2b8e57f1baf1912772c`  `C-SSH_0.9.2_arm64-setup.exe`
+- `b9d9f0b148615d00b2d438039125857b22412b4cf4cf09395efa2fb27aaea0e3`  `C-SSH_0.9.2_portable-Windows-arm64.zip`
+- `9e635e857025732e3e68fcced78ab983a1c735c0a322c7aaccb539f3f6743b4b`  `C-SSH_0.9.2_portable-Windows-x64.zip`
+- `447a880a1e3c7a5841907e1247a6e48a832c7e5e36704f18a67f27eed437fb38`  `C-SSH_0.9.2_x64-setup.exe`
 
 ## Feedback and contact
 

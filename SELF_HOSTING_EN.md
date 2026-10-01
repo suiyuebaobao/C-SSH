@@ -18,7 +18,7 @@ The repository's `creation-cloud/` directory is a filtered production-source mir
 
 ## Release distribution
 
-**0.9.1 requires manual installation. Older versions cannot automatically upgrade to it.** Do not force this upgrade on clients with the previous signing identity.
+**0.9.2 requires manual installation. Older versions cannot automatically upgrade to it.** Do not force this upgrade on clients with the previous signing identity.
 
 For later compatible upgrades, download original official artifacts, preserve their bytes/signatures, upload them through your Cloud administration interface and configure release policy. Clients check and download from the currently selected Cloud rather than a separate official endpoint.
 
@@ -29,4 +29,6 @@ For later compatible upgrades, download original official artifacts, preserve th
 
 Operators own certificate, backup, mail, availability and permission management. Clients still control end-to-end decryption; a server upgrade does not perform a user's decryption or migration.
 
-The official 0.9.1 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
+The official 0.9.2 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
+
+The current Cloud updater asset contract covers Windows x64 and Android. Windows ARM64, Mac and Linux use manual download links in this release; ARM64 is never mapped to x64.

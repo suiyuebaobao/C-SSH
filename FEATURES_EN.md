@@ -1,4 +1,4 @@
-# C-SSH 0.9.1 Feature Guide
+# C-SSH 0.9.2 Feature Guide
 
 [Home](README_EN.md) · [Installation](INSTALL_EN.md) · [Gallery](screenshots/README.md)
 
@@ -8,7 +8,7 @@ This release requires manual installation. The sections below describe available
 
 ### Three clients
 
-Windows x64, Apple Silicon Mac arm64 and Android arm64 share core capabilities with desktop and phone layouts. 0.9.1 · Manual installation.
+Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and Linux x86_64/ARM64 share core capabilities with desktop and phone layouts. 0.9.2 · Manual installation.
 
 ### SSH and RDP connections
 
@@ -54,7 +54,7 @@ Browse, upload, download, create, rename, delete, edit text and verify hashes. M
 
 ### Forwarding and broadcasts
 
-Windows and Mac provide SSH port forwarding, saved commands, batch execution and per-host results. Android has no forwarding or broadcast pages. Desktop features.
+Windows, Mac and Linux provide SSH port forwarding, saved commands, batch execution and per-host results. Android has no forwarding or broadcast pages. Desktop features.
 
 ### Three AI scopes
 
@@ -96,14 +96,14 @@ The Cloud data-protection password and local device key have separate roles. Cha
 
 ### Manual download and update source
 
-0.9.1 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures. No automatic update to this release.
+0.9.2 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures. No automatic update to this release.
 
 ## Platform differences
 
-Windows and Mac expose port forwarding, saved commands, broadcasts, separate RDP windows and desktop access-grant management. Android has no forwarding or broadcast pages. Windows server features require the matching components and capability handshake; ordinary OpenSSH does not imply full Agent functionality.
+Windows, Mac and Linux expose port forwarding, saved commands, broadcasts, separate RDP windows and desktop access-grant management. Android has no forwarding or broadcast pages. Windows server features require the matching components and capability handshake; ordinary OpenSSH does not imply full Agent functionality.
 
 Mac is M-series only, not notarized and has no automatic updater. iOS is not published. Recovery evidence is environment-specific, not a guarantee for every outage, reboot or server configuration.
 
 ## Embedded Windows Setup ZIP
 
-Windows, Mac and Android provide offline export from the DVC management form; Android also offers system sharing. RDP-only mode hides the installer card. The ZIP carries no host or credential and the client never executes its EXE.
+Windows, Mac, Linux and Android provide offline export from the DVC management form; Android also offers system sharing. RDP-only mode hides the installer card. The ZIP carries no host or credential and the client never executes its EXE.

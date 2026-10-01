@@ -2,6 +2,17 @@
 
 # Changelog
 
+## 0.9.2 — Linux and Windows ARM64
+
+2026-10-02. Four platforms, ten packages; no iOS upload.
+
+- **Linux desktop client:** x86_64 and ARM64 deb/AppImage packages, sharing desktop hosts, SSH/Agent, persistent terminals, RDP/DVC, monitoring, files, AI, proxies, port forwarding and broadcasts.
+- **Native Windows ARM64:** NSIS and Portable packages, validated under an ordinary user on Windows 11 ARM64. Remote Windows management components remain x64.
+- **Older Windows terminals:** the bundled psmux adds a WinPTY backend for Server 2016 without ConPTY. Modern Windows keeps ConPTY. Management components use the static CRT to reduce runtime dependencies on clean systems.
+- **Reliability fixes:** host edit/delete waits, Windows domain connections, file-overwrite permission cleanup and Linux legacy-database migration.
+- **Cleaner announcements:** sync-operation messages are removed from the announcement dialog; Cloud sync remains available.
+- **Manual installation:** announced through notices, without upgrade prompts or forced updates.
+
 ## 0.9.1 — Address detection and embedded Windows Setup export
 
 2026-09-30. Windows x64 NSIS/Portable, Apple Silicon Mac arm64 DMG and Android arm64 APK. Notices and manual downloads only; no upgrade prompt or forced update. No iOS release; the Linux client stays frozen.

@@ -41,7 +41,9 @@
           {% endif %}
           <ul class="changelog-platforms" aria-label="{% if is_en %}Released platforms{% else %}发布平台{% endif %}">
             {% for platform in release.platforms %}<li>{{ platform.name }}</li>{% endfor %}
-            {% if (release.version == "0.9.0" || release.version == "0.9.1") && !release.has_macos %}<li>macOS</li>{% endif %}
+            {% if (release.version == "0.9.0" || release.version == "0.9.1" || release.version == "0.9.2") && !release.has_macos %}<li>macOS</li>{% endif %}
+            {% if release.version == "0.9.2" && !release.has_linux %}<li>Linux</li>{% endif %}
+            {% if release.version == "0.9.2" %}<li>Windows ARM64</li>{% endif %}
           </ul>
         </article>
       </li>
