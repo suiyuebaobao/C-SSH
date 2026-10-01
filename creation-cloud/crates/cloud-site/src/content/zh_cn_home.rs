@@ -51,7 +51,7 @@ pub(super) fn page_content() -> PageContent {
         "C-SSH 0.9.2 支持Windows x64／ARM64、M系列Mac、Android和Linux，提供SSH、RDP、持久终端、监控、文件、三作用域AI及可选自建云；本次仅发布公告，手动下载安装，不推送升级提醒或强制更新。",
         "C-SSH 0.9.2 / MANUAL DOWNLOAD",
         "C-SSH 0.9.2，把服务器运维放进同一工作台",
-        "Windows、M系列Mac与Android：主机、持久终端、远程桌面、监控、文件和AI助手统一使用。本次仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。iOS本次不提供下载。",
+        "Windows、M系列Mac、Android与Linux：主机、持久终端、远程桌面、监控、文件和AI助手统一使用。本次仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。iOS本次不提供下载。",
     )
     .with_actions(vec![
         action(
@@ -121,7 +121,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "NODE 01",
                     "三个客户端",
-                    "Windows x64、M系列Mac arm64和Android arm64共享核心能力，按桌面和手机布局使用。",
+                    "Windows x64／ARM64、M系列Mac arm64、Android arm64和Linux双架构共享核心能力，按桌面和手机布局使用。",
                     "0.9.2 · 手动安装",
                 ),
                 item(
@@ -195,7 +195,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "PURE SSH",
                     "端口映射与群发",
-                    "Windows和Mac提供SSH端口映射、常用命令库、批量执行和逐机结果；Android不提供这两类页面。",
+                    "Windows、Mac和Linux提供SSH端口映射、常用命令库、批量执行和逐机结果；Android不提供这两类页面。",
                     "桌面功能",
                 ),
                 item(
@@ -350,7 +350,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "这次有哪些平台？",
-            "Windows x64安装包与便携版、仅M系列Mac的arm64 DMG、Android arm64 APK。iOS本次不上传；Linux客户端保持冻结，Linux服务器Agent继续提供。",
+            "Windows x64／ARM64各有安装包与便携版，M系列Mac提供arm64 DMG，Android提供arm64 APK，Linux x86_64／ARM64各提供deb与AppImage。iOS本次不上传。",
         ),
         HomeFaqItem::new(
             "Android旧数据怎么办？",

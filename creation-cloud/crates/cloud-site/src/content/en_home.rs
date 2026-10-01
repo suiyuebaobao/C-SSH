@@ -127,7 +127,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "NODE 01",
                     "Three clients",
-                    "Windows x64, Apple Silicon Mac arm64 and Android arm64 share core capabilities with desktop and phone layouts.",
+                    "Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and both Linux architectures share core capabilities with desktop and phone layouts.",
                     "0.9.2 · Manual installation",
                 ),
                 item(
@@ -201,7 +201,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "PURE SSH",
                     "Forwarding and broadcasts",
-                    "Windows and Mac provide SSH port forwarding, saved commands, batch execution and per-host results. Android has no forwarding or broadcast pages.",
+                    "Windows, Mac and Linux provide SSH port forwarding, saved commands, batch execution and per-host results. Android has no forwarding or broadcast pages.",
                     "Desktop features",
                 ),
                 item(
@@ -277,7 +277,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
         section(
             "platforms",
             HomeLayout::Platforms,
-            "Windows, Mac and Android; iOS is not published",
+            "Windows, Mac, Android and Linux; iOS is not published",
             "0.9.2 ships for Windows x64/ARM64, Apple Silicon Mac, Android and Linux and requires manual installation. Linux offers x86_64 and ARM64 packages; iOS is not published.",
             platform_items(platforms),
         ),
@@ -356,7 +356,7 @@ fn faqs() -> Vec<HomeFaqItem> {
         ),
         HomeFaqItem::new(
             "Which platforms are included?",
-            "Windows x64 installer and portable ZIP, an arm64 DMG for Apple Silicon Mac only, and an Android arm64 APK. iOS is not published. The Linux client remains frozen; Linux server Agents remain available.",
+            "Windows x64/ARM64 installer and portable ZIP, an Apple Silicon Mac arm64 DMG, an Android arm64 APK, and Linux x86_64/ARM64 deb and AppImage packages. iOS is not published.",
         ),
         HomeFaqItem::new(
             "What happens to old Android data?",
