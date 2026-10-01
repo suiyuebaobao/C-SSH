@@ -99,14 +99,6 @@ fn platforms() -> Vec<HomePlatform> {
             "Ubuntu 24.04 / X11已验证",
             "deb / AppImage · 手动下载",
         ),
-        HomePlatform::planned(
-            "i",
-            "iOS",
-            "iPhone客户端开发中",
-            "本次不提供下载",
-            "不上传IPA或TestFlight",
-            "本次未发布",
-        ),
     ]
 }
 
@@ -120,7 +112,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             vec![
                 item(
                     "NODE 01",
-                    "三个客户端",
+                    "四个客户端",
                     "Windows x64／ARM64、M系列Mac arm64、Android arm64和Linux双架构共享核心能力，按桌面和手机布局使用。",
                     "0.9.2 · 手动安装",
                 ),
@@ -382,7 +374,7 @@ fn section(
         HomeLayout::Workflow => ("01 / HOW IT WORKS", "SYSTEM FLOW / DATA PATH"),
         HomeLayout::Capabilities => ("02 / CAPABILITIES", "FUNCTION MODULE / 09 UNITS"),
         HomeLayout::Steps => ("03 / FIRST RUN", "OPERATION SEQUENCE / 06 STEPS"),
-        HomeLayout::Platforms => ("04 / PLATFORMS", "PLATFORM MATRIX / 05 SLOTS"),
+        HomeLayout::Platforms => ("04 / PLATFORMS", "PLATFORM MATRIX / 04 SLOTS"),
         HomeLayout::Security => ("05 / SECURITY BOUNDARY", "SEPARATED PLANES"),
         HomeLayout::Cloud => ("07 / CREATION CLOUD", "CONTROL SURFACE"),
     };

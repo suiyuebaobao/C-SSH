@@ -62,7 +62,7 @@ pub(super) fn page_content() -> PageContent {
     .with_actions(vec![
         action(
             "Download 0.9.2 manually",
-            "/en/downloads",
+            "/downloads",
             "button button-primary",
         ),
         action("Complete feature guide", "https://github.com/suiyuebaobao/C-SSH/blob/main/FEATURES_EN.md", "button button-secondary"),
@@ -105,14 +105,6 @@ fn platforms() -> Vec<HomePlatform> {
             "Verified on Ubuntu 24.04 / X11",
             "deb / AppImage · Manual download",
         ),
-        HomePlatform::planned(
-            "i",
-            "iOS",
-            "iPhone client in development",
-            "No download in this release",
-            "No IPA or TestFlight upload",
-            "Not published",
-        ),
     ]
 }
 
@@ -126,7 +118,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             vec![
                 item(
                     "NODE 01",
-                    "Three clients",
+                    "Four clients",
                     "Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and both Linux architectures share core capabilities with desktop and phone layouts.",
                     "0.9.2 · Manual installation",
                 ),
@@ -388,7 +380,7 @@ fn section(
         HomeLayout::Workflow => ("01 / HOW IT WORKS", "SYSTEM FLOW / DATA PATH"),
         HomeLayout::Capabilities => ("02 / CAPABILITIES", "FUNCTION MODULE / 09 UNITS"),
         HomeLayout::Steps => ("03 / FIRST RUN", "OPERATION SEQUENCE / 06 STEPS"),
-        HomeLayout::Platforms => ("04 / PLATFORMS", "PLATFORM MATRIX / 05 SLOTS"),
+        HomeLayout::Platforms => ("04 / PLATFORMS", "PLATFORM MATRIX / 04 SLOTS"),
         HomeLayout::Security => ("05 / SECURITY BOUNDARY", "SEPARATED PLANES"),
         HomeLayout::Cloud => ("07 / CREATION CLOUD", "CONTROL SURFACE"),
     };
