@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 0.9.3 — Terminal keyboard and form fixes
+
+2026-10-02.
+
+- **Terminal keyboard handling:** Android adaptive terminals resize to the visible area, with corrected cursor and input-anchor positioning. Shortcut keys stay above the keyboard and leave room for the input line when expanded.
+- **Accessible form closing:** add/edit host forms have a top-right close button that remains available while scrolling. Clicking outside the form preserves entered values.
+- **Mobile terminal font:** Android/iOS default to size 6, preserving saved custom sizes.
+- **Version alignment:** iOS is maintained at 0.9.3, without an iOS package upload.
+- **Manual installation:** download and install this release yourself. Announcement only; no upgrade prompts or forced updates.
+
 ## 0.9.2 — Linux and Windows ARM64
 
 2026-10-02. Four platforms, ten packages; no iOS upload.

@@ -1,4 +1,4 @@
-# C-SSH 0.9.2 installation and data preservation
+# C-SSH 0.9.3 installation and data preservation
 
 [Downloads](README_EN.md#downloads) · [中文](INSTALL.md)
 
@@ -6,7 +6,7 @@ This release uses notices and manual downloads only. No upgrade prompt or forced
 
 ## Before installation
 
-Use the official website or suiyuebaobao/C-SSH v0.9.2 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
+Use the official website or suiyuebaobao/C-SSH v0.9.3 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
 
 ## Windows x64 / ARM64
 
@@ -19,11 +19,11 @@ Choose the package for your CPU; native ARM64 was validated on Windows 11 ARM64.
 
 ## Apple Silicon Mac
 
-Open C-SSH_0.9.2_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. Mac automatic updates are deferred.
+Open C-SSH_0.9.3_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. Mac automatic updates are deferred.
 
 ## Android arm64
 
-Install C-SSH_0.9.2_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The 0.9.0 signer is retained, so 0.9.0 and 0.9.1 can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
+Install C-SSH_0.9.3_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The 0.9.0 signer is retained, so 0.9.0, 0.9.1 and 0.9.2 can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
 
 ## Linux x86_64 / ARM64
 

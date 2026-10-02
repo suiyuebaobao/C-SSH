@@ -74,7 +74,7 @@ pub(super) fn downloads() -> PageContent {
         "下载 C-SSH SSH 终端与服务器运维客户端的 Windows x64／ARM64、M系列Mac、Android与Linux最新版；Linux提供两种架构的deb和AppImage。",
         "DOWNLOADS / DIRECT",
         "下载 C-SSH",
-        "0.9.2 仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。安装前请阅读数据保全说明。",
+        "0.9.3 仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。安装前请阅读数据保全说明。",
     )
     .with_sections(vec![section(
         "builds",

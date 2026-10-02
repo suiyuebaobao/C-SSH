@@ -1,12 +1,12 @@
-# C-SSH 0.9.2 安装与数据保全
+# C-SSH 0.9.3 安装与数据保全
 
 [下载](README.md#下载) · [English](INSTALL_EN.md)
 
-0.9.2只发公告，不弹升级提醒、不强制更新；请自行下载并安装。
+0.9.3只发公告，不弹升级提醒、不强制更新；请自行下载并安装。
 
 ## 安装前
 
-- 从官网或suiyuebaobao/C-SSH的v0.9.2取得安装包，按首页SHA256核对。
+- 从官网或suiyuebaobao/C-SSH的v0.9.3取得安装包，按首页SHA256核对。
 - 退出C-SSH，保全重要数据。Cloud仅手动同步加密配置，不包含AI对话与长期记忆；保留数据保护密码。
 
 ## Windows x64／ARM64
@@ -18,13 +18,13 @@
 
 ## M系列Mac
 
-- 打开C-SSH_0.9.2_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
+- 打开C-SSH_0.9.3_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
 - 仅Apple Silicon，最低系统目标macOS13；ad-hoc签名、未经公证。首次打开的系统许可参见[Apple官方说明](https://support.apple.com/zh-cn/102445)，不要把系统密码发到反馈中。
 - 当前没有Mac自动更新，后续单独开发。
 
 ## Android arm64
 
-- 用系统安装器安装C-SSH_0.9.2_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
+- 用系统安装器安装C-SSH_0.9.3_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
 - 沿用0.9.0正式签名，可覆盖0.9.0／0.9.1保留数据，无需卸载。
 - 更早旧签名不能直接覆盖；卸载会清除本地数据，尤其AI对话和记忆不在Cloud同步范围。未确认数据保全前不要卸载或清库。
 

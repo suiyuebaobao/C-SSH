@@ -44,7 +44,7 @@ pub(super) fn downloads() -> PageContent {
         "Download the latest C-SSH SSH terminal and server operations client for Windows x64/ARM64, Apple Silicon Mac, Android and Linux. Linux offers deb and AppImage packages for x86_64 and ARM64.",
         "DOWNLOADS / DIRECT",
         "Download C-SSH",
-        "0.9.2 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
+        "0.9.3 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
     )
     .with_sections(vec![section(
         "builds",

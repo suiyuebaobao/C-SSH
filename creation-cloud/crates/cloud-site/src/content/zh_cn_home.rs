@@ -12,7 +12,7 @@ pub(super) fn page_content() -> PageContent {
     let sections = sections(&platforms);
     let home_page = HomePageContent {
         status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
-        status_note: "0.9.2 · Windows / M系列Mac / Android / Linux · 必须手动下载安装".into(),
+        status_note: "0.9.3 · Windows / M系列Mac / Android / Linux · 必须手动下载安装".into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
         platform_note: "4 RELEASED / iOS NOT PUBLISHED".into(),
@@ -47,15 +47,15 @@ pub(super) fn page_content() -> PageContent {
 
     page(
         PageId::Home,
-        "C-SSH 0.9.2 | Windows · Mac · Android · Linux",
-        "C-SSH 0.9.2 支持Windows x64／ARM64、M系列Mac、Android和Linux，提供SSH、RDP、持久终端、监控、文件、三作用域AI及可选自建云；本次仅发布公告，手动下载安装，不推送升级提醒或强制更新。",
-        "C-SSH 0.9.2 / MANUAL DOWNLOAD",
-        "C-SSH 0.9.2，把服务器运维放进同一工作台",
+        "C-SSH 0.9.3 | Windows · Mac · Android · Linux",
+        "C-SSH 0.9.3 支持Windows x64／ARM64、M系列Mac、Android和Linux，提供SSH、RDP、持久终端、监控、文件、三作用域AI及可选自建云；本次仅发布公告，手动下载安装，不推送升级提醒或强制更新。",
+        "C-SSH 0.9.3 / MANUAL DOWNLOAD",
+        "C-SSH 0.9.3，把服务器运维放进同一工作台",
         "Windows、M系列Mac、Android与Linux：主机、持久终端、远程桌面、监控、文件和AI助手统一使用。本次仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。iOS本次不提供下载。",
     )
     .with_actions(vec![
         action(
-            "手动下载 0.9.2",
+            "手动下载 0.9.3",
             "/downloads",
             "button button-primary",
         ),
@@ -114,7 +114,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                     "NODE 01",
                     "四个客户端",
                     "Windows x64／ARM64、M系列Mac arm64、Android arm64和Linux双架构共享核心能力，按桌面和手机布局使用。",
-                    "0.9.2 · 手动安装",
+                    "0.9.3 · 手动安装",
                 ),
                 item(
                     "LINK 02",
@@ -225,7 +225,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 01",
                     "手动下载安装",
-                    "本次0.9.2只通过公告告知，请从官网下载页或官方GitHub手动下载匹配平台的安装包。",
+                    "本次0.9.3只通过公告告知，请从官网下载页或官方GitHub手动下载匹配平台的安装包。",
                     "核对版本和SHA256",
                 ),
                 item(
@@ -264,7 +264,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "platforms",
             HomeLayout::Platforms,
             "Windows、Mac、Android与Linux",
-            "0.9.2发布Windows x64／ARM64、M系列Mac、Android和Linux；必须手动下载安装。Linux提供x86_64／ARM64两种架构；iOS本次不提供下载。",
+            "0.9.3发布Windows x64／ARM64、M系列Mac、Android和Linux；必须手动下载安装。Linux提供x86_64／ARM64两种架构；iOS本次不提供下载。",
             platform_items(platforms),
         ),
         section(
@@ -326,7 +326,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "RELEASE",
                     "手动下载与更新来源",
-                    "0.9.2必须手动下载；使用自建云时，后续更新检查走所选云，由其管理员上传来自官网的版本与原签名。",
+                    "0.9.3必须手动下载；使用自建云时，后续更新检查走所选云，由其管理员上传来自官网的版本与原签名。",
                     "仅公告告知 · 不推送升级提醒或强制更新",
                 ),
             ],
@@ -337,7 +337,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
 fn faqs() -> Vec<HomeFaqItem> {
     vec![
         HomeFaqItem::new(
-            "0.9.2能从旧版自动更新吗？",
+            "0.9.3能从旧版自动更新吗？",
             "本次仅通过公告告知，不推送升级提醒，不强制更新。请手动下载安装，并先阅读安装与数据保全说明；Mac自动更新延期。",
         ),
         HomeFaqItem::new(

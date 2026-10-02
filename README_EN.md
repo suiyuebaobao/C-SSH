@@ -1,42 +1,39 @@
 [中文](README.md) | **English**
 
-# C-SSH 0.9.2
+# C-SSH 0.9.3
 
 A server-operations workspace for **Windows, Apple Silicon Mac, Android and Linux**: hosts, persistent terminals, RDP, monitoring, files and scoped AI. Local features work without a Cloud login.
 
-> **0.9.2 is announced through notices only. Download and install manually; no upgrade prompt or forced update is sent.**
+> **0.9.3 is announced through notices only. Download and install manually; no upgrade prompt or forced update is sent.**
 >
 > Android keeps the 0.9.0 signer and can replace 0.9.0 and 0.9.1. Earlier official builds with a different signer cannot be replaced directly. Uninstalling clears local data. Read the [installation and data-preservation guide](INSTALL_EN.md), especially the note that AI conversations and memory are not included in Cloud sync. The Mac DMG is Apple Silicon only, ad-hoc signed and not notarized.
 
 ## Downloads
 
-| Platform | Official 0.9.2 download |
+| Platform | Official 0.9.3 download |
 |---|---|
-| Windows x64 · NSIS | [C-SSH_0.9.2_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_x64-setup.exe) |
-| Windows x64 · Portable | [C-SSH_0.9.2_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_portable-Windows-x64.zip) |
-| macOS · Apple Silicon | [C-SSH_0.9.2_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_macOS-arm64.dmg) |
-| Android · arm64 | [C-SSH_0.9.2_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_android-arm64.apk) |
-| Windows 11 ARM64 · NSIS | [C-SSH_0.9.2_arm64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_arm64-setup.exe) |
-| Windows 11 ARM64 · Portable | [C-SSH_0.9.2_portable-Windows-arm64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_portable-Windows-arm64.zip) |
-| Linux x86_64 · deb | [C-SSH_0.9.2_amd64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_amd64.deb) |
-| Linux x86_64 · AppImage | [C-SSH_0.9.2_amd64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_amd64.AppImage) |
-| Linux ARM64 · deb | [C-SSH_0.9.2_arm64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_arm64.deb) |
-| Linux ARM64 · AppImage | [C-SSH_0.9.2_aarch64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_aarch64.AppImage) |
+| Windows x64 · NSIS | [C-SSH_0.9.3_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_x64-setup.exe) |
+| Windows x64 · Portable | [C-SSH_0.9.3_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_portable-Windows-x64.zip) |
+| macOS · Apple Silicon | [C-SSH_0.9.3_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_macOS-arm64.dmg) |
+| Android · arm64 | [C-SSH_0.9.3_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_android-arm64.apk) |
+| Windows 11 ARM64 · NSIS | [C-SSH_0.9.3_arm64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_arm64-setup.exe) |
+| Windows 11 ARM64 · Portable | [C-SSH_0.9.3_portable-Windows-arm64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_portable-Windows-arm64.zip) |
+| Linux x86_64 · deb | [C-SSH_0.9.3_amd64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_amd64.deb) |
+| Linux x86_64 · AppImage | [C-SSH_0.9.3_amd64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_amd64.AppImage) |
+| Linux ARM64 · deb | [C-SSH_0.9.3_arm64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_arm64.deb) |
+| Linux ARM64 · AppImage | [C-SSH_0.9.3_aarch64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_aarch64.AppImage) |
 
-[Website](https://c-ssh.com/en) · [Website downloads](https://c-ssh.com/en/downloads) · [Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.2) · [Installation](INSTALL_EN.md)
+[Website](https://c-ssh.com/en) · [Website downloads](https://c-ssh.com/en/downloads) · [Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.3) · [Installation](INSTALL_EN.md)
 
 iOS is not uploaded in this release. No Intel Mac, MSI, AAB or x86 Android release package is provided. Windows requires WebView2 Runtime. Minimum package targets are macOS 13 and Android 7.0/API 24; this does not mean every supported OS has been tested.
 
 ## What changed
 
-- **Linux desktop client:** x86_64 and ARM64 deb/AppImage packages, sharing desktop hosts, SSH/Agent, persistent terminals, RDP/DVC, monitoring, files, AI, proxies, port forwarding and broadcasts.
-- **Native Windows ARM64:** NSIS and Portable packages, validated under an ordinary user on Windows 11 ARM64. Remote Windows management components remain x64.
-- **Older Windows terminals:** the bundled psmux adds a WinPTY backend for Server 2016 without ConPTY. Modern Windows keeps ConPTY. Management components use the static CRT to reduce runtime dependencies on clean systems.
-- **Reliability fixes:** host edit/delete waits, Windows domain connections, file-overwrite permission cleanup and Linux legacy-database migration.
-- **Cleaner announcements:** sync-operation messages are removed from the announcement dialog; Cloud sync remains available.
-- **Manual installation:** announced through notices, without upgrade prompts or forced updates.
-
-[Full changelog](CHANGELOG_EN.md)
+- **Terminal keyboard handling:** Android adaptive terminals resize to the visible area, with corrected cursor and input-anchor positioning. Shortcut keys stay above the keyboard and leave room for the input line when expanded.
+- **Accessible form closing:** add/edit host forms have a top-right close button that remains available while scrolling. Clicking outside the form preserves entered values.
+- **Mobile terminal font:** Android/iOS default to size 6, preserving saved custom sizes.
+- **Version alignment:** iOS is maintained at 0.9.3, without an iOS package upload.
+- **Manual installation:** download and install this release yourself. Announcement only; no upgrade prompts or forced updates.
 
 ## Capabilities
 
@@ -68,11 +65,7 @@ The [new 0.9.1 form](screenshots/v0.9.1/README_EN.md) and retained 0.9.0 full ga
 
 ## Validation scope
 
-- Windows x64/ARM64: isolated ordinary-user NSIS/Portable installation, startup, uninstall, manual 0.9.1-to-0.9.2 upgrade and data preservation. ARM64 also has live SSH/file/tmux and Server 2022 RDP/DVC/Terminal2 reconnection evidence.
-- Mac: arm64, DMG mount, version, embedded resources and complete ad-hoc signature checks passed. Not notarized; this is not validation of every Mac model or the minimum OS.
-- Android: package/version/ABI/original signer/16KiB alignment/resources passed; SDK Emulator upgrade from 0.9.1 retained settings and launched normally. No physical-phone claim.
-- Linux: ARM64 and x86_64 Ubuntu 24.04.5 VMs, actual deb/AppImage startup, Secret Service, cold recovery and desktop feature checks. Other distributions and Wayland remain unvalidated; GPU-less Xvfb fixtures used a test-only WebKit graphics setting.
-- Server 2016 WinPTY integration has live development-candidate evidence; this release's 0.9.2 Setup was also tested on local Server 2022. Issue #57's original installer error 46 was not reproduced and is not claimed fixed. Initial monitoring and immediate-detach close rejections remain recorded; later success is not a root-cause fix.
+This release checks changed behavior and new packages: five-platform form components in a background browser; Android SDK Emulator keyboard handling and upgrade; Windows lifecycle checks on both architectures; Mac DMG/arm64/ad-hoc signatures; Linux packages and forms on Ubuntu 24.04/X11. Earlier functional evidence retains its original version scope. No claim covers a physical Honor phone, all keyboards, all Linux distributions, or a physical iPhone.
 
 ## Data and source code
 
@@ -82,16 +75,18 @@ This public repository contains product information, screenshots, downloads and 
 
 ## SHA256
 
-- `eb55cf041a5c430ceb9264e278f54c889436322db0e4fffacfcf46bca45b818a`  `C-SSH_0.9.2_android-arm64.apk`
-- `c20223ed8751abe9f8484672eb5c589d8c51c4f21fb9ec7dfb8c116ab01316fa`  `C-SSH_0.9.2_aarch64.AppImage`
-- `34a2d102a3934a2cbbf013c5eca364381d9b8eab20a714fd0b2315543e081e51`  `C-SSH_0.9.2_amd64.AppImage`
-- `13be972dcfc6bf860e3b587237493f4dca4b0b7df909b8976db7539780031142`  `C-SSH_0.9.2_amd64.deb`
-- `287d2a4c0c193f9b9e1d9ea4c352b11b40b93ec32018d0eb88ec4a07cba630b9`  `C-SSH_0.9.2_arm64.deb`
-- `4c12425965724d76f004b9d7bfe8744d6c56cc81d859ad906c0a2618af7a50b1`  `C-SSH_0.9.2_macOS-arm64.dmg`
-- `0f72009dfd5b91b70e699d7ce29f13b329ed929b2bb1f2b8e57f1baf1912772c`  `C-SSH_0.9.2_arm64-setup.exe`
-- `b9d9f0b148615d00b2d438039125857b22412b4cf4cf09395efa2fb27aaea0e3`  `C-SSH_0.9.2_portable-Windows-arm64.zip`
-- `9e635e857025732e3e68fcced78ab983a1c735c0a322c7aaccb539f3f6743b4b`  `C-SSH_0.9.2_portable-Windows-x64.zip`
-- `447a880a1e3c7a5841907e1247a6e48a832c7e5e36704f18a67f27eed437fb38`  `C-SSH_0.9.2_x64-setup.exe`
+| File | SHA256 |
+|---|---|
+| C-SSH_0.9.3_android-arm64.apk | `261f028ed76462577f0bd369404a5c4e5a47cf6b7b1ff8422851b1e0401612e9` |
+| C-SSH_0.9.3_aarch64.AppImage | `842c1ca1b01650a8e19a27f43cd4aef839e7e0255e34d0aa923591e86ac291a4` |
+| C-SSH_0.9.3_amd64.AppImage | `26249275cc7d2e9f9e85cf4d47e89d11ca9740590fc3f6626328274cd214145b` |
+| C-SSH_0.9.3_amd64.deb | `8686242edc6c470f039dbb6e710143e964c75da4e18750a18b6e57c408b88292` |
+| C-SSH_0.9.3_arm64.deb | `d6b92a1b0d2f33144f6ab063703483f491a94092f69d7aeb1d22ba59ebcfe17f` |
+| C-SSH_0.9.3_macOS-arm64.dmg | `d86c2cdf8563f53602f74e1d0200d95b79dd35b89bc08f6f55f236b88ba09785` |
+| C-SSH_0.9.3_arm64-setup.exe | `98ee1a090ec8143a0fd47336319c86a9dd03877cd5b62c302dae8da294310091` |
+| C-SSH_0.9.3_portable-Windows-arm64.zip | `8c419270eff33874887e2848c5167c77c05ca873d6b6ebdfcf2e45e431b4f35e` |
+| C-SSH_0.9.3_portable-Windows-x64.zip | `bf290d13963885b8f5c6eac8da576b8aac731d26d20df0de204e39ad190aeb54` |
+| C-SSH_0.9.3_x64-setup.exe | `0defc336bfe744b5f6b76917d3954c53dd5e0ccfa0c9b74b8973deb8f78a1b09` |
 
 ## Feedback and contact
 

@@ -1,4 +1,4 @@
-# C-SSH 0.9.2 Feature Guide
+# C-SSH 0.9.3 Feature Guide
 
 [Home](README_EN.md) · [Installation](INSTALL_EN.md) · [Gallery](screenshots/README.md)
 
@@ -8,7 +8,7 @@ This release requires manual installation. The sections below describe available
 
 ### Three clients
 
-Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and Linux x86_64/ARM64 share core capabilities with desktop and phone layouts. 0.9.2 · Manual installation.
+Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and Linux x86_64/ARM64 share core capabilities with desktop and phone layouts. 0.9.3 · Manual installation.
 
 ### SSH and RDP connections
 
@@ -96,7 +96,7 @@ The Cloud data-protection password and local device key have separate roles. Cha
 
 ### Manual download and update source
 
-0.9.2 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures. No automatic update to this release.
+0.9.3 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures. No automatic update to this release.
 
 ## Platform differences
 

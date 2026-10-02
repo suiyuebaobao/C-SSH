@@ -1,42 +1,39 @@
 **中文** | [English](README_EN.md)
 
-# C-SSH 0.9.2
+# C-SSH 0.9.3
 
 面向 **Windows、M系列 Mac、Android 和 Linux** 的服务器运维工作台：主机管理、持久终端、RDP、监控、文件和三作用域 AI。无需登录 Cloud 也能使用本地功能。
 
-> **0.9.2 只通过公告告知，请自行下载并安装；不弹升级提醒、不强制更新。**
+> **0.9.3 只通过公告告知，请自行下载并安装；不弹升级提醒、不强制更新。**
 >
-> Android 沿用 0.9.0 安装签名，可覆盖 0.9.0／0.9.1；更早的旧正式签名不能直接覆盖，卸载会清除本地数据。请先阅读[安装与数据保全说明](INSTALL.md)，尤其注意 AI 对话和记忆不参与 Cloud 同步。Mac 仅支持 M 系列，DMG 采用 ad-hoc 签名且未公证。
+> Android 沿用 0.9.0 安装签名，可覆盖 0.9.0／0.9.1／0.9.2；更早的旧正式签名不能直接覆盖，卸载会清除本地数据。请先阅读[安装与数据保全说明](INSTALL.md)，尤其注意 AI 对话和记忆不参与 Cloud 同步。Mac 仅支持 M 系列，DMG 采用 ad-hoc 签名且未公证。
 
 ## 下载
 
-| 平台 | 0.9.2 官方下载 |
+| 平台 | 0.9.3 官方下载 |
 |---|---|
-| Windows x64 · NSIS | [C-SSH_0.9.2_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_x64-setup.exe) |
-| Windows x64 · Portable | [C-SSH_0.9.2_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_portable-Windows-x64.zip) |
-| macOS · Apple Silicon | [C-SSH_0.9.2_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_macOS-arm64.dmg) |
-| Android · arm64 | [C-SSH_0.9.2_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_android-arm64.apk) |
-| Windows 11 ARM64 · NSIS | [C-SSH_0.9.2_arm64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_arm64-setup.exe) |
-| Windows 11 ARM64 · Portable | [C-SSH_0.9.2_portable-Windows-arm64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_portable-Windows-arm64.zip) |
-| Linux x86_64 · deb | [C-SSH_0.9.2_amd64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_amd64.deb) |
-| Linux x86_64 · AppImage | [C-SSH_0.9.2_amd64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_amd64.AppImage) |
-| Linux ARM64 · deb | [C-SSH_0.9.2_arm64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_arm64.deb) |
-| Linux ARM64 · AppImage | [C-SSH_0.9.2_aarch64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.2/C-SSH_0.9.2_aarch64.AppImage) |
+| Windows x64 · NSIS | [C-SSH_0.9.3_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_x64-setup.exe) |
+| Windows x64 · Portable | [C-SSH_0.9.3_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_portable-Windows-x64.zip) |
+| macOS · Apple Silicon | [C-SSH_0.9.3_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_macOS-arm64.dmg) |
+| Android · arm64 | [C-SSH_0.9.3_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_android-arm64.apk) |
+| Windows 11 ARM64 · NSIS | [C-SSH_0.9.3_arm64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_arm64-setup.exe) |
+| Windows 11 ARM64 · Portable | [C-SSH_0.9.3_portable-Windows-arm64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_portable-Windows-arm64.zip) |
+| Linux x86_64 · deb | [C-SSH_0.9.3_amd64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_amd64.deb) |
+| Linux x86_64 · AppImage | [C-SSH_0.9.3_amd64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_amd64.AppImage) |
+| Linux ARM64 · deb | [C-SSH_0.9.3_arm64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_arm64.deb) |
+| Linux ARM64 · AppImage | [C-SSH_0.9.3_aarch64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_aarch64.AppImage) |
 
-[官网](https://c-ssh.com) · [官网下载页](https://c-ssh.com/downloads) · [本次 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.2) · [安装说明](INSTALL.md)
+[官网](https://c-ssh.com) · [官网下载页](https://c-ssh.com/downloads) · [本次 Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.3) · [安装说明](INSTALL.md)
 
 iOS 本次不上传；不提供 Intel Mac、MSI、AAB 或 x86 Android 发布包。Windows 需要可用的 WebView2 Runtime；Mac 最低系统目标为 macOS 13，Android 最低系统目标为 Android 7.0/API 24。最低目标不等于所有系统都已实测。
 
 ## 这次更新了什么
 
-- **Linux 桌面客户端**：新增 x86_64／ARM64 的 deb 和 AppImage，复用桌面主机、SSH／Agent、持久终端、RDP／DVC、监控、文件、AI、代理、端口映射和群发能力。
-- **Windows ARM64 原生版**：提供 NSIS 和 Portable，已在 Windows 11 ARM64 的普通用户环境验证；远端 Windows 管理组件继续使用 x64。
-- **Windows 旧系统终端**：配套 psmux 增加 WinPTY 后端，供缺少 ConPTY 的 Server 2016 使用；现代 Windows 保持 ConPTY。管理组件使用静态 CRT，减少干净系统上的运行库依赖。
-- **稳定性修复**：主机编辑／删除等待、Windows 域名接入、文件覆盖权限收尾及 Linux 旧库迁移。
-- **公告更简洁**：移除公告界面的同步消息列表，云同步功能保留。
-- **手动下载安装**：本次通过公告告知，不弹升级提醒、不强制更新。
-
-[完整更新记录](CHANGELOG.md)
+- **终端键盘避让**：Android 自适应终端随键盘可见区域调整，修正游标和输入焦点定位；快捷键保持在键盘上方，展开时为输入行留出空间。
+- **更易关闭表单**：新增／编辑主机表单增加右上关闭按钮，长表单滚动时仍可操作；点击表单外侧不会丢失输入。
+- **移动终端字号**：Android／iOS 默认字号为 6，保留已经保存的自定义字号。
+- **版本同步**：iOS 同步维护 0.9.3，但本次不上传 iOS 安装包。
+- **手动安装**：本次只发公告，请自行下载安装；不弹升级提醒、不强制更新。
 
 ## 完整能力
 
@@ -68,11 +65,7 @@ iOS 本次不上传；不提供 Intel Mac、MSI、AAB 或 x86 Android 发布包�
 
 ## 验证范围
 
-- Windows x64／ARM64：普通用户隔离环境的 NSIS／Portable、安装启动卸载及 0.9.1 到 0.9.2 手动升级与 data 保留；ARM64另有真实SSH、文件传输、tmux、Server2022 RDP／DVC及Terminal2重连证据。
-- Mac：arm64、DMG挂载、版本、内嵌资源与完整ad-hoc签名通过；未公证，不外推最低系统或全部M系列机型。
-- Android：包名、版本、ABI、原签名、16KiB对齐与资源检查；SDK Emulator覆盖0.9.1后启动与设置保留，不代表物理手机验收。
-- Linux：Ubuntu24.04.5的ARM64与x86_64隔离VM，实际deb与AppImage启动、系统密钥环、冷恢复及桌面功能分项验证。Wayland和其它发行版尚未验收；无GPU的Xvfb夹具使用了仅作用于测试环境的WebKit图形设置。
-- Server2016的WinPTY产品接入已有开发候选实链；本次0.9.2 Setup另在本机Server2022验证。Issue57原安装错误46未复现，不宣称已修复。首次监控请求及紧接detach的关闭拒绝保留为观察记录，后续成功不等于根因已修复。
+本次仅复测变化相关流程及新包：五端表单后台浏览器验证、Android SDK Emulator 键盘与升级、Windows 两架构安装生命周期、Mac DMG／arm64／ad-hoc 签名、Linux Ubuntu 24.04／X11 包与表单。既有功能证据保留原版本边界；不宣称荣耀真机、所有输入法、所有 Linux 发行版或 iPhone 真机已验收。
 
 ## 数据与源码
 
@@ -82,16 +75,18 @@ Cloud 不转发客户端到服务器的 SSH 数据。主机凭据和模型 Key �
 
 ## SHA256
 
-- `eb55cf041a5c430ceb9264e278f54c889436322db0e4fffacfcf46bca45b818a`  `C-SSH_0.9.2_android-arm64.apk`
-- `c20223ed8751abe9f8484672eb5c589d8c51c4f21fb9ec7dfb8c116ab01316fa`  `C-SSH_0.9.2_aarch64.AppImage`
-- `34a2d102a3934a2cbbf013c5eca364381d9b8eab20a714fd0b2315543e081e51`  `C-SSH_0.9.2_amd64.AppImage`
-- `13be972dcfc6bf860e3b587237493f4dca4b0b7df909b8976db7539780031142`  `C-SSH_0.9.2_amd64.deb`
-- `287d2a4c0c193f9b9e1d9ea4c352b11b40b93ec32018d0eb88ec4a07cba630b9`  `C-SSH_0.9.2_arm64.deb`
-- `4c12425965724d76f004b9d7bfe8744d6c56cc81d859ad906c0a2618af7a50b1`  `C-SSH_0.9.2_macOS-arm64.dmg`
-- `0f72009dfd5b91b70e699d7ce29f13b329ed929b2bb1f2b8e57f1baf1912772c`  `C-SSH_0.9.2_arm64-setup.exe`
-- `b9d9f0b148615d00b2d438039125857b22412b4cf4cf09395efa2fb27aaea0e3`  `C-SSH_0.9.2_portable-Windows-arm64.zip`
-- `9e635e857025732e3e68fcced78ab983a1c735c0a322c7aaccb539f3f6743b4b`  `C-SSH_0.9.2_portable-Windows-x64.zip`
-- `447a880a1e3c7a5841907e1247a6e48a832c7e5e36704f18a67f27eed437fb38`  `C-SSH_0.9.2_x64-setup.exe`
+| File | SHA256 |
+|---|---|
+| C-SSH_0.9.3_android-arm64.apk | `261f028ed76462577f0bd369404a5c4e5a47cf6b7b1ff8422851b1e0401612e9` |
+| C-SSH_0.9.3_aarch64.AppImage | `842c1ca1b01650a8e19a27f43cd4aef839e7e0255e34d0aa923591e86ac291a4` |
+| C-SSH_0.9.3_amd64.AppImage | `26249275cc7d2e9f9e85cf4d47e89d11ca9740590fc3f6626328274cd214145b` |
+| C-SSH_0.9.3_amd64.deb | `8686242edc6c470f039dbb6e710143e964c75da4e18750a18b6e57c408b88292` |
+| C-SSH_0.9.3_arm64.deb | `d6b92a1b0d2f33144f6ab063703483f491a94092f69d7aeb1d22ba59ebcfe17f` |
+| C-SSH_0.9.3_macOS-arm64.dmg | `d86c2cdf8563f53602f74e1d0200d95b79dd35b89bc08f6f55f236b88ba09785` |
+| C-SSH_0.9.3_arm64-setup.exe | `98ee1a090ec8143a0fd47336319c86a9dd03877cd5b62c302dae8da294310091` |
+| C-SSH_0.9.3_portable-Windows-arm64.zip | `8c419270eff33874887e2848c5167c77c05ca873d6b6ebdfcf2e45e431b4f35e` |
+| C-SSH_0.9.3_portable-Windows-x64.zip | `bf290d13963885b8f5c6eac8da576b8aac731d26d20df0de204e39ad190aeb54` |
+| C-SSH_0.9.3_x64-setup.exe | `0defc336bfe744b5f6b76917d3954c53dd5e0ccfa0c9b74b8973deb8f78a1b09` |
 
 ## 反馈与联系
 
