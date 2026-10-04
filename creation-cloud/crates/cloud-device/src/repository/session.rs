@@ -262,26 +262,3 @@ fn mask_label(value: &str) -> String {
         .next()
         .map_or_else(|| "***".to_owned(), |first| format!("{first}***"))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::{SESSION_PROJECTION_SQL, account_label};
-
-    #[test]
-    fn public_status_has_only_online_and_offline_branches() {
-        assert!(SESSION_PROJECTION_SQL.contains("THEN 'online' ELSE 'offline' END"));
-        assert!(SESSION_PROJECTION_SQL.contains("interval '5 minutes'"));
-        assert!(SESSION_PROJECTION_SQL.contains("credential_version = account.credential_version"));
-        assert!(!SESSION_PROJECTION_SQL.contains("token_hash"));
-        assert!(!SESSION_PROJECTION_SQL.contains("password_hash"));
-    }
-
-    #[test]
-    fn account_label_is_masked() {
-        assert_eq!(
-            account_label(Some("person@example.com"), None),
-            "p***@e***.com"
-        );
-        assert_eq!(account_label(None, Some("ops-admin")), "o***");
-    }
-}

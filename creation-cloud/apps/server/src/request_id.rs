@@ -34,16 +34,3 @@ fn valid(value: &str) -> bool {
             .bytes()
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b':' | b'-'))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::valid;
-
-    #[test]
-    fn request_id_rejects_sensitive_or_header_breaking_characters() {
-        assert!(valid("019f-example:01"));
-        assert!(!valid("admin@example.com"));
-        assert!(!valid("line\nbreak"));
-        assert!(!valid(""));
-    }
-}

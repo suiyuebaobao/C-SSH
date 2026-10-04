@@ -1,0 +1,633 @@
+# C-SSH historical changelog 1
+
+[Current changelog](CHANGELOG.md)
+
+## 0.9.0 — 三端发布（必须手动安装）
+
+0.9.0 必须自行下载并安装，旧版本无法自动更新。
+
+发布平台：Windows x64（NSIS、便携ZIP）、M系列Mac arm64（DMG）、Android arm64（APK）。iOS本次不上传，Linux客户端保持冻结。
+
+新增与完善：
+- M系列Mac客户端及DMG分发，复用共享运行时和桌面能力。
+- 主机新增IPv4／域名选择，端口独立；域名解析兼容IPv6，已有IPv6主机保持可用。
+- 设置中增加官方／自建Creation Cloud选择，账号、同步和更新来源按云隔离。
+- Windows服务器采用手动Setup与Windows账号接入，移除自动安装／OCR流程。
+- Windows Agent持久终端Terminal2／psmux，普通OpenSSH路径继续保留。
+- 全局／项目／主机AI历史范围、终端输入、RDP登录就绪、主机刷新、系统信息和共享数据迁移修复。
+
+验证：
+- Windows测试VM通过安装、启动、卸载及0.8.8到0.9.0的手动升级与data保留。
+- Mac通过arm64构建、DMG挂载、版本和ad-hoc签名完整性核对。
+- Android通过包级检查及SDK Emulator同签名测试包升级、启动和原数据保留；不代表旧正式版可覆盖，也不代表真机验收。
+
+安装提示：
+- Android使用新签名，无法直接覆盖旧正式版；卸载会清除本地数据。AI对话和记忆不包含在Cloud同步中，无法确认数据已保全时请保留旧版。
+- Mac只支持M系列，最低系统目标macOS13，ad-hoc签名、未经公证，无自动更新。
+- Windows安装器没有Authenticode签名；需要已安装WebView2 Runtime。
+- 本次不向旧客户端投放自动更新，请使用官方手动下载入口。
+
+
+完整安装包请前往 [GitHub Releases](https://github.com/suiyuebaobao/C-SSH/releases)。每个 Release 都包含对应版本的安装包、更新说明和验证信息。
+
+## v0.8.9（历史开发阶段，未独立发布）
+
+> 以下记录描述当时的状态，不代表当前功能或下载状态。后续开发已进入上方的 0.9.0 正式版。
+
+本次仅更新说明和截图，未上传新程序，也未变更旧版资产或自动更新策略。
+
+### 新增与调整
+
+- 界面图集扩充到Windows／Android共54张，补齐主要页面并替换旧图原链接，新增分平台图集导航。
+- Windows／Android 共用自动安装流程；保留原手动 Setup 与远程桌面接管。
+- Windows 管理支持 RDP-only、OpenSSH 直连和 SSH-over-RDP，复用已保存凭据。
+- 补齐 Windows Native AI、监控及跨端代理线路和加密同步相关能力。
+
+### 修复
+
+- Windows Agent显示真实认证软件版本，未知版本明确提示；两端九语言账号概览状态文案补齐。
+- 版本缓存故障不再全屏封锁本地界面，保留已知强制更新／停用决策。
+- 修复 Android 数据库路径不一致，并验证真实旧库迁移与原配置保持。
+- 修复安装副标题、密码重复输入及 Windows 磁盘／网络指标问题。
+
+### 验证
+
+- Windows Server 2022 真实 UAC、真实 Server 2019 安装与权限检查通过定向验证；不外推其它环境。
+- Windows 公开旧包升级、本地模式故障与数据保持按各自原制品记录；Android采用MuMu，无物理手机结果。
+- 最新界面截图使用示例主机；安装进度图为状态回放。
+
+### 下载与 SHA256
+
+该阶段没有独立发布 0.8.9 安装包；当时的公开版本为 0.8.8。当前下载请使用上方 0.9.0。
+
+## v0.8.8（历史版本）- Cloud 数据保护恢复与三资产发布
+
+> 协议为 14，Windows 与 Android 统一使用 SQLite schema 15。正式资产恰好为 Windows NSIS、Windows Portable ZIP 与 Android arm64 APK；不再构建或发布 MSI，不生成 AAB，也不发布 Linux 客户端资产。
+
+### 下载
+- Windows 安装版：`C-SSH_0.8.8_x64-setup.exe`
+- Windows 便携版：`C-SSH_0.8.8_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.8.8_android-arm64.apk`
+
+### 新增与调整
+- Windows 与 Android 的 Cloud 数据保护页面统一为明确的加载、就绪和错误状态；旧 envelope 迁移、首次设置、修改、重置和重试入口按服务端权威状态显示。
+- `0.8.8` 是 Windows updater 信任根 epoch 2 的首个版本。`0.8.7` 及更早 Windows 用户需要手动安装一次 `0.8.8`，之后恢复自动更新；Android 不受影响。
+- 从本版起 Windows 只发布 NSIS 与 Portable ZIP，历史 MSI 只作为不可改写的旧版本记录保留。
+
+### 修复
+- 修复正确密码在真正验证前被旧 envelope 状态拒绝、云同步长期停在“正在读取”、数据保护修改／重置入口被隐藏，以及 Cloud 状态变化后预览未正确恢复。
+- 修复撤销登录设备后会话行仍显示且删除按钮禁用，以及通知中心首次只有账号通知时无法正常选择的问题。
+- 修复 Android 浅色主题账号页标签栏与内容卡背景颜色不一致。
+
+### 验证
+- Windows NSIS 与 Portable 通过正式安装、退出、卸载保留数据、用户手动执行的 `0.8.7 → 0.8.8` 升级和完整清场门禁；双设备生产 Cloud 数据保护与 Host+AI 手动同步链通过。
+- Android x86_64 MuMu 通过受影响的 Cloud 数据保护、Host+AI 手动同步、Reset 本地保留和清场真链；主题静态与真实浏览器对比门禁通过。
+- 正式 arm64 APK 通过 `0.8.8 / 8000008`、SDK 24/36、唯一 `arm64-v8a`、非 debug、v2 单 signer 与四份内嵌 Agent/tmux 资源包级核验；本条不冒充物理 arm64 真机验收。
+
+### SHA256
+- `FF15C6CD40D3FC6725A413BD7253AABC191BD76C78CD3AFF83AA255758907736`  `C-SSH_0.8.8_x64-setup.exe`
+- `55B42F281725D3995B9117C85A9E688F51AD4F2359D2921768C52E6AB027FAA0`  `C-SSH_0.8.8_portable-Windows-x64.zip`
+- `A2C98E7A81BB4E5A66B38A2C8096FE41951AC8B66DD3DFE9AA4C64E17A1E4F80`  `C-SSH_0.8.8_android-arm64.apk`
+
+## v0.8.3 - 公告、版本控制、自动更新与安全数据迁移
+
+> 协议为 14；Windows 与 Android 统一使用 SQLite schema 15。正式资产恰好为 Windows NSIS、MSI、便携 ZIP 与 Android arm64 APK 四项；不发布 Linux 客户端制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.8.3_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.8.3_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.8.3_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.8.3_android-arm64.apk`
+
+### 新增与调整
+- 客户端启动时通过 Creation Cloud 统一取得公告、版本、下载和更新策略；公告按普通、重要、紧急三档以整体弹窗显示。
+- 管理端可停用指定旧版本或强制更新到指定稳定版；策略可只比较版本号，也可启用当前安装身份 SHA-256 核对。
+- Windows 自动下载、验签、安全退出、替换并重启；Android 通过系统安装器更新，系统要求时显示系统确认。
+- schema 12→15 使用 Copy-on-Migrate：只迁移数据库副本，主机、凭据、known_hosts、分组、片段、AI/Cloud 数据与必要设置保持一致；失败时原库不变。
+- Creation-Log 使用独立诊断数据库，默认关闭；用户手动开启后才采集，关闭时不建立或打开诊断库。
+
+### 验证
+- Windows NSIS、MSI 与 Portable 分别通过正式安装／替换／重启、数据保留和清场门禁。
+- Android 已通过既有真 App、真 SSH、Agent、UI、SQLite 与 arm64 制品门禁；不把 x86_64 模拟器无法运行 arm64 引导包的结果冒充为自动更新通过。
+- 四项正式资产均按版本、名称、大小和 SHA256 核对；Windows 更新签名由 Creation Cloud 元数据承载，不新增公开资产。
+
+### SHA256
+- `87DC4A7F07DD39B2D4764BE00DA1726BD8F50437F9ED8F172E7E931AAC254BE5`  `Creation-SSH_0.8.3_x64-setup.exe`
+- `0D1BC658622B456F1AFC32066C2B6CA1D8D34813896989203637C64C8D03A8AA`  `Creation-SSH_0.8.3_x64_en-US.msi`
+- `333DB9499D851450561995ADA2A982502434027865F66867A524B2D4C20610A8`  `Creation-SSH_0.8.3_portable-Windows-x64.zip`
+- `77D383471B1D122100B37C24F4FDA5DC3732FFC9A412C994C12B944C115651CE`  `C-SSH_0.8.3_android-arm64.apk`
+
+## v0.7.7 - 账号级加密同步与主机安全新增/删除
+
+> 协议保持 13；Windows 与 Android 统一使用 SQLite schema 12。正式资产恰好为 Windows 三项与 Android arm64 APK 一项；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.7_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.7_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.7_android-arm64.apk`
+
+### 新增与调整
+- Cloud 数据保护改为账号级随机数据密钥 envelope。保护密码只在设置、修改、已知密码清空、上传、下载与显式恢复时短暂使用；普通启动、本机 SSH、AI 与日常操作不再要求 Cloud 保护密码。
+- Windows 与 Android 共用 schema 12、本机无感 device wrapper 和同一手动同步合同；改密只重包同一账号数据密钥，不重加密 Host/AI 业务密文。
+- 新增主机必须先用冻结的 IP、端口、用户名与凭据完成真实 SSH 握手、主机密钥校验和认证，成功后才原子保存主机、模式、凭据与 trust；失败零写。
+- 删除主机只停止本机活动并原子清除本机主机、凭据、trust 与关联状态，不连接 Agent/SSH，不卸载远端 agent，也不删除远端公钥、tmux 或数据。
+- Android AI 参数抽屉恢复工具循环上限，范围 `1..=200`、默认 `30`，使用本机 SQLite 持久化并在冷启动后恢复。
+- Windows 四份 agent/tmux 资源全部内嵌到 EXE；安装目录不再携带 `resources` 或运行时 DLL，便携 ZIP 只包含单一 EXE。
+
+### 修复
+- 修复繁体中文等非 `zh-CN/en` 界面语言注册 Cloud 账号时被服务端拒绝的问题，并把确定性 4xx 与服务不可用错误分开显示。
+- 修复 Android 工具循环输入值在强制停止后恢复默认值的问题。
+- 修复新增主机在 SSH 未连接或认证失败时仍可写入本机的问题，以及普通删除错误尝试连接远端的问题。
+
+### 验证
+- Windows 正式后台真实点击验证：不可达 SSH 新增保持 `0→0`；受控 SSH 仅一次连接与一次认证后新增 `0→1`；最终删除 `1→0`，删除期间 SSH 事件 `0→0`，用户本机密钥不变。
+- Android MuMu 后台真实点击验证不可达主机不会写入；工具循环设为 `200` 后 force-stop 冷启动仍为 `200`。
+- 正式 Creation Cloud 0046 跨设备验证覆盖 Windows 上传 Host+AI、Android 下载、改密、Windows 新密收敛，以及 reset 后 Cloud 清空而 Android 本机 Host+AI 保留。
+- 四项资产均核对版本、名称和 SHA256；Windows 内嵌资源、Android arm64 ABI/v2 单签名与无 AAB 均通过。
+
+### SHA256
+- `DBFFE88A5A2DCC59A0AF463EF9A16520E3B207717DF8DA9A313095C4038FB513`  `Creation-SSH_0.7.7_x64-setup.exe`
+- `F80767097D2BB3F0422B8652C7C45349F9882797240805AE7982840EA883CD57`  `Creation-SSH_0.7.7_x64_en-US.msi`
+- `4C44A98EF6655F66C2FE76926D951536678CFD36F57D7119755DA529FA8E7252`  `Creation-SSH_0.7.7_portable-Windows-x64.zip`
+- `C1321415BC0CF0AB4D9188D8DFDD5947E68E49CB9950C056C60584291D79E5B4`  `C-SSH_0.7.7_android-arm64.apk`
+
+## v0.7.6 - 数据实例保护与三作用域 AI
+
+> 协议保持 13；Windows SQLite 为 schema 11，Android 只建立 fresh schema 10。正式资产恰好为 Windows 三项与 Android arm64 APK 一项；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.6_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.6_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.6_android-arm64.apk`
+- 本版只包含以上四项资产；不提供 Linux 客户端制品，不生成或上传 AAB。
+
+### Windows 数据保护
+- 当前 `data` 数据库中的单例 vault 记录成为本副本的数据保护权威。fresh 目录或只复制 EXE 会创建新的未配置实例，不会继承其它程序副本的密码。
+- 完整复制受保护的 `data` 会保留原实例及密码要求。数据库只保存 DPAPI 或密码 KEK 包裹的主密钥与必要参数，不保存数据保护密码、裸主密钥或自动解锁材料。
+- 普通 WebView2 profile 使用系统应用数据目录；业务 SQLite、known_hosts、AI/Cloud 本地状态、日志与传输临时文件仍位于 EXE 同级 `data`。
+
+### 三作用域 AI 与记忆
+- AI 助手固定为 Global、Project、Host 三种作用域，并与查看、编辑、全权三档权限相互独立。
+- 普通总结使用共享 `ScopeCognitionSnapshot`：Global 从可见项目与主机召回相关的有界认知，Project 覆盖当前项目及成员 Host，Host 只覆盖自身；同一 run 复用同一快照，不逐个重读全部会话。
+- canonical 原始事件仍是唯一事实源。普通总结不注册完整会话目录/正文工具；只有 Windows 调用方显式开启精确取证时，才按当前可见范围有界读取原始证据。
+- Android 三作用域薄壳复用同一共享认知业务层，普通运行固定关闭精确取证，并保持既有 scope、owner、history 与 replay 门禁。
+
+### 界面与消息
+- Windows 新增 Frost 灰白主题，保持玻璃层次、深灰正文与危险红色；主题在本地持久化并跨窗口同步。
+- Host 状态列在宽窗保持九项指标但更紧凑，窄窗继续折叠为按钮/浮层。延迟只显示真实 Agent 指标请求或 SSH channel 往返，未知值为 `—`，不由前端估算。
+- Windows assistant 正文使用完整聊天区宽度；Windows 与 Android 都会从持久化消息恢复并显示用户图片。图片只接受本地 base64 image data URL，单图和多图分别适配桌面与窄屏布局。
+
+### 验证与安全提示
+- 四项资产已按同一发布版本核对名称与 SHA256；Windows 与 Android 之外没有其它正式制品。
+- Windows NSIS 与 MSI 未使用 Authenticode 签名，SmartScreen 可能显示“未知发布者”或要求额外确认；请从本仓库 Release 下载并核对 SHA256。
+- Android `v0.7.6` 只建立 fresh schema 10，不打开或迁移旧 schema 9；安装代变化时不会保留上一代本地数据库及其主机、设置、凭据引用和 AI 数据。
+
+### SHA256
+- `E996FEE3EABDBFA4EBEF1C6E429264B17FFB51972CD807E8AFF764F9432C4D48`  `Creation-SSH_0.7.6_x64-setup.exe`
+- `BF246971DBE5C0A1190EC940E715D9D1752E66D35FF141E76AADB1E427379627`  `Creation-SSH_0.7.6_x64_en-US.msi`
+- `C43A7006524F5E0C0AC53C9720F7945160D39614969E05B413329F9FDAC8230B`  `Creation-SSH_0.7.6_portable-Windows-x64.zip`
+- `84A9CA3C71582AC28C6A3468502290611788F2B281AB0A49C32A516626D4996D`  `C-SSH_0.7.6_android-arm64.apk`
+
+## v0.7.5 - Windows 数据隔离、文件恢复与 AI 瞬时重试
+
+> 协议保持 13，SQLite/AI schema 保持 9。正式资产恰好为 Windows 三项和 Android arm64 APK；Linux 客户端保持冻结，不发布 Linux 制品，也不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.5_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.5_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.5_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.5_android-arm64.apk`
+
+### 新增与调整
+- Windows 在 Tauri/Runtime 初始化前将真实 `<EXE目录>\data` 设为唯一数据与状态根；SQLite、known_hosts、AI/Cloud 本地文件、日志、WebView2 数据和传输临时文件不再分散到 AppData、工作目录或系统临时目录。
+- Windows 主密钥、Cloud 会话和自动解锁材料继续保存在 Credential Manager，不因“随 EXE”数据布局降级为普通文件。
+- 文件页补强拖出会话与下载恢复；中断后的恢复继续受目标身份、分块完整性和原子采用门禁约束。
+- Issue #41 的终端右键只在 xterm 当前确有选区时显示“复制”并恢复焦点；无选区时不接管，继续交给远端 TUI 或鼠标模式。
+
+### AI 可靠性
+- 网络、连接、读取超时及 408/429/500/502/503/504 等可证明瞬时失败，在首次失败后按固定 5 秒间隔最多重试 5 次；只有只读且幂等的 Agent/SSH 读取可自动重放。
+- 写入、编辑、命令、终端等请求一旦可能送达就不会自动重放，而是返回未知终态并保留恢复门禁，避免重复副作用。
+- 每次重试排程先持久化再显示；停止可以取消等待，最终错误会说明失败类别和重试是否用尽。
+
+### 截图证据边界
+- 更新 Windows 8 张与 Android 5 张公开产品截图；全部使用 RFC 5737、`example.com` 和明确标注的模拟数据，未连接真实主机、Cloud 或 AI provider。
+- 13 张截图均完成逐图目检与脱敏复核。Android 截图来自 x86_64 模拟器测试界面；这些截图不代表物理 arm64 设备验收，也不等同于完整人工 GUI 覆盖。
+
+### SHA256
+- `8E6D4CDF05CD84521C1C4D06CE90F429732F45147871FEF92D6C436A4D159E58`  `Creation-SSH_0.7.5_x64-setup.exe`
+- `D5EEBB641DA594998E449F9B86C119BA3A3F40E1541A26E09772FC9B10FA67D6`  `Creation-SSH_0.7.5_x64_en-US.msi`
+- `07200FBD5D10861300469FAD2AED51DF4F419665188F8093C62BD8BDDAD21EE6`  `Creation-SSH_0.7.5_portable-Windows-x64.zip`
+- `4C9F67096A8855FDC85D2ACCE1EF84D2A4D56C0FABBB74F32B1396E5E5DC5C1C`  `C-SSH_0.7.5_android-arm64.apk`
+
+## v0.7.4 - 主机与 AI 配置加密手动云同步
+
+> 协议保持 13，SQLite/AI schema 保持 9。正式资产恰好为 Windows 三项和 Android arm64 APK。Linux 客户端停止开发并冻结，不发布 Linux 制品，也不生成或上传 AAB。Windows EXE/MSI 当前未使用 Authenticode 签名。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.4_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.4_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.4_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.4_android-arm64.apk`
+
+### 新增
+- 手动云同步覆盖主机与凭据、AI provider 账户及其 Key/Token、API 地址和模型绑定；秘密只由可信客户端使用数据保护密码加密，Creation Cloud 仅保存不透明密文。
+- 云同步先检查本机与云端变化，再由用户逐项选择上传或下载；主机行显示 `IP:端口`，便于区分同名主机。
+- 管理后台增加稳定入口 [`/admin`](https://c-ssh.com/admin)。
+
+### 修复
+- 删除持久冲突区及冲突资源；双边变化直接在普通变化列表中互斥选择方向，后端继续严格校验 revision、generation、本机 change token 和摘要。
+- 修复 `sync_resync_required` 被显示为旧数据清除流程的问题；现在重新验证数据保护状态并重新检查变化，不会清除本地业务数据。
+- AI 对话、附件、工具结果、usage、原始事件、任务、记忆和向量明确保持本地，不参与 Cloud 同步。
+
+### 验证
+- Windows NSIS、MSI 与便携 ZIP 通过正式安装、启动、退出、卸载、隔离 WebView2 与清理门禁；NSIS/MSI 当前为未签名制品。
+- Android `0.7.4/7000004` arm64 正式签名 APK 通过真实主机、真实 AI provider 只读工具和 Host+AI 加密同步验证；x86_64 MuMu 测试包不属于发布资产。
+- Creation Cloud 的 Host+AI、generation、rekey、reset、并发校验和备份恢复门禁通过；部署及测试未修改用户业务数据。
+
+### SHA256
+- `ACC5716B4E54AB0802173F78EE42BA91B546D976AB7DA4E2CC79914379E64B52`  `Creation-SSH_0.7.4_x64-setup.exe`
+- `F1EE2DF1E741975597C5EC9C2AEB598C39E4B4E6E61C649E453CE73EA42CA623`  `Creation-SSH_0.7.4_x64_en-US.msi`
+- `6B407FC6870EB8BFC1011504DBDB90DCA17D69FD44CFC84B260E93D8E66111A1`  `Creation-SSH_0.7.4_portable-Windows-x64.zip`
+- `DAE8D93F431BEFDBAA036DA4D5377FD92821AAA2CAA0AEA005BA1719C7038A40`  `C-SSH_0.7.4_android-arm64.apk`
+
+## v0.7.3 - 数据保护验证交互修复
+
+> 协议继续为 13，SQLite/AI schema 继续为 9。正式资产仅包含 Windows 三项和 Android arm64 APK；不发布 Linux 包，不生成或上传 AAB。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.3_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.3_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.3_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.3_android-arm64.apk`
+
+### 修复
+- 修复账号提醒在数据保护密码弹窗打开后仍处于顶层、导致“立即验证”看似无响应的问题。
+- 设置或修改数据保护密码后立即刷新启动保护状态。
+- 清除数据保护页面问号占位与繁体中文乱码，并以三端共享门禁防止回归。
+
+## v0.7.2 - 可持久控制启动密码保护
+
+> Windows 与 Android 的协议继续为 13，SQLite/AI schema 继续为 9。Android 正式版仅提供 arm64 APK，不生成或上传 AAB；Windows 安装包当前未使用 Authenticode 签名。Linux 客户端代码继续维护，但本版不提供 Linux 正式包。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.2_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.2_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.2_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.7.2_android-arm64.apk`
+
+### 新增
+- Windows 与 Android 均可持久开启或关闭“启动密码保护”；开启和关闭都通过弹窗验证当前数据保护密码。
+- 关闭后，下一次冷启动会使用平台安全存储中的内部凭据自动进入；用户主动重新开启前保持关闭。
+- 开关只控制冷启动时是否需要手工输入密码，不会删除、迁移、重加密或改写本地与 Cloud 数据，也不改变登录状态。
+
+### 修复
+- 修复数据保护设置页以内联输入框切换启动保护、导致操作路径不清晰的问题，统一改为独立密码验证弹窗。
+- 修复关闭启动保护后无法跨冷启动保持选择，以及重新开启时可能没有恢复前置解密门的问题。
+- 错误密码或平台安全存储失败时保持原选择并继续失败关闭，防止绕过解密门。
+- 修复 Android 新设备验证时原提醒遮罩仍覆盖密码框、导致“验证”按钮触摸无反应的问题。
+- 修复 Android 数据保护说明文案出现问号乱码，并增加 9 语编码防回归检查。
+
+### 验证
+- Windows 正式 EXE 后台流程通过：默认开启、错误密码不能关闭、正确密码关闭、冷启动自动进入、错误密码不能开启、正确密码开启、再次冷启动恢复前置解密门；系统设备密钥指纹保持不变。
+- Android `0.7.2/7000002` 正式 APK 通过 arm64-only、正式签名与内嵌资源检查；x86_64 MuMu 测试通过首次启动和强制停止后的冷启动，测试包不属于发布资产。
+- 共享启动保护单元测试、Windows/Android 前端构建、版本一致性门禁与 Windows 正式数据保护运行时测试通过。
+
+### SHA256
+- `A68826CBEEA6E04CCE52B37E2464BFA0EA68C69BF14B71F19CA7B9956B03A685`  `Creation-SSH_0.7.2_x64-setup.exe`
+- `4139832B3363E62BD7F581A9F9DFBB49CE2C6229E983DF542412C0C3346BC5AF`  `Creation-SSH_0.7.2_x64_en-US.msi`
+- `56034053754CF9C392B90D1A81CD9769405B8BF9D7888C1769E731E8369DBB53`  `Creation-SSH_0.7.2_portable-Windows-x64.zip`
+- `3D35FDE833FF06F3108FBED44A8BEC29CDF71638F154D274CE14A0B14F023E08`  `C-SSH_0.7.2_android-arm64.apk`
+
+## v0.7.1 - 可选云同步与本地多模型账户
+
+> `v7.0.0` 是上一版误写的历史版本号，原 Release 保持不变；本次正确的新版本为 `v0.7.1`。Android 正式版仅提供 arm64 APK，不生成 AAB。Windows 安装包当前未使用 Authenticode 签名。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.7.1_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.7.1_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.7.1_portable-Windows-x64.zip`
+- Linux AppImage：`Creation-SSH_0.7.1_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.7.1_linux-amd64.deb`
+- Android arm64 APK：`C-SSH_0.7.1_android-arm64.apk`
+
+### 新增
+- 新增可选 Cloud 账号、登录设备管理和手动主机同步；主机凭据只在客户端使用数据保护密码加密，AI API Key 永不上传。
+- 新增本地多模型账户：同一厂商可配置多个 Key，并可绑定 Cloud 模型目录或自定义 OpenAI/Anthropic 兼容接口。
+- AI 权限精简为查看、编辑、全权三档；SSH 模式增加基于 SFTP 的文件读取、写入和代码编辑能力。
+- 群发执行支持 Agent 与原生 SSH 主机混选，并统一逐机结果、失败隔离和确认流程。
+- Windows、Linux、Android 新增 WhatsApp、QQ 群和微信联系方式入口；移动端 AI 工具栏改为紧凑图标布局。
+
+### 修复
+- 修复旧 Cloud 或数据保护状态导致 Windows 升级后无法启动，以及忘记数据保护密码后无法进入重置流程的问题。
+- 修复空云端下载预览误显示本地主机、数据保护未配置时同步按钮仍可操作，以及登录后提示流程不清晰的问题。
+- 修复从设置返回 AI 页面后模型配置不刷新、模型切换并发状态和自定义模型表单不易理解的问题。
+- 修复删除会话时长期记忆来源归属不精确的问题，避免删除仍被其它会话引用的共享记忆。
+- 修复主机监控状态投影、群发主机过滤和多主机选择器显示问题。
+
+### 验证
+- Windows 正式构建生成 EXE、MSI 与规范 6 项便携 ZIP；最终 EXE 的联系方式和多模型账户后台真实 UI 验证通过，系统设备密钥指纹不变。
+- Linux AppImage/deb 在授权 Linux VM 构建，并通过版本、架构、内嵌 agent/tmux 资源、制品收集与 SHA256 门禁。
+- Android 正式 arm64 APK 通过 `0.7.1/7000001`、唯一 ABI、正式签名和内嵌资源门禁；没有生成或上传 AAB。x86_64 MuMu 测试包仅用于 UI 回归，不属于发布资产。
+- 协议保持 13，SQLite/AI schema 保持 9；版本门禁确认根 workspace、agent 与三端元数据均为 `0.7.1`。
+
+### SHA256
+- `FD626D319BC3D4D79B66657327C6933F7E0AEB552C58A91CF929668DD4348482`  `Creation-SSH_0.7.1_x64-setup.exe`
+- `37ABF3883DB14FEA63C441FA7BF6715AF4EE2B1E24728A0C044D4C2D299BB0D2`  `Creation-SSH_0.7.1_x64_en-US.msi`
+- `551CB8321CFD76BA82D158B5A5D37178B421626D243D89F02323925B87F4F8F2`  `Creation-SSH_0.7.1_portable-Windows-x64.zip`
+- `C7C312CF383E644A18D33BF2929BBDE7CA0BA3A8743DD0E2B84A7A1D098D5E54`  `Creation-SSH_0.7.1_linux-x86_64.AppImage`
+- `2A1C30F6C6817CA9766C062F2E41A508C77FD0E356307DB829F18DC3F9EDD764`  `Creation-SSH_0.7.1_linux-amd64.deb`
+- `62DD267B4D56321D825772D7D70B0FA620452452B399431089D390964FBDD3DA`  `C-SSH_0.7.1_android-arm64.apk`
+
+## v7.0.0 - 统一客户端运行时与 Agent/SSH 双模式
+
+> Android 每次安装或覆盖安装后的首次启动都会清除上一安装代本地数据库并建立新的 schema 9 数据库；旧主机、设置、凭据引用和 AI 数据不会保留。Windows 安装包当前未使用 Authenticode 签名。
+
+### 下载
+- Windows 安装版：`Creation-SSH_7.0.0_x64-setup.exe`
+- Windows MSI：`Creation-SSH_7.0.0_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_7.0.0_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_7.0.0_android-arm64.apk`
+- Linux AppImage：`Creation-SSH_7.0.0_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_7.0.0_linux-amd64.deb`
+
+### 新增
+- 新增 Agent 与原生 SSH 两种主机模式。Agent 保留 tmux 持久终端与服务端持续监控；SSH 无需安装 agent，可使用终端、端口转发、SFTP 文件管理、在线监控、系统管理、应用中心及 SSH AI 工具。
+- Windows、Linux、Android 的服务器业务统一进入共享 Rust `client-runtime`，主机列表统一显示连接模式、架构和资源数据。
+- 三端统一单主机选择并强化异步 owner 隔离；AI 继续使用本地 SQLite 原始事件、五层派生记忆、硬窗口上下文编译和 10 秒真实进度。
+
+### 修复
+- 修复原生 SSH 终端丢失尾部输出、忽略扩展数据或重复终态的问题。
+- 修复 SSH 监控响应解析、系统管理兼容和主机列表数据展示。
+- 修复移动端横向主机滑块、弹层层级和缓存页面返回键问题。
+- 修复 Android SQLite code 14 / CANTOPEN、启动顺序，以及 Windows NSIS/MSI 首次运行和卸载残留问题。
+
+### 验证
+- Windows 八个主要入口后台验收、NSIS/MSI fresh 安装/首次运行/卸载通过。
+- Android MuMu 五入口多主机验收以及正式 APK 的版本、ABI、签名和内嵌资源检查通过。
+- Linux AppImage/deb 在授权 Linux VM 构建，并通过版本、架构、资源、SHA256 与隔离启动检查。
+- SSH 模式不提供 tmux，也不在客户端离线期间宣称持续监控；这些仍是 Agent 模式能力。
+
+### SHA256
+- `7FC9C415B1458880C340B88903AF6C77B3D2BCB21F719ECABE83498A06CB01EF`  `Creation-SSH_7.0.0_x64-setup.exe`
+- `E62D8A466F4836E2E9C185EE503E9FB22104C9A6737D64E7B50D505E93A99499`  `Creation-SSH_7.0.0_x64_en-US.msi`
+- `3EC32802C66CAE2ED25F434197E626C47CA86E338C362C6D2244AB830B486E0A`  `Creation-SSH_7.0.0_portable-Windows-x64.zip`
+- `5936656CF04B3E60AA7318328194B14DB92A0C704A19FE83B519BE1E18764635`  `Creation-SSH_7.0.0_linux-x86_64.AppImage`
+- `BA8CABC824B6AF37FB46F7EF30A1BB8341EE0E0D3F0D6EC502D547B78702A7E7`  `Creation-SSH_7.0.0_linux-amd64.deb`
+- `5EC2964EA362F216B4E4B229ED5F5D5A8F551E060F216E2946C0C59072A3F72F`  `C-SSH_7.0.0_android-arm64.apk`
+
+## v0.6.19 - AI 五层记忆、长上下文与会话持久化
+
+> 升级到 schema 9 时会清空旧版本的 AI 会话、回放、任务/检查点、记忆和向量索引；主机、设置和凭据引用等非 AI 数据保留。
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.19_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.19_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.19_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.19_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.19_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.19_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.19_linux-amd64.deb`
+
+### 新增
+- 三端 AI 使用本地 SQLite schema 9 原始层，并构建当前任务、事件组织、任务检查点、长期召回和上下文编译五层可重建记忆。
+- 长上下文按模型硬窗口编译；容量裁剪只改变本次 provider 工作集，不改写或删除本地原始记录。
+- 长任务连续 10 秒没有新的用户可见事件时显示真实阶段进度，之后每静默 10 秒续报；暂停、停止、完成或 owner 失效后立即停发。
+
+### 修复
+- 修复重启后上下文占用归零、历史会话缺失和新会话首条消息可能提示会话不存在的问题。
+- 修复移动端更新版本判断（[#32](https://github.com/suiyuebaobao/C-SSH/issues/32)）和桌面独立终端上次主机恢复（[#33](https://github.com/suiyuebaobao/C-SSH/issues/33)）。
+- 收敛群发执行、文件列表在目录/搜索切换后的滚动复位和终端 `Ctrl+V` 行为（[#23](https://github.com/suiyuebaobao/C-SSH/issues/23)、[#26](https://github.com/suiyuebaobao/C-SSH/issues/26)、[#28](https://github.com/suiyuebaobao/C-SSH/issues/28)）。
+- 删除随包中文字体资源，继续使用系统字体栈。
+
+### 验证
+- 根工作区格式、版本一致性、全目标测试和严格 Clippy 通过。
+- schema 9、五层记忆、恢复/删除、10 秒进度，以及 `500,000` 字节候选输入的确定性工作集裁剪路径通过自动化验证。
+- 七个正式制品从同一冻结源码提交 `7d66fd2` 重建；Android x86_64 测试包不公开上传。
+- aarch64 agent/tmux 完成交叉构建与静态校验；真实 ARM 服务器 no-mock 尚未完成，不宣称完整 ARM64 服务器支持。
+
+### SHA256
+- `761E9F89DA0A4E1DEEE4F2DB8286ACA44654A5C742C2E1D82CD67DC1F7976990`  `Creation-SSH_0.6.19_x64-setup.exe`
+- `FA52F284C7261710BC0D9851146B6617D939DA2E84CBE0DEA0854A2D6C3739C4`  `Creation-SSH_0.6.19_x64_en-US.msi`
+- `52C9849771FE06FB5DB8EA34F193BD7D59830D16884BDCB9B7518562BC1F4779`  `Creation-SSH_0.6.19_portable-Windows-x64.zip`
+- `CE370432AE74E8581801C3B59557BAE6232DBC62D86379D5F642CD16A93C6F94`  `Creation-SSH_0.6.19_linux-x86_64.AppImage`
+- `FEA80F4269FAA690FA11B31734E3A9C020E369A7B0341A2AC5885C1126E5E770`  `Creation-SSH_0.6.19_linux-amd64.deb`
+- `A2E6F76EAEF40A5883706FD09959012E64CDD05698BADD3A9F6BFA952D94456C`  `C-SSH_0.6.19_android-arm64.apk`
+- `4580588959AFB2A9EF26829249FFAC990610676B28903BE456C6C68170B77904`  `C-SSH_0.6.19_android-arm64.aab`
+
+## v0.6.17 - 群发执行、终端快捷键与字体一致性
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.17_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.17_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.17_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.17_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.17_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.17_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.17_linux-amd64.deb`
+
+### 新增
+- 桌面端将“命令片段”收敛为四步“群发执行”：选择主机、输入命令或 UTF-8 `.sh` 文件、冻结确认、执行并查看结果。
+- 群发统一通过常驻 agent 的结构化 `RunCommand` 协议执行，单台主机失败不会阻断其它主机；结果按成功、失败、未知归类并使用 `hN` 脱敏别名。
+- AI 总结改为用户显式触发，输入统一经过脱敏导出边界。
+
+### 修复
+- 文件列表切换目录或搜索状态后只复位列表容器的纵向滚动，不滚动整页、不抢焦点、不改变横向位置。
+- Windows、Linux 与 Android 统一终端快捷键：`Ctrl+V` 走原生粘贴；有选区时 `Ctrl+C` 复制，无选区且终端获焦时发送 ETX。
+- 三端统一内置 Sarasa Fixed SC Regular/Bold，并等待字体加载后创建和适配终端，改善中文、框线与粗体显示一致性。
+
+### 验证
+- 根 workspace 格式、全目标测试、严格 clippy 与版本一致性门禁通过。
+- Windows 正式程序、Android x86_64 MuMu 测试包、arm64 APK/AAB 与 Linux AppImage/deb 的最终候选验证见本版本 Release。
+- aarch64 agent/tmux 配对资源完成交叉构建与静态校验；真实 ARM 服务器 no-mock 仍待完成，不宣称完整 ARM64 服务器支持。
+
+### SHA256
+- `6535b5586096141f1443bb04a274f9dfd48c9607d09df00a0d30b818d2e6deca`  `Creation-SSH_0.6.17_x64-setup.exe`
+- `6b54d10970b31b5e09893bb68354840aefa58b481302a3a1413efcf9d1669437`  `Creation-SSH_0.6.17_x64_en-US.msi`
+- `3ea83768e1de116813f077bd010a0ecc03925c0aadd6ba65db2692dd784d4a19`  `Creation-SSH_0.6.17_portable-Windows-x64.zip`
+- `ca02c611ba7cce293fb3be172f78f2cd94c2e062538c0d393446fef44e8acafb`  `Creation-SSH_0.6.17_linux-x86_64.AppImage`
+- `8d85ed30fadee203ba1574d76243b9cdaca01432c5f8ac3ef82f759cacfe241e`  `Creation-SSH_0.6.17_linux-amd64.deb`
+- `af22d2bf03cb1f79c6a5d8da3704483a8cd1d4c4358cd6207a77aad1e7a36829`  `C-SSH_0.6.17_android-arm64.apk`
+- `01e01a25641b6dcab018959c00efd6c66b1c76e84395941d4510cef6d2e13aa8`  `C-SSH_0.6.17_android-arm64.aab`
+
+## v0.6.16 - 双架构自动部署与桌面终端独立窗口
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.16_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.16_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.16_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.16_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.16_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.16_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.16_linux-amd64.deb`
+
+### 新增
+- Windows 与 Linux 终端新增独立窗口入口；每次打开都会创建新的终端窗口，可并行操作不同主机、普通 SSH PTY 或 tmux 持久化窗口。
+- Windows、Linux 与 Android 的部署包加入 `x86_64 agent + x86_64 静态 tmux` 和 `aarch64 agent + aarch64 静态 tmux` 两套独立配对资源。客户端通过已认证 SSH 只读执行 `uname -m`，仅选择并上传匹配的一对；架构不支持或任一配对资源缺失时，会在远端写入前停止。
+- SQLite 升级到 schema 6，记录最近一次经认证 SSH 探测到的主机架构；每次部署仍重新执行真实探测，不会把本地记录当作部署依据。
+
+### 修复
+- 桌面终端把连接状态点并入主机选择器，按当前状态只显示连接或断开动作，并移除重复状态栏；tmux 窗口下拉不再显示容易被误解为当前选择的服务端“活动”标记。
+- Windows/Linux 主机行只在窄于 960px 时切换双行布局，常用桌面宽度下保持单行紧凑展示，同时保留全部系统与监控指标。
+
+### 验证
+- `cargo fmt --check`、严格 clippy、`cargo test --workspace`、`client-core` 的 18 项 agent 部署定向测试与 Windows/Linux 布局守卫已通过。
+- Windows 正式程序与 Linux AppImage 均完成后台真实 GUI 冒烟和自然关闭验证；Android x86_64 测试包已在 MuMu 真实进入界面，arm64 APK/AAB 已完成版本、ABI 与签名复核。
+- aarch64 静态 tmux 构建已经验证；aarch64 agent/tmux 配对与自动选择基础已经实现。
+- 真实 ARM 服务器 no-mock 运行尚未完成，因此本条目不宣称完整 ARM64 服务器支持。
+
+### SHA256
+- `82d185867b6f7e51739accc8ad69c2ef87702f4a00e1c7684d665317c94e9c50`  `Creation-SSH_0.6.16_x64-setup.exe`
+- `694826c1efa5ea26cc7005cd6388b31868aa4b872b62950a385e2d6cd796ce7d`  `Creation-SSH_0.6.16_x64_en-US.msi`
+- `183f878b4dddb30f2812776ad377603cde0a45ebdad24a6a2798fdb05a852a21`  `Creation-SSH_0.6.16_portable-Windows-x64.zip`
+- `5b5557134e6deb64fd52b4ba1b169ffef62c94ab254783da834f5dd01cf0906e`  `Creation-SSH_0.6.16_linux-x86_64.AppImage`
+- `a0c0a8137b86d38111593e49c91e72ae4c50010c7c303a0a3bb8cb1e34c833de`  `Creation-SSH_0.6.16_linux-amd64.deb`
+- `df88e0e7a078bb5831015ae24e96cdac4e617ace727bc17dda2d00791aafe1ce`  `C-SSH_0.6.16_android-arm64.apk`
+- `806459e61dd0de96b01c4318bc2e2a34cc44e732b3aac8c89ff757693a1f1c33`  `C-SSH_0.6.16_android-arm64.aab`
+
+## v0.6.15 - 三端紧凑工作台与移动文件上传
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.15_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.15_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.15_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.15_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.15_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.15_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.15_linux-amd64.deb`
+
+### 新增
+- Android 文件管理新增系统文件选择器单文件上传，复用分块传输、SHA256 完整性校验与当前远端目录目标冻结。
+- Android 主机操作新增安装 agent 与更新/修复 agent，优先复用本地保险库凭据。
+
+### 修复
+- Windows 与 Linux 的主机、AI、终端、监控、文件、端口映射、命令片段、系统管理、应用中心、访问授权和设置统一为紧凑单层布局。
+- 修复 AI 与文件缓存页面切换菜单后向共享顶栏残留或叠加控件的问题。
+- AI 主机和模型选择器限制宽度并自动省略长名称；历史、当前会话和新建入口合并。
+- 修复访问授权页面隐藏标签形成灰色遮挡区域的问题。
+- Android AI 删除重复会话栏；文件页压缩为两行工具栏并折叠深层路径；监控页合并主机与状态并为进程名称释放空间。
+
+### 验证
+- Windows 候选完成紧凑工作台菜单往返、小窗口/高 DPI 布局与主窗口自然退出验证。
+- Android x86_64 MuMu、Linux 原生界面及七份正式资产的最终证据见本版本 Release。
+- 公开资料通过版本号、资产名、中英双语一致性、QQ群入口保留与脱敏检查。
+
+### SHA256
+- `Creation-SSH_0.6.15_x64-setup.exe`: `B9662AC58E7F0525CE055B0385F2B4ED1A4E8474C00F40BE5152899E8FAD13B1`
+- `Creation-SSH_0.6.15_x64_en-US.msi`: `D3DE26B5EC4B23878DF5BE54D461CCE616F97E27B301B9034FA72DC99EB70963`
+- `Creation-SSH_0.6.15_portable-Windows-x64.zip`: `7E37E8A2AE82A14C49C704B10FA06E609F9291900F2B1E362C5E0380A9010BED`
+- `C-SSH_0.6.15_android-arm64.apk`: `FDEDB8CFBF075B9B903466601131DB5399C4452EA2BD50C1DAE0D40CA1AC6405`
+- `C-SSH_0.6.15_android-arm64.aab`: `BACE56E90AF31E736927D5CF201AB880492F056E9A6C35ED07ED2EB95F88B874`
+- `Creation-SSH_0.6.15_linux-x86_64.AppImage`: `F126E940FAE4F86DEB5367AFDC27EE31976485DE250DCF53D44DB272E5E5269A`
+- `Creation-SSH_0.6.15_linux-amd64.deb`: `13A8968DA2FDB468D5775B58C610AF98A99C293E3FCAAFF837D7F5F9987781C7`
+
+## v0.6.14 - 三端主机硬删除与生命周期隔离
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.14_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.14_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.14_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.14_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.14_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.14_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.14_linux-amd64.deb`
+
+### 新增
+- Windows、Linux 与 Android 统一使用主机硬删除语义：删除会结束该主机在当前设备上的本地生命周期，而不是只移除列表项。
+- 本地数据库升级到 schema 5，主机与关联状态通过 `ON DELETE CASCADE` 收口，并在迁移中执行一次匿名孤儿记录清理。
+
+### 修复
+- 删除主机时同步清除本地主机记录、绑定凭据、历史会话、终端窗口持久化、监控缓存及其他可归属状态，避免残留数据继续影响客户端。
+- 后续新增主机始终创建全新生命周期；即使复用已删除主机的 ID 或网络地址，也不会继承旧凭据、会话、窗口或指标数据。
+- 不可达主机仅在远端清理尚未开始时允许执行本地硬删除；一旦流程涉及远端服务、会话、socket、数据或公钥，归属或完整性无法确认时即 fail-closed。
+- schema 5 迁移一次性清理无法归属到任何主机的匿名孤儿记录，避免历史残留继续游离于生命周期之外。
+- 修复 Windows/Linux 主窗口关闭后进程仍在后台残留的问题；`CloseRequested` 与 `Destroyed` 统一进入幂等退出流程。
+
+### 验证
+- 公开资料已完成版本号、资产命名、中英双语功能口径、逐图说明、QQ群入口保留与脱敏检查。
+- Windows/Linux 正式候选均要求主窗口与调试连接消失后，程序进程自然归零；强制结束进程不计为通过。
+- 尚未执行的破坏性真实服务器深度删除 E2E 未列为通过项；本条目不声称该项已经验证。
+
+### SHA256
+- `Creation-SSH_0.6.14_x64-setup.exe`: `3332E724EAD76EE32ABFB047DBDBB77C8C372D8D8CAC5A5CF37A315A69F2C1A3`
+- `Creation-SSH_0.6.14_x64_en-US.msi`: `B74A9FCA806D83AD09B8FA117D14730A53BFFB67CA842C98A618014D80D42A02`
+- `Creation-SSH_0.6.14_portable-Windows-x64.zip`: `04E326D51D380188C9EFA2232448F67CFBC7ED3769E5D1F51C8F78830E7BC7C0`
+- `C-SSH_0.6.14_android-arm64.apk`: `349BF316DB92FCB84E4143B9F9C6FE967B82A55BC2828652B09DA39EC601C458`
+- `C-SSH_0.6.14_android-arm64.aab`: `E656672C08F5E1D3E9D0C17E5B18CEFB0AD4ABF3A5D8697E231D00B22A8828B2`
+- `Creation-SSH_0.6.14_linux-x86_64.AppImage`: `CB09DF5ED82FC9E084145177ED18702959BA33300C7CED71EC407154B5FC863A`
+- `Creation-SSH_0.6.14_linux-amd64.deb`: `48DDA463DAF7ED99F77018C1E3AD1B1515B5D731044B381137F1E38413793F15`
+
+## v0.6.13 - 主机监控恢复与客户端韧性
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.13_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.13_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.13_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.13_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.13_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.13_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.13_linux-amd64.deb`
+
+### 新增
+- Windows/Linux 主机列表改为紧凑自适应指标网格，展示真实系统、CPU、内存、磁盘、负载、运行时长与正常/暂停/失败三种可见状态。
+- 最新指标与系统描述写入共享 SQLite schema 4；Android 同步指标缓存字段，三端删除继续与后台采集互斥。
+
+### 修复
+- 修复 Windows、Linux 与 Android 切换菜单会销毁终端现场的问题；普通 PTY 和持久化 tmux 会话现在跨菜单保留连接、画面与输入状态，重新附加不再产生重复提示符。
+- 修复监控数据已经成功拉取但状态仍停在“失败”的问题；附加系统信息失败不再丢弃有效动态指标，修复 agent 后立即执行一次真实采集并按结果刷新。
+- 修复不可达主机无法删除本地记录的问题；SSH bootstrap 失败时明确跳过远端破坏动作并警告可能残留，已连接后的归属审计仍严格停止。
+- Windows/Linux AI 助手对明确离线的当前主机禁用输入、附件与发送；切换到可用主机后恢复。
+- 修复 Windows 开屏受应用壳布局影响而偏移的问题，动画继续保持原时序并按完整窗口居中。
+
+### 验证
+- Windows 隔离候选、授权 Ubuntu 虚拟机和 Android x86_64 MuMu 测试包均完成普通/持久化终端菜单往返、继续输入、主动断开保持及无重复提示符的真实验证。
+- Windows 候选完成真实 `failed→fresh`、系统列、无横向溢出、启动与退出验证。
+- Android arm64 正式资产完成版本/包名/ABI/签名检查，x86_64 测试包在 MuMu 完成受影响页面实操。
+- Linux AppImage/deb 在授权 Ubuntu 虚拟机本地构建，并在隔离图形与密钥环会话中完成安装、启动、关闭及本轮主机监控验证。
+
+### SHA256
+- `Creation-SSH_0.6.13_x64-setup.exe`: `161795BA3CB74E144A3423E50CB3C03D857A4AB448C7AEF7C2046BA0E78D03C1`
+- `Creation-SSH_0.6.13_x64_en-US.msi`: `DD62A6C7EC1BAF2CC1ABF8C3F18BFC37424239709247990F78D99E0B94599EF6`
+- `Creation-SSH_0.6.13_portable-Windows-x64.zip`: `FEA9D83918138EDD04A1FF839BB92A14A7CD2BFA321AA9187EAF7FB331387057`
+- `C-SSH_0.6.13_android-arm64.apk`: `FE2BA564552B072D0997FC0C9DB00391098C802E4E867CB3E99EEA75C2D5FE5D`
+- `C-SSH_0.6.13_android-arm64.aab`: `802CA928A94A2F09B8267B7E43BE9F945CA7463627A5B4EF2D8748F87C84D2A4`
+- `Creation-SSH_0.6.13_linux-x86_64.AppImage`: `EB56DB36524B4D6781DC5721824A29B70D89108DAAAE47A61A954757BD52D397`
+- `Creation-SSH_0.6.13_linux-amd64.deb`: `FC01CA9EFC001345253C140ED0164D25BE2962F7915BC1275D915D6E616F08CA`
+
+## v0.6.12 - 安全卸载收口与三端体验完善
+
+### 下载
+- Windows 安装版：`Creation-SSH_0.6.12_x64-setup.exe`
+- Windows MSI：`Creation-SSH_0.6.12_x64_en-US.msi`
+- Windows 便携版：`Creation-SSH_0.6.12_portable-Windows-x64.zip`
+- Android arm64 APK：`C-SSH_0.6.12_android-arm64.apk`
+- Android arm64 AAB：`C-SSH_0.6.12_android-arm64.aab`
+- Linux AppImage：`Creation-SSH_0.6.12_linux-x86_64.AppImage`
+- Linux deb：`Creation-SSH_0.6.12_linux-amd64.deb`
+
+### 新增
+- Windows、Linux、Android 复用同一主机已认证 SSH transport；监控、文件、AI、系统管理与终端通过独立 channel 并行，多客户端可同时连接。
+- Android 终端采用紧凑双行工具栏，补齐主机 IP、唯一窗口名、`1-24px` 字体、自适应/固定/自定义尺寸、横纵滚动、复制与按需快捷键面板。
+- Windows/Linux 使用系统“另存为”，Android 使用 SAF 文档选择器；三端均由用户选择下载目的地。
+- Android 新增系统/浅色/深色主题和系统语言自动选择，终端、AI、监控偏好通过 SQLite 持久化。
+
+### 修复
+- 修复 `v0.6.11` 真实 Ubuntu 卸载后 tmux socket 路径残留阻断数据清理的问题；只隔离并删除身份连续、已证明归属的对象，任何身份异常继续 fail-closed。
+- 修复离线主机旧绿色状态、全新 SQLite 并发初始化锁库、单 channel 失败误断健康 transport、停止状态 firewalld 误报，以及 Windows 主窗关闭后隐藏登录窗残留。
+- SSH 的 DNS、TCP、握手、认证阶段分别使用 8 秒硬截止，不再为不可恢复错误重复完整拨号。
+
+### 验证
+- 根 workspace 全量测试、`client-core` 132 项定向测试、Clippy、格式与 Shell 语法通过。
+- Ubuntu no-mock 覆盖正常 quarantine/guard 清理、初始 stale、事务残留、原路径替换与外部资源不变。
+- Windows、Android、Linux 正式资产完成版本、包身份、签名/ABI/payload、真实启动、关闭与 SHA256 复核；Android x86_64 测试包在 MuMu 完成页面实操。
+- Linux AppImage/deb 在隔离图形与系统密钥环会话中，以真实服务器和真实 AI Key 完成监控、系统、文件、进程、AI、失效重连和持久化终端重开。
+
+### SHA256
+- `Creation-SSH_0.6.12_x64-setup.exe`: `07F1E843DA9AF1122CB6E282343684DE898C18A25F14626EA50FE96C892B92F8`
+- `Creation-SSH_0.6.12_x64_en-US.msi`: `3D4A70A0975A2D4A0755934B79220CFB3EA58D500790C37BFC76F21565D61257`
+- `Creation-SSH_0.6.12_portable-Windows-x64.zip`: `0FF0672A737689959FE8B5D490F1C232432887AEDDDB40FEA08F724EF6E232F2`
+- `C-SSH_0.6.12_android-arm64.apk`: `19B813DBF79A64304961C09DEBBC2268A64FEE48ACBD0ECDB2DB8D80DEB5D789`
+- `C-SSH_0.6.12_android-arm64.aab`: `541C6A2BAAA7BC4A9489C55F736D4499CE57B7AF37D9645D7544B434193E0625`
+- `Creation-SSH_0.6.12_linux-x86_64.AppImage`: `E4A2AC525ADF04304B642FE6E5C8A0A40AD99AFD09E66043117FEE86D41B7B45`
+- `Creation-SSH_0.6.12_linux-amd64.deb`: `DBB46F0D7E1D31D2E97339C89D709B0818D85683BC0B9DC7275C6D983553C325`

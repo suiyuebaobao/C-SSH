@@ -1,6 +1,6 @@
 //! 定义文档中心实操指南的前置条件、操作步骤、验证与 agent 边界模型。
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct TutorialStep {
     pub label: &'static str,
     pub title: &'static str,
@@ -21,7 +21,7 @@ impl TutorialStep {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct Tutorial {
     pub anchor: &'static str,
     pub sequence: &'static str,
@@ -75,7 +75,7 @@ impl Tutorial {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct TutorialContent {
     pub index_label: &'static str,
     pub prerequisites_label: &'static str,

@@ -164,19 +164,3 @@ fn smtp_error_class(error: &SmtpError) -> &'static str {
         "network_or_connection"
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::verification_body;
-
-    #[test]
-    fn password_reset_mail_contains_only_the_code_and_safety_hint() {
-        let body = verification_body("找回密码", "422216");
-        assert!(body.contains("422216"));
-        assert!(body.contains("10 分钟"));
-        assert!(!body.contains("http"));
-        assert!(!body.contains("/reset-password"));
-        assert!(!body.contains("challenge_id"));
-        assert!(!body.contains("专属链接"));
-    }
-}

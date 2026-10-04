@@ -130,7 +130,7 @@ async fn local_response(
     }
     let byte_range = match ByteRange::parse(range_header, actual_size) {
         Ok(value) => value,
-        Err(()) => return range_not_satisfiable(actual_size),
+        Err(_) => return range_not_satisfiable(actual_size),
     };
     verifier
         .verify(&path, &mut file, actual_size, sha256)

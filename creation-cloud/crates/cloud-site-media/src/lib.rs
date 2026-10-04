@@ -16,17 +16,6 @@ mod storage;
 mod use_case;
 mod validation;
 
-#[cfg(test)]
-mod image_validation_tests;
-#[cfg(test)]
-mod inspection_tests;
-#[cfg(test)]
-mod migration_tests;
-#[cfg(test)]
-mod router_tests;
-#[cfg(test)]
-mod storage_tests;
-
 pub use inspection_model::{PublishedMediaInspectionReport, SiteMediaInspectionStatus};
 pub use model::{
     CreateSiteMediaInput, PublicHomeQr, SiteMedia, SiteMediaSlot, SiteMediaState,

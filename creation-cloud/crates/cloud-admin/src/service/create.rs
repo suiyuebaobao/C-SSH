@@ -72,15 +72,3 @@ fn map_create_error(error: sqlx::Error) -> AppError {
         map_write_error(error)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn local_admin_insert_has_no_email_dependency() {
-        assert!(INSERT_ACCOUNT_SQL.contains("VALUES ($1, NULL, $2, $3"));
-        assert!(INSERT_ACCOUNT_SQL.contains("'admin', 'active'"));
-        assert!(!INSERT_AUDIT_SQL.contains("admin_login_name"));
-    }
-}

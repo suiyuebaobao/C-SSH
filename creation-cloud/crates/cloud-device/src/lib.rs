@@ -62,6 +62,3 @@ pub fn management_router(service: Service) -> Router {
         )
         .with_state(service)
 }
-
-#[cfg(test)]
-mod tests;

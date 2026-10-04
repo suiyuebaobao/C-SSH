@@ -21,3 +21,5 @@ pub(crate) mod reset_password;
 pub(crate) mod session;
 pub(crate) mod verify_email;
 pub(crate) mod verify_login;
+
+pub(crate) mod settings;

@@ -5,3 +5,5 @@ pub(crate) mod delete;
 pub(crate) mod get;
 pub(crate) mod list;
 pub(crate) mod update;
+
+pub(crate) mod profile;

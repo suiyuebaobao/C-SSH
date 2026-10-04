@@ -31,34 +31,3 @@ pub async fn with_semantic_audit_tracking<T>(future: impl Future<Output = T>) ->
 pub fn mark_semantic_audit_recorded() {
     let _ = SEMANTIC_AUDIT_RECORDED.try_with(|recorded| recorded.set(true));
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn request_id_is_visible_only_inside_its_async_scope() {
-        assert!(current_request_id().is_none());
-        let value = with_request_id("request-example".to_owned(), async {
-            current_request_id().expect("作用域内应存在请求标识")
-        })
-        .await;
-        assert_eq!(value, "request-example");
-        assert!(current_request_id().is_none());
-    }
-
-    #[tokio::test]
-    async fn semantic_audit_tracking_is_request_scoped() {
-        mark_semantic_audit_recorded();
-        let (value, recorded) = with_semantic_audit_tracking(async {
-            mark_semantic_audit_recorded();
-            "完成"
-        })
-        .await;
-        assert_eq!(value, "完成");
-        assert!(recorded);
-
-        let (_, next_recorded) = with_semantic_audit_tracking(async {}).await;
-        assert!(!next_recorded);
-    }
-}

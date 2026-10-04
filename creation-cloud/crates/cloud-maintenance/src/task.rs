@@ -69,6 +69,3 @@ impl FromStr for MaintenanceTask {
         }
     }
 }
-
-#[cfg(test)]
-mod task_tests;

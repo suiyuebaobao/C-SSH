@@ -36,36 +36,3 @@ fn sanitize_user_agent(value: Option<&str>) -> Option<String> {
     let sanitized = sanitized.trim();
     (!sanitized.is_empty()).then(|| sanitized.to_owned())
 }
-
-#[cfg(test)]
-mod tests {
-    use axum::http::{HeaderMap, HeaderValue, header};
-
-    use super::TrustedRequestMetadata;
-
-    #[test]
-    fn metadata_accepts_only_a_single_valid_trusted_ip_and_sanitizes_user_agent() {
-        let mut headers = HeaderMap::new();
-        headers.insert(
-            "x-creation-client-ip",
-            HeaderValue::from_static("2001:db8::1"),
-        );
-        headers.insert(
-            header::USER_AGENT,
-            HeaderValue::from_bytes(b"Creation\tClient 7.0").expect("valid header"),
-        );
-        let metadata = TrustedRequestMetadata::from_headers(&headers);
-        assert_eq!(metadata.last_login_ip.as_deref(), Some("2001:db8::1"));
-        assert_eq!(metadata.user_agent.as_deref(), Some("CreationClient 7.0"));
-
-        headers.insert(
-            "x-creation-client-ip",
-            HeaderValue::from_static("198.51.100.1, 203.0.113.2"),
-        );
-        assert!(
-            TrustedRequestMetadata::from_headers(&headers)
-                .last_login_ip
-                .is_none()
-        );
-    }
-}

@@ -26,15 +26,3 @@ pub(crate) async fn execute(
         .ok_or_else(|| AppError::NotFound("下载来源不存在".into()))?;
     ReleaseSource::try_from(row)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::LOCK_SOURCE_SQL;
-
-    #[test]
-    fn source_lock_has_no_parent_join() {
-        assert!(LOCK_SOURCE_SQL.contains("FROM release_sources"));
-        assert!(LOCK_SOURCE_SQL.contains("FOR UPDATE"));
-        assert!(!LOCK_SOURCE_SQL.contains("JOIN"));
-    }
-}

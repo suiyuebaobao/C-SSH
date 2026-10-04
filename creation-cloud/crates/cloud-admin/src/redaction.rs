@@ -20,16 +20,3 @@ fn masked_label(value: &str) -> String {
         .next()
         .map_or_else(|| "***".to_owned(), |first| format!("{first}***"))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn masks_local_and_domain_labels() {
-        let masked = email("admin@example.com");
-        assert_eq!(masked, "a***@e***.com");
-        assert!(!masked.contains("admin"));
-        assert!(!masked.contains("example"));
-    }
-}

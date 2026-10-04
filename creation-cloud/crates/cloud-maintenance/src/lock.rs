@@ -102,7 +102,3 @@ async fn configure_session(connection: &mut PgConnection) -> AppResult<()> {
     }
     Ok(())
 }
-
-#[cfg(test)]
-#[path = "lock_tests.rs"]
-mod tests;

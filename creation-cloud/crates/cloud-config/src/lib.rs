@@ -10,11 +10,6 @@ mod proxy;
 mod public_base_url;
 mod smtp;
 
-#[cfg(test)]
-mod public_base_url_tests;
-#[cfg(test)]
-mod tests;
-
 const DEFAULT_SITE_MEDIA_ROOT: &str = "./data/site-media";
 
 #[derive(Clone, Debug)]

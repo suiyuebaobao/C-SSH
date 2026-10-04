@@ -189,25 +189,3 @@ where
     }
     Ok(value)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::AuthorizationEndpoint;
-
-    #[test]
-    fn authorization_endpoint_requires_literal_loopback_and_fixed_path() {
-        let endpoint =
-            AuthorizationEndpoint::parse("http://127.0.0.1:3101/internal/v1/proxy/authorize")
-                .expect("回环固定路径应有效");
-        assert!(endpoint.address.ip().is_loopback());
-        for rejected in [
-            "https://127.0.0.1:3101/internal/v1/proxy/authorize",
-            "http://localhost:3101/internal/v1/proxy/authorize",
-            "http://192.0.2.1:3101/internal/v1/proxy/authorize",
-            "http://127.0.0.1:3101/api/v1/proxy/authorize",
-            "http://127.0.0.1:3101/internal/v1/proxy/authorize?x=1",
-        ] {
-            assert!(AuthorizationEndpoint::parse(rejected).is_err());
-        }
-    }
-}

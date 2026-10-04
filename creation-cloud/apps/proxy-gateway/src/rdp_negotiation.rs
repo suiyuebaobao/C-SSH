@@ -154,7 +154,3 @@ fn validate_confirm(packet: &[u8], requested: u32) -> Result<bool, NegotiationEr
         _ => Err(NegotiationError::Invalid),
     }
 }
-
-#[cfg(test)]
-#[path = "rdp_negotiation_tests.rs"]
-mod tests;

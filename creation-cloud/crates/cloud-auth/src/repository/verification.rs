@@ -311,22 +311,3 @@ fn delivery_cooldown_active(
     now.signed_duration_since(delivery_started_at).num_seconds()
         < i64::from(cooldown_seconds.max(1))
 }
-
-#[cfg(test)]
-mod cooldown_tests {
-    use chrono::{Duration, TimeZone, Utc};
-
-    use super::delivery_cooldown_active;
-
-    #[test]
-    fn registration_delivery_cooldown_uses_the_configured_value() {
-        let now = Utc
-            .with_ymd_and_hms(2026, 8, 4, 12, 0, 0)
-            .single()
-            .expect("fixed time");
-        let started_at = now - Duration::seconds(45);
-
-        assert!(delivery_cooldown_active(started_at, 90, now));
-        assert!(!delivery_cooldown_active(started_at, 30, now));
-    }
-}

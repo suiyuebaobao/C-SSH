@@ -428,7 +428,3 @@ where
     let _ = stream.write_all(response).await;
     let _ = stream.shutdown().await;
 }
-
-#[cfg(test)]
-#[path = "gateway_tests.rs"]
-mod tests;

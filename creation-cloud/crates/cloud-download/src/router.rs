@@ -28,6 +28,7 @@ pub fn management_router(service: Service) -> Router {
         .route("/policy", get(policy::get))
         .route("/policy/draft", put(policy::save_draft))
         .route("/policy/publish", post(policy::publish))
+        .route("/policy/apply", post(policy::apply))
         .route(
             "/installed-identities",
             post(installed_identity::handle).layer(DefaultBodyLimit::max(32 * 1024)),

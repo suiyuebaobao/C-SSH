@@ -5,6 +5,7 @@ mod admin_actor;
 mod admin_login_name;
 mod auth;
 mod error;
+mod http_range;
 mod page;
 mod release_contract;
 mod request_context;
@@ -16,6 +17,7 @@ pub use admin_login_name::{
 };
 pub use auth::AuthenticatedSession;
 pub use error::{AppError, AppResult, SyncResyncReason};
+pub use http_range::{ByteRange, InvalidByteRange};
 pub use page::{Page, PageQuery};
 pub use release_contract::{FormalReleaseAssetIdentity, formal_release_asset_identities};
 pub use request_context::{

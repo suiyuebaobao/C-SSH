@@ -25,8 +25,6 @@ pub(crate) use protection::{
     ValidatedEnvelope, change_protection, migrate_protection, setup_protection,
 };
 
-#[cfg(test)]
-pub(crate) use opaque::MAX_NONCE_BYTES;
 pub(crate) use opaque::{ValidatedAiChange, ValidatedAiPayload, ValidatedProxyProfileChange};
 pub(crate) use rekey_resource::ValidatedRekeyResource;
 

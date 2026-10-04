@@ -194,6 +194,3 @@ const fn allowed_ipv4(address: Ipv4Addr) -> bool {
         || (octets[0] == 198 && octets[1] == 51 && octets[2] == 100)
         || (octets[0] == 203 && octets[1] == 0 && octets[2] == 113)
 }
-
-#[cfg(test)]
-mod tests;

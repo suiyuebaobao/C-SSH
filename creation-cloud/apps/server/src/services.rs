@@ -24,6 +24,7 @@ pub struct AppServices {
     pub seo: cloud_seo::Service,
     pub site_content: cloud_site_content::Service,
     pub site_media: cloud_site_media::Service,
+    pub tutorial: cloud_tutorial::Service,
     pub sync: cloud_sync::Service,
     pub user: cloud_user::Service,
 }
@@ -83,6 +84,7 @@ impl AppServices {
             seo: cloud_seo::Service::new(pool.clone()),
             site_content,
             site_media,
+            tutorial: cloud_tutorial::Service::new(pool.clone(), config.site_media_root.clone()),
             sync: cloud_sync::Service::new(pool.clone()),
             user: cloud_user::Service::new(pool.clone()),
             pool,

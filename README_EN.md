@@ -1,39 +1,46 @@
 [中文](README.md) | **English**
 
-# C-SSH 0.9.3
+# C-SSH 0.9.4
 
 A server-operations workspace for **Windows, Apple Silicon Mac, Android and Linux**: hosts, persistent terminals, RDP, monitoring, files and scoped AI. Local features work without a Cloud login.
 
-> **0.9.3 is announced through notices only. Download and install manually; no upgrade prompt or forced update is sent.**
+> **0.9.4 is announced through notices only. Download and install manually; no upgrade prompt or forced update is sent.**
 >
 > Android keeps the 0.9.0 signer and can replace 0.9.0 and 0.9.1. Earlier official builds with a different signer cannot be replaced directly. Uninstalling clears local data. Read the [installation and data-preservation guide](INSTALL_EN.md), especially the note that AI conversations and memory are not included in Cloud sync. The Mac DMG is Apple Silicon only, ad-hoc signed and not notarized.
 
 ## Downloads
 
-| Platform | Official 0.9.3 download |
-|---|---|
-| Windows x64 · NSIS | [C-SSH_0.9.3_x64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_x64-setup.exe) |
-| Windows x64 · Portable | [C-SSH_0.9.3_portable-Windows-x64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_portable-Windows-x64.zip) |
-| macOS · Apple Silicon | [C-SSH_0.9.3_macOS-arm64.dmg](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_macOS-arm64.dmg) |
-| Android · arm64 | [C-SSH_0.9.3_android-arm64.apk](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_android-arm64.apk) |
-| Windows 11 ARM64 · NSIS | [C-SSH_0.9.3_arm64-setup.exe](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_arm64-setup.exe) |
-| Windows 11 ARM64 · Portable | [C-SSH_0.9.3_portable-Windows-arm64.zip](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_portable-Windows-arm64.zip) |
-| Linux x86_64 · deb | [C-SSH_0.9.3_amd64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_amd64.deb) |
-| Linux x86_64 · AppImage | [C-SSH_0.9.3_amd64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_amd64.AppImage) |
-| Linux ARM64 · deb | [C-SSH_0.9.3_arm64.deb](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_arm64.deb) |
-| Linux ARM64 · AppImage | [C-SSH_0.9.3_aarch64.AppImage](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.3/C-SSH_0.9.3_aarch64.AppImage) |
+| File | Bytes | Download |
+|---|---:|---|
+| C-SSH_0.9.4_android-arm64.apk | 39,707,218 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_android-arm64.apk) |
+| C-SSH_0.9.4_aarch64.AppImage | 116,402,696 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_aarch64.AppImage) |
+| C-SSH_0.9.4_amd64.AppImage | 117,410,296 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_amd64.AppImage) |
+| C-SSH_0.9.4_amd64.deb | 43,882,432 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_amd64.deb) |
+| C-SSH_0.9.4_arm64.deb | 43,049,976 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_arm64.deb) |
+| C-SSH_0.9.4_macOS-arm64.dmg | 42,342,556 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_macOS-arm64.dmg) |
+| C-SSH_0.9.4_arm64-setup.exe | 45,720,976 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_arm64-setup.exe) |
+| C-SSH_0.9.4_portable-Windows-arm64.zip | 41,482,505 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_portable-Windows-arm64.zip) |
+| C-SSH_0.9.4_portable-Windows-x64.zip | 42,794,746 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_portable-Windows-x64.zip) |
+| C-SSH_0.9.4_x64-setup.exe | 47,565,127 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.4/C-SSH_0.9.4_x64-setup.exe) |
 
-[Website](https://c-ssh.com/en) · [Website downloads](https://c-ssh.com/en/downloads) · [Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.3) · [Installation](INSTALL_EN.md)
+[Installation and data preservation](INSTALL_EN.md) · [Website](https://c-ssh.com/en) · [Release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.4)
 
-iOS is not uploaded in this release. No Intel Mac, MSI, AAB or x86 Android release package is provided. Windows requires WebView2 Runtime. Minimum package targets are macOS 13 and Android 7.0/API 24; this does not mean every supported OS has been tested.
+0.9.4 uses announcements and manual downloads only, with no upgrade prompt or forced update. Mac is Apple Silicon arm64 only, minimum target macOS13, ad-hoc signed and not notarized. Windows installers have no Authenticode signature. Android retains the release signer used since 0.9.0; earlier differently signed builds cannot be replaced directly. AI content is excluded from Cloud sync; read the installation and data-preservation guide first.
 
 ## What changed
 
-- **Terminal keyboard handling:** Android adaptive terminals resize to the visible area, with corrected cursor and input-anchor positioning. Shortcut keys stay above the keyboard and leave room for the input line when expanded.
-- **Accessible form closing:** add/edit host forms have a top-right close button that remains available while scrolling. Clicking outside the form preserves entered values.
-- **Mobile terminal font:** Android/iOS default to size 6, preserving saved custom sizes.
-- **Version alignment:** iOS is maintained at 0.9.3, without an iOS package upload.
-- **Manual installation:** download and install this release yourself. Announcement only; no upgrade prompts or forced updates.
+### Added
+
+- **Bulk host import**: Import CSV or OpenSSH configuration, preview and select entries, then create pending connections. A host becomes active only after credentials are supplied and real authentication succeeds. Previewing is not connecting; passwords and private keys are not stored in the plaintext pending queue.
+- **Skippable first-use guide**: Discover connection, import and operations entry points, or skip directly to the workspace. The choice survives a cold restart and the guide can be reopened in Settings. Upgrades with existing data do not force onboarding.
+- **Automatic AI operations Skills**: Experience is learned only after tools execute and acceptance succeeds. Later tasks reuse it only when the current environment matches. No manual save or adoption step is required; the normal UI shows a single light notice when past experience is referenced. Existing permissions and confirmations still apply. Skills, AI conversations, raw records and long-term memory remain local and are excluded from Cloud sync.
+- **Readable operation-log rows**: One business operation per row, with time, level, local host name and a trustworthy result. Collection is off by default; enable and query it as needed, switch to the technical view or export support material. A successful substep or transfer never implies that the whole operation succeeded; unknown and incomplete outcomes are explicit.
+- **Version and data upgrade**: Four platforms ship 0.9.4 with client SQLite schema 22. iOS is maintained at 0.9.4/9004000 but no iOS artifact is uploaded.
+
+### Fixed
+
+- **Frost-white theme readability**: Corrected primary-button backgrounds, text, hover, disabled and keyboard-focus states on Windows, Mac and Linux.
+- **Android fresh-install startup**: Corrected the earlier 0.9.4 candidate that was incorrectly rejected during cold startup. The new formal APK passed a fresh arm64 Android SDK Emulator cold start and normal UI checks, retaining the original release signer. The earlier candidate's failed result is preserved.
 
 ## Capabilities
 
@@ -56,6 +63,8 @@ iOS is not uploaded in this release. No Intel Mac, MSI, AAB or x86 Android relea
 
 ## Screenshots
 
+The retained 0.9.0 gallery was published on 2026-09-29; the 0.9.1 additions on 2026-09-30. These are historical UI examples with synthetic data, not new 0.9.4 screenshots.
+
 [Windows](screenshots/WINDOWS_EN.md) · [Mac](screenshots/MACOS_EN.md) · [Android](screenshots/ANDROID_EN.md)
 
 The [new 0.9.1 form](screenshots/v0.9.1/README_EN.md) and retained 0.9.0 full gallery render real Vue interfaces with synthetic data in a background browser. It illustrates the UI, not native-app, physical-device or live-server validation. Personal contact details are hidden in public screenshots.
@@ -63,11 +72,18 @@ The [new 0.9.1 form](screenshots/v0.9.1/README_EN.md) and retained 0.9.0 full ga
 ![Windows host form and Setup export](screenshots/v0.9.1/windows-add-host-setup.png)
 ![Mac monitoring](screenshots/v0.9.0/macos-monitor-detail.png)
 
-## Validation scope
+## Verified
 
-This release checks changed behavior and new packages: five-platform form components in a background browser; Android SDK Emulator keyboard handling and upgrade; Windows lifecycle checks on both architectures; Mac DMG/arm64/ad-hoc signatures; Linux packages and forms on Ubuntu 24.04/X11. Earlier functional evidence retains its original version scope. No claim covers a physical Honor phone, all keyboards, all Linux distributions, or a physical iPhone.
+- All ten formal artifacts have names, byte counts and SHA256 values bound to their platform receipts, totaling 580,358,528 bytes. Windows has current Release and package gates on both architectures; Portable contains only `C-SSH/C-SSH.exe`. Installation lifecycle and ordinary user-profile startup were not repeated in this packaging round.
+- Mac is the ordinary arm64 Release/DMG with checked ad-hoc signing and no notarization. Same-source Mac business evidence is reused without opening the user's normal profile. Android checks cover 0.9.4/9004000, the original signer, 16KB alignment, a fresh SDK Emulator cold start and a normal operation-log row.
+- Both Linux architectures passed deb/AppImage package checks and isolated minimal startup; AppImage used its extracted entry point. This round adds no FUSE-mount, upgrade, other-distribution or physical-machine claim.
+- Import, onboarding and automatic Skills reuse the October 2–3 native evidence: Mac arm64; Windows ARM64 and x64 within an ARM VM; Linux ARM64, with x64 native differences checked separately; Android SDK Emulator and iPhone Simulator. SSH/Windows management and real-provider learning/cold-restart reuse retain their individual scopes. A complete matrix was not rerun on every architecture.
+- Operation-log evidence includes same-source Mac business operations and a normal Android row. Other platforms have the current shared implementation, frontend/package checks and their minimal-startup evidence; this does not claim every business-log path was rerun on every platform.
+- No claim covers physical Android/iPhone devices, every input method, every Linux distribution/Wayland, every recovery scenario or untested features in this round.
 
 ## Data and source code
+
+The production-source mirror includes the current Rust API, Nuxt frontend and production migrations.
 
 Cloud does not relay SSH traffic. The client encrypts host credentials and model keys before explicit sync. AI conversations and memory stay local; selected context is sent to the chosen model provider. Deleting a local host does not uninstall its Agent or clean up remote sessions.
 
@@ -77,16 +93,16 @@ This public repository contains product information, screenshots, downloads and 
 
 | File | SHA256 |
 |---|---|
-| C-SSH_0.9.3_android-arm64.apk | `261f028ed76462577f0bd369404a5c4e5a47cf6b7b1ff8422851b1e0401612e9` |
-| C-SSH_0.9.3_aarch64.AppImage | `842c1ca1b01650a8e19a27f43cd4aef839e7e0255e34d0aa923591e86ac291a4` |
-| C-SSH_0.9.3_amd64.AppImage | `26249275cc7d2e9f9e85cf4d47e89d11ca9740590fc3f6626328274cd214145b` |
-| C-SSH_0.9.3_amd64.deb | `8686242edc6c470f039dbb6e710143e964c75da4e18750a18b6e57c408b88292` |
-| C-SSH_0.9.3_arm64.deb | `d6b92a1b0d2f33144f6ab063703483f491a94092f69d7aeb1d22ba59ebcfe17f` |
-| C-SSH_0.9.3_macOS-arm64.dmg | `d86c2cdf8563f53602f74e1d0200d95b79dd35b89bc08f6f55f236b88ba09785` |
-| C-SSH_0.9.3_arm64-setup.exe | `98ee1a090ec8143a0fd47336319c86a9dd03877cd5b62c302dae8da294310091` |
-| C-SSH_0.9.3_portable-Windows-arm64.zip | `8c419270eff33874887e2848c5167c77c05ca873d6b6ebdfcf2e45e431b4f35e` |
-| C-SSH_0.9.3_portable-Windows-x64.zip | `bf290d13963885b8f5c6eac8da576b8aac731d26d20df0de204e39ad190aeb54` |
-| C-SSH_0.9.3_x64-setup.exe | `0defc336bfe744b5f6b76917d3954c53dd5e0ccfa0c9b74b8973deb8f78a1b09` |
+| C-SSH_0.9.4_android-arm64.apk | `8ee9649e69ed73660f1bdc42c6c56de9964de64f1ecfe9d72bb52d2ec26fd76c` |
+| C-SSH_0.9.4_aarch64.AppImage | `a30eeadb2052a3a7702b4ac4de20ab0544ccf6a1552cd8b4fcfdccab3a744402` |
+| C-SSH_0.9.4_amd64.AppImage | `6e536a4c070539d7ff1195ebfb92b6654402450fdf5d82d5a86de3a47ff91ad5` |
+| C-SSH_0.9.4_amd64.deb | `8bd0330364baf7fe5f5fd6bc71c3c64cb54c4351184dc2a578ccbaf58dd98edc` |
+| C-SSH_0.9.4_arm64.deb | `fb12a27ae9fc2e93729aeff6ea826e3b45cc01ca5f168f2283ccc4a8d752d281` |
+| C-SSH_0.9.4_macOS-arm64.dmg | `b6c472e64e98965f9859e65cc738de2f2895dbebfb1d5a080ba4c9f553cfe401` |
+| C-SSH_0.9.4_arm64-setup.exe | `463ae846ea6d2129f9fd1e2a25055f02a78a9dcffb9e80abf0672e9477ec8bb6` |
+| C-SSH_0.9.4_portable-Windows-arm64.zip | `1dd2abe077602c94fb976b849648e5432f984ad482de1da91828040520321627` |
+| C-SSH_0.9.4_portable-Windows-x64.zip | `32689bfaf190bab66ae5197d12ece09270358bc139f40c1a30ced15563f72841` |
+| C-SSH_0.9.4_x64-setup.exe | `280b1144366a283f20fd75f224c800239db072d5dd1c0fdd162b71c4ea21ff54` |
 
 ## Feedback and contact
 

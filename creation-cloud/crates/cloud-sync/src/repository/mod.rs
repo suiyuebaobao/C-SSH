@@ -19,8 +19,6 @@ pub(crate) use get_conflict::get_conflict;
 pub(crate) use list_conflicts::list_conflicts;
 pub(crate) use pull::pull;
 pub(crate) use push::push;
-#[cfg(test)]
-pub(crate) use push::validate_replay_identity as validate_push_replay_identity;
 pub(crate) use resolve_conflict::resolve_conflict;
 pub(crate) use retention::run_batch as run_retention_batch;
 pub(crate) use retention::run_batch_on_connection as run_retention_batch_on_connection;

@@ -13,7 +13,7 @@ pub(super) fn page_content() -> PageContent {
     let home_page = HomePageContent {
         status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
         status_note:
-            "0.9.3 · Manual installation · No upgrade reminders or forced updates"
+            "0.9.4 · Manual installation · No upgrade reminders or forced updates"
                 .into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
@@ -53,15 +53,15 @@ pub(super) fn page_content() -> PageContent {
 
     page(
         PageId::Home,
-        "C-SSH 0.9.3 | Windows · Mac · Android · Linux",
-        "C-SSH 0.9.3 for Windows x64/ARM64, Apple Silicon Mac, Android and Linux: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
-        "C-SSH 0.9.3 / MANUAL DOWNLOAD",
-        "C-SSH 0.9.3: one workspace for server operations",
+        "C-SSH 0.9.4 | Windows · Mac · Android · Linux",
+        "C-SSH 0.9.4 for Windows x64/ARM64, Apple Silicon Mac, Android and Linux: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
+        "C-SSH 0.9.4 / MANUAL DOWNLOAD",
+        "C-SSH 0.9.4: one workspace for server operations",
         "Windows x64/ARM64, Apple Silicon Mac, Android and Linux bring hosts, persistent terminals, remote desktops, monitoring, files and AI together. This release is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. iOS is not published in this release.",
     )
     .with_actions(vec![
         action(
-            "Download 0.9.3 manually",
+            "Download 0.9.4 manually",
             "/downloads",
             "button button-primary",
         ),
@@ -120,7 +120,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                     "NODE 01",
                     "Four clients",
                     "Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and both Linux architectures share core capabilities with desktop and phone layouts.",
-                    "0.9.3 · Manual installation",
+                    "0.9.4 · Manual installation",
                 ),
                 item(
                     "LINK 02",
@@ -169,7 +169,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "MIXED",
                     "Hosts and projects",
-                    "Create, edit, search, favorite and group hosts. Use IPv4 or domains, separate ports, passwords or keys, and direct or proxy routes.",
+                    "Create, edit, search, favorite and group hosts. Preview and import CSV hosts; use IPv4 or domains, separate ports, passwords or keys, and direct or proxy routes.",
                     "Hosts / Projects",
                 ),
                 item(
@@ -199,7 +199,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "AGENT",
                     "AI assistant",
-                    "Global can access all local scope histories; project is limited to that project and host to that host. Manage model accounts, bindings, permissions and confirmations.",
+                    "Global can access all local scope histories; project and host remain scoped. Manage model accounts and permissions, and let AI learn and match Skills automatically.",
                     "Conversations and memory remain local",
                 ),
                 item(
@@ -217,7 +217,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "PURE SSH",
                     "Grants and diagnostics",
-                    "Desktop access-grant management. Diagnostic logging is off by default and can be enabled, queried and exported when needed.",
+                    "Desktop access-grant management. Diagnostics stay off by default and use one record per line when enabled. Frost White button readability is corrected on Windows, Mac and Linux.",
                     "Platform entry points follow the actual UI",
                 ),
             ],
@@ -231,7 +231,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 01",
                     "Download manually",
-                    "0.9.3 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
+                    "0.9.4 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
                     "Check version and SHA256",
                 ),
                 item(
@@ -243,7 +243,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 03",
                     "Add your first host",
-                    "Enter an IPv4 address or domain, a separate port and credentials, then select Agent, standard SSH or the appropriate Windows connection.",
+                    "Enter host details or preview and import a CSV, then choose Agent, standard SSH or the appropriate Windows connection. The lightweight guide can be skipped.",
                     "Verify server identity first",
                 ),
                 item(
@@ -270,7 +270,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "platforms",
             HomeLayout::Platforms,
             "Windows, Mac, Android and Linux; iOS is not published",
-            "0.9.3 ships for Windows x64/ARM64, Apple Silicon Mac, Android and Linux and requires manual installation. Linux offers x86_64 and ARM64 packages; iOS is not published.",
+            "0.9.4 ships for Windows x64/ARM64, Apple Silicon Mac, Android and Linux and requires manual installation. Linux offers x86_64 and ARM64 packages; iOS is not published.",
             platform_items(platforms),
         ),
         section(
@@ -332,7 +332,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "RELEASE",
                     "Manual download and update source",
-                    "0.9.3 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
+                    "0.9.4 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
                     "Announcement only · No upgrade reminders or forced updates",
                 ),
             ],
@@ -343,7 +343,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
 fn faqs() -> Vec<HomeFaqItem> {
     vec![
         HomeFaqItem::new(
-            "Can older versions automatically update to 0.9.3?",
+            "Can older versions automatically update to 0.9.4?",
             "This release is communicated by announcement only, without upgrade reminders or forced updates. Download and install it manually, and read the installation and data-preservation guide first. The Mac automatic updater is deferred.",
         ),
         HomeFaqItem::new(

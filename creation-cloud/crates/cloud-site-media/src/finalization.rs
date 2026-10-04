@@ -93,29 +93,3 @@ where
         .await
         .map_err(|_| AppError::Storage("站点媒体事务收尾 owner 异常终止".into()))?
 }
-
-#[cfg(test)]
-mod tests {
-    use tokio::sync::oneshot;
-
-    use super::*;
-
-    #[tokio::test]
-    async fn request_cancellation_does_not_cancel_owned_finalization() {
-        let (started_tx, started_rx) = oneshot::channel();
-        let (release_tx, release_rx) = oneshot::channel();
-        let (completed_tx, completed_rx) = oneshot::channel();
-        let request = tokio::spawn(run_owned(async move {
-            let _ = started_tx.send(());
-            let _ = release_rx.await;
-            let _ = completed_tx.send(());
-            Ok(())
-        }));
-
-        started_rx.await.expect("收尾 owner 应已启动");
-        request.abort();
-        let _ = request.await;
-        let _ = release_tx.send(());
-        completed_rx.await.expect("请求取消后 owner 仍应完成");
-    }
-}

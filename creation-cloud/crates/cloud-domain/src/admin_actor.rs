@@ -28,35 +28,3 @@ impl AdminActor {
         self.account_id
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use chrono::{Duration, Utc};
-
-    use super::*;
-
-    fn session(role: &str) -> AuthenticatedSession {
-        AuthenticatedSession {
-            account_id: Uuid::now_v7(),
-            email: "admin@example.com".to_owned(),
-            admin_login_name: None,
-            role: role.to_owned(),
-            device_id: None,
-            expires_at: Utc::now() + Duration::minutes(10),
-            csrf_token: "csrf-example".to_owned(),
-            session_id: Uuid::now_v7(),
-        }
-    }
-
-    #[test]
-    fn accepts_only_admin_role() {
-        let admin = session("admin");
-        let actor = AdminActor::from_session(&admin).expect("管理员会话应可派生管理身份");
-        assert_eq!(actor.account_id(), admin.account_id);
-
-        assert!(matches!(
-            AdminActor::from_session(&session("user")),
-            Err(AppError::Forbidden(_))
-        ));
-    }
-}

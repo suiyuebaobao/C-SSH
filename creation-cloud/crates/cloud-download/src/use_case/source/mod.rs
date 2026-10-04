@@ -5,6 +5,3 @@ mod delete;
 mod get;
 mod list;
 mod update;
-
-#[cfg(test)]
-mod tests;

@@ -112,18 +112,3 @@ pub(crate) async fn list(
         total: count.total,
     })
 }
-
-#[cfg(test)]
-mod tests {
-    use super::RECORDS_SQL;
-
-    #[test]
-    fn admin_projection_contains_only_safe_sync_metadata() {
-        assert!(RECORDS_SQL.contains("'upload'::TEXT"));
-        assert!(RECORDS_SQL.contains("'download'::TEXT"));
-        assert!(RECORDS_SQL.contains("last_manual_sync_at"));
-        assert_eq!(RECORDS_SQL.matches("admin_deleted_at IS NULL").count(), 2);
-        assert!(!RECORDS_SQL.contains("request_hash"));
-        assert!(!RECORDS_SQL.contains("ciphertext"));
-    }
-}

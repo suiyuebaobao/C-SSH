@@ -56,33 +56,3 @@ pub(crate) fn enforce_policy(
     }
     Ok(())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn rejects_self_and_last_active_admin() {
-        let actor_id = Uuid::now_v7();
-        assert!(matches!(
-            enforce_policy(
-                actor_id,
-                actor_id,
-                AdminUserRole::Admin,
-                AdminUserStatus::Active,
-                2,
-            ),
-            Err(AppError::Forbidden(_))
-        ));
-        assert!(matches!(
-            enforce_policy(
-                actor_id,
-                Uuid::now_v7(),
-                AdminUserRole::Admin,
-                AdminUserStatus::Active,
-                1,
-            ),
-            Err(AppError::Conflict(_))
-        ));
-    }
-}

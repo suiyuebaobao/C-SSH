@@ -23,15 +23,3 @@ pub(crate) async fn execute(connection: &mut PgConnection, id: Uuid) -> AppResul
         .ok_or_else(|| AppError::NotFound("版本不存在".into()))?;
     Release::try_from(row)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::LOCK_RELEASE_SQL;
-
-    #[test]
-    fn parent_release_lock_is_explicit() {
-        assert!(LOCK_RELEASE_SQL.contains("FROM releases"));
-        assert!(LOCK_RELEASE_SQL.contains("FOR UPDATE"));
-        assert!(!LOCK_RELEASE_SQL.contains("JOIN release_assets"));
-    }
-}

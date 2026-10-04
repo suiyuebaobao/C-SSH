@@ -9,14 +9,14 @@ use serde::Serialize;
 pub(crate) struct AdminOverviewState {
     admin: cloud_admin::Service,
     feedback: cloud_feedback::Service,
-    page: cloud_web::AdminPageState,
+    page: crate::health::HealthState,
 }
 
 impl AdminOverviewState {
     pub(crate) const fn new(
         admin: cloud_admin::Service,
         feedback: cloud_feedback::Service,
-        page: cloud_web::AdminPageState,
+        page: crate::health::HealthState,
     ) -> Self {
         Self {
             admin,
@@ -31,7 +31,7 @@ pub(crate) struct AdminOverviewResponse {
     #[serde(flatten)]
     overview: cloud_admin::AdminOverview,
     feedback: cloud_feedback::FeedbackOverview,
-    health: cloud_web::AdminHealth,
+    health: crate::health::AdminHealth,
 }
 
 pub(crate) async fn handle(

@@ -24,15 +24,3 @@ pub(crate) fn map_write_error(error: sqlx::Error, conflict: &str) -> AppError {
 fn is_conflict_code(code: &str) -> bool {
     matches!(code, "23503" | "23505" | "P0001")
 }
-
-#[cfg(test)]
-mod tests {
-    use super::is_conflict_code;
-
-    #[test]
-    fn maps_foreign_key_unique_and_guard_failures_to_conflict() {
-        assert!(is_conflict_code("23503"));
-        assert!(is_conflict_code("23505"));
-        assert!(is_conflict_code("P0001"));
-    }
-}

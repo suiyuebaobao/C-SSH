@@ -29,9 +29,9 @@ pub(super) fn security() -> PageContent {
             "Cloud data classification",
             "Unknown fields are rejected and sensitive material does not enter the cloud in plaintext.",
             vec![
-                item("Sync", "Host and AI manual sync", "Secrets upload only as opaque ciphertext encrypted by a trusted client.", "User confirmed"),
+                item("Sync", "Host, AI and proxy-profile manual sync", "Secrets upload only as opaque ciphertext encrypted by a trusted client.", "User confirmed"),
                 item("Vault", "Client-side encryption", "The server stores versioned opaque ciphertext and required non-secret metadata only.", "Zero knowledge"),
-                item("Logs", "Redacted records", "Passwords, tokens, cookies, ciphertext bodies, and SSH details stay out of logs.", "Minimum record"),
+                item("Logs", "Redacted records", "Diagnostics are off by default and use one redacted record per line when enabled. Passwords, tokens, cookies, ciphertext bodies and SSH credentials stay out of diagnostic logs.", "Minimum record"),
             ],
         ),
     ])
@@ -44,7 +44,7 @@ pub(super) fn downloads() -> PageContent {
         "Download the latest C-SSH SSH terminal and server operations client for Windows x64/ARM64, Apple Silicon Mac, Android and Linux. Linux offers deb and AppImage packages for x86_64 and ARM64.",
         "DOWNLOADS / DIRECT",
         "Download C-SSH",
-        "0.9.3 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
+        "0.9.4 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
     )
     .with_sections(vec![section(
         "builds",
@@ -93,6 +93,7 @@ pub(super) fn faq() -> PageContent {
         "A concise guide to connections, the agent, cloud sync, and downloads.",
     )
     .with_faqs(vec![
+        FaqItem::new("What is new in 0.9.4?", "Preview and import CSV hosts, skip the lightweight guide, let AI learn and match Skills, and read diagnostic records one per line. Frost White buttons are more readable on Windows, Mac and Linux."),
         FaqItem::new("Does Creation Cloud proxy SSH connections?", "No. The SSH data plane stays direct from the client to your server; the cloud only provides account, device, and optional sync controls."),
         FaqItem::new("Can I use it without the agent?", "A standard SSH terminal and port forwarding currently use native SSH. Jump hosts share that architectural exception but remain deferred. Persistent sessions, monitoring, and structured management use the agent."),
         FaqItem::new("Are host addresses and private keys synced?", "Host names, addresses, ports, tags, status, connection settings, and credentials sync only as client-encrypted ciphertext. AI keys, APIs, and model bindings use the same client-side protection boundary. known_hosts, terminal content, and command history never upload."),

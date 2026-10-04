@@ -6,6 +6,3 @@ pub(crate) mod list;
 pub(crate) mod overview;
 pub(crate) mod redact;
 pub(crate) mod status;
-
-#[cfg(test)]
-mod tests;

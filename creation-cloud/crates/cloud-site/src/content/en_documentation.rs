@@ -10,11 +10,11 @@ use super::en::{action, page};
 pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
-        "Creation-SSH Docs | Connect and Operate",
-        "Task-oriented Creation-SSH documentation for adding a host, agent deployment, persistent terminals, monitoring, files, and AI.",
+        "C-SSH Docs | Connect and Operate",
+        "C-SSH 0.9.4 documentation for CSV import, a skippable guide, agent deployment, persistent terminals, monitoring, files and automatic Skills.",
         "DOCS / TASK GUIDES",
-        "Start with your first Creation-SSH host",
-        "Documentation and tutorials now share one task-oriented home. Complete one real workflow and use its expected result to verify the path.",
+        "Start with your first C-SSH host",
+        "Follow the C-SSH 0.9.4 task index: preview CSV imports, skip the lightweight guide if preferred, and use terminals, monitoring and AI when needed.",
     )
     .with_actions(vec![
         action("Add your first host", "#add-host", "button button-primary"),
@@ -44,7 +44,7 @@ fn documentation() -> DocumentationContent {
             title: "A standard PTY and a persistent terminal are separate paths",
             lead: "The image shows a direct standard PTY. Only persistent-terminal mode uses the client, agent, and tmux to provide a reconnectable session.",
             src: "/static/img/product-terminal.png",
-            alt: "Redacted Creation-SSH demo terminal showing an example server and a standard SSH PTY",
+            alt: "Redacted C-SSH demo terminal showing an example server and a standard SSH PTY",
             caption: "Redacted demo with an RFC 5737 example address. It explains the UI path only and is not persistent-session or no-mock evidence.",
             width: 1650,
             height: 1080,
@@ -96,6 +96,12 @@ fn sections() -> Vec<DocumentationSection> {
             "Open the installed client and confirm the connection mode, host identity, and data boundary.",
             vec![
                 text(
+                    "0.9.4",
+                    "CSV, guide, Skills and diagnostics",
+                    "Preview CSV imports before committing and skip the lightweight guide if preferred. AI can learn and match Skills automatically. Diagnostics use one record per line; Frost White buttons are clearer on Windows, Mac and Linux.",
+                    false,
+                ),
+                text(
                     "MODE",
                     "Choose Agent or SSH mode",
                     "Use Agent mode for persistent terminals, monitoring, and structured operations. Choose SSH mode when you only need a native connection or the target should not run the agent.",
@@ -137,13 +143,13 @@ fn sections() -> Vec<DocumentationSection> {
                 text(
                     "OPTIONAL",
                     "Manage local hosts without a Cloud account",
-                    "SSH connections, standard terminals, and local workflows do not require Cloud sign-in. Cloud is limited to control-plane data such as accounts, devices, sync, models, and vault envelopes.",
+                    "SSH connections, standard terminals and local workflows do not require Cloud sign-in. Cloud provides accounts, devices, the model catalog and explicit encrypted sync of hosts, AI accounts and proxy profiles.",
                     false,
                 ),
                 text(
                     "BOUNDARY",
                     "Cloud never proxies the SSH data plane",
-                    "Private keys, passwords, and plaintext secrets do not go to Cloud. Only client-side encrypted vault envelopes defined by the dedicated plan may be stored.",
+                    "Hosts, AI accounts and proxy profiles sync manually as client-encrypted opaque ciphertext. Data-protection passwords and keys never upload; AI conversations and long-term memory are excluded from Cloud sync.",
                     true,
                 ),
             ],

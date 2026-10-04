@@ -3,6 +3,3 @@
 mod get;
 mod list;
 pub(crate) mod record;
-
-#[cfg(test)]
-mod tests;

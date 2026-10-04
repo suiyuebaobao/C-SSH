@@ -36,3 +36,12 @@ pub(crate) async fn publish(
     let actor = AdminActor::from_session(&session)?;
     service.publish_update_policy(&actor, input).await.map(Json)
 }
+
+pub(crate) async fn apply(
+    State(service): State<Service>,
+    Extension(session): Extension<AuthenticatedSession>,
+    Json(input): Json<crate::ApplyUpdatePolicyInput>,
+) -> AppResult<Json<PublishedUpdatePolicy>> {
+    let actor = AdminActor::from_session(&session)?;
+    service.apply_update_policy(&actor, input).await.map(Json)
+}

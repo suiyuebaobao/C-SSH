@@ -594,6 +594,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloud-site-api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "cloud-domain",
+ "cloud-download",
+ "cloud-seo",
+ "cloud-site",
+ "cloud-site-content",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower",
+ "url",
+]
+
+[[package]]
 name = "cloud-site-content"
 version = "0.1.0"
 dependencies = [
@@ -656,6 +673,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloud-tutorial"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "cloud-domain",
+ "cloud-store",
+ "image",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tower",
+ "uuid",
+]
+
+[[package]]
 name = "cloud-user"
 version = "0.1.0"
 dependencies = [
@@ -706,6 +743,7 @@ dependencies = [
  "cloud-release",
  "cloud-seo",
  "cloud-site",
+ "cloud-site-api",
  "cloud-site-content",
  "cloud-site-media",
  "cloud-store",
@@ -836,12 +874,13 @@ dependencies = [
  "cloud-proxy",
  "cloud-release",
  "cloud-seo",
+ "cloud-site-api",
  "cloud-site-content",
  "cloud-site-media",
  "cloud-store",
  "cloud-sync",
+ "cloud-tutorial",
  "cloud-user",
- "cloud-web",
  "lettre",
  "rpassword",
  "serde",

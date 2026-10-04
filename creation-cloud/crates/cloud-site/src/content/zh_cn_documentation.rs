@@ -10,11 +10,11 @@ use super::zh_cn::{action, page};
 pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
-        "Creation-SSH 使用文档｜连接与运维实操指南",
-        "从添加主机到 agent 部署、持久终端、监控、文件与 AI 的 Creation-SSH 使用文档。",
+        "C-SSH 使用文档｜连接与运维实操指南",
+        "C-SSH 0.9.4使用文档：CSV导入、可跳过引导、Agent部署、持久终端、监控、文件与自动Skills。",
         "DOCS / TASK GUIDES",
-        "从第一台主机开始使用 Creation-SSH",
-        "文档和实操指南已经合并。按目录完成一个真实任务，并用每章的预期结果判断链路是否可用。",
+        "从第一台主机开始使用 C-SSH",
+        "按C-SSH 0.9.4的目录完成一个任务；可以先预览CSV导入、跳过轻量引导，再按需使用终端、监控与AI。",
     )
     .with_actions(vec![
         action("添加第一台主机", "#add-host", "button button-primary"),
@@ -44,7 +44,7 @@ fn documentation() -> DocumentationContent {
             title: "普通 PTY 与持久化终端是两条不同路径",
             lead: "图中是直连普通 PTY；切换到持久化终端后，才由客户端、agent 与 tmux 协作提供可重连会话。",
             src: "/static/img/product-terminal.png",
-            alt: "Creation-SSH 脱敏演示终端，显示示例服务器和普通 SSH PTY",
+            alt: "C-SSH 脱敏演示终端，显示示例服务器和普通 SSH PTY",
             caption: "脱敏演示图：地址使用 RFC 5737 示例值；只说明界面路径，不作为持久化会话或 no-mock 证据。",
             width: 1650,
             height: 1080,
@@ -92,6 +92,12 @@ fn sections() -> Vec<DocumentationSection> {
             "打开已安装的客户端后，先确定连接模式、主机身份与数据边界。",
             vec![
                 text(
+                    "0.9.4",
+                    "CSV、引导、Skills与诊断",
+                    "CSV导入先预览再确认，轻量引导可以跳过；AI可自动学习和匹配Skills。诊断日志每行一笔记录，Windows、Mac与Linux霜白主题按钮更清晰。",
+                    false,
+                ),
+                text(
                     "MODE",
                     "选择 Agent 或 SSH 模式",
                     "默认使用 Agent 模式获得持久终端、监控和结构化运维；只需原生连接或目标机不适合 agent 时选择 SSH 模式。",
@@ -133,13 +139,13 @@ fn sections() -> Vec<DocumentationSection> {
                 text(
                     "OPTIONAL",
                     "无需 Cloud 账号也可管理本地主机",
-                    "SSH 连接、普通终端和本地工作流不以 Cloud 登录为前提。Cloud 仅承载账号、设备、同步、模型与保险库信封等控制面数据。",
+                    "SSH连接、普通终端和本地工作流不以Cloud登录为前提。Cloud只承载账号、设备、模型目录与用户主动发起的主机、AI账户及代理配置密文同步。",
                     false,
                 ),
                 text(
                     "BOUNDARY",
                     "Cloud 不代理 SSH 数据面",
-                    "私钥、密码和明文敏感资料不上云；只有专项方案定义的客户端本地加密 vault 信封可存储。",
+                    "主机、AI账户及代理配置只以客户端加密的不透明密文手动同步；数据保护密码与密钥不上传，AI对话和长期记忆不参与Cloud同步。",
                     true,
                 ),
             ],

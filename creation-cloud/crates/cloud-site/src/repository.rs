@@ -2,7 +2,7 @@
 
 const PUBLIC_REPOSITORY_URL: &str = "https://github.com/suiyuebaobao/C-SSH";
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct RepositoryLink {
     pub label: String,
     pub href: String,

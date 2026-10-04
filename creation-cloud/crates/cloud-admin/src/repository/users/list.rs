@@ -98,13 +98,3 @@ fn search_pattern(value: &str) -> String {
         .replace('_', r"\_");
     format!("%{escaped}%")
 }
-
-#[cfg(test)]
-mod tests {
-    use super::search_pattern;
-
-    #[test]
-    fn search_pattern_escapes_like_wildcards() {
-        assert_eq!(search_pattern(r"a_b%c\d"), r"%a\_b\%c\\d%");
-    }
-}

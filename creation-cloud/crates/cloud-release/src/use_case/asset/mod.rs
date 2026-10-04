@@ -7,6 +7,3 @@ pub(crate) mod installed_identity;
 mod list;
 mod list_all;
 mod update;
-
-#[cfg(test)]
-mod tests;

@@ -13,6 +13,7 @@ pub(super) fn view(page: PageId) -> SiteView {
         page: match page {
             PageId::Home => super::en_home::page_content(),
             PageId::Documentation => super::en_documentation::page_content(),
+            PageId::Tutorials => super::tutorial_videos::page(Locale::En),
             PageId::Security => super::en_public::security(),
             PageId::Downloads => super::en_public::downloads(),
             PageId::Changelog => super::en_public::changelog(),

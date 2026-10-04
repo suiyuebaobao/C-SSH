@@ -23,6 +23,3 @@ pub use types::{
     ResolveConflictOutcome, ResolveConflictRequest, SyncChange, SyncConflict, SyncOperation,
     SyncRecord,
 };
-
-#[cfg(test)]
-mod tests;

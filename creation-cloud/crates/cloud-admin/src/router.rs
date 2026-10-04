@@ -41,6 +41,7 @@ fn routes() -> Router<Service> {
                 .patch(users::update::handle)
                 .delete(users::delete::handle),
         )
+        .route("/users/{account_id}/profile", get(users::profile::handle))
         .route("/devices", get(devices::list::handle))
         .route("/devices/{device_id}", get(devices::get::handle))
         .route("/devices/{device_id}/revoke", post(devices::revoke::handle))

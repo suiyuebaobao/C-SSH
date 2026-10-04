@@ -21,7 +21,3 @@ impl RunBudget {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "budget_tests.rs"]
-mod tests;

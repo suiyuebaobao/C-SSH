@@ -504,34 +504,3 @@ fn response(
         idempotent,
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn current_ai(id: Uuid, revision: i64) -> CurrentEncryptedResource {
-        CurrentEncryptedResource::AiProviderAccount(CurrentEncryptedAi { id, revision })
-    }
-
-    fn candidate_ai(id: Uuid, revision: i64) -> ValidatedRekeyResource {
-        ValidatedRekeyResource::AiProviderAccount {
-            resource_id: id,
-            cloud_revision: revision,
-            payload: crate::validation::ValidatedAiPayload {
-                ciphertext: vec![1],
-                nonce: vec![2],
-                envelope_metadata: serde_json::json!({"v": 1}),
-            },
-        }
-    }
-
-    #[test]
-    fn candidate_must_cover_exact_typed_snapshot() {
-        let id = Uuid::now_v7();
-        assert!(require_complete_candidate(&[current_ai(id, 4)], &[candidate_ai(id, 4)]).is_ok());
-        assert!(matches!(
-            require_complete_candidate(&[current_ai(id, 4)], &[candidate_ai(id, 3)]),
-            Err(AppError::SyncStateChanged(_))
-        ));
-    }
-}

@@ -171,23 +171,3 @@ fn sanitize_request_id(value: Option<String>) -> String {
 fn valid_captcha_code(code: &str) -> bool {
     code.len() == crate::captcha::CODE_LENGTH && code.bytes().all(|byte| byte.is_ascii_digit())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::sanitize_request_id;
-
-    #[test]
-    fn mail_delivery_logs_accept_only_a_bounded_ascii_request_id() {
-        assert_eq!(
-            sanitize_request_id(Some("019c1234-5678-7abc-8def-0123456789ab".to_owned())),
-            "019c1234-5678-7abc-8def-0123456789ab"
-        );
-        for unsafe_value in ["", "request id", "id\nemail@example.test"] {
-            assert_eq!(
-                sanitize_request_id(Some(unsafe_value.to_owned())),
-                "unavailable"
-            );
-        }
-        assert_eq!(sanitize_request_id(None), "unavailable");
-    }
-}

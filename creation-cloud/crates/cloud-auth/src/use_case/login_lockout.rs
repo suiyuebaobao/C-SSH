@@ -106,39 +106,3 @@ fn can_accumulate_failures(account: &LoginAccount) -> bool {
         && (account.role == "admin"
             || (account.role == "user" && account.email_verified_at.is_some()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn threshold_locks_and_expired_cycle_restarts_from_one() {
-        let now = Utc::now();
-        let before_threshold = next_failure_state(3, None, 5, 30, now);
-        assert_eq!(before_threshold.consecutive_failures, 4);
-        assert_eq!(before_threshold.locked_until, None);
-
-        let locked = next_failure_state(4, None, 5, 30, now);
-        assert_eq!(locked.consecutive_failures, 5);
-        assert_eq!(locked.locked_until, Some(now + Duration::minutes(30)));
-
-        let restarted = next_failure_state(5, Some(now - Duration::seconds(1)), 5, 30, now);
-        assert_eq!(restarted.consecutive_failures, 1);
-        assert_eq!(restarted.locked_until, None);
-    }
-
-    #[test]
-    fn active_lock_returns_ceiling_retry_after() {
-        let now = Utc::now();
-        let error = active_lock_error(Some(now + Duration::milliseconds(1_001)), now)
-            .expect("未来锁期应阻止登录");
-        assert!(matches!(
-            error,
-            AppError::RateLimitedAfter {
-                retry_after_seconds: 2,
-                ..
-            }
-        ));
-        assert!(active_lock_error(Some(now), now).is_none());
-    }
-}

@@ -18,13 +18,13 @@ members = [
     "crates/cloud-release",
     "crates/cloud-seo",
     "crates/cloud-site",
+    "crates/cloud-site-api",
     "crates/cloud-site-content",
     "crates/cloud-site-media",
     "crates/cloud-store",
     "crates/cloud-sync",
+    "crates/cloud-tutorial",
     "crates/cloud-user",
-    "crates/cloud-vault",
-    "crates/cloud-web",
 ]
 resolver = "2"
 
@@ -37,7 +37,6 @@ rust-version = "1.90"
 [workspace.dependencies]
 anyhow = "1.0.98"
 argon2 = "0.5.3"
-askama = "0.16.0"
 async-trait = "0.1.88"
 axum = { version = "0.8.9", features = ["form", "json", "macros", "multipart"] }
 base64 = "0.22.1"
@@ -58,13 +57,13 @@ cloud-maintenance = { path = "crates/cloud-maintenance" }
 cloud-release = { path = "crates/cloud-release" }
 cloud-seo = { path = "crates/cloud-seo" }
 cloud-site = { path = "crates/cloud-site" }
+cloud-site-api = { path = "crates/cloud-site-api" }
 cloud-site-content = { path = "crates/cloud-site-content" }
 cloud-site-media = { path = "crates/cloud-site-media" }
 cloud-store = { path = "crates/cloud-store" }
 cloud-sync = { path = "crates/cloud-sync" }
+cloud-tutorial = { path = "crates/cloud-tutorial" }
 cloud-user = { path = "crates/cloud-user" }
-cloud-vault = { path = "crates/cloud-vault" }
-cloud-web = { path = "crates/cloud-web" }
 hex = "0.4.3"
 hmac = "0.12.1"
 http = "1.3.1"

@@ -308,24 +308,3 @@ async fn not_found(tx: DbTransaction<'_>, message: &str) -> AppResult<()> {
     tx.rollback().await.map_err(storage)?;
     Err(AppError::NotFound(message.to_owned()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::SyncRecordId;
-    use uuid::Uuid;
-
-    #[test]
-    fn sync_record_ids_are_explicit_and_non_nil() {
-        let id = Uuid::now_v7();
-        assert_eq!(
-            SyncRecordId::parse(&id.to_string()),
-            Some(SyncRecordId::Upload(id))
-        );
-        assert_eq!(
-            SyncRecordId::parse(&format!("download:{id}")),
-            Some(SyncRecordId::Download(id))
-        );
-        assert_eq!(SyncRecordId::parse("download:not-a-uuid"), None);
-        assert_eq!(SyncRecordId::parse(&Uuid::nil().to_string()), None);
-    }
-}

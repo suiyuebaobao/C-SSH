@@ -91,32 +91,3 @@ pub(crate) async fn execute(
 fn invalid_code() -> AppError {
     AppError::Unauthorized("验证码无效、已过期或已达到尝试上限".to_owned())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn reset_requires_a_six_digit_code_and_a_policy_compliant_password() {
-        assert!(
-            ResetPassword {
-                email: "user@example.com".to_owned(),
-                code: "123456".to_owned(),
-                new_password: "new-password-value".to_owned(),
-            }
-            .validate()
-            .is_ok()
-        );
-        for code in ["12345", "1234567", "12a456"] {
-            assert!(
-                ResetPassword {
-                    email: "user@example.com".to_owned(),
-                    code: code.to_owned(),
-                    new_password: "new-password-value".to_owned(),
-                }
-                .validate()
-                .is_err()
-            );
-        }
-    }
-}

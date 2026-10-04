@@ -2,7 +2,7 @@
 
 use crate::TutorialContent;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationContent {
     pub index_label: &'static str,
     pub mobile_index_label: &'static str,
@@ -20,7 +20,7 @@ pub struct DocumentationContent {
     pub final_body: &'static str,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationNotice {
     pub label: &'static str,
     pub title: &'static str,
@@ -34,7 +34,7 @@ impl DocumentationNotice {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationGroup {
     pub title: &'static str,
     pub links: Vec<DocumentationLink>,
@@ -47,7 +47,7 @@ impl DocumentationGroup {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationLink {
     pub anchor: &'static str,
     pub code: &'static str,
@@ -65,7 +65,7 @@ impl DocumentationLink {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationSection {
     pub anchor: &'static str,
     pub code: &'static str,
@@ -93,7 +93,7 @@ impl DocumentationSection {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationItem {
     pub badge: &'static str,
     pub title: &'static str,
@@ -140,7 +140,7 @@ impl DocumentationItem {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct DocumentationScreenshot {
     pub code: &'static str,
     pub title: &'static str,

@@ -2,10 +2,11 @@
 
 use crate::{DocumentationContent, HomePageContent, Locale, RepositoryLink};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize)]
 pub enum PageId {
     Home,
     Documentation,
+    Tutorials,
     Security,
     Downloads,
     Changelog,
@@ -35,9 +36,10 @@ pub enum PageId {
 }
 
 impl PageId {
-    pub const ALL: [Self; 28] = [
+    pub const ALL: [Self; 29] = [
         Self::Home,
         Self::Documentation,
+        Self::Tutorials,
         Self::Security,
         Self::Downloads,
         Self::Changelog,
@@ -66,9 +68,10 @@ impl PageId {
         Self::AdminFeedback,
     ];
 
-    pub const INDEXABLE: [Self; 5] = [
+    pub const INDEXABLE: [Self; 6] = [
         Self::Home,
         Self::Documentation,
+        Self::Tutorials,
         Self::Security,
         Self::Faq,
         Self::Feedback,
@@ -79,6 +82,7 @@ impl PageId {
         match self {
             Self::Home => "/",
             Self::Documentation => "/docs/getting-started",
+            Self::Tutorials => "/tutorials",
             Self::Security => "/security",
             Self::Downloads => "/downloads",
             Self::Changelog => "/changelog",
@@ -112,7 +116,12 @@ impl PageId {
     pub const fn is_indexable(self) -> bool {
         matches!(
             self,
-            Self::Home | Self::Documentation | Self::Security | Self::Faq | Self::Feedback
+            Self::Home
+                | Self::Documentation
+                | Self::Tutorials
+                | Self::Security
+                | Self::Faq
+                | Self::Feedback
         )
     }
 
@@ -122,7 +131,7 @@ impl PageId {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct NavigationItem {
     pub label: String,
     pub href: String,
@@ -139,7 +148,7 @@ impl NavigationItem {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct Action {
     pub label: String,
     pub href: String,
@@ -156,7 +165,7 @@ impl Action {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct Metric {
     pub value: &'static str,
     pub label: &'static str,
@@ -177,7 +186,7 @@ impl Metric {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct ContentItem {
     pub badge: &'static str,
     pub title: &'static str,
@@ -201,7 +210,7 @@ impl ContentItem {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct ContentSection {
     pub anchor: &'static str,
     pub title: &'static str,
@@ -225,7 +234,7 @@ impl ContentSection {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct FaqItem {
     pub question: &'static str,
     pub answer: &'static str,
@@ -237,7 +246,7 @@ impl FaqItem {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct FormField {
     pub name: &'static str,
     pub label: &'static str,
@@ -266,7 +275,7 @@ impl FormField {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct PageContent {
     pub id: PageId,
     pub path: &'static str,
@@ -380,7 +389,7 @@ impl PageContent {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct SiteShell {
     pub locale: Locale,
     pub html_lang: String,
@@ -403,7 +412,7 @@ pub struct SiteShell {
     pub footer_navigation: Vec<NavigationItem>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize)]
 pub struct SiteView {
     pub shell: SiteShell,
     pub page: PageContent,

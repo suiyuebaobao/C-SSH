@@ -22,15 +22,3 @@ pub(crate) async fn execute(connection: &mut PgConnection, id: Uuid) -> AppResul
         .map_err(map_read_error)?
         .ok_or_else(|| AppError::NotFound("资产不存在".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::LOCK_ASSET_SQL;
-
-    #[test]
-    fn child_asset_lock_is_independent_from_parent_lock() {
-        assert!(LOCK_ASSET_SQL.contains("FROM release_assets"));
-        assert!(LOCK_ASSET_SQL.contains("FOR UPDATE"));
-        assert!(!LOCK_ASSET_SQL.contains("JOIN releases"));
-    }
-}

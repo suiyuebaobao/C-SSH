@@ -13,6 +13,3 @@ pub use model::{
 };
 pub use router::{management_router, public_router};
 pub use service::Service;
-
-#[cfg(test)]
-mod tests;

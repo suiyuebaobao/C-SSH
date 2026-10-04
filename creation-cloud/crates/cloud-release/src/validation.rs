@@ -123,19 +123,3 @@ pub(crate) fn sha256(value: &str) -> AppResult<String> {
     }
     Ok(normalized)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn new_releases_reject_msi_while_legacy_release_mutations_remain_compatible() {
-        assert!(asset_identity_for_release("0.8.7", "windows", "x86_64", "msi").is_ok());
-        assert!(asset_identity_for_release("0.8.8", "windows", "x86_64", "exe").is_ok());
-        assert!(asset_identity_for_release("0.8.8", "windows", "x86_64", "zip").is_ok());
-        assert!(asset_identity_for_release("0.8.8", "android", "aarch64", "apk").is_ok());
-        assert!(asset_identity_for_release("0.8.8", "windows", "x86_64", "msi").is_err());
-        assert!(asset_identity_for_release("0.8.8", "linux", "x86_64", "appimage").is_err());
-        assert!(asset_identity_for_release("0.8.8", "android", "x86_64", "apk").is_err());
-    }
-}

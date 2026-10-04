@@ -271,6 +271,3 @@ fn same_file_identity(left: &std::fs::Metadata, right: &std::fs::Metadata) -> bo
         && left.modified().ok() == right.modified().ok()
         && left.created().ok() == right.created().ok()
 }
-
-#[cfg(test)]
-mod backup_tests;

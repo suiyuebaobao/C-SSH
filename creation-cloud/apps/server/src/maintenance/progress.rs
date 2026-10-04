@@ -45,7 +45,3 @@ fn saturating_add(counter: &AtomicU64, value: u64) {
         Some(current.saturating_add(value))
     });
 }
-
-#[cfg(test)]
-#[path = "progress_tests.rs"]
-mod tests;

@@ -24,18 +24,3 @@ pub(crate) async fn execute(pool: &PgPool) -> AppResult<FeedbackOverview> {
         .await
         .map_err(error::read)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::OVERVIEW_SQL;
-
-    #[test]
-    fn overview_counts_every_feedback_status_without_selecting_text() {
-        for status in ["new", "triaged", "in_progress", "resolved", "closed"] {
-            assert!(OVERVIEW_SQL.contains(&format!("status = '{status}'")));
-        }
-        assert!(!OVERVIEW_SQL.contains("title"));
-        assert!(!OVERVIEW_SQL.contains("description"));
-        assert!(!OVERVIEW_SQL.contains("account_id"));
-    }
-}

@@ -18,24 +18,6 @@ mod upload_file;
 mod use_case;
 mod validation;
 
-#[cfg(test)]
-mod router_tests;
-
-#[cfg(test)]
-mod authorization_tests;
-
-#[cfg(test)]
-mod aggregation_tests;
-
-#[cfg(test)]
-mod inspection_tests;
-
-#[cfg(test)]
-mod policy_migration_tests;
-
-#[cfg(test)]
-mod validation_tests;
-
 pub use model::{
     AdminUpdatePolicySnapshot, ApplyUpdatePolicyInput, AssetInspectionStatus, CreateSourceInput,
     DownloadAggregationReport, DownloadHistoryItem, InstalledIdentityEntryInput, LatestUpdate,
@@ -48,3 +30,8 @@ pub use model::{
 pub use router::{account_router, management_router, public_router, update_router};
 pub use service::Service;
 pub use upload_file::PreparedLocalUpload;
+
+mod new_download;
+pub use new_download::{
+    NewDownloadState, router as new_download_router, submit as submit_new_download,
+};

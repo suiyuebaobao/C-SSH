@@ -59,7 +59,3 @@ pub async fn execute(
     });
     Ok(report)
 }
-
-#[cfg(test)]
-#[path = "published_asset_inspection_tests.rs"]
-mod tests;

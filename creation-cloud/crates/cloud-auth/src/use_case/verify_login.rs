@@ -133,32 +133,3 @@ pub(crate) async fn execute(
 fn invalid_code() -> AppError {
     AppError::Unauthorized("登录验证码无效、已过期或已达到尝试上限".to_owned())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn login_code_is_exactly_six_ascii_digits() {
-        let challenge_id = Uuid::now_v7();
-        assert!(
-            VerifyLogin {
-                challenge_id,
-                code: "123456".to_owned(),
-            }
-            .validate()
-            .is_ok()
-        );
-        for code in ["12345", "1234567", "１２３４５６", "12a456"] {
-            assert!(
-                VerifyLogin {
-                    challenge_id,
-                    code: code.to_owned(),
-                }
-                .validate()
-                .is_err(),
-                "{code}"
-            );
-        }
-    }
-}

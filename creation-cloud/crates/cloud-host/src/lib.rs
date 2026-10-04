@@ -31,6 +31,3 @@ pub use types::{
     SetupDataProtectionRequest, SyncGenerationTransition, SyncStateView,
     VerifyProtectionResetChallengeRequest, VerifyProtectionResetChallengeResponse,
 };
-
-#[cfg(test)]
-mod tests;

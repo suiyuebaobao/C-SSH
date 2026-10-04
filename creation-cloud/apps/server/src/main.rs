@@ -5,6 +5,7 @@ mod admin_overview;
 mod app;
 mod client_config;
 mod command;
+mod health;
 mod http_trace;
 mod maintenance;
 mod maintenance_cli;

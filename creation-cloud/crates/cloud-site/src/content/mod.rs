@@ -25,3 +25,5 @@ pub(super) fn view(page: PageId, locale: Locale) -> SiteView {
         Locale::En => en::view(page),
     }
 }
+
+mod tutorial_videos;

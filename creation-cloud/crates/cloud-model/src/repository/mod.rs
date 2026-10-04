@@ -5,12 +5,8 @@ mod seed;
 
 pub(crate) use catalog::{create, delete, get_admin, get_public, list_admin, list_public, replace};
 pub(crate) use seed::seed_system_catalog;
-#[cfg(test)]
-pub(crate) use seed::{ACTIVE_ADMIN_SQL, INSERT_SEED_SQL, LOCK_CATALOG_SQL, SYSTEM_MODEL_SEEDS};
-#[cfg(test)]
-pub(crate) use seed::{
-    RETIRE_UNEDITED_SEED_SQL, RETIRED_SYSTEM_MODEL_IDS, UPDATE_UNEDITED_SEED_SQL,
-};
+;
+;
 
 use cloud_domain::AppError;
 

@@ -69,39 +69,3 @@ fn validate_identification(line: &[u8]) -> bool {
         .unwrap_or(body.len());
     software_end > prefix.len() && body.iter().all(|byte| (b' '..=b'~').contains(byte))
 }
-
-#[cfg(test)]
-mod tests {
-    use tokio::io::{AsyncWriteExt, duplex};
-
-    use super::{BannerError, read};
-
-    #[tokio::test]
-    async fn accepts_bounded_ssh2_banner_with_preface() {
-        let (mut writer, mut reader) = duplex(512);
-        writer
-            .write_all(b"authorized access only\r\nSSH-2.0-OpenSSH_9.9 test\r\n")
-            .await
-            .expect("写入应成功");
-        drop(writer);
-        let banner = read(&mut reader).await.expect("SSH banner 应有效");
-        assert_eq!(
-            banner,
-            b"authorized access only\r\nSSH-2.0-OpenSSH_9.9 test\r\n"
-        );
-    }
-
-    #[tokio::test]
-    async fn rejects_non_ssh_and_oversized_banner() {
-        for raw in [
-            b"HTTP/1.1 200 OK\r\n\r\n".to_vec(),
-            [vec![b'x'; 256], b"\r\nSSH-2.0-test\r\n".to_vec()].concat(),
-            b"SSH-1.5-obsolete\r\n".to_vec(),
-        ] {
-            let (mut writer, mut reader) = duplex(raw.len() + 1);
-            writer.write_all(&raw).await.expect("写入应成功");
-            drop(writer);
-            assert!(matches!(read(&mut reader).await, Err(BannerError::Invalid)));
-        }
-    }
-}

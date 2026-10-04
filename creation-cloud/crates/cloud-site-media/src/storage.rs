@@ -222,12 +222,6 @@ pub(crate) async fn readiness_probe(root: &Path) -> AppResult<()> {
     Ok(())
 }
 
-#[cfg(test)]
-pub(crate) fn controlled_path(root: &Path, storage_key: &str) -> AppResult<PathBuf> {
-    validate_storage_key(storage_key)?;
-    Ok(root.join(storage_key))
-}
-
 fn validate_storage_key(storage_key: &str) -> AppResult<(&str, &str)> {
     if storage_key.contains('\\') || Path::new(storage_key).is_absolute() {
         return Err(AppError::Internal("站点媒体存储键不受控".into()));

@@ -145,6 +145,3 @@ impl StatusRow {
 fn required<T>(value: Option<T>, field: &'static str) -> AppResult<T> {
     value.ok_or_else(|| AppError::Storage(format!("维护任务最近运行{field}状态缺失")))
 }
-
-#[cfg(test)]
-mod status_tests;

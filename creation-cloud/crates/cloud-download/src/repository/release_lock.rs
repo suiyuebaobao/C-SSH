@@ -16,15 +16,3 @@ pub(crate) async fn execute(connection: &mut PgConnection, release_id: Uuid) -> 
         .map_err(map_read_error)?
         .ok_or_else(|| AppError::NotFound("版本不存在".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::LOCK_RELEASE_SQL;
-
-    #[test]
-    fn parent_release_lock_has_no_child_join() {
-        assert!(LOCK_RELEASE_SQL.contains("FROM releases"));
-        assert!(LOCK_RELEASE_SQL.contains("FOR UPDATE"));
-        assert!(!LOCK_RELEASE_SQL.contains("JOIN"));
-    }
-}

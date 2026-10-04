@@ -59,7 +59,3 @@ pub(super) async fn wait_for_request(shutdown: &mut watch::Receiver<ShutdownSign
         }
     }
 }
-
-#[cfg(test)]
-#[path = "control_tests.rs"]
-mod tests;

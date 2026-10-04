@@ -1,0 +1,29 @@
+{
+  "name": "creation-cloud-web",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^24.11.0"
+  },
+  "scripts": {
+    "dev": "nuxt dev --host 127.0.0.1",
+    "build": "nuxt build",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "nuxt typecheck",
+    "test": "node --test tests/*.test.mjs",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "1.0.2",
+    "nuxt": "4.5.2",
+    "pinia": "4.0.3",
+    "vue": "3.5.43",
+    "vue-router": "5.3.1"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "prettier": "3.8.4",
+    "typescript": "~5.9.3",
+    "vue-tsc": "^3.1.0"
+  }
+}

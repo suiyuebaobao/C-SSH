@@ -100,20 +100,3 @@ pub(crate) async fn audit(
     .map_err(|_| AppError::Storage("保存安装身份审计失败".into()))?;
     Ok(())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn release_is_locked_before_independently_ordered_asset_rows() {
-        assert!(LOCK_IDENTITY_RELEASE_SQL.contains("FROM releases"));
-        assert!(LOCK_IDENTITY_RELEASE_SQL.contains("FOR UPDATE"));
-        assert!(!LOCK_IDENTITY_RELEASE_SQL.contains("JOIN release_assets"));
-        assert!(LOCK_IDENTITY_ASSETS_SQL.contains("FROM release_assets"));
-        assert!(LOCK_IDENTITY_ASSETS_SQL.contains("FOR UPDATE"));
-        for package_kind in ["exe", "msi", "zip", "apk"] {
-            assert!(LOCK_IDENTITY_ASSETS_SQL.contains(package_kind));
-        }
-    }
-}

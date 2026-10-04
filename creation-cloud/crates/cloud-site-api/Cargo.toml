@@ -1,0 +1,24 @@
+[package]
+name = "cloud-site-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+axum.workspace = true
+cloud-domain.workspace = true
+cloud-download.workspace = true
+cloud-site.workspace = true
+cloud-site-content.workspace = true
+cloud-seo.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+tower = { workspace = true, features = ["util"] }
+
+[lints]
+workspace = true

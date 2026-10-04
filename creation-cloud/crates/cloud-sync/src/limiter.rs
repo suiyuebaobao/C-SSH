@@ -128,32 +128,6 @@ impl SyncLimiter {
         Ok(bucket)
     }
 
-    #[cfg(test)]
-    pub(crate) fn acquire_at(
-        &self,
-        account_id: Uuid,
-        kind: AccessKind,
-        now: Instant,
-    ) -> AppResult<SyncPermit> {
-        self.acquire_at_inner(account_id, kind, now)
-    }
-
-    #[cfg(test)]
-    pub(crate) fn bucket_count(&self) -> usize {
-        self.inner
-            .buckets
-            .lock()
-            .expect("测试中的同步限流账号桶不应中毒")
-            .len()
-    }
-
-    #[cfg(test)]
-    pub(crate) fn uses_overflow_at(&self, account_id: Uuid, now: Instant) -> bool {
-        let bucket = self
-            .bucket_for(account_id, now)
-            .expect("测试中的同步限流账号桶应可取得");
-        Arc::ptr_eq(&bucket, &self.inner.overflow)
-    }
 }
 
 fn can_evict(bucket: &Arc<AccountBucket>, now: Instant) -> bool {
@@ -226,6 +200,3 @@ fn concurrent_limited() -> AppError {
         retry_after_seconds: 1,
     }
 }
-
-#[cfg(test)]
-pub(crate) const TEST_MAX_ACCOUNT_BUCKETS: usize = MAX_ACCOUNT_BUCKETS;

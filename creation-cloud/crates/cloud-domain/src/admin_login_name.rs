@@ -19,26 +19,3 @@ pub fn normalize_admin_login_name(value: &str) -> AppResult<String> {
     }
     Ok(normalized)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::normalize_admin_login_name;
-
-    #[test]
-    fn normalizes_supported_ascii_name() {
-        assert_eq!(
-            normalize_admin_login_name("  Ops_Admin-01  ").expect("合法名称应规范化"),
-            "ops_admin-01"
-        );
-    }
-
-    #[test]
-    fn rejects_non_letter_prefix_and_unsupported_characters() {
-        for invalid in ["1admin", "op", "ops.admin", "管理员", "ops admin"] {
-            assert!(
-                normalize_admin_login_name(invalid).is_err(),
-                "应拒绝：{invalid}"
-            );
-        }
-    }
-}

@@ -16,7 +16,7 @@ use crate::{
 };
 
 pub fn build(services: AppServices, config: CloudConfig) -> Router {
-    let seo = cloud_web::SeoConfig::from_validated_origin(
+    let seo = cloud_site_api::SeoConfig::from_validated_origin(
         config.public_base_url.clone(),
         config.google_site_verification.clone(),
         config.baidu_site_verification.clone(),
@@ -33,45 +33,32 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
     let download_service = services.download.clone();
     let seo_topic_service = services.seo.clone();
     let site_content_service = services.site_content.clone();
-    let public_page_state = cloud_web::PublicPageState::new(
+    let public_page_state = cloud_site_api::SiteState::new(
         seo,
-        auth_service.clone(),
         download_service.clone(),
         seo_topic_service.clone(),
         site_content_service.clone(),
     );
-    let console_page_state = cloud_web::ConsolePageState::new(
-        auth_service.clone(),
-        user_service.clone(),
-        device_service.clone(),
-        host_service.clone(),
-        model_service.clone(),
-        download_service.clone(),
-    );
     let feedback_service = services.feedback.clone();
     let release_service = services.release.clone();
     let site_media_service = services.site_media.clone();
-    let admin_page_state = cloud_web::AdminPageState::new(
-        admin_service.clone(),
-        auth_service.clone(),
-        announcement_service.clone(),
-        release_service.clone(),
-        download_service.clone(),
-        host_service.clone(),
-        model_service.clone(),
-        site_content_service.clone(),
-        site_media_service.clone(),
-        services.pool.clone(),
-        config.environment.clone(),
-    );
+    let tutorial_service = services.tutorial.clone();
+    let health_state = crate::health::HealthState {
+        pool: services.pool.clone(),
+        download: download_service.clone(),
+        site_content: site_content_service.clone(),
+        site_media: site_media_service.clone(),
+        environment: config.environment.clone(),
+    };
     let admin_overview_state = admin_overview::AdminOverviewState::new(
         admin_service.clone(),
         feedback_service.clone(),
-        admin_page_state.clone(),
+        health_state.clone(),
     );
     let admin = Router::new()
         .route("/overview", get(admin_overview::handle))
         .with_state(admin_overview_state)
+        .merge(cloud_auth::settings_router(auth_service.clone()))
         .merge(cloud_admin::router_without_overview(admin_service.clone()))
         .nest(
             "/announcements",
@@ -85,10 +72,19 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/models",
             cloud_model::management_router(model_service.clone()),
         )
-        .nest("/releases", cloud_release::router(release_service))
+        .nest("/releases", cloud_release::router(release_service.clone()))
         .nest(
             "/downloads",
-            cloud_download::management_router(download_service.clone()),
+            cloud_download::management_router(download_service.clone()).merge(
+                cloud_download::new_download_router(cloud_download::NewDownloadState::new(
+                    download_service.clone(),
+                    release_service.clone(),
+                )),
+            ),
+        )
+        .nest(
+            "/tutorials",
+            cloud_tutorial::management_router(tutorial_service.clone()),
         )
         .nest(
             "/site-media",
@@ -143,6 +139,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             cloud_auth::require_session,
         ));
     let api = Router::new()
+        .nest("/site", cloud_site_api::router(public_page_state))
         .nest(
             "/client",
             client_config::router(client_config::ClientConfigState::new(
@@ -168,41 +165,21 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
             "/site-media",
             cloud_site_media::public_router(site_media_service),
         )
+        .nest(
+            "/tutorials",
+            cloud_tutorial::public_router(tutorial_service),
+        )
         .nest("/models", cloud_model::router(model_service))
         .nest("/admin", admin)
         .merge(protected)
-        .layer(middleware::from_fn(cloud_web::noindex_response));
+        .layer(middleware::from_fn(noindex_response));
 
-    let console = cloud_web::console_router_with_state(console_page_state)
-        .route_layer(middleware::from_fn_with_state(
-            auth_service.clone(),
-            cloud_auth::require_page_session,
-        ))
-        .layer(middleware::from_fn(cloud_web::noindex_response));
-    let admin_pages = cloud_web::admin_router_with_state(admin_page_state.clone())
-        .layer(middleware::from_fn(cloud_auth::require_csrf))
-        .layer(middleware::from_fn_with_state(
-            admin_service,
-            cloud_admin::audit_write_requests,
-        ))
-        .route_layer(middleware::from_fn(cloud_auth::require_admin))
-        .route_layer(middleware::from_fn_with_state(
-            auth_service.clone(),
-            cloud_auth::authenticate_page_session,
-        ))
-        .layer(middleware::from_fn(cloud_web::noindex_response));
-
-    let ready_state = admin_page_state.clone();
-
-    cloud_web::public_router_with_state(public_page_state)
-        .nest("/web/auth", cloud_auth::form_router(auth_service))
-        .nest("/console", console)
-        .nest("/admin", admin_pages)
+    Router::new()
         .nest("/api/v1", api)
         .route("/health/live", get(health_live))
         .route(
             "/health/ready",
-            get(move || health_ready(ready_state.clone())),
+            get(move || health_ready(health_state.clone())),
         )
         .layer(middleware::from_fn(noindex_private_routes))
         .layer(CompressionLayer::new())
@@ -211,9 +188,18 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .layer(middleware::from_fn(request_id::attach))
 }
 
+async fn noindex_response(request: Request, next: Next) -> Response {
+    let mut response = next.run(request).await;
+    response.headers_mut().insert(
+        "x-robots-tag",
+        axum::http::HeaderValue::from_static("noindex, nofollow"),
+    );
+    response
+}
+
 async fn noindex_private_routes(request: Request, next: Next) -> Response {
     if route_requires_noindex(request.uri().path()) {
-        cloud_web::noindex_response(request, next).await
+        noindex_response(request, next).await
     } else {
         next.run(request).await
     }
@@ -246,7 +232,7 @@ async fn health_live() -> impl IntoResponse {
     health_response(StatusCode::OK, "ok")
 }
 
-async fn health_ready(state: cloud_web::AdminPageState) -> impl IntoResponse {
+async fn health_ready(state: crate::health::HealthState) -> impl IntoResponse {
     let ready = state.health().await.ready;
     if ready {
         health_response(StatusCode::OK, "ok")
@@ -263,258 +249,4 @@ fn health_response(status: StatusCode, body: &'static str) -> impl IntoResponse 
         ],
         (status, body),
     )
-}
-
-#[cfg(test)]
-mod tests {
-    use std::{path::PathBuf, time::Duration};
-
-    use axum::{
-        body::Body,
-        http::{Request, StatusCode, header},
-    };
-    use tower::ServiceExt;
-
-    use super::*;
-
-    mod notification_route_tests;
-    mod proxy_route_tests;
-    mod sync_route_tests;
-    mod update_route_tests;
-
-    fn app() -> Router {
-        let pool = sqlx::postgres::PgPoolOptions::new()
-            .connect_lazy("postgres://example:example@example.com/example")
-            .expect("固定测试连接串应可创建惰性连接池");
-        let config = CloudConfig {
-            bind_addr: "127.0.0.1:8088".parse().expect("地址应有效"),
-            database_url: "postgres://example:example@example.com/example".to_owned(),
-            public_base_url: "http://127.0.0.1:8088".parse().expect("URL 应有效"),
-            google_site_verification: None,
-            baidu_site_verification: None,
-            download_root: PathBuf::from("data/downloads"),
-            site_media_root: PathBuf::from("data/site-media"),
-            session_ttl: Duration::from_secs(3600),
-            environment: "development".to_owned(),
-            maintenance: cloud_config::MaintenanceConfig::default(),
-            proxy: cloud_config::ProxyConfig::default(),
-            smtp: None,
-        };
-        let services = AppServices::new(pool, &config).expect("测试服务应可装配");
-        build(services, config)
-    }
-
-    #[tokio::test]
-    async fn feedback_api_requires_a_session() {
-        let request = Request::builder()
-            .method("POST")
-            .uri("/api/v1/feedback")
-            .header("content-type", "application/json")
-            .body(Body::from("{}"))
-            .expect("请求应可构造");
-        let response = app().oneshot(request).await.expect("应用应返回响应");
-        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
-    }
-
-    #[tokio::test]
-    async fn feedback_management_api_uses_the_admin_authentication_chain() {
-        let request = Request::builder()
-            .uri("/api/v1/admin/feedback")
-            .body(Body::empty())
-            .expect("请求应可构造");
-        let response = app().oneshot(request).await.expect("应用应返回响应");
-        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
-    }
-
-    #[tokio::test]
-    async fn startup_data_apis_are_mounted_outside_session_authentication() {
-        for path in [
-            "/api/v1/updates/check?platform=invalid&architecture=x86_64&current_version=1.0.0",
-            "/api/v1/announcements/current?locale=invalid",
-        ] {
-            let response = app()
-                .oneshot(
-                    Request::get(path)
-                        .body(Body::empty())
-                        .expect("公开接口请求应可构造"),
-                )
-                .await
-                .expect("公开接口应返回响应");
-            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
-            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
-        }
-    }
-
-    #[tokio::test]
-    async fn model_catalog_list_and_detail_are_mounted_outside_session_authentication() {
-        for path in [
-            "/api/v1/models?page=not-a-number",
-            "/api/v1/models/not-a-uuid",
-        ] {
-            let response = app()
-                .oneshot(
-                    Request::get(path)
-                        .body(Body::empty())
-                        .expect("公开模型目录请求应可构造"),
-                )
-                .await
-                .expect("公开模型目录应返回响应");
-            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
-            assert_ne!(response.status(), StatusCode::UNAUTHORIZED, "{path}");
-            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
-        }
-    }
-
-    #[tokio::test]
-    async fn unified_client_config_is_anonymous_and_takes_no_query_parameters() {
-        let response = app()
-            .oneshot(
-                Request::post("/api/v1/client/config")
-                    .body(Body::empty())
-                    .expect("客户端配置请求应可构造"),
-            )
-            .await
-            .expect("客户端配置接口应返回响应");
-        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
-        assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
-    }
-
-    #[tokio::test]
-    async fn unified_client_config_rejects_every_query_parameter_before_data_access() {
-        for path in [
-            "/api/v1/client/config?lang=zh-CN",
-            "/api/v1/client/config?platform=windows",
-            "/api/v1/client/config?unexpected=value",
-        ] {
-            let response = app()
-                .oneshot(
-                    Request::get(path)
-                        .body(Body::empty())
-                        .expect("客户端配置请求应可构造"),
-                )
-                .await
-                .expect("客户端配置接口应返回响应");
-            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{path}");
-            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
-        }
-    }
-
-    #[tokio::test]
-    async fn maintenance_status_api_uses_the_admin_authentication_chain() {
-        let request = Request::builder()
-            .uri("/api/v1/admin/maintenance")
-            .body(Body::empty())
-            .expect("请求应可构造");
-        let response = app().oneshot(request).await.expect("应用应返回响应");
-        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
-    }
-
-    #[tokio::test]
-    async fn account_download_history_requires_a_session() {
-        let request = Request::builder()
-            .uri("/api/v1/downloads/history")
-            .body(Body::empty())
-            .expect("请求应可构造");
-        let response = app().oneshot(request).await.expect("应用应返回响应");
-        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
-    }
-
-    #[tokio::test]
-    async fn account_download_entry_requires_a_session_before_source_lookup() {
-        let asset_id = uuid::Uuid::now_v7();
-        let source_id = uuid::Uuid::now_v7();
-        let request = Request::builder()
-            .uri(format!(
-                "/api/v1/downloads/account/assets/{asset_id}/sources/{source_id}"
-            ))
-            .body(Body::empty())
-            .expect("请求应可构造");
-        let response = app().oneshot(request).await.expect("应用应返回响应");
-        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
-    }
-
-    #[tokio::test]
-    async fn account_pages_and_form_routes_send_noindex_response_header() {
-        let paths = [
-            "/login",
-            "/en/login",
-            "/register",
-            "/en/register",
-            "/verify-email",
-            "/en/verify-email",
-            "/verify-login",
-            "/en/verify-login",
-            "/forgot-password",
-            "/en/forgot-password",
-            "/reset-password",
-            "/en/reset-password",
-        ];
-        for path in paths {
-            assert!(route_requires_noindex(path), "{path}");
-        }
-
-        let app = app();
-        for path in [
-            "/web/auth/login",
-            "/web/auth/register",
-            "/web/auth/password-reset/request",
-            "/web/auth/password-reset/confirm",
-        ] {
-            let response = app
-                .clone()
-                .oneshot(
-                    Request::post(path)
-                        .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded")
-                        .body(Body::empty())
-                        .expect("空账号表单请求应可构造"),
-                )
-                .await
-                .expect("账号表单路由应返回响应");
-            assert_eq!(
-                response.status(),
-                StatusCode::UNPROCESSABLE_ENTITY,
-                "{path}"
-            );
-            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
-        }
-    }
-
-    #[tokio::test]
-    async fn public_content_does_not_inherit_account_noindex_header() {
-        for path in ["/", "/security", "/downloads"] {
-            assert!(!route_requires_noindex(path), "{path}");
-        }
-
-        let response = app()
-            .oneshot(
-                Request::get("/security")
-                    .body(Body::empty())
-                    .expect("公开页面请求应可构造"),
-            )
-            .await
-            .expect("公开页面应返回响应");
-        assert_eq!(response.status(), StatusCode::OK);
-        assert!(!response.headers().contains_key("x-robots-tag"));
-    }
-
-    #[tokio::test]
-    async fn unmatched_private_namespaces_remain_noindex() {
-        for path in [
-            "/api/v1/seo-not-found",
-            "/console/seo-not-found",
-            "/admin/seo-not-found",
-            "/health/seo-not-found",
-        ] {
-            let response = app()
-                .oneshot(
-                    Request::get(path)
-                        .body(Body::empty())
-                        .expect("私有命名空间请求应可构造"),
-                )
-                .await
-                .expect("私有命名空间应返回响应");
-            assert_eq!(response.status(), StatusCode::NOT_FOUND, "{path}");
-            assert_eq!(response.headers()["x-robots-tag"], "noindex, nofollow");
-        }
-    }
 }

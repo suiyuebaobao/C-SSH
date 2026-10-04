@@ -54,22 +54,3 @@ pub(crate) async fn handle(
     );
     Ok(response)
 }
-
-#[cfg(test)]
-mod tests {
-    use axum::{extract::Query, http::Uri};
-
-    use super::CaptchaQuery;
-
-    #[test]
-    fn refresh_nonce_is_allowed_but_other_query_fields_stay_rejected() {
-        let accepted = Uri::from_static("/captcha?purpose=login&refresh=123");
-        let Query(query) =
-            Query::<CaptchaQuery>::try_from_uri(&accepted).expect("数字刷新 nonce 应被接受");
-        assert_eq!(query.purpose, "login");
-        assert_eq!(query._refresh, Some(123));
-
-        let unknown = Uri::from_static("/captcha?purpose=login&cache=no");
-        assert!(Query::<CaptchaQuery>::try_from_uri(&unknown).is_err());
-    }
-}

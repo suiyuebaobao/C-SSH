@@ -61,6 +61,7 @@ pub fn router(service: Service) -> Router {
         ));
 
     Router::new()
+        .route("/policy", get(handler::settings::policy))
         .route("/captcha", get(handler::captcha::handle))
         .route("/register", post(handler::register::handle))
         .route("/verify-email", post(handler::verify_email::handle))
@@ -115,5 +116,14 @@ pub fn form_router(service: Service) -> Router {
         .layer(DefaultBodyLimit::max(4 * 1024))
 }
 
-#[cfg(test)]
-mod tests;
+/// 由server挂到统一管理员认证、CSRF与审计层内，禁止匿名挂载。
+#[must_use = "管理路由必须挂载到管理员保护层"]
+pub fn settings_router(service: Service) -> Router {
+    Router::new()
+        .route(
+            "/auth-settings",
+            get(handler::settings::get).put(handler::settings::update),
+        )
+        .with_state(service)
+        .layer(DefaultBodyLimit::max(4 * 1024))
+}

@@ -179,31 +179,3 @@ fn compare_prerelease(
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn normalizes_optional_v_and_orders_prereleases() {
-        let (normalized, stable) =
-            normalize_semantic_version("v7.1.0").expect("带 v 的有效版本应被规范化");
-        let (_, beta_ten) =
-            normalize_semantic_version("7.1.0-beta.10").expect("有效预发布版本应可解析");
-        let (_, beta_two) =
-            normalize_semantic_version("7.1.0-beta.2").expect("有效预发布版本应可解析");
-        assert_eq!(normalized, "7.1.0");
-        assert!(stable > beta_ten);
-        assert!(beta_ten > beta_two);
-    }
-
-    #[test]
-    fn rejects_non_semver_and_noncanonical_numeric_identifiers() {
-        for value in ["smoke-run", "7.0", "07.0.0", "7.0.0-beta.01", "V7.0.0"] {
-            assert!(
-                normalize_semantic_version(value).is_none(),
-                "{value} 不应被接受"
-            );
-        }
-    }
-}

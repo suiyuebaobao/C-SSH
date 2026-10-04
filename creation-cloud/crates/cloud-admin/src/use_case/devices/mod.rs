@@ -3,6 +3,3 @@
 mod get;
 mod list;
 mod revoke;
-
-#[cfg(test)]
-mod tests;

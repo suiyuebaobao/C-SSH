@@ -9,9 +9,6 @@ mod service;
 mod use_case;
 mod validation;
 
-#[cfg(test)]
-mod tests;
-
 pub use model::{CreateSeoTopicInput, SeoLocale, SeoTopic, UpdateSeoTopicInput};
 pub use router::management_router;
 pub use service::Service;

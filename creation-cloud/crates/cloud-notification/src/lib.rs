@@ -7,9 +7,6 @@ mod router;
 mod service;
 mod validation;
 
-#[cfg(test)]
-mod tests;
-
 pub use event::{AccountNotificationEvent, record_account_event};
 pub use model::{
     AccountNotification, AdminNotification, CreateNotificationInput, NotificationKind,

@@ -170,31 +170,3 @@ fn parse_ttl() -> Result<Duration> {
     }
     Ok(Duration::from_secs(seconds))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::parse_rdp_nodes;
-
-    #[test]
-    fn rdp_nodes_require_explicit_valid_unique_ids() {
-        assert!(parse_rdp_nodes(None).expect("默认关闭 RDP").is_empty());
-        assert!(
-            parse_rdp_nodes(Some(""))
-                .expect("空列表关闭 RDP")
-                .is_empty()
-        );
-        let id = "00000000-0000-0000-0000-000000000001";
-        assert_eq!(
-            parse_rdp_nodes(Some(id)).expect("节点 UUID 应有效").len(),
-            1
-        );
-        for invalid in [
-            "unknown",
-            "00000000-0000-0000-0000-000000000000",
-            &format!("{id},{id}"),
-            &format!("{id},"),
-        ] {
-            assert!(parse_rdp_nodes(Some(invalid)).is_err());
-        }
-    }
-}

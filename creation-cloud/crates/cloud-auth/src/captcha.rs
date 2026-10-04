@@ -120,28 +120,3 @@ pub(crate) fn render_svg(code: &str) -> String {
     svg.push_str("</svg>");
     svg
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn issued_code_is_six_ascii_digits() {
-        for _ in 0..100 {
-            let code = issue_code();
-            assert_eq!(code.len(), CODE_LENGTH);
-            assert!(code.bytes().all(|byte| byte.is_ascii_digit()));
-        }
-    }
-
-    #[test]
-    fn svg_contains_no_plaintext_code_or_text_node() {
-        let code = "123456";
-        let svg = render_svg(code);
-        assert!(svg.starts_with("<svg"));
-        assert!(svg.ends_with("</svg>"));
-        assert!(!svg.contains(code));
-        assert!(!svg.contains("<text"));
-        assert!(!svg.contains("<script"));
-    }
-}

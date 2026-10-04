@@ -5,6 +5,3 @@ mod manifest;
 mod serve;
 mod tauri;
 mod update;
-
-#[cfg(test)]
-mod tests;

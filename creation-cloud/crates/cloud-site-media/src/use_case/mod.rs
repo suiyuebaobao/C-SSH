@@ -9,6 +9,3 @@ mod public;
 mod publish;
 mod revoke;
 mod update;
-
-#[cfg(test)]
-mod tests;

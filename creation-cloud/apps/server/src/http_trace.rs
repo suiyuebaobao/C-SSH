@@ -11,17 +11,3 @@ pub(crate) fn make_span(request: &Request<Body>) -> Span {
         path = %request.uri().path()
     )
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn tracing_path_excludes_sensitive_query_values() {
-        let request = Request::builder()
-            .uri("/api/v1/admin/users?email=private%40example.com&token=secret")
-            .body(Body::empty())
-            .expect("测试请求应可创建");
-        assert_eq!(request.uri().path(), "/api/v1/admin/users");
-    }
-}

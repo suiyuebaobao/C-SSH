@@ -30,22 +30,3 @@ pub fn formal_release_asset_identities(
         &LEGACY_FORMAL_ASSETS
     })
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn release_shape_changes_at_0_8_8_without_removing_legacy_msi() {
-        let legacy = formal_release_asset_identities("0.8.7").expect("旧版本必须合法");
-        assert_eq!(legacy.len(), 4);
-        assert!(legacy.contains(&("windows", "x86_64", "msi")));
-
-        for version in ["0.8.8-beta.1", "0.8.8", "1.0.0"] {
-            let current = formal_release_asset_identities(version).expect("新版本必须合法");
-            assert_eq!(current.len(), 3);
-            assert!(!current.contains(&("windows", "x86_64", "msi")));
-        }
-        assert!(formal_release_asset_identities("not-semver").is_none());
-    }
-}

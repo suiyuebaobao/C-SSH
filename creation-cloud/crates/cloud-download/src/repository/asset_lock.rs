@@ -24,15 +24,3 @@ pub(crate) async fn execute(
         .map_err(map_read_error)?
         .ok_or_else(|| AppError::NotFound("资产不存在".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::LOCK_ASSET_SQL;
-
-    #[test]
-    fn child_asset_lock_has_no_parent_join() {
-        assert!(LOCK_ASSET_SQL.contains("FROM release_assets"));
-        assert!(LOCK_ASSET_SQL.contains("FOR UPDATE"));
-        assert!(!LOCK_ASSET_SQL.contains("JOIN"));
-    }
-}

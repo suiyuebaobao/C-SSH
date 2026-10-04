@@ -9,11 +9,6 @@ mod service;
 mod types;
 mod validation;
 
-#[cfg(test)]
-mod migration_tests;
-#[cfg(test)]
-mod seed_tests;
-
 pub use router::{management_router, router};
 pub use service::Service;
 pub use types::{

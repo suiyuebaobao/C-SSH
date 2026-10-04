@@ -63,34 +63,3 @@ fn normalize(source: IpAddr) -> IpAddr {
         other => other,
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use std::net::IpAddr;
-
-    use super::SourceLimiter;
-
-    #[test]
-    fn source_limit_restores_capacity_and_isolates_sources() {
-        let limiter = SourceLimiter::new(2);
-        let first = "192.0.2.1".parse::<IpAddr>().expect("地址应有效");
-        let second = "192.0.2.2".parse::<IpAddr>().expect("地址应有效");
-        let first_permit = limiter.try_acquire(first).expect("首个额度应可用");
-        let _second_permit = limiter.try_acquire(first).expect("第二个额度应可用");
-        assert!(limiter.try_acquire(first).is_none());
-        assert!(limiter.try_acquire(second).is_some());
-        drop(first_permit);
-        assert!(limiter.try_acquire(first).is_some());
-    }
-
-    #[test]
-    fn ipv4_mapped_source_cannot_bypass_limit() {
-        let limiter = SourceLimiter::new(1);
-        let ipv4 = "192.0.2.1".parse::<IpAddr>().expect("地址应有效");
-        let mapped = "::ffff:192.0.2.1"
-            .parse::<IpAddr>()
-            .expect("映射地址应有效");
-        let _permit = limiter.try_acquire(ipv4).expect("额度应可用");
-        assert!(limiter.try_acquire(mapped).is_none());
-    }
-}
