@@ -11,6 +11,7 @@ chrono.workspace = true
 cloud-domain.workspace = true
 cloud-store.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 sqlx.workspace = true
 uuid.workspace = true
 

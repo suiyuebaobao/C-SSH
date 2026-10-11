@@ -24,6 +24,7 @@ pub(crate) fn assemble(rows: Vec<PublicCatalogRow>) -> AppResult<Vec<PublicRelea
             releases.push(PublicRelease {
                 id: row.release_id,
                 version: row.version.clone(),
+                revision: row.revision,
                 channel: row.channel.clone(),
                 title_zh: row.title_zh.clone(),
                 title_en: row.title_en.clone(),
@@ -58,5 +59,14 @@ pub(crate) fn assemble(rows: Vec<PublicCatalogRow>) -> AppResult<Vec<PublicRelea
         };
         asset.sources.push(row.source()?);
     }
+    // 同版本以修订倒序；旧修订仍保留在清单，不因发布日期碰巧相同而选错包。
+    releases.sort_by(|left, right| {
+        let version = |value: &str| cloud_domain::normalize_semantic_version(value).map(|(_, v)| v);
+        version(&right.version)
+            .cmp(&version(&left.version))
+            .then_with(|| right.revision.cmp(&left.revision))
+            .then_with(|| right.published_at.cmp(&left.published_at))
+            .then_with(|| right.id.cmp(&left.id))
+    });
     Ok(releases)
 }

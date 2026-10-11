@@ -7,7 +7,8 @@ use uuid::Uuid;
 use crate::{Release, model::ReleaseRow, repository::map_read_error};
 
 pub(crate) const LOCK_RELEASE_SQL: &str = r#"
-    SELECT id, version, channel, status, title_zh, title_en,
+    SELECT id, version, revision,
+        GREATEST(revision, COALESCE((SELECT counter.last_revision FROM release_revision_counters AS counter WHERE counter.version = releases.version), 1)) AS latest_revision, channel, status, title_zh, title_en,
            notes_zh, notes_en, published_at, created_at, updated_at
     FROM releases
     WHERE id = $1

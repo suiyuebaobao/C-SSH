@@ -31,6 +31,7 @@ pub struct PublishedReleaseView {
     pub manual_platforms: Vec<ManualPlatform>,
     pub manual_notice: Option<ManualNotice>,
     pub version: String,
+    pub revision: i32,
     pub channel: String,
     pub title: String,
     pub notes_blocks: Vec<NotesBlock>,
@@ -70,9 +71,15 @@ impl PublishedReleaseView {
         let has_macos = has_platform(&platforms, "macos");
         let has_ios = has_platform(&platforms, "ios");
         Self {
-            manual_platforms: manual_downloads::platforms(&release.version, locale, &platforms),
+            manual_platforms: manual_downloads::platforms(
+                &release.version,
+                release.revision,
+                locale,
+                &platforms,
+            ),
             manual_notice: manual_downloads::notice(&release.version, locale),
             version: release.version,
+            revision: release.revision,
             channel: release.channel,
             title,
             notes_blocks: release_notes::parse(&notes),

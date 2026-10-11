@@ -21,6 +21,10 @@ pub fn router(service: Service) -> Router {
                 .delete(release::delete::handle),
         )
         .route(
+            "/{release_id}/revisions",
+            axum::routing::post(release::revision::handle),
+        )
+        .route(
             "/{release_id}/assets",
             get(asset::list::handle).post(asset::create::handle),
         )

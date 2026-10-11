@@ -49,7 +49,7 @@ impl Service {
             .iter()
             .any(|version| version == &query.current_text);
         let identity_status = if required && policy.sha256_enabled {
-            let expected = repository::policy::installed_sha256(
+            let expected = repository::policy::installed_sha256s(
                 &self.pool,
                 &query.current_text,
                 &query.platform,
@@ -57,12 +57,7 @@ impl Service {
                 &query.package_kind,
             )
             .await?;
-            evaluate_identity(
-                true,
-                true,
-                query.current_install_sha256.as_deref(),
-                expected.as_deref(),
-            )?
+            evaluate_revision_identities(query.current_install_sha256.as_deref(), &expected)?
         } else {
             UpdateIdentityStatus::NotApplicable
         };
@@ -241,6 +236,22 @@ fn no_update(
         sha256_enabled,
         identity_status: UpdateIdentityStatus::NotApplicable,
     }
+}
+
+// 同版本每个公开修订都属于合法安装；不按查询首行覆盖旧包的身份。
+fn evaluate_revision_identities(
+    current: Option<&str>,
+    expected: &[String],
+) -> AppResult<UpdateIdentityStatus> {
+    if expected.is_empty() || expected.iter().any(|value| !is_lower_sha256(value)) {
+        return Err(AppError::Storage("强制版本修订安装身份证据不完整".into()));
+    }
+    let normalized = current.map(|value| value.trim().to_ascii_lowercase());
+    let selected = expected
+        .iter()
+        .find(|value| Some(value.as_str()) == normalized.as_deref())
+        .or_else(|| expected.first());
+    evaluate_identity(true, true, current, selected.map(String::as_str))
 }
 
 fn evaluate_identity(

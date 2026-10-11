@@ -53,6 +53,7 @@ impl PublishedUpdatePolicy {
 pub struct UpdatePolicyTargetRelease {
     pub id: Uuid,
     pub version: String,
+    pub revision: i32,
     pub published_at: DateTime<Utc>,
     pub eligible: bool,
     pub readiness: String,
@@ -114,6 +115,7 @@ pub(crate) struct PublishedUpdatePolicyRow {
 pub(crate) struct PolicyTargetRow {
     pub id: Uuid,
     pub version: String,
+    pub revision: i32,
     pub published_at: DateTime<Utc>,
     pub asset_count: i64,
     pub formal_asset_count: i64,
@@ -138,6 +140,7 @@ pub(crate) struct PolicyAssetRow {
 #[derive(Clone, Debug, FromRow)]
 pub(crate) struct ForcedIdentityRow {
     pub version: String,
+    pub revision: i32,
     pub platform: String,
     pub architecture: String,
     pub package_kind: String,

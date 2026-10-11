@@ -564,6 +564,7 @@ dependencies = [
  "cloud-domain",
  "cloud-store",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tower",

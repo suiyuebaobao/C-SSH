@@ -155,6 +155,7 @@ export type NotesBlock =
   | { kind: "bullets"; content: string[] };
 export interface Release {
   version: string;
+  revision: number;
   channel: string;
   title: string;
   notes_blocks: NotesBlock[];

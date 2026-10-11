@@ -11,8 +11,8 @@ mod use_case;
 mod validation;
 
 pub use model::{
-    CreateAssetInput, CreateReleaseInput, Release, ReleaseAsset, ReleaseChannel, ReleaseStatus,
-    UpdateAssetInput, UpdateReleaseInput,
+    CreateAssetInput, CreateReleaseInput, CreateRevisionInput, Release, ReleaseAsset,
+    ReleaseChannel, ReleaseStatus, UpdateAssetInput, UpdateReleaseInput,
 };
 pub use router::router;
 pub use service::Service;

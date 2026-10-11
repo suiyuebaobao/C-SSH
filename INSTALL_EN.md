@@ -1,12 +1,14 @@
-# C-SSH 0.9.6 installation and data preservation
+# C-SSH 0.9.6 Revision 2 installation and data preservation
 
 [Downloads](README_EN.md#downloads) · [中文](INSTALL.md)
 
 This release uses notices and manual downloads only. No upgrade prompt or forced update is sent.
 
+Announcements and manual downloads only: no upgrade reminder or forced update. The product version remains 0.9.6; revision 2 uses the new tag `v0.9.6-r2`. Ten assets cover four platforms; iOS is not uploaded. All earlier releases and original 0.9.6 assets remain intact. Android/iOS build number is 9006000; wire and signing identities are unchanged.
+
 ## Before installation
 
-Use the official website or suiyuebaobao/C-SSH v0.9.6 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
+Use the official website or suiyuebaobao/C-SSH v0.9.6-r2 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
 
 ## Windows x64 / ARM64
 
@@ -23,12 +25,12 @@ Open C-SSH_0.9.6_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Ap
 
 ## Android arm64
 
-Install C-SSH_0.9.6_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The 0.9.0 signer is retained, so 0.9.0, 0.9.1, 0.9.2 and 0.9.3 can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
+Install C-SSH_0.9.6_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The existing release signer is retained; this round directly tested original 0.9.6 same-version/same-code replacement. Compatible earlier builds with the same signer can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
 
 ## Linux x86_64 / ARM64
 
 - Choose an amd64 or arm64 deb for your CPU and install through the Debian/Ubuntu package manager.
-- Make the AppImage executable before launching; Ordinary mounted launch usually requires FUSE; this round verified the extracted AppImage entry point, not FUSE mounting. The aarch64 AppImage is the ARM64 build.
+- Make the AppImage executable before launching; Mounted launch needs FUSE; this round exercised direct FUSE AppImage cold startup on both Ubuntu VM architectures. The aarch64 AppImage is the ARM64 build.
 - Validated on Ubuntu 24.04.5 with X11 and a desktop Secret Service such as GNOME Keyring. Other distributions and Wayland remain unvalidated.
 - Keep the existing data directory and system keyring during upgrades. Do not substitute copying encrypted databases from another device for migration. Linux uses manual downloads in this release.
 
@@ -41,12 +43,12 @@ Enter an IPv4 address or domain directly, with a separate port. See [self-hosted
 
 ## Data and verification
 
-Mac is arm64-only, ad-hoc signed and unnotarized; Windows installers have no Authenticode signature. Android keeps the release signer; this round directly verified upgrades from 0.9.4. Do not uninstall or clear data to work around a signer difference. This schema22 build cannot open higher-schema test data; retain that test build and its separate data.
+This revision uses SQLite 26. Exit, preserve complete data and keep existing OS Keychain/keystore entries before replacing the program in place. Do not manually move, delete or export raw keys, clear data, or uninstall to work around startup/signing issues. Normal 22→26 and the validated known 25 data were exercised. Other 23–25 data is accepted only for strictly known shapes with trust preserved. Once data adopts 26, do not open it with original 0.9.6 schema 22 binaries. A rollback requires the matching older program and a complete pre-upgrade backup.
 
-Cloud receives only permitted, explicitly synced client-encrypted ciphertext. AI conversations, raw records, Skills and long-term memory stay local; selected context is sent to the chosen model provider. This public repository contains documentation, binaries and a whitelisted Cloud production-source mirror. Client, shared-core, AI and Agent sources are not public.
-
-- Ten artifacts total 583,386,396 bytes and are bound to the current build and package receipts. Existing Mac/Windows real-VM SSH/SFTP, monitor switching, navigation and deletion regressions are reused without repeating unchanged passing checks.
-- Windows x64/ARM64 packages passed per-architecture package, install, 0.9.4→0.9.6 upgrade, uninstall and data-preservation checks in a Windows 11 ARM VM. x64 updater epoch3 signatures were cryptographically verified; these are not Authenticode signatures.
-- Mac passed ordinary arm64 Release, ad-hoc strict-signature and DMG checks; it remains unnotarized. Android retained the release signer and passed actual Manifest/DEX 0.9.6/9006000, 16KiB alignment, and same-signer upgrade with settings and 21 protected tables preserved in an API36 arm64 emulator.
-- Linux deb/AppImage packages passed per-architecture embedding and isolated startup, log entry and preference preservation on Ubuntu24.04 X11. AppImage used its extracted entry point; FUSE mounting and all remote workflows were not retested.
-- iPhone received a Simulator build/identity check only and is not uploaded. Physical devices, minimum-OS execution, other distributions/Wayland, weak networks and untested remote workflows are not implied.
+- Ten artifacts total 583,805,859 bytes. Sizes and SHA256 come from current artifact and transfer receipts. Unchanged Mac r26/Windows r11 SSH/SFTP, monitor switching, navigation and UI-R57 deletion evidence is reused within its original scope.
+- Mac arm64 reuses the first candidate’s actual 25→26 migration evidence with unchanged Store inputs. Final revision 2 starts under the ordinary identity on data already migrated to schema 26 and passes the existing Cloud page, window controls and close. A real-model text follow-up retained prior information; stopping occurred before provider context with tool=0, so incomplete tool rounds were not tested against a real model. Mac remains ad-hoc signed and unnotarized.
+- Windows 11 ARM VM: native ARM64 and emulated x64. Release binaries passed 22→26 preservation, workbench and same-conversation stop/follow-up with an HTTP fixture. A new ordinary-user installer-only lane passed original 0.9.6 same-version replacement, actual EXE identities, data and registration preservation. All four updater epoch3 signatures were verified; no Authenticode. New-identity Session0 close/exit_app natural shutdown failures remain recorded; ARM64 raw separately passed Session1 close/destroyed. This is not a full formal-runtime pass.
+- The signed arm64 APK passed same-signer/same build number 9006000 replacement, 22→26 preservation of 51 Required tables and preferences/wrapping data, plus fresh workbench/system appearance on a real Android SDK Emulator. AI entry only; no physical phone or general CleanShutdown validation.
+- Both Linux architectures passed 22→26 preservation of 57 tables and 12 old rows, followed by direct FUSE AppImage cold startup after deb installation and real business views in Ubuntu VMs. Native Linux AI follow-up was not tested without independent model credentials.
+- Incomplete tool rounds, unique complete results and exact coverage watermarks passed 3 shared integration tests / 4 real local HTTP scenarios; Windows native validation used a controlled HTTP fixture. This does not imply real-model or remote-tool validation on every platform.
+- iPhone Simulator version/entry, fresh workbench/system and the two notification categories were exercised; no public upload. Physical devices, minimum-OS execution, other distributions/Wayland, weak networks and untested remote workflows are not implied.

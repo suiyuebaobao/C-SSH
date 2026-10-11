@@ -8,7 +8,7 @@ use crate::{model::PublicCatalogRow, repository::map_read_error};
 pub(crate) async fn execute(pool: &PgPool) -> AppResult<Vec<PublicCatalogRow>> {
     sqlx::query_as::<_, PublicCatalogRow>(
         r#"
-        SELECT releases.id AS release_id, releases.version, releases.channel,
+        SELECT releases.id AS release_id, releases.version, releases.revision, releases.channel,
                releases.title_zh, releases.title_en, releases.notes_zh,
                releases.notes_en, releases.published_at,
                assets.id AS asset_id, assets.platform, assets.architecture,

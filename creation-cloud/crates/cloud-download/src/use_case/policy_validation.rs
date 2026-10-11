@@ -152,45 +152,53 @@ pub(super) fn validate_forced_identities(
     forced_versions: &[String],
     rows: &[ForcedIdentityRow],
 ) -> AppResult<()> {
-    let expected_count = forced_versions.iter().try_fold(0_usize, |count, version| {
-        let identities = formal_release_asset_identities(version)
-            .ok_or_else(|| AppError::Conflict("强制版本不是有效语义版本".into()))?;
-        count
-            .checked_add(identities.len())
-            .ok_or_else(|| AppError::Conflict("强制版本安装身份数量溢出".into()))
-    })?;
-    if rows.len() != expected_count {
-        return Err(AppError::Conflict(
-            "开启 SHA-256 的强制版本必须具备对应版本的全部安装身份".into(),
-        ));
+    let revisions = rows
+        .iter()
+        .map(|row| (row.version.as_str(), row.revision))
+        .collect::<HashSet<_>>();
+    if forced_versions
+        .iter()
+        .any(|version| !revisions.iter().any(|(value, _)| value == version))
+        || revisions.iter().any(|(version, revision)| {
+            *revision < 1 || !forced_versions.iter().any(|value| value == version)
+        })
+    {
+        return Err(AppError::Conflict("强制版本缺少公开修订安装身份".into()));
     }
-    for version in forced_versions {
+    for (version, revision) in revisions {
         let expected = formal_release_asset_identities(version)
             .ok_or_else(|| AppError::Conflict("强制版本不是有效语义版本".into()))?;
-        for expected in expected.iter().copied() {
-            let mut matching = rows.iter().filter(|row| {
-                row.version == *version
-                    && (
-                        row.platform.as_str(),
-                        row.architecture.as_str(),
-                        row.package_kind.as_str(),
-                    ) == expected
+        let revision_rows = rows
+            .iter()
+            .filter(|row| row.version == version && row.revision == revision)
+            .collect::<Vec<_>>();
+        if revision_rows.len() != expected.len() {
+            return Err(AppError::Conflict(
+                "强制版本修订的安装身份数量不完整".into(),
+            ));
+        }
+        for identity in expected.iter().copied() {
+            let mut matching = revision_rows.iter().filter(|row| {
+                (
+                    row.platform.as_str(),
+                    row.architecture.as_str(),
+                    row.package_kind.as_str(),
+                ) == identity
             });
-            let Some(row) = matching.next() else {
-                return Err(AppError::Conflict(
-                    "开启 SHA-256 的强制版本缺少安装身份".into(),
-                ));
-            };
+            let row = matching
+                .next()
+                .ok_or_else(|| AppError::Conflict("强制版本修订缺少安装身份".into()))?;
             if matching.next().is_some() {
-                return Err(AppError::Conflict("强制版本安装身份不唯一".into()));
+                return Err(AppError::Conflict("强制版本修订安装身份不唯一".into()));
             }
-            let installed = row.installed_sha256.as_deref().ok_or_else(|| {
-                AppError::Conflict("开启 SHA-256 的强制版本安装身份尚未回填".into())
-            })?;
+            let installed = row
+                .installed_sha256
+                .as_deref()
+                .ok_or_else(|| AppError::Conflict("强制版本修订安装身份尚未回填".into()))?;
             if !is_sha256(installed) || !is_sha256(&row.asset_sha256) {
                 return Err(AppError::Conflict("强制版本安装身份摘要无效".into()));
             }
-            if expected == ("android", "aarch64", "apk") && installed != row.asset_sha256 {
+            if identity == ("android", "aarch64", "apk") && installed != row.asset_sha256 {
                 return Err(AppError::Conflict(
                     "Android APK 安装身份必须等于最终资产摘要".into(),
                 ));

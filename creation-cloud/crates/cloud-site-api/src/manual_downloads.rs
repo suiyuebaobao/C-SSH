@@ -55,6 +55,7 @@ pub fn notice(version: &str, locale: Locale) -> Option<ManualNotice> {
 
 pub fn platforms(
     version: &str,
+    revision: i32,
     locale: Locale,
     published: &[PublishedPlatformView],
 ) -> Vec<ManualPlatform> {
@@ -71,6 +72,7 @@ pub fn platforms(
             name: "macOS".into(),
             assets: vec![asset(
                 version,
+                revision,
                 "DMG",
                 "Apple Silicon · macOS 13+",
                 "macOS-arm64.dmg",
@@ -90,7 +92,7 @@ pub fn platforms(
         {
             result.push(ManualPlatform {
                 name: "Windows ARM64".into(),
-                assets: vec![asset(version, "NSIS", "Windows 11 ARM64", "arm64-setup.exe"), asset(version, "Portable ZIP", "Windows 11 ARM64", "portable-Windows-arm64.zip")],
+                assets: vec![asset(version, revision, "NSIS", "Windows 11 ARM64", "arm64-setup.exe"), asset(version, revision, "Portable ZIP", "Windows 11 ARM64", "portable-Windows-arm64.zip")],
                 note: if en { "Native ARM64 client. Install and update manually; choose the x64 downloads above for x64 Windows." }
                 else { "原生 ARM64 客户端，手动安装与更新；x64 Windows 请使用 x64 下载。" }.into(),
             });
@@ -98,7 +100,7 @@ pub fn platforms(
         if !published.iter().any(|p| p.name == "Linux") {
             result.push(ManualPlatform {
                 name: "Linux".into(),
-                assets: vec![asset(version, "deb", "x86_64 / amd64", "amd64.deb"), asset(version, "AppImage", "x86_64 / amd64", "amd64.AppImage"), asset(version, "deb", "ARM64 / aarch64", "arm64.deb"), asset(version, "AppImage", "ARM64 / aarch64", "aarch64.AppImage")],
+                assets: vec![asset(version, revision, "deb", "x86_64 / amd64", "amd64.deb"), asset(version, revision, "AppImage", "x86_64 / amd64", "amd64.AppImage"), asset(version, revision, "deb", "ARM64 / aarch64", "arm64.deb"), asset(version, revision, "AppImage", "ARM64 / aarch64", "aarch64.AppImage")],
                 note: if en { "Verified on Ubuntu 24.04 with X11. Requires an unlocked desktop Secret Service keyring; AppImage also needs FUSE support. Other distributions and Wayland are not covered by this verification." }
                 else { "已在 Ubuntu 24.04／X11 验证。需要已解锁的桌面 Secret Service 密钥环，AppImage 还需 FUSE 支持；本轮未覆盖其他发行版和 Wayland。" }.into(),
             });
@@ -107,12 +109,23 @@ pub fn platforms(
     result
 }
 
-fn asset(version: &str, package: &str, architecture: &str, suffix: &str) -> PublishedAssetView {
+fn asset(
+    version: &str,
+    revision: i32,
+    package: &str,
+    architecture: &str,
+    suffix: &str,
+) -> PublishedAssetView {
+    let tag = if revision == 1 {
+        format!("v{version}")
+    } else {
+        format!("v{version}-r{revision}")
+    };
     PublishedAssetView {
         architecture: architecture.into(),
         package_kind: package.into(),
         download_href: Some(format!(
-            "https://github.com/suiyuebaobao/C-SSH/releases/download/v{version}/C-SSH_{version}_{suffix}"
+            "https://github.com/suiyuebaobao/C-SSH/releases/download/{tag}/C-SSH_{version}_{suffix}"
         )),
     }
 }

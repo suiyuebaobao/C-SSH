@@ -5,3 +5,5 @@ mod delete;
 mod get;
 mod list;
 mod update;
+
+pub(crate) mod revision;

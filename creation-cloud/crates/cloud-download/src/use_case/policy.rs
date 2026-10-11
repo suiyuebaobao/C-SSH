@@ -38,6 +38,7 @@ impl Service {
                 .map(|row| {
                     let eligible = policy_target_is_eligible(&row);
                     UpdatePolicyTargetRelease {
+                        revision: row.revision,
                         id: row.id,
                         version: row.version,
                         published_at: row.published_at,

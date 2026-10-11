@@ -113,7 +113,7 @@ async function apply() {
             :value="item.id"
             :disabled="!item.eligible"
           >
-            {{ item.version
+            {{ `${item.version} · ${t("修订", "Revision")} ${item.revision}`
             }}{{ item.eligible ? "" : t("（未就绪）", " (not ready)") }}
           </option>
         </select></label

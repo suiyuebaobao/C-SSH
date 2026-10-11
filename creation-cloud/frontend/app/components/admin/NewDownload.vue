@@ -111,7 +111,7 @@ async function upload() {
             }}
           </option>
           <option v-for="item in releases" :key="item.id" :value="item.id">
-            {{ item.version }}
+            {{ item.version }} · {{ t("修订", "Revision") }} {{ item.revision }}
           </option>
         </select></label
       ><label

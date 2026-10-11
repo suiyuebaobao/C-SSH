@@ -61,7 +61,7 @@ pub(crate) async fn current(pool: &PgPool) -> AppResult<Option<PublishedUpdatePo
 
 pub(crate) async fn targets(pool: &PgPool) -> AppResult<Vec<PolicyTargetRow>> {
     sqlx::query_as(
-        "SELECT release.id, release.version, release.published_at, \
+        "SELECT release.id, release.version, release.revision, release.published_at, \
                 COUNT(DISTINCT asset.id) AS asset_count, \
                 COUNT(DISTINCT asset.id) FILTER (WHERE \
                     (asset.platform = 'windows' AND asset.architecture = 'x86_64' \
@@ -169,7 +169,7 @@ pub(crate) async fn forced_identities(
     versions: &[String],
 ) -> AppResult<Vec<ForcedIdentityRow>> {
     sqlx::query_as(
-        "SELECT release.version, asset.platform, asset.architecture, asset.package_kind, \
+        "SELECT release.version, release.revision, asset.platform, asset.architecture, asset.package_kind, \
                 asset.sha256 AS asset_sha256, asset.installed_sha256 \
          FROM releases AS release \
          JOIN release_assets AS asset ON asset.release_id = release.id \
@@ -188,14 +188,14 @@ pub(crate) async fn forced_identities(
     .map_err(write_error)
 }
 
-pub(crate) async fn installed_sha256(
+pub(crate) async fn installed_sha256s(
     pool: &PgPool,
     version: &str,
     platform: &str,
     architecture: &str,
     package_kind: &str,
-) -> AppResult<Option<String>> {
-    sqlx::query_scalar::<_, Option<String>>(
+) -> AppResult<Vec<String>> {
+    let rows = sqlx::query_scalar::<_, Option<String>>(
         "SELECT asset.installed_sha256 \
          FROM releases AS release \
          JOIN release_assets AS asset ON asset.release_id = release.id \
@@ -207,10 +207,15 @@ pub(crate) async fn installed_sha256(
     .bind(platform)
     .bind(architecture)
     .bind(package_kind)
-    .fetch_optional(pool)
+    .fetch_all(pool)
     .await
-    .map_err(read_error)?
-    .ok_or_else(|| AppError::Storage("强制版本缺少当前安装形态身份".into()))
+    .map_err(read_error)?;
+    if rows.is_empty() {
+        return Err(AppError::Storage("强制版本缺少当前安装形态身份".into()));
+    }
+    rows.into_iter()
+        .map(|value| value.ok_or_else(|| AppError::Storage("强制版本修订安装身份尚未回填".into())))
+        .collect()
 }
 
 pub(crate) async fn publish(

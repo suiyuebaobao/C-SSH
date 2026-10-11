@@ -4,6 +4,7 @@ const api = useCloudApi();
 interface Release {
   id: string;
   version: string;
+  revision: number;
   assets: {
     id: string;
     file_name: string;
@@ -32,7 +33,7 @@ const columns = computed(() => [
   <h1>{{ t("下载与记录", "Downloads & history") }}</h1>
   <p v-if="error" role="alert" class="form-error">{{ error }}</p>
   <section v-for="release in releases" :key="release.id" class="card">
-    <h2>v{{ release.version }}</h2>
+    <h2>v{{ release.version }}<template v-if="release.revision > 1"> · {{ t("修订", "Revision") }} {{ release.revision }}</template></h2>
     <article
       v-for="asset in release.assets"
       :key="asset.id"

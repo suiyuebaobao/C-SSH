@@ -85,6 +85,8 @@ impl TryFrom<&str> for ReleaseStatus {
 pub struct Release {
     pub id: Uuid,
     pub version: String,
+    pub revision: i32,
+    pub latest_revision: i32,
     pub channel: ReleaseChannel,
     pub status: ReleaseStatus,
     pub title_zh: String,
@@ -100,6 +102,8 @@ pub struct Release {
 pub(crate) struct ReleaseRow {
     pub id: Uuid,
     pub version: String,
+    pub revision: i32,
+    pub latest_revision: i32,
     pub channel: String,
     pub status: String,
     pub title_zh: String,
@@ -118,6 +122,8 @@ impl TryFrom<ReleaseRow> for Release {
         Ok(Self {
             id: row.id,
             version: row.version,
+            revision: row.revision,
+            latest_revision: row.latest_revision,
             channel: ReleaseChannel::try_from(row.channel.as_str())?,
             status: ReleaseStatus::try_from(row.status.as_str())?,
             title_zh: row.title_zh,
@@ -148,4 +154,12 @@ pub struct UpdateReleaseInput {
     pub notes_zh: Option<String>,
     pub notes_en: Option<String>,
     pub status: Option<ReleaseStatus>,
+}
+
+/// 新修订必须确认所见源记录与当前分配序号，重复请求不再次创建。
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateRevisionInput {
+    pub expected_updated_at: DateTime<Utc>,
+    pub expected_latest_revision: i32,
 }

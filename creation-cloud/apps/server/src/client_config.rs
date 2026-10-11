@@ -124,7 +124,10 @@ fn latest_stable_release(
         .filter_map(|release| {
             normalize_semantic_version(&release.version).map(|(_, version)| (version, release))
         })
-        .max_by(|(left, _), (right, _)| left.cmp(right))
+        .max_by(|(left, left_release), (right, right_release)| {
+            left.cmp(right)
+                .then_with(|| left_release.revision.cmp(&right_release.revision))
+        })
         .map(|(_, release)| release)
 }
 

@@ -149,6 +149,7 @@ export const releases: ResourceConfig = {
   endpoint: "/api/v1/admin/releases",
   columns: [
     { key: "version", label: ["版本", "Version"] },
+    { key: "revision", label: ["修订", "Revision"] },
     { key: "channel", label: ["渠道", "Channel"] },
     { key: "status", label: ["状态", "Status"] },
     { key: "published_at", label: ["发布时间", "Published"] },

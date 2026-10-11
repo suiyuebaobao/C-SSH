@@ -6,4 +6,7 @@ mod release;
 pub(crate) use asset::AssetRow;
 pub use asset::{CreateAssetInput, ReleaseAsset, UpdateAssetInput};
 pub(crate) use release::ReleaseRow;
-pub use release::{CreateReleaseInput, Release, ReleaseChannel, ReleaseStatus, UpdateReleaseInput};
+pub use release::{
+    CreateReleaseInput, CreateRevisionInput, Release, ReleaseChannel, ReleaseStatus,
+    UpdateReleaseInput,
+};

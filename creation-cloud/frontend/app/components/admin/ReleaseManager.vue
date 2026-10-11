@@ -49,6 +49,15 @@ const tabs = computed(() => [
       />
       <WorkspaceConfirmAction
         v-if="row.status === 'published'"
+        :label="t('新建修订', 'Create revision')"
+        :message="t('为此版本新建修订草稿？原发布与旧文件保持不变，新文件需重新上传并通过校验。', 'Create a new revision draft? The original release and files remain unchanged. Upload and validate the new files separately.')"
+        :endpoint="`/api/v1/admin/releases/${row.id}/revisions`"
+        method="POST"
+        :body="{ expected_updated_at: row.updated_at, expected_latest_revision: row.latest_revision }"
+        @done="reload"
+      />
+      <WorkspaceConfirmAction
+        v-if="row.status === 'published'"
         :label="t('隐藏版本', 'Hide release')"
         :message="
           t(

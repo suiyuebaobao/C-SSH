@@ -12,6 +12,7 @@ use crate::SourceKind;
 pub struct PublicRelease {
     pub id: Uuid,
     pub version: String,
+    pub revision: i32,
     pub channel: String,
     pub title_zh: String,
     pub title_en: String,
@@ -47,6 +48,7 @@ pub struct PublicSource {
 pub(crate) struct PublicCatalogRow {
     pub release_id: Uuid,
     pub version: String,
+    pub revision: i32,
     pub channel: String,
     pub title_zh: String,
     pub title_en: String,

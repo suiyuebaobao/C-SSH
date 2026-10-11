@@ -18,6 +18,8 @@ The repository's `creation-cloud/` directory is a filtered production-source mir
 
 ## Release distribution
 
+Revision 2 uses a separate `v0.9.6-r2` tag with the same 0.9.6 product version and canonical filenames. Preserve original 0.9.6 records/assets; use the new hashes and matching signatures for the new record. Do not replace the older record in place. Client data usesSQLite 26 and must not be opened by original schema 22 binaries.
+
 **0.9.6 requires manual installation. No automatic update to this release is offered.** Do not force this upgrade on clients with the previous signing identity.
 
 For later compatible upgrades, download original official artifacts, preserve their bytes/signatures, upload them through your Cloud administration interface and configure release policy. Clients check and download from the currently selected Cloud rather than a separate official endpoint.
@@ -29,7 +31,7 @@ For later compatible upgrades, download original official artifacts, preserve th
 
 Operators own certificate, backup, mail, availability and permission management. Clients still control end-to-end decryption; a server upgrade does not perform a user's decryption or migration.
 
-The official 0.9.6 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
+The official 0.9.6 revision 2 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
 
 The current Cloud updater asset contract covers Windows x64 and Android. Windows ARM64, Mac and Linux use manual download links in this release; ARM64 is never mapped to x64.
 
@@ -38,6 +40,6 @@ The current Cloud updater asset contract covers Windows x64 and Android. Windows
 
 The mirror separates a Rust/Axum API from a Nuxt4/Vue3 frontend. Rust owns authentication, permissions, transactions, audit, PostgreSQL and controlled file distribution; Nuxt owns pages, public-content SSR and browser interaction. A same-origin reverse proxy routes `/api/*` to Rust and pages to Nuxt. Nuxt receives no database, SMTP or client decryption secrets; Pinia keeps interaction/session state in memory. The historical Askama page layer is excluded from the current production mirror.
 
-Only the production Cargo dependency closure, migrations, frontend package/lock/build configuration/app/server source and referenced sanitized public resources are included. Deployment configuration, environment files, tests, runtime data and secrets are excluded. Operators supply HTTPS, PostgreSQL, mail and persistent storage; this is not a ready-to-run deployment bundle. Client SQLite22 and Cloud PostgreSQL migrations are independent version systems.
+Only the production Cargo dependency closure, migrations, frontend package/lock/build configuration/app/server source and referenced sanitized public resources are included. Deployment configuration, environment files, tests, runtime data and secrets are excluded. Operators supply HTTPS, PostgreSQL, mail and persistent storage; this is not a ready-to-run deployment bundle. Client SQLite 26 and Cloud PostgreSQL migrations are independent version systems.
 
 Automatic operations Skills, AI conversations and memory remain on the client. Upgrading Cloud neither automatically upgrades clients nor proves that a user has completed data migration.

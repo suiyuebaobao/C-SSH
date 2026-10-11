@@ -6,3 +6,5 @@ pub(crate) mod get;
 pub(crate) mod list;
 pub(crate) mod lock;
 pub(crate) mod update;
+
+pub(crate) mod revision;

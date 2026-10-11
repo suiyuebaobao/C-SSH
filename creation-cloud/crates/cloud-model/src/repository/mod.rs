@@ -5,9 +5,6 @@ mod seed;
 
 pub(crate) use catalog::{create, delete, get_admin, get_public, list_admin, list_public, replace};
 pub(crate) use seed::seed_system_catalog;
-;
-;
-
 use cloud_domain::AppError;
 
 fn storage(context: &'static str) -> impl FnOnce(sqlx::Error) -> AppError {

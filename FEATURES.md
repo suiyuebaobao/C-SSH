@@ -1,4 +1,4 @@
-# C-SSH 0.9.6 功能详解
+# C-SSH 0.9.6 修訂2功能詳解
 
 [返回首页](README.md) · [安装说明](INSTALL.md) · [图集](screenshots/README.md)
 
@@ -33,6 +33,18 @@ Windows、Mac、Linux及Android均可离线保存内置Setup ZIP，Android另可
 ### 本地优先
 
 不登录Cloud也能使用本地运维；可选账号用于设备和用户主动发起的端到端加密同步。 云不转发SSH数据。
+
+## 修訂2
+
+- 未明確選擇介面的資料與新安裝預設使用工作台，外觀跟隨系統；已保存的介面與外觀選擇繼續保留。
+- 提供獨立修訂2下載記錄，保留原0.9.6與所有歷史下載。
+- 修正Mac啟動初始化中止；已驗證的舊schema25資料可前滾到26，既有Cloud會話頁正常載入。
+- 修正Mac右上角最大化／還原、最小化與關閉按鈕。
+- 通知中心只顯示公告與版本訊息，移除帳號安全類的可見入口及相關未讀提示。
+- AI同會話中斷後續問保留已記錄的原文、助手說明及有完整唯一結果的工具紀錄；缺失结果不補造，未完整涵蓋的紀錄不提前標為已覆蓋。
+- SQLite前滾到26；已知23–25遺留資料只在嚴格形狀與信任無損檢查成立時接續，不恢復插件執行。
+
+本修訂使用SQLite26。請退出程式、保全完整資料並保留現有系統鑰匙圈／密鑰庫條目，再於原位置替換程式；不要手動搬移、刪除或匯出原始密鑰，也不要清庫或以卸載處理啟動／簽名問題。正常22→26及已驗證的已知25資料接續已實測；其它23–25只接受嚴格已知形狀與信任無損的前滾。資料一旦採用26，不要用舊schema22的原0.9.6包打開新庫；回退必須使用相配的舊程式與升級前完整備份。
 
 ## 0.9.6
 
@@ -118,8 +130,10 @@ Mac仅M系列，未公证且没有自动更新；iOS本次不发布。诊断和�
 
 ## Verified
 
-- 十项正式包合计583,386,396字节；实际制品与本轮来源及平台收据绑定。已有Mac／Windows真实本地VM的SSH／SFTP、监控加载切换、离页返回与删除定向回归复用，没有重跑同输入PASS。
-- Windows x64／ARM64四包完成各架构包级、安装、0.9.4→0.9.6升级、卸载与资料保持，环境为Windows11 ARM VM；x64 updater epoch3真签名／验签通过，不是Authenticode。
-- Mac普通arm64 Release与DMG通过ad-hoc严格签章和包级检查，未公证。Android沿用原release signer，实际Manifest／DEX为0.9.6／9006000，16KiB对齐、API36 arm64模拟器同签名升级及设置／21张受保护表保持通过。
-- Linux两架构deb／AppImage通过包级、内嵌、各自Ubuntu24.04 X11隔离启动、日志入口与偏好保持；AppImage采用提取入口，未新增FUSE挂载或全远端业务回归。
-- iPhone只完成Simulator构建与身份检查，不上传。物理设备、最低系统实际运行、其它发行版／Wayland、弱网与未测远端流程不由本轮结果推定。
+- 十項制品共583,805,859位元組，大小與SHA256直接採用本輪制品及傳輸收據。未改的Mac r26／Windows r11 SSH、SFTP、監控切換、離頁返回與UI-R57刪除實鏈按原範圍復用。
+- Mac arm64：同Store首候選的實際25→26遷移證據復用；最終r2在已採用26的資料上以普通身份啟動，既有Cloud頁、窗口按鈕與關閉通過。真模型純文字續問保留前文；停止發生在provider context之前且tool=0，未驗真模型的不完整工具輪。Mac為ad-hoc且未公證。
+- Windows11 ARM VM：ARM64原生、x64仿真；release原生程序的22→26資料保持、工作台及同會話停止／續問HTTP fixture通過。新普通使用者的installer-only、原公開0.9.6同版本覆蓋、實際EXE身份、data及登記保持通過；四包epoch3真簽名／驗簽通過，沒有Authenticode。新身份Session0的close／exit_app自然收尾門禁失敗保留；ARM64 raw另於Session1的close／destroyed通過，不稱全套formal通過。
+- Android arm64正式APK在真正Android SDK Emulator完成同簽名／同9006000覆蓋、22→26、51張Required表與偏好／包裹資料保持，以及fresh工作台／system外觀。AI只驗入口；未驗真手機或一般CleanShutdown。
+- Linux兩架構Ubuntu VM：22→26保留57表及12條舊資料；deb後直接FUSE AppImage冷啟與實際業務畫面通過。無獨立模型憑據，未做Linux原生AI續問。
+- 不完整工具輪、唯一完整結果與精確覆蓋水位：共享3项集成測試／4個實際本地HTTP場景通過；Windows原生使用受控HTTP fixture。這些不是全平台真模型／遠端工具結果。
+- iPhone Simulator實測版本／入口、fresh工作台／system及通知兩類，不公開上传。真機、最低系統實際運行、其它發行版／Wayland、弱網及未測遠端流程均未外推。

@@ -37,7 +37,7 @@ const visible = computed(() =>
           >
             {{ platform.name }}
           </option></select
-        ><span>v{{ latest.version }} · {{ latest.channel }}</span>
+        ><span>v{{ latest.version }}<template v-if="latest.revision > 1"> · {{ en ? "Revision" : "修订" }} {{ latest.revision }}</template> · {{ latest.channel }}</span>
       </div>
       <div class="download-grid">
         <section

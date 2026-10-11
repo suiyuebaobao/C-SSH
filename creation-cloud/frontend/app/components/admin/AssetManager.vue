@@ -136,7 +136,7 @@ defineExpose({ reload: () => table.value?.load() });
   >
   <section v-if="selected" class="card">
     <h2>{{ selected.file_name }}</h2>
-    <p>{{ release?.version }} · {{ release?.status }}</p>
+    <p>{{ release?.version }} · {{ t("修订", "Revision") }} {{ release?.revision }} · {{ release?.status }}</p>
     <details>
       <summary>{{ t("文件校验", "File integrity") }}</summary>
       <pre>

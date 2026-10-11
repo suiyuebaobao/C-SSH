@@ -8,11 +8,11 @@ defineProps<{ document: SiteDocument }>();
     <div v-if="document.catalog?.releases.length" class="timeline">
       <article
         v-for="release in document.catalog.releases"
-        :key="release.version"
+        :key="`${release.version}:${release.revision}`"
         class="release-entry"
       >
         <header>
-          <span class="release-version">v{{ release.version }}</span
+          <span class="release-version">v{{ release.version }}<template v-if="release.revision > 1"> · {{ document.view.shell.locale === "en" ? "Revision" : "修订" }} {{ release.revision }}</template></span
           ><time :datetime="release.published_at_iso">{{
             release.published_at_label
           }}</time>

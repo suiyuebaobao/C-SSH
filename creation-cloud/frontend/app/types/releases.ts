@@ -1,6 +1,9 @@
 export interface AdminRelease {
+  latest_revision: number;
+  updated_at: string;
   id: string;
   version: string;
+  revision: number;
   status: string;
   channel: string;
 }
@@ -19,6 +22,7 @@ export interface PolicySnapshot {
   target_releases: {
     id: string;
     version: string;
+  revision: number;
     eligible: boolean;
     readiness: string;
   }[];
