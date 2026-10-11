@@ -19,7 +19,10 @@ pub struct ManualNotice {
 }
 
 pub fn notice(version: &str, locale: Locale) -> Option<ManualNotice> {
-    if !matches!(version, "0.9.0" | "0.9.1" | "0.9.2" | "0.9.3" | "0.9.4") {
+    if !matches!(
+        version,
+        "0.9.0" | "0.9.1" | "0.9.2" | "0.9.3" | "0.9.4" | "0.9.6"
+    ) {
         return None;
     }
     let en = locale == Locale::En;
@@ -55,7 +58,10 @@ pub fn platforms(
     locale: Locale,
     published: &[PublishedPlatformView],
 ) -> Vec<ManualPlatform> {
-    if !matches!(version, "0.9.0" | "0.9.1" | "0.9.2" | "0.9.3" | "0.9.4") {
+    if !matches!(
+        version,
+        "0.9.0" | "0.9.1" | "0.9.2" | "0.9.3" | "0.9.4" | "0.9.6"
+    ) {
         return Vec::new();
     }
     let en = locale == Locale::En;
@@ -77,7 +83,7 @@ pub fn platforms(
             .into(),
         });
     }
-    if matches!(version, "0.9.2" | "0.9.3" | "0.9.4") {
+    if matches!(version, "0.9.2" | "0.9.3" | "0.9.4" | "0.9.6") {
         if !published
             .iter()
             .any(|p| p.name == "Windows" && p.assets.iter().any(|a| a.architecture == "arm64"))

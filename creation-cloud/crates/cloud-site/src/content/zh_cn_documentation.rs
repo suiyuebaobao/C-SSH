@@ -11,10 +11,10 @@ pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
         "C-SSH 使用文档｜连接与运维实操指南",
-        "C-SSH 0.9.4使用文档：CSV导入、可跳过引导、Agent部署、持久终端、监控、文件与自动Skills。",
+        "C-SSH 0.9.6使用文档：经典／工作台、主机短卡、Agent部署、持久终端、监控、文件、AI与日志。",
         "DOCS / TASK GUIDES",
         "从第一台主机开始使用 C-SSH",
-        "按C-SSH 0.9.4的目录完成一个任务；可以先预览CSV导入、跳过轻量引导，再按需使用终端、监控与AI。",
+        "按C-SSH 0.9.6的目录完成一个任务；可以先预览CSV导入、跳过轻量引导，再按需使用终端、监控与AI。",
     )
     .with_actions(vec![
         action("添加第一台主机", "#add-host", "button button-primary"),
@@ -92,9 +92,9 @@ fn sections() -> Vec<DocumentationSection> {
             "打开已安装的客户端后，先确定连接模式、主机身份与数据边界。",
             vec![
                 text(
-                    "0.9.4",
-                    "CSV、引导、Skills与诊断",
-                    "CSV导入先预览再确认，轻量引导可以跳过；AI可自动学习和匹配Skills。诊断日志每行一笔记录，Windows、Mac与Linux霜白主题按钮更清晰。",
+                    "0.9.6",
+                    "双界面、短卡片与切换修正",
+                    "经典界面与新工作台并存，三桌面提供三档同款短卡和更清晰的AI聊天；修复只读载入中切换主机、删除目标后隐藏页跳转，日志显示安全设置的实际新值。",
                     false,
                 ),
                 text(

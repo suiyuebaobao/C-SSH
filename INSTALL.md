@@ -1,12 +1,12 @@
-# C-SSH 0.9.4 安装与数据保全
+# C-SSH 0.9.6 安装与数据保全
 
 [下载](README.md#下载) · [English](INSTALL_EN.md)
 
-0.9.4只发公告，不弹升级提醒、不强制更新；请自行下载并安装。
+0.9.6只发公告，不弹升级提醒、不强制更新；请自行下载并安装。
 
 ## 安装前
 
-- 从官网或suiyuebaobao/C-SSH的v0.9.4取得安装包，按首页SHA256核对。
+- 从官网或suiyuebaobao/C-SSH的v0.9.6取得安装包，按首页SHA256核对。
 - 退出C-SSH，保全重要数据。Cloud仅手动同步加密配置，不包含AI对话与长期记忆；保留数据保护密码。
 
 ## Windows x64／ARM64
@@ -18,13 +18,13 @@
 
 ## M系列Mac
 
-- 打开C-SSH_0.9.4_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
+- 打开C-SSH_0.9.6_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
 - 仅Apple Silicon，最低系统目标macOS13；ad-hoc签名、未经公证。首次打开的系统许可参见[Apple官方说明](https://support.apple.com/zh-cn/102445)，不要把系统密码发到反馈中。
 - 当前没有Mac自动更新，后续单独开发。
 
 ## Android arm64
 
-- 用系统安装器安装C-SSH_0.9.4_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
+- 用系统安装器安装C-SSH_0.9.6_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
 - 沿用0.9.0正式签名，可覆盖0.9.0／0.9.1／0.9.2／0.9.3保留数据，无需卸载。
 - 更早旧签名不能直接覆盖；卸载会清除本地数据，尤其AI对话和记忆不在Cloud同步范围。未确认数据保全前不要卸载或清库。
 
@@ -41,13 +41,15 @@
 
 地址直接填IPv4或域名，客户端自动判断，端口单独填写；自建云见[接入说明](SELF_HOSTING.md)。iOS本次无公开下载。
 
-## 新版资料与首次使用
 
-0.9.4客户端资料采用SQLite22，从21通过原迁移流程升级。已有资料不强制首次引导；新资料的引导可以跳过并从设置重开。批量导入先生成待接入项，通过认证后才建立正式主机。自动Skills及操作日志不会替代数据备份；AI对话、原始记录、Skills和长期记忆不上传Cloud。
+## 本轮数据与验证
 
-- 本次十项正式包的文件名、大小及SHA256与平台收据逐一绑定，合计580,358,528字节。Windows双架构为当前Release与包级门禁，Portable仅有`C-SSH/C-SSH.exe`；本轮未重复安装生命周期或普通用户资料启动。
-- Mac为普通arm64 Release与DMG，ad-hoc签名检查通过，未公证；复用同源Mac业务验证，不启动用户普通资料。Android正式APK验证0.9.4／9004000、原signer、16KB对齐、fresh SDK Emulator冷启动及正常操作日志行。
-- Linux双架构deb／AppImage完成包级和隔离最小启动；AppImage使用提取入口。没有新增FUSE挂载、升级、其它发行版或物理机器验证。
-- 导入、引导和自动Skills复用10-02／10-03专项原生证据：Mac arm64；Windows ARM64及ARM VM中的x64；Linux ARM64，x64仅其原生差异；Android SDK Emulator及iPhone Simulator。SSH／Windows管理与真实provider学习／冷启复用按各自范围成立，不宣称每个架构都重跑完整矩阵。
-- 逐行操作日志的Mac同源实际业务证据及Android正常行已完成；其它平台采用当前共享实现、前端／包级与对应最小启动证据，不宣称全平台所有业务日志都已复测。
-- 不宣称Android或iPhone真机、全部输入法、全部Linux发行版／Wayland、所有断网恢复或本轮未实测功能完成验收。
+Mac仅arm64、ad-hoc且未公证；Windows安装器无Authenticode。Android沿用原正式签名；本轮直接验证0.9.4覆盖升级。不要卸载或清库来尝试解决签名差异。当前schema22不能打开更高schema的测试版资料，需保留原测试版和独立数据。
+
+Cloud只接收允许手动同步的客户端不透明密文；AI对话、原始记录、Skills和长期记忆不上传Cloud。所选模型上下文会发给对应服务商。本公开仓只提供说明、安装包及白名单Cloud生产源码，客户端、共享核心、AI与Agent源码不公开。
+
+- 十项正式包合计583,386,396字节；实际制品与本轮来源及平台收据绑定。已有Mac／Windows真实本地VM的SSH／SFTP、监控加载切换、离页返回与删除定向回归复用，没有重跑同输入PASS。
+- Windows x64／ARM64四包完成各架构包级、安装、0.9.4→0.9.6升级、卸载与资料保持，环境为Windows11 ARM VM；x64 updater epoch3真签名／验签通过，不是Authenticode。
+- Mac普通arm64 Release与DMG通过ad-hoc严格签章和包级检查，未公证。Android沿用原release signer，实际Manifest／DEX为0.9.6／9006000，16KiB对齐、API36 arm64模拟器同签名升级及设置／21张受保护表保持通过。
+- Linux两架构deb／AppImage通过包级、内嵌、各自Ubuntu24.04 X11隔离启动、日志入口与偏好保持；AppImage采用提取入口，未新增FUSE挂载或全远端业务回归。
+- iPhone只完成Simulator构建与身份检查，不上传。物理设备、最低系统实际运行、其它发行版／Wayland、弱网与未测远端流程不由本轮结果推定。

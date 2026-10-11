@@ -44,7 +44,7 @@ pub(super) fn downloads() -> PageContent {
         "Download the latest C-SSH SSH terminal and server operations client for Windows x64/ARM64, Apple Silicon Mac, Android and Linux. Linux offers deb and AppImage packages for x86_64 and ARM64.",
         "DOWNLOADS / DIRECT",
         "Download C-SSH",
-        "0.9.4 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
+        "0.9.6 is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. Read the data-preservation instructions first.",
     )
     .with_sections(vec![section(
         "builds",
@@ -93,7 +93,7 @@ pub(super) fn faq() -> PageContent {
         "A concise guide to connections, the agent, cloud sync, and downloads.",
     )
     .with_faqs(vec![
-        FaqItem::new("What is new in 0.9.4?", "Preview and import CSV hosts, skip the lightweight guide, let AI learn and match Skills, and read diagnostic records one per line. Frost White buttons are more readable on Windows, Mac and Linux."),
+        FaqItem::new("What is new in 0.9.6?", "Classic and workbench interfaces coexist, with three compact desktop card sizes and clearer AI chat. Host switching during reads and hidden-page navigation after deletion are corrected; logs show safe setting values."),
         FaqItem::new("Does Creation Cloud proxy SSH connections?", "No. The SSH data plane stays direct from the client to your server; the cloud only provides account, device, and optional sync controls."),
         FaqItem::new("Can I use it without the agent?", "A standard SSH terminal and port forwarding currently use native SSH. Jump hosts share that architectural exception but remain deferred. Persistent sessions, monitoring, and structured management use the agent."),
         FaqItem::new("Are host addresses and private keys synced?", "Host names, addresses, ports, tags, status, connection settings, and credentials sync only as client-encrypted ciphertext. AI keys, APIs, and model bindings use the same client-side protection boundary. known_hosts, terminal content, and command history never upload."),

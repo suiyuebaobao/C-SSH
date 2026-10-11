@@ -1,4 +1,4 @@
-# C-SSH 0.9.4 installation and data preservation
+# C-SSH 0.9.6 installation and data preservation
 
 [Downloads](README_EN.md#downloads) · [中文](INSTALL.md)
 
@@ -6,7 +6,7 @@ This release uses notices and manual downloads only. No upgrade prompt or forced
 
 ## Before installation
 
-Use the official website or suiyuebaobao/C-SSH v0.9.4 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
+Use the official website or suiyuebaobao/C-SSH v0.9.6 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
 
 ## Windows x64 / ARM64
 
@@ -19,11 +19,11 @@ Choose the package for your CPU; native ARM64 was validated on Windows 11 ARM64.
 
 ## Apple Silicon Mac
 
-Open C-SSH_0.9.4_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. Mac automatic updates are deferred.
+Open C-SSH_0.9.6_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. Mac automatic updates are deferred.
 
 ## Android arm64
 
-Install C-SSH_0.9.4_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The 0.9.0 signer is retained, so 0.9.0, 0.9.1, 0.9.2 and 0.9.3 can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
+Install C-SSH_0.9.6_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The 0.9.0 signer is retained, so 0.9.0, 0.9.1, 0.9.2 and 0.9.3 can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
 
 ## Linux x86_64 / ARM64
 
@@ -38,13 +38,15 @@ The DVC host form in every released client exports embedded Setup ZIP; Android a
 
 Enter an IPv4 address or domain directly, with a separate port. See [self-hosted Cloud](SELF_HOSTING_EN.md). No public iOS download is supplied.
 
-## Data and first use
 
-0.9.4 uses client SQLite schema 22 and the existing migration path from 21. Existing data does not force onboarding; a new-profile guide can be skipped and reopened in Settings. Bulk import creates pending connections before authentication creates a host. Automatic Skills and operation logs do not replace backups. AI conversations, raw records, Skills and long-term memory are not uploaded to Cloud.
+## Data and verification
 
-- All ten formal artifacts have names, byte counts and SHA256 values bound to their platform receipts, totaling 580,358,528 bytes. Windows has current Release and package gates on both architectures; Portable contains only `C-SSH/C-SSH.exe`. Installation lifecycle and ordinary user-profile startup were not repeated in this packaging round.
-- Mac is the ordinary arm64 Release/DMG with checked ad-hoc signing and no notarization. Same-source Mac business evidence is reused without opening the user's normal profile. Android checks cover 0.9.4/9004000, the original signer, 16KB alignment, a fresh SDK Emulator cold start and a normal operation-log row.
-- Both Linux architectures passed deb/AppImage package checks and isolated minimal startup; AppImage used its extracted entry point. This round adds no FUSE-mount, upgrade, other-distribution or physical-machine claim.
-- Import, onboarding and automatic Skills reuse the October 2–3 native evidence: Mac arm64; Windows ARM64 and x64 within an ARM VM; Linux ARM64, with x64 native differences checked separately; Android SDK Emulator and iPhone Simulator. SSH/Windows management and real-provider learning/cold-restart reuse retain their individual scopes. A complete matrix was not rerun on every architecture.
-- Operation-log evidence includes same-source Mac business operations and a normal Android row. Other platforms have the current shared implementation, frontend/package checks and their minimal-startup evidence; this does not claim every business-log path was rerun on every platform.
-- No claim covers physical Android/iPhone devices, every input method, every Linux distribution/Wayland, every recovery scenario or untested features in this round.
+Mac is arm64-only, ad-hoc signed and unnotarized; Windows installers have no Authenticode signature. Android keeps the release signer; this round directly verified upgrades from 0.9.4. Do not uninstall or clear data to work around a signer difference. This schema22 build cannot open higher-schema test data; retain that test build and its separate data.
+
+Cloud receives only permitted, explicitly synced client-encrypted ciphertext. AI conversations, raw records, Skills and long-term memory stay local; selected context is sent to the chosen model provider. This public repository contains documentation, binaries and a whitelisted Cloud production-source mirror. Client, shared-core, AI and Agent sources are not public.
+
+- Ten artifacts total 583,386,396 bytes and are bound to the current build and package receipts. Existing Mac/Windows real-VM SSH/SFTP, monitor switching, navigation and deletion regressions are reused without repeating unchanged passing checks.
+- Windows x64/ARM64 packages passed per-architecture package, install, 0.9.4→0.9.6 upgrade, uninstall and data-preservation checks in a Windows 11 ARM VM. x64 updater epoch3 signatures were cryptographically verified; these are not Authenticode signatures.
+- Mac passed ordinary arm64 Release, ad-hoc strict-signature and DMG checks; it remains unnotarized. Android retained the release signer and passed actual Manifest/DEX 0.9.6/9006000, 16KiB alignment, and same-signer upgrade with settings and 21 protected tables preserved in an API36 arm64 emulator.
+- Linux deb/AppImage packages passed per-architecture embedding and isolated startup, log entry and preference preservation on Ubuntu24.04 X11. AppImage used its extracted entry point; FUSE mounting and all remote workflows were not retested.
+- iPhone received a Simulator build/identity check only and is not uploaded. Physical devices, minimum-OS execution, other distributions/Wayland, weak networks and untested remote workflows are not implied.

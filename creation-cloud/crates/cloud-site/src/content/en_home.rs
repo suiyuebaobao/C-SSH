@@ -13,7 +13,7 @@ pub(super) fn page_content() -> PageContent {
     let home_page = HomePageContent {
         status_strip_label: "OFFICIAL PRODUCT SURFACE / INDUSTRIAL SYSTEM".into(),
         status_note:
-            "0.9.4 · Manual installation · No upgrade reminders or forced updates"
+            "0.9.6 · Manual installation · No upgrade reminders or forced updates"
                 .into(),
         hero_blueprint_label: "BRAND GEOMETRY / UNIT 01".into(),
         platform_label: "I/O MATRIX / PLATFORM".into(),
@@ -53,15 +53,15 @@ pub(super) fn page_content() -> PageContent {
 
     page(
         PageId::Home,
-        "C-SSH 0.9.4 | Windows · Mac · Android · Linux",
-        "C-SSH 0.9.4 for Windows x64/ARM64, Apple Silicon Mac, Android and Linux: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
-        "C-SSH 0.9.4 / MANUAL DOWNLOAD",
-        "C-SSH 0.9.4: one workspace for server operations",
+        "C-SSH 0.9.6 | Windows · Mac · Android · Linux",
+        "C-SSH 0.9.6 for Windows x64/ARM64, Apple Silicon Mac, Android and Linux: SSH, RDP, persistent terminals, monitoring, files, scoped AI and optional self-hosted Cloud. Announcement only; manual installation without upgrade reminders or forced updates.",
+        "C-SSH 0.9.6 / MANUAL DOWNLOAD",
+        "C-SSH 0.9.6: one workspace for server operations",
         "Windows x64/ARM64, Apple Silicon Mac, Android and Linux bring hosts, persistent terminals, remote desktops, monitoring, files and AI together. This release is communicated by announcement only. Download and install it manually; no upgrade reminders or forced updates are sent. iOS is not published in this release.",
     )
     .with_actions(vec![
         action(
-            "Download 0.9.4 manually",
+            "Download 0.9.6 manually",
             "/downloads",
             "button button-primary",
         ),
@@ -120,7 +120,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                     "NODE 01",
                     "Four clients",
                     "Windows x64/ARM64, Apple Silicon Mac arm64, Android arm64 and both Linux architectures share core capabilities with desktop and phone layouts.",
-                    "0.9.4 · Manual installation",
+                    "0.9.6 · Manual installation",
                 ),
                 item(
                     "LINK 02",
@@ -169,7 +169,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "MIXED",
                     "Hosts and projects",
-                    "Create, edit, search, favorite and group hosts. Preview and import CSV hosts; use IPv4 or domains, separate ports, passwords or keys, and direct or proxy routes.",
+                    "Classic and workbench interfaces coexist, with three saved desktop card sizes. Create, edit, search and group hosts, preview CSV imports, and use direct or proxy routes.",
                     "Hosts / Projects",
                 ),
                 item(
@@ -217,7 +217,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "PURE SSH",
                     "Grants and diagnostics",
-                    "Desktop access-grant management. Diagnostics stay off by default and use one record per line when enabled. Frost White button readability is corrected on Windows, Mac and Linux.",
+                    "Desktop access-grant management. Logs stay off by default, show safe setting values, and reduce routine noise. Host switching during reads and hidden-page navigation after deletion are corrected.",
                     "Platform entry points follow the actual UI",
                 ),
             ],
@@ -231,7 +231,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "STEP 01",
                     "Download manually",
-                    "0.9.4 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
+                    "0.9.6 is communicated by announcement only. Download the matching package manually from the website or official GitHub release.",
                     "Check version and SHA256",
                 ),
                 item(
@@ -270,7 +270,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
             "platforms",
             HomeLayout::Platforms,
             "Windows, Mac, Android and Linux; iOS is not published",
-            "0.9.4 ships for Windows x64/ARM64, Apple Silicon Mac, Android and Linux and requires manual installation. Linux offers x86_64 and ARM64 packages; iOS is not published.",
+            "0.9.6 ships for Windows x64/ARM64, Apple Silicon Mac, Android and Linux and requires manual installation. Linux offers x86_64 and ARM64 packages; iOS is not published.",
             platform_items(platforms),
         ),
         section(
@@ -332,7 +332,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
                 item(
                     "RELEASE",
                     "Manual download and update source",
-                    "0.9.4 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
+                    "0.9.6 must be downloaded manually. With a self-hosted Cloud, later checks use that source; its administrator uploads official downloads and original signatures.",
                     "Announcement only · No upgrade reminders or forced updates",
                 ),
             ],
@@ -343,7 +343,7 @@ fn sections(platforms: &[HomePlatform]) -> Vec<HomeSection> {
 fn faqs() -> Vec<HomeFaqItem> {
     vec![
         HomeFaqItem::new(
-            "Can older versions automatically update to 0.9.4?",
+            "Can older versions automatically update to 0.9.6?",
             "This release is communicated by announcement only, without upgrade reminders or forced updates. Download and install it manually, and read the installation and data-preservation guide first. The Mac automatic updater is deferred.",
         ),
         HomeFaqItem::new(

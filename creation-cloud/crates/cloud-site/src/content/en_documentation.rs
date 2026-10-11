@@ -11,10 +11,10 @@ pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
         "C-SSH Docs | Connect and Operate",
-        "C-SSH 0.9.4 documentation for CSV import, a skippable guide, agent deployment, persistent terminals, monitoring, files and automatic Skills.",
+        "C-SSH 0.9.6 documentation for classic/workbench interfaces, compact host cards, agent deployment, persistent terminals, monitoring, files, AI and logs.",
         "DOCS / TASK GUIDES",
         "Start with your first C-SSH host",
-        "Follow the C-SSH 0.9.4 task index: preview CSV imports, skip the lightweight guide if preferred, and use terminals, monitoring and AI when needed.",
+        "Follow the C-SSH 0.9.6 task index: preview CSV imports, skip the lightweight guide if preferred, and use terminals, monitoring and AI when needed.",
     )
     .with_actions(vec![
         action("Add your first host", "#add-host", "button button-primary"),
@@ -96,9 +96,9 @@ fn sections() -> Vec<DocumentationSection> {
             "Open the installed client and confirm the connection mode, host identity, and data boundary.",
             vec![
                 text(
-                    "0.9.4",
-                    "CSV, guide, Skills and diagnostics",
-                    "Preview CSV imports before committing and skip the lightweight guide if preferred. AI can learn and match Skills automatically. Diagnostics use one record per line; Frost White buttons are clearer on Windows, Mac and Linux.",
+                    "0.9.6",
+                    "Interfaces, compact cards and host switching",
+                    "Classic and workbench interfaces coexist, with three compact desktop card sizes and clearer AI chat. Host switching during reads and hidden-page navigation after deletion are corrected; logs show safe setting values.",
                     false,
                 ),
                 text(

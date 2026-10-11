@@ -74,7 +74,7 @@ pub(super) fn downloads() -> PageContent {
         "下载 C-SSH SSH 终端与服务器运维客户端的 Windows x64／ARM64、M系列Mac、Android与Linux最新版；Linux提供两种架构的deb和AppImage。",
         "DOWNLOADS / DIRECT",
         "下载 C-SSH",
-        "0.9.4 仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。安装前请阅读数据保全说明。",
+        "0.9.6 仅通过公告告知，请手动下载安装；不推送升级提醒，不强制更新。安装前请阅读数据保全说明。",
     )
     .with_sections(vec![section(
         "builds",
@@ -168,7 +168,7 @@ pub(super) fn faq() -> PageContent {
         "关于连接方式、agent、云同步与下载版本的简明回答。",
     )
     .with_faqs(vec![
-        FaqItem::new("0.9.4新增了什么？", "主机CSV导入前可预览，轻量使用引导可以跳过，AI可自动学习和匹配Skills，诊断日志每行一笔记录；Windows、Mac与Linux霜白主题按钮更清晰。"),
+        FaqItem::new("0.9.6新增了什么？", "经典界面与新工作台并存，三桌面提供三档同款短卡和更清晰的AI聊天；修复只读载入中切换主机、删除目标后隐藏页跳转，日志显示安全设置的实际新值。"),
         FaqItem::new("Creation Cloud 会代理 SSH 连接吗？", "不会。SSH 数据面保持客户端直连用户服务器，云端只做账号、设备与可选同步等控制面能力。"),
         FaqItem::new("没有安装 agent 还能使用吗？", "普通 SSH 终端和端口映射当前可走原生 SSH；跳板机属于同类架构例外，但本阶段仍延期。持久会话、监控和结构化管理能力依赖 agent。"),
         FaqItem::new("主机地址和私钥会同步到云端吗？", "主机名称、地址、端口、标签、状态、连接设置和凭据只以客户端加密密文手动同步；AI Key/API/模型绑定遵循相同的客户端保护边界。known_hosts、终端内容和命令历史不上云。"),
