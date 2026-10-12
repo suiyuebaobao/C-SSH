@@ -1,5 +1,6 @@
 # Connecting to a self-hosted Creation Cloud
 
+
 [Home](README_EN.md) · [中文](SELF_HOSTING.md)
 
 ## Responsibilities
@@ -18,7 +19,7 @@ The repository's `creation-cloud/` directory is a filtered production-source mir
 
 ## Release distribution
 
-Revision 2 uses a separate `v0.9.6-r2` tag with the same 0.9.6 product version and canonical filenames. Preserve original 0.9.6 records/assets; use the new hashes and matching signatures for the new record. Do not replace the older record in place. Client data usesSQLite 26 and must not be opened by original schema 22 binaries.
+Revision 3 uses a separate `v0.9.6-r3` tag with the same 0.9.6 product version and canonical filenames. Preserve original 0.9.6 records/assets; use the new hashes and matching signatures for the new record. Do not replace the older record in place. Client data usesSQLite 26 and must not be opened by original schema 22 binaries.
 
 **0.9.6 requires manual installation. No automatic update to this release is offered.** Do not force this upgrade on clients with the previous signing identity.
 
@@ -31,7 +32,7 @@ For later compatible upgrades, download original official artifacts, preserve th
 
 Operators own certificate, backup, mail, availability and permission management. Clients still control end-to-end decryption; a server upgrade does not perform a user's decryption or migration.
 
-The official 0.9.6 revision 2 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
+The official 0.9.6 revision 3 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
 
 The current Cloud updater asset contract covers Windows x64 and Android. Windows ARM64, Mac and Linux use manual download links in this release; ARM64 is never mapped to x64.
 

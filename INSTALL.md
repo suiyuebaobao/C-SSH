@@ -1,14 +1,15 @@
-# C-SSH 0.9.6 修訂2安裝與資料保全
+# C-SSH 0.9.6 修訂3安裝與資料保全
+
 
 [下载](README.md#downloads) · [English](INSTALL_EN.md)
 
 0.9.6只发公告，不弹升级提醒、不强制更新；请自行下载并安装。
 
-本次僅公告、手動下載，不提醒升級、不強制更新。產品版本仍為0.9.6，修訂2使用新tag `v0.9.6-r2`；四平台十項，iOS不上传，所有舊Release與原0.9.6資產保持。Android／iOS構建號9006000，wire及簽名身份不變。
+本次僅公告、手動下載，不提醒升級、不強制更新。產品版本仍為0.9.6，修訂3使用新tag `v0.9.6-r3`；四平台十項，iOS不上传，所有舊Release與原0.9.6資產保持。Android／iOS構建號9006000，wire及簽名身份不變。
 
 ## 安装前
 
-- 从官网或suiyuebaobao/C-SSH的v0.9.6-r2取得安装包，按首页SHA256核对。
+- 从官网或suiyuebaobao/C-SSH的v0.9.6-r3取得安装包，按首页SHA256核对。
 - 退出C-SSH，保全重要数据。Cloud仅手动同步加密配置，不包含AI对话与长期记忆；保留数据保护密码。
 
 ## Windows x64／ARM64
@@ -27,13 +28,13 @@
 ## Android arm64
 
 - 用系统安装器安装C-SSH_0.9.6_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
-- 沿用原正式簽名；本輪直接驗證原0.9.6同版本／同構建號覆蓋。相容且同簽名的舊版可保留資料覆蓋，無需卸載。
+- 沿用原正式簽名；修訂3最終APK沿用原正式簽名；相容同簽名安裝可保留資料覆蓋。相容且同簽名的舊版可保留資料覆蓋，無需卸載。
 - 更早旧签名不能直接覆盖；卸载会清除本地数据，尤其AI对话和记忆不在Cloud同步范围。未确认数据保全前不要卸载或清库。
 
 ## Linux x86_64／ARM64
 
 - Debian／Ubuntu按CPU选择amd64或arm64的deb，使用系统包管理器安装。
-- AppImage下载后增加可执行权限再启动，正常掛載啟動需要FUSE；本輪已在兩架構Ubuntu VM實測直接FUSE AppImage冷啟。包名aarch64对应ARM64。
+- AppImage下载后增加可执行权限再启动，正常掛載啟動需要FUSE；本輪套件驗證範圍見下方；直接AppImage啟動需要FUSE。包名aarch64对应ARM64。
 - 当前验证环境为Ubuntu24.04.5／X11，需要可用的桌面Secret Service（例如GNOME Keyring）；Wayland及其它发行版尚未验收。
 - 升级时保留原数据目录和系统密钥环，不从其它设备直接搬运加密库替代正常迁移。Linux本次提供手动下载。
 
@@ -46,12 +47,9 @@
 
 ## 本輪資料與驗證
 
-本修訂使用SQLite26。請退出程式、保全完整資料並保留現有系統鑰匙圈／密鑰庫條目，再於原位置替換程式；不要手動搬移、刪除或匯出原始密鑰，也不要清庫或以卸載處理啟動／簽名問題。正常22→26及已驗證的已知25資料接續已實測；其它23–25只接受嚴格已知形狀與信任無損的前滾。資料一旦採用26，不要用舊schema22的原0.9.6包打開新庫；回退必須使用相配的舊程式與升級前完整備份。
+本修訂產品版本仍為0.9.6、SQLite26。以對應平台套件於原位置更新並保留既有資料及系統鑰匙圈／密鑰庫；Mac為ad-hoc簽章、未公證。只公告與手動下載，不推送升级提醒或強制更新。
 
-- 十項制品共583,805,859位元組，大小與SHA256直接採用本輪制品及傳輸收據。未改的Mac r26／Windows r11 SSH、SFTP、監控切換、離頁返回與UI-R57刪除實鏈按原範圍復用。
-- Mac arm64：同Store首候選的實際25→26遷移證據復用；最終r2在已採用26的資料上以普通身份啟動，既有Cloud頁、窗口按鈕與關閉通過。真模型純文字續問保留前文；停止發生在provider context之前且tool=0，未驗真模型的不完整工具輪。Mac為ad-hoc且未公證。
-- Windows11 ARM VM：ARM64原生、x64仿真；release原生程序的22→26資料保持、工作台及同會話停止／續問HTTP fixture通過。新普通使用者的installer-only、原公開0.9.6同版本覆蓋、實際EXE身份、data及登記保持通過；四包epoch3真簽名／驗簽通過，沒有Authenticode。新身份Session0的close／exit_app自然收尾門禁失敗保留；ARM64 raw另於Session1的close／destroyed通過，不稱全套formal通過。
-- Android arm64正式APK在真正Android SDK Emulator完成同簽名／同9006000覆蓋、22→26、51張Required表與偏好／包裹資料保持，以及fresh工作台／system外觀。AI只驗入口；未驗真手機或一般CleanShutdown。
-- Linux兩架構Ubuntu VM：22→26保留57表及12條舊資料；deb後直接FUSE AppImage冷啟與實際業務畫面通過。無獨立模型憑據，未做Linux原生AI續問。
-- 不完整工具輪、唯一完整結果與精確覆蓋水位：共享3项集成測試／4個實際本地HTTP場景通過；Windows原生使用受控HTTP fixture。這些不是全平台真模型／遠端工具結果。
-- iPhone Simulator實測版本／入口、fresh工作台／system及通知兩類，不公開上传。真機、最低系統實際運行、其它發行版／Wayland、弱網及未測遠端流程均未外推。
+- Windows／Mac／Linux 經典與工作台的搜尋按鈕、原面板、快捷鍵及窄視窗排版完成 170 項直接前端檢查、38 組布局；三端前端構建通過。
+- 十項正式包已完成對應的來源與包體檢查；九項桌面新包確認包含最終搜尋介面，Windows 四包取得新的實際安裝身份與有效簽名。Mac 為 arm64、ad-hoc 簽章，未公證。
+- Agent 實測涵蓋 Mac 三台 Linux 節點、Windows 11 ARM64 的原生 ARM64／相容 x64，以及 Linux 兩架構 VM；本次搜尋修正沿用未變更 Rust 流程的原始證據，不外推為新包全功能重測或 Windows x64 實體機驗收。
+- Android arm64 正式 APK 沿用原簽名，已在 SDK Emulator 經正常介面完成既有 Agent 復用、就緒、憑據保存與監控載入；不外推為真機或一般主機刪除驗收。iOS 僅同步源碼與前端，不上傳。

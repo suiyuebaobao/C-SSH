@@ -1,4 +1,4 @@
-# C-SSH 0.9.6 Revision 2 Feature Guide
+# C-SSH 0.9.6 Revision 3 Feature Guide
 
 [Home](README_EN.md) · [Installation](INSTALL_EN.md) · [Gallery](screenshots/README.md)
 
@@ -33,6 +33,14 @@ For Windows management, run the supplied Setup on the server once, then connect 
 ### Local-first operation
 
 Use local server tools without a Cloud login. Optional accounts provide device management and explicit end-to-end encrypted sync. Cloud does not relay SSH traffic.
+
+## Revision 3
+
+- Adding an Agent host checks an existing Agent for compatibility first. Compatible Agents are reused without uploading, reinstalling or restarting. Missing Agents are installed; confirmed older versions follow the safe upgrade path. Unknown probe outcomes or future versions do not overwrite an installation.
+- Identity adoption, READY confirmation and credential persistence appear as separate real stages. A readiness failure is no longer reported as an initial SSH connection failure, and does not automatically replay installation.
+- Deployment progress is scoped to the current invocation, host and operation; late events after completion or leaving the view are rejected.
+- Windows and Mac workbench close buttons match the adjacent window controls in outline, background and size, while preserving danger hover and the existing exit action. Linux retains its normal system title bar.
+- Classic and workbench search entry points on Windows, Mac and Linux default to a magnifying-glass icon. Clicking opens the existing search panel, and the existing shortcuts are retained. The terminal toolbar wraps in narrow windows to keep search and connection controls from overlapping.
 
 ## Revision 2
 
@@ -134,10 +142,7 @@ Windows, Mac, Linux and Android provide offline export from the DVC management f
 
 ## Verified
 
-- Ten artifacts total 583,805,859 bytes. Sizes and SHA256 come from current artifact and transfer receipts. Unchanged Mac r26/Windows r11 SSH/SFTP, monitor switching, navigation and UI-R57 deletion evidence is reused within its original scope.
-- Mac arm64 reuses the first candidate’s actual 25→26 migration evidence with unchanged Store inputs. Final revision 2 starts under the ordinary identity on data already migrated to schema 26 and passes the existing Cloud page, window controls and close. A real-model text follow-up retained prior information; stopping occurred before provider context with tool=0, so incomplete tool rounds were not tested against a real model. Mac remains ad-hoc signed and unnotarized.
-- Windows 11 ARM VM: native ARM64 and emulated x64. Release binaries passed 22→26 preservation, workbench and same-conversation stop/follow-up with an HTTP fixture. A new ordinary-user installer-only lane passed original 0.9.6 same-version replacement, actual EXE identities, data and registration preservation. All four updater epoch3 signatures were verified; no Authenticode. New-identity Session0 close/exit_app natural shutdown failures remain recorded; ARM64 raw separately passed Session1 close/destroyed. This is not a full formal-runtime pass.
-- The signed arm64 APK passed same-signer/same build number 9006000 replacement, 22→26 preservation of 51 Required tables and preferences/wrapping data, plus fresh workbench/system appearance on a real Android SDK Emulator. AI entry only; no physical phone or general CleanShutdown validation.
-- Both Linux architectures passed 22→26 preservation of 57 tables and 12 old rows, followed by direct FUSE AppImage cold startup after deb installation and real business views in Ubuntu VMs. Native Linux AI follow-up was not tested without independent model credentials.
-- Incomplete tool rounds, unique complete results and exact coverage watermarks passed 3 shared integration tests / 4 real local HTTP scenarios; Windows native validation used a controlled HTTP fixture. This does not imply real-model or remote-tool validation on every platform.
-- iPhone Simulator version/entry, fresh workbench/system and the two notification categories were exercised; no public upload. Physical devices, minimum-OS execution, other distributions/Wayland, weak networks and untested remote workflows are not implied.
+- Direct frontend verification completed 170 checks across 38 layouts for classic/workbench search buttons, the existing panel, shortcuts and narrow windows on Windows, Mac and Linux. All three frontend builds passed.
+- All ten release packages have matching source and package receipts. The nine refreshed desktop packages contain the final search interface; all four Windows packages have new actual installed identities and valid signatures. Mac is arm64, ad-hoc signed and not notarized.
+- Agent acceptance covers three Linux nodes through Mac, native ARM64 and compatible x64 execution on Windows 11 ARM64, and both Linux VM architectures. The search-only change reuses the unchanged Rust-flow evidence; it does not imply a new full-function test of every package or physical Windows x64 acceptance.
+- The Android arm64 release APK retains the existing signer. Its normal UI completed existing-Agent reuse, readiness, credential persistence and monitor loading on the SDK Emulator. This does not imply physical-device or ordinary host-deletion acceptance. iOS source and frontend are synchronized only and are not uploaded.

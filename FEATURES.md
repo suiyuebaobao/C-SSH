@@ -1,4 +1,4 @@
-# C-SSH 0.9.6 修訂2功能詳解
+# C-SSH 0.9.6 修訂3功能詳解
 
 [返回首页](README.md) · [安装说明](INSTALL.md) · [图集](screenshots/README.md)
 
@@ -33,6 +33,14 @@ Windows、Mac、Linux及Android均可离线保存内置Setup ZIP，Android另可
 ### 本地优先
 
 不登录Cloud也能使用本地运维；可选账号用于设备和用户主动发起的端到端加密同步。 云不转发SSH数据。
+
+## 修訂3
+
+- 新增 Agent 主機時先確認既有 Agent 的相容性；相容者直接復用，不重新上傳、安裝或啟動。缺失才安裝；已確認舊版沿安全升級；未知或未來版本的探測不觸發覆蓋。
+- 將身份採納、READY 確認及憑據保存顯示為各自的真實階段；就緒階段失敗不再誤報為初始 SSH 連線失敗，且不自動重放安装。
+- 部署進度按當次呼叫、主機與操作隔離，拒絕終態後或離頁後的遲到事件。
+- Windows／Mac工作台右上角關閉键與相鄰視窗控件對齊外框、背景及尺寸，保留危险懸停與原退出路徑；Linux繼續使用正常系統標題欄。
+- Windows／Mac／Linux的經典及工作台搜尋入口預設收成放大鏡圖示；點擊開啟原搜尋面板，原快捷鍵保留。窄視窗的終端工具列自動換行，避免搜尋與連線操作重疊。
 
 ## 修訂2
 
@@ -130,10 +138,7 @@ Mac仅M系列，未公证且没有自动更新；iOS本次不发布。诊断和�
 
 ## Verified
 
-- 十項制品共583,805,859位元組，大小與SHA256直接採用本輪制品及傳輸收據。未改的Mac r26／Windows r11 SSH、SFTP、監控切換、離頁返回與UI-R57刪除實鏈按原範圍復用。
-- Mac arm64：同Store首候選的實際25→26遷移證據復用；最終r2在已採用26的資料上以普通身份啟動，既有Cloud頁、窗口按鈕與關閉通過。真模型純文字續問保留前文；停止發生在provider context之前且tool=0，未驗真模型的不完整工具輪。Mac為ad-hoc且未公證。
-- Windows11 ARM VM：ARM64原生、x64仿真；release原生程序的22→26資料保持、工作台及同會話停止／續問HTTP fixture通過。新普通使用者的installer-only、原公開0.9.6同版本覆蓋、實際EXE身份、data及登記保持通過；四包epoch3真簽名／驗簽通過，沒有Authenticode。新身份Session0的close／exit_app自然收尾門禁失敗保留；ARM64 raw另於Session1的close／destroyed通過，不稱全套formal通過。
-- Android arm64正式APK在真正Android SDK Emulator完成同簽名／同9006000覆蓋、22→26、51張Required表與偏好／包裹資料保持，以及fresh工作台／system外觀。AI只驗入口；未驗真手機或一般CleanShutdown。
-- Linux兩架構Ubuntu VM：22→26保留57表及12條舊資料；deb後直接FUSE AppImage冷啟與實際業務畫面通過。無獨立模型憑據，未做Linux原生AI續問。
-- 不完整工具輪、唯一完整結果與精確覆蓋水位：共享3项集成測試／4個實際本地HTTP場景通過；Windows原生使用受控HTTP fixture。這些不是全平台真模型／遠端工具結果。
-- iPhone Simulator實測版本／入口、fresh工作台／system及通知兩類，不公開上传。真機、最低系統實際運行、其它發行版／Wayland、弱網及未測遠端流程均未外推。
+- Windows／Mac／Linux 經典與工作台的搜尋按鈕、原面板、快捷鍵及窄視窗排版完成 170 項直接前端檢查、38 組布局；三端前端構建通過。
+- 十項正式包已完成對應的來源與包體檢查；九項桌面新包確認包含最終搜尋介面，Windows 四包取得新的實際安裝身份與有效簽名。Mac 為 arm64、ad-hoc 簽章，未公證。
+- Agent 實測涵蓋 Mac 三台 Linux 節點、Windows 11 ARM64 的原生 ARM64／相容 x64，以及 Linux 兩架構 VM；本次搜尋修正沿用未變更 Rust 流程的原始證據，不外推為新包全功能重測或 Windows x64 實體機驗收。
+- Android arm64 正式 APK 沿用原簽名，已在 SDK Emulator 經正常介面完成既有 Agent 復用、就緒、憑據保存與監控載入；不外推為真機或一般主機刪除驗收。iOS 僅同步源碼與前端，不上傳。
