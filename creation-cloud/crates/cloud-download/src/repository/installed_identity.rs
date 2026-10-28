@@ -48,7 +48,10 @@ pub(crate) const LOCK_IDENTITY_ASSETS_SQL: &str = r#"
         WHEN platform = 'windows' AND architecture = 'x86_64' AND package_kind = 'msi' THEN 2
         WHEN platform = 'windows' AND architecture = 'x86_64' AND package_kind = 'zip' THEN 3
         WHEN platform = 'android' AND architecture = 'aarch64' AND package_kind = 'apk' THEN 4
-        ELSE 5
+        WHEN platform = 'macos' AND package_kind = 'tar_gz' THEN 5
+        WHEN platform = 'linux' AND architecture = 'x86_64' AND package_kind = 'appimage' THEN 6
+        WHEN platform = 'linux' AND architecture = 'aarch64' AND package_kind = 'appimage' THEN 7
+        ELSE 8
     END, id
     FOR UPDATE
 "#;
@@ -100,3 +103,4 @@ pub(crate) async fn audit(
     .map_err(|_| AppError::Storage("保存安装身份审计失败".into()))?;
     Ok(())
 }
+

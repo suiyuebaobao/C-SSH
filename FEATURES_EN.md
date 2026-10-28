@@ -32,7 +32,7 @@ Browse, transfer, edit, create, rename, delete, and verify files. System, proces
 
 ## Agent and Windows management access
 
-Improved Agent reuse, multi-device authorization, readiness, and update messages. Linux x86_64/ARM64 and Windows servers use their corresponding protocol backends. UOS and Kylin validation remains specific to the tested environments.
+Improved Agent reuse, multi-device authorization, readiness, and update messages. Linux x86_64/ARM64 and Windows servers use their corresponding protocol backends. Improves Agent connectivity and administration on Kylin Linux Advanced Server V10 ARM64 with 64KiB memory pages, including initial independent-channel failures in specific SSH configurations.
 
 Clients can save the embedded Windows Setup ZIP, with system sharing on Android. Install it manually on the Windows server and then connect using a Windows account. Plain RDP does not require Setup; there is no OCR-driven or unattended installation.
 

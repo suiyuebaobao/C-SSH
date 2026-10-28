@@ -1,13 +1,36 @@
 <script setup lang="ts">
-import type { SiteDocument } from "~/types/site";
+import type { Platform, SiteDocument } from "~/types/site";
+type DownloadPlatform = Platform & { note?: string };
 const props = defineProps<{ document: SiteDocument }>();
 const en = computed(() => props.document.view.shell.locale === "en");
 const latest = computed(() => props.document.catalog?.latest);
 const selection = ref("all");
-const platforms = computed(() => [
-  ...(latest.value?.platforms ?? []),
-  ...(latest.value?.manual_platforms ?? []),
-]);
+const platforms = computed(() => {
+  const result: DownloadPlatform[] = [];
+  const sources: DownloadPlatform[] = [
+    ...(latest.value?.platforms ?? []),
+    ...(latest.value?.manual_platforms ?? []),
+  ];
+  for (const platform of sources) {
+    const existing = result.find((item) => item.name === platform.name);
+    if (!existing) {
+      result.push({ ...platform, assets: [...platform.assets] });
+      continue;
+    }
+    for (const asset of platform.assets) {
+      if (
+        !existing.assets.some(
+          (item) =>
+            item.architecture === asset.architecture &&
+            item.package_kind === asset.package_kind,
+        )
+      )
+        existing.assets.push(asset);
+    }
+    if ("note" in platform) existing.note = platform.note;
+  }
+  return result;
+});
 const visible = computed(() =>
   platforms.value.filter(
     (platform) =>
@@ -37,7 +60,13 @@ const visible = computed(() =>
           >
             {{ platform.name }}
           </option></select
-        ><span>v{{ latest.version }}<template v-if="latest.revision > 1"> · {{ en ? "Revision" : "修订" }} {{ latest.revision }}</template> · {{ latest.channel }}</span>
+        ><span
+          >v{{ latest.version
+          }}<template v-if="latest.revision > 1">
+            · {{ en ? "Revision" : "修订" }} {{ latest.revision }}</template
+          >
+          · {{ latest.channel }}</span
+        >
       </div>
       <div class="download-grid">
         <section

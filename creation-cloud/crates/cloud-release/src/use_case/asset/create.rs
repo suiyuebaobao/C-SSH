@@ -55,6 +55,10 @@ pub(crate) fn normalize(input: CreateAssetInput) -> AppResult<CreateAssetInput> 
         byte_size: validation::byte_size(input.byte_size)?,
         sha256: validation::sha256(&input.sha256)?,
     };
-    validation::asset_identity(&normalized.platform, &normalized.package_kind)?;
+    validation::asset_identity(
+        &normalized.platform,
+        &normalized.architecture,
+        &normalized.package_kind,
+    )?;
     Ok(normalized)
 }

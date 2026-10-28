@@ -1,6 +1,6 @@
 //! 集中校验版本和资产输入，避免 handler 与 SQL 重复业务规则。
 
-use cloud_domain::{AppError, AppResult, formal_release_asset_identities};
+use cloud_domain::{AppError, AppResult, MANUAL_RELEASE_ASSETS, formal_release_asset_identities};
 use uuid::Uuid;
 
 pub(crate) const MAX_ASSET_BYTES: i64 = 4 * 1024 * 1024 * 1024;
@@ -59,9 +59,9 @@ pub(crate) fn byte_size(value: i64) -> AppResult<i64> {
 pub(crate) fn platform(value: &str) -> AppResult<String> {
     let value = required_text(value, "平台", 32)?.to_ascii_lowercase();
     match value.as_str() {
-        "windows" | "linux" | "android" => Ok(value),
+        "windows" | "macos" | "linux" | "android" => Ok(value),
         _ => Err(AppError::Validation(
-            "发布资产平台只允许 windows、linux 或 android".into(),
+            "发布资产平台只允许 windows、macos、linux 或 android".into(),
         )),
     }
 }
@@ -79,20 +79,19 @@ pub(crate) fn architecture(value: &str) -> AppResult<String> {
 pub(crate) fn package_kind(value: &str) -> AppResult<String> {
     let value = required_text(value, "包类型", 32)?.to_ascii_lowercase();
     match value.as_str() {
-        "exe" | "msi" | "zip" | "appimage" | "deb" | "apk" | "aab" => Ok(value),
+        "exe" | "zip" | "dmg" | "appimage" | "deb" | "apk" | "tar_gz" => Ok(value),
         _ => Err(AppError::Validation("发布资产包类型不在允许列表内".into())),
     }
 }
 
-pub(crate) fn asset_identity(platform: &str, package_kind: &str) -> AppResult<()> {
-    let valid = matches!(
-        (platform, package_kind),
-        ("windows", "exe" | "msi" | "zip")
-            | ("linux", "appimage" | "deb")
-            | ("android", "apk" | "aab")
-    );
-    if !valid {
-        return Err(AppError::Validation("平台与包类型组合无效".into()));
+pub(crate) fn asset_identity(
+    platform: &str,
+    architecture: &str,
+    package_kind: &str,
+) -> AppResult<()> {
+    if !MANUAL_RELEASE_ASSETS.contains(&(platform, architecture, package_kind))
+        && (platform, architecture, package_kind) != ("macos", "aarch64", "tar_gz") {
+        return Err(AppError::Validation("平台、架构与包类型组合无效".into()));
     }
     Ok(())
 }
@@ -103,12 +102,15 @@ pub(crate) fn asset_identity_for_release(
     architecture: &str,
     package_kind: &str,
 ) -> AppResult<()> {
-    asset_identity(platform, package_kind)?;
+    asset_identity(platform, architecture, package_kind)?;
     let expected = formal_release_asset_identities(version)
         .ok_or_else(|| AppError::Internal("数据库中的版本号无效".into()))?;
-    if expected.len() == 3 && !expected.contains(&(platform, architecture, package_kind)) {
+    if package_kind == "tar_gz" && !expected.contains(&(platform, architecture, package_kind)) {
+        return Err(AppError::Validation("此版本尚未采用Mac更新资产合同".into()));
+    }
+    if expected.len() == 4 && !expected.contains(&(platform, architecture, package_kind)) {
         return Err(AppError::Validation(
-            "0.8.8 及后续版本只允许 Windows EXE/ZIP 与 Android arm64 APK".into(),
+            "历史版本不允许新增手动分发平台".into(),
         ));
     }
     Ok(())
@@ -123,3 +125,4 @@ pub(crate) fn sha256(value: &str) -> AppResult<String> {
     }
     Ok(normalized)
 }
+

@@ -19,7 +19,10 @@ pub use auth::AuthenticatedSession;
 pub use error::{AppError, AppResult, SyncResyncReason};
 pub use http_range::{ByteRange, InvalidByteRange};
 pub use page::{Page, PageQuery};
-pub use release_contract::{FormalReleaseAssetIdentity, formal_release_asset_identities};
+pub use release_contract::{
+    FormalReleaseAssetIdentity, MANUAL_RELEASE_ASSETS, formal_release_asset_identities,
+    release_asset_set_is_complete, is_desktop_updater_asset,
+};
 pub use request_context::{
     current_request_id, mark_semantic_audit_recorded, with_request_id, with_semantic_audit_tracking,
 };

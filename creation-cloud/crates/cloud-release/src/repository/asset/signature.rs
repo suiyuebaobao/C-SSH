@@ -7,10 +7,10 @@ use uuid::Uuid;
 pub(crate) async fn has_invalid_metadata(pool: &PgPool, release_id: Uuid) -> AppResult<bool> {
     sqlx::query_scalar(
         "SELECT EXISTS(SELECT 1 FROM release_assets WHERE release_id = $1 \
-         AND ((platform = 'windows' AND package_kind IN ('exe', 'msi', 'zip') \
+         AND ((desktop_updater_signature_asset(platform, package_kind) \
+               AND (platform = 'windows' OR formal_update_asset(release_id, platform, architecture, package_kind)) \
                AND updater_signature IS NULL) \
-           OR (NOT (platform = 'windows' AND package_kind IN ('exe', 'msi', 'zip')) \
-               AND updater_signature IS NOT NULL)))",
+           OR (NOT desktop_updater_signature_asset(platform, package_kind) AND updater_signature IS NOT NULL)))",
     )
     .bind(release_id)
     .fetch_one(pool)

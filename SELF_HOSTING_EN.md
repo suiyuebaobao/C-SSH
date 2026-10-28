@@ -1,46 +1,35 @@
-# Connecting to a self-hosted Creation Cloud
+# C-SSH 0.9.7 and self-hosted Creation Cloud
 
+[Home](README_EN.md) · [中文](SELF_HOSTING.md) · [Installation and data](INSTALL_EN.md)
 
-[Home](README_EN.md) · [中文](SELF_HOSTING.md)
+Creation Cloud is an independent control plane for accounts, devices, user-initiated encrypted configuration sync, model catalogs, notices, and downloads. It does not proxy client-to-server SSH, terminal, or Agent traffic. Local operations do not require Cloud sign-in.
 
-## Responsibilities
+## This release's update policy
 
-Creation Cloud provides accounts, devices, model catalogs, explicit encrypted sync, announcements, releases and downloads. It does not relay SSH, terminal, file or Agent traffic. The client defaults to the official service but can use your deployment of the same server; local features do not require login.
+**Version 0.9.7 only notifies users and directs them to a manual download. It does not force upgrades or download/install in the background.** The official update policy remains disabled; notices and Downloads provide the entry points. Android only supports version notices and manual downloads. iOS development and distribution remain paused.
 
-The repository's `creation-cloud/` directory is a filtered production-source mirror. The operator must configure and maintain the database, SMTP, HTTPS, administrators and runtime secrets. It does not include the official production configuration or secrets.
+Self-hosted operators may publish a notice linking to official downloads. When hosting official packages, preserve filenames, architectures, sizes, SHA256 values, and original signatures. Use new releases or revisions rather than replacing published records or assets.
 
-## Client setup
+## Assets and signatures
 
-1. Deploy a working service with a trusted HTTPS certificate. Set `CLOUD_PUBLIC_BASE_URL` to its public root, such as `https://cloud.example.com`.
-2. Select Self-hosted Cloud under Settings → Cloud Service and enter the same HTTPS root.
-3. Test, confirm the switch, then sign in to that service. URLs may not contain credentials, paths, queries or fragments; certificate verification is not disabled.
-4. The official service and separate self-hosted services have isolated login/sync state. Switching does not move local hosts, credentials or chats. Resolve pending sync as instructed before switching.
-5. Sync still requires explicit preview, selection and confirmation. The data-protection password differs from the login password; AI conversations and long-term memory are excluded.
+- The manual set has ten assets: Windows x64/ARM64 NSIS and portable ZIP, Mac arm64 DMG, Android arm64 APK, and Linux x86_64/ARM64 deb and AppImage. There are no new MSI, AAB, or iOS assets.
+- Starting with 0.9.7, the current server supports a six-asset canonical distribution set: Windows x64 EXE/ZIP, Android APK, the Mac update archive, and both Linux AppImages. It also accepts the complete manual set plus the Mac update archive. Storing that archive does not activate automatic updates.
+- The official `GET /api/v1/downloads/releases` manifest provides filenames, targets, sizes, hashes, and `updater_signature` for applicable assets. Save signatures unchanged as UTF-8 `.sig` files and upload them with the matching packages. Do not replace official signatures with your own key.
+- Do not label Windows ARM64, Mac DMG, or Linux deb as a different update target. Android does not gain in-app installation capability.
+- Keep the 0.9.7 update policy disabled, without forced or disabled versions, and use a notice to let users decide when to download. Uploading files is not authorization to enable a rollout.
 
-## Release distribution
+## Data and migrations
 
-Revision 3 uses a separate `v0.9.6-r3` tag with the same 0.9.6 product version and canonical filenames. Preserve original 0.9.6 records/assets; use the new hashes and matching signatures for the new record. Do not replace the older record in place. Client data usesSQLite 26 and must not be opened by original schema 22 binaries.
+Signing in does not decrypt data or start sync automatically. Hosts, proxy routes, and AI configuration are synced manually with sensitive fields encrypted by the client. AI conversations, original memory, terminal output, and command history remain outside Cloud sync.
 
-**0.9.6 requires manual installation. No automatic update to this release is offered.** Do not force this upgrade on clients with the previous signing identity.
+Account and data-protection passwords have separate purposes. A valid data-protection verification is reused within one client process and requested again after reopening. Preserve existing data and OS keys; do not clear storage or remove keys to address sync errors.
 
-For later compatible upgrades, download original official artifacts, preserve their bytes/signatures, upload them through your Cloud administration interface and configure release policy. Clients check and download from the currently selected Cloud rather than a separate official endpoint.
+Clients use SQLite27 in 0.9.7. Cloud PostgreSQL migrations have their own version sequence. Do not treat the client release number or SQLite schema as the server schema version. Preserve your configuration, keys, and data, and use the normal forward migration process without rewriting old migrations or database checksums.
 
-- Windows requires the original updater signature. The official `GET /api/v1/downloads/releases` manifest exposes `file_name`, `sha256` and `updater_signature`. Save the matching non-empty signature unchanged as a UTF-8 `.sig` and upload it with the package. Do not replace it with your own signing key.
-- Upload the original Android APK and preserve its installation signature. Signing changes still require the official manual-installation and data-preservation procedure.
-- Mac currently uses a manually downloaded DMG without an automatic-install contract. iOS is not distributed in this release.
-- Verify version, platform, architecture, SHA256, source and real downloads. Never replace a published asset, hash or signature under the same identity.
+## Public source boundary
 
-Operators own certificate, backup, mail, availability and permission management. Clients still control end-to-end decryption; a server upgrade does not perform a user's decryption or migration.
+The repository's `creation-cloud/` directory contains the server production-source mirror. Use the current `main` directory and its corresponding commit. Client Release tags archive client distribution material; they do not imply that every tag contains the latest server source.
 
-The official 0.9.6 revision 3 channel uses notices and manual downloads only, with no upgrade prompt or forced update. Self-hosted operators manage their own notices and releases.
+The mirror includes the production Cargo dependency closure, migrations, current Nuxt build manifests and source, and required sanitized public resources. Client, shared client core, AI/Agent source, production configuration, deployment tools, tests, runtime data, and secrets are excluded.
 
-The current Cloud updater asset contract covers Windows x64 and Android. Windows ARM64, Mac and Linux use manual download links in this release; ARM64 is never mapped to x64.
-
-
-## Current production source
-
-The mirror separates a Rust/Axum API from a Nuxt4/Vue3 frontend. Rust owns authentication, permissions, transactions, audit, PostgreSQL and controlled file distribution; Nuxt owns pages, public-content SSR and browser interaction. A same-origin reverse proxy routes `/api/*` to Rust and pages to Nuxt. Nuxt receives no database, SMTP or client decryption secrets; Pinia keeps interaction/session state in memory. The historical Askama page layer is excluded from the current production mirror.
-
-Only the production Cargo dependency closure, migrations, frontend package/lock/build configuration/app/server source and referenced sanitized public resources are included. Deployment configuration, environment files, tests, runtime data and secrets are excluded. Operators supply HTTPS, PostgreSQL, mail and persistent storage; this is not a ready-to-run deployment bundle. Client SQLite 26 and Cloud PostgreSQL migrations are independent version systems.
-
-Automatic operations Skills, AI conversations and memory remain on the client. Upgrading Cloud neither automatically upgrades clients nor proves that a user has completed data migration.
+Operators supply HTTPS, PostgreSQL, mail, and persistent storage. This is not a one-click deployment carrying the official production environment. Do not copy another operator's sessions, keys, databases, or environment files.

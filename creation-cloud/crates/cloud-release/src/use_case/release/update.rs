@@ -40,19 +40,17 @@ impl Service {
 }
 
 fn ensure_formal_asset_shape(version: &str, assets: &[ReleaseAsset]) -> AppResult<()> {
-    let expected = cloud_domain::formal_release_asset_identities(version)
-        .ok_or_else(|| AppError::Internal("数据库中的版本号无效".into()))?;
-    if assets.len() != expected.len()
-        || expected.iter().any(|identity| {
-            !assets.iter().any(|asset| {
-                (
-                    asset.platform.as_str(),
-                    asset.architecture.as_str(),
-                    asset.package_kind.as_str(),
-                ) == *identity
-            })
+    let identities = assets
+        .iter()
+        .map(|asset| {
+            (
+                asset.platform.as_str(),
+                asset.architecture.as_str(),
+                asset.package_kind.as_str(),
+            )
         })
-    {
+        .collect::<Vec<_>>();
+    if !cloud_domain::release_asset_set_is_complete(version, &identities) {
         return Err(AppError::Conflict(
             "发布版本的正式资产形态与版本合同不一致".into(),
         ));
@@ -106,3 +104,4 @@ pub(crate) const fn valid_transition(from: ReleaseStatus, to: ReleaseStatus) -> 
             | (ReleaseStatus::Hidden, ReleaseStatus::Hidden)
     )
 }
+

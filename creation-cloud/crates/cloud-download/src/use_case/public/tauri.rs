@@ -25,6 +25,7 @@ impl Service {
             .ok_or_else(|| AppError::Storage("更新检查结果缺少 latest".into()))?;
         project_response(
             latest,
+            &query.platform,
             &query.package_kind,
             &query.architecture,
             &self.public_base_url,
@@ -35,8 +36,9 @@ impl Service {
 
 fn shared_check_query(query: &TauriUpdateQuery) -> UpdateCheckQuery {
     UpdateCheckQuery {
+        update_package_kind: None,
         policy_version: None,
-        platform: "windows".into(),
+        platform: query.platform.clone(),
         architecture: query.architecture.clone(),
         package_kind: query.package_kind.clone(),
         current_version: query.current_version.clone(),
@@ -48,6 +50,7 @@ fn shared_check_query(query: &TauriUpdateQuery) -> UpdateCheckQuery {
 
 fn project_response(
     latest: LatestUpdate,
+    platform: &str,
     package_kind: &str,
     architecture: &str,
     public_base_url: &Url,
@@ -71,7 +74,7 @@ fn project_response(
     {
         return Err(AppError::Storage("Tauri 下载入口不属于本站固定路径".into()));
     }
-    let target = format!("windows-{architecture}");
+    let target = format!("{}-{architecture}", if platform == "macos" { "darwin" } else { platform });
     let platforms = BTreeMap::from([(
         target,
         TauriPlatformUpdate {
@@ -91,12 +94,11 @@ fn project_response(
 }
 
 fn validate_query(query: &TauriUpdateQuery) -> AppResult<()> {
-    if query.architecture != "x86_64" {
-        return Err(AppError::Validation("Tauri 更新架构只允许 x86_64".into()));
-    }
-    if !matches!(query.package_kind.as_str(), "exe" | "msi") {
+    if !matches!((query.platform.as_str(), query.architecture.as_str(), query.package_kind.as_str()),
+        ("windows", "x86_64", "exe" | "msi") | ("macos", "aarch64", "tar_gz")
+        | ("linux", "x86_64" | "aarch64", "appimage")) {
         return Err(AppError::Validation(
-            "Tauri 更新包类型只允许 exe 或 msi".into(),
+            "Tauri 更新平台或安装形态不受支持".into(),
         ));
     }
     if query.channel != "stable" || !matches!(query.locale.as_str(), "zh-CN" | "en") {
@@ -104,3 +106,4 @@ fn validate_query(query: &TauriUpdateQuery) -> AppResult<()> {
     }
     Ok(())
 }
+

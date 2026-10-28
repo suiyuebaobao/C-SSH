@@ -9,10 +9,12 @@ use crate::{AuditEvent, model::AuditRow, repository::map_read_error};
 pub(crate) async fn execute(pool: &PgPool, event_id: Uuid) -> AppResult<AuditEvent> {
     let row = sqlx::query_as::<_, AuditRow>(
         r#"
-        SELECT id, actor_account_id, action, resource_kind, resource_id,
-               outcome, request_id, details, created_at
-        FROM audit_events
-        WHERE id = $1
+        SELECT event.id, actor.id AS actor_account_id, event.action,
+               event.resource_kind, event.resource_id, event.outcome,
+               event.request_id, event.details, event.created_at
+        FROM audit_events AS event
+        LEFT JOIN accounts AS actor ON actor.id = event.actor_account_id
+        WHERE event.id = $1
         "#,
     )
     .bind(event_id)

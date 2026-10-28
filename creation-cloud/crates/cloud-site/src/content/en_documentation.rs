@@ -11,10 +11,10 @@ pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
         "C-SSH Docs | Connect and Operate",
-        "C-SSH 0.9.6 documentation for classic/workbench interfaces, compact host cards, agent deployment, persistent terminals, monitoring, files, AI and logs.",
+        "C-SSH 0.9.7 documentation for classic/workbench interfaces, Agent access, persistent terminals, monitoring queues, server browsers, AI progress and usage, manual cloud sync, and files.",
         "DOCS / TASK GUIDES",
         "Start with your first C-SSH host",
-        "Follow the C-SSH 0.9.6 task index: preview CSV imports, skip the lightweight guide if preferred, and use terminals, monitoring and AI when needed.",
+        "Follow the C-SSH 0.9.7 task index: preview CSV imports, skip the lightweight guide if preferred, and use terminals, monitoring and AI when needed.",
     )
     .with_actions(vec![
         action("Add your first host", "#add-host", "button button-primary"),
@@ -74,6 +74,8 @@ fn groups() -> Vec<DocumentationGroup> {
                 link("monitoring", "05", "Enable monitoring and history"),
                 link("files", "06", "Browse and transfer files"),
                 link("ai-assistant", "07", "Configure and run the AI assistant"),
+                link("ai-usage-and-tasks", "11", "AI concurrency and usage"),
+                link("server-browser", "12", "Independent server browsers"),
             ],
         ),
         group(
@@ -96,9 +98,9 @@ fn sections() -> Vec<DocumentationSection> {
             "Open the installed client and confirm the connection mode, host identity, and data boundary.",
             vec![
                 text(
-                    "0.9.6",
+                    "0.9.7",
                     "Interfaces, compact cards and host switching",
-                    "Classic and workbench interfaces coexist, with three compact desktop card sizes and clearer AI chat. Host switching during reads and hidden-page navigation after deletion are corrected; logs show safe setting values.",
+                    "Concurrent AI tasks and live progress, context/cache statistics, independent server browsers, monitoring queues and selective compression, manual cloud-sync fixes, and Android terminal/history improvements. See the changelog for full details.",
                     false,
                 ),
                 text(
@@ -118,6 +120,58 @@ fn sections() -> Vec<DocumentationSection> {
                     "Confirm the Cloud data boundary",
                     "The SSH data plane always connects directly from the client to the server. Creation Cloud stores accounts, devices, and allowed sync data only; it never proxies terminals or remote commands.",
                     false,
+                ),
+            ],
+        ),
+        section(
+            "ai-usage-and-tasks",
+            "11 / AI TASKS & USAGE",
+            "Read AI progress, concurrency and usage",
+            "Set independent-task concurrency in AI model execution settings; expand activity details in the conversation when needed.",
+            vec![
+                text(
+                    "PROGRESS",
+                    "See results as they arrive",
+                    "A compact summary stays readable while subtask progress and available results update. Interjections, pause, stop and resume remain attached to the current conversation.",
+                    false,
+                ),
+                text(
+                    "USAGE",
+                    "Cumulative usage versus context",
+                    "Cumulative tokens include requests and subtasks. Context represents one main-assistant input, not the cumulative total. Missing cache data stays unknown; refreshes retain the last confirmed values.",
+                    false,
+                ),
+                text(
+                    "MEMORY",
+                    "Keep original records",
+                    "Context follows the configured model window and long histories use bounded reads. AI conversations and original memory remain local and are excluded from Cloud configuration sync.",
+                    false,
+                ),
+            ],
+        ),
+        section(
+            "server-browser",
+            "12 / SERVER BROWSER",
+            "Use independent server browser environments",
+            "Open the desktop host server-browser entry. The host needs a usable Agent and the local computer needs Google Chrome.",
+            vec![
+                text(
+                    "ENVIRONMENT",
+                    "Separate data per environment",
+                    "Create multiple environments for one server, each retaining its browsing data, stable seed and settings. Chrome and Agent capabilities are checked before launch; reopening does not reset identity.",
+                    false,
+                ),
+                text(
+                    "SETTINGS",
+                    "System, language and permissions",
+                    "Choose OS presentation, timezone, language and permissions per environment. Location, microphone and camera can use normal prompts; websites may still request verification.",
+                    false,
+                ),
+                text(
+                    "MOBILE",
+                    "Current platform scope",
+                    "Available on Windows, Mac and Linux. The Android entry is hidden while validation is paused, and iOS remains paused.",
+                    true,
                 ),
             ],
         ),

@@ -18,6 +18,10 @@ impl Service {
             .then(|| u64::try_from(policy.revision))
             .transpose()
             .map_err(|_| AppError::Storage("版本策略修订超出客户端范围".into()))?;
+        // 手机只提醒并手动下载；旧客户端不能收到强更、停用或可自动安装目标。
+        if let Some(response) = mobile_manual_only(&query, policy_revision) {
+            return Ok(response);
+        }
         if policy.disabled_versions.contains(&query.current_text) {
             if query.policy_version == 1 {
                 return Err(AppError::Forbidden("此版本已停用，请安装可用版本".into()));
@@ -79,7 +83,7 @@ impl Service {
             .filter(|asset| {
                 asset.platform == query.platform
                     && asset.architecture == query.architecture
-                    && asset.package_kind == query.package_kind
+                    && asset.package_kind == query.update_package_kind
             })
             .map(project_asset)
             .collect::<AppResult<Vec<_>>>()?;
@@ -110,6 +114,13 @@ impl Service {
     }
 }
 
+fn mobile_manual_only(
+    query: &ValidatedQuery,
+    revision: Option<u64>,
+) -> Option<UpdateCheckResponse> {
+    (query.platform == "android").then(|| no_update(query, revision, false))
+}
+
 fn requires_manual_windows_bridge(
     query: &ValidatedQuery,
     target_version: &SemanticVersion,
@@ -128,7 +139,7 @@ fn project_asset(mut asset: PublicAsset) -> AppResult<UpdateAsset> {
     if asset.sources.is_empty() {
         return Err(AppError::Storage("版本策略目标资产缺少本站下载来源".into()));
     }
-    if matches!(asset.package_kind.as_str(), "exe" | "msi" | "zip") {
+    if cloud_domain::is_desktop_updater_asset(&asset.platform, &asset.package_kind) {
         let signature = asset
             .updater_signature
             .as_deref()
@@ -173,6 +184,7 @@ struct ValidatedQuery {
     platform: String,
     architecture: String,
     package_kind: String,
+    update_package_kind: String,
     current_text: String,
     current_version: SemanticVersion,
     current_install_sha256: Option<String>,
@@ -201,11 +213,26 @@ impl TryFrom<UpdateCheckQuery> for ValidatedQuery {
                 query.architecture.as_str(),
                 query.package_kind.as_str(),
             ),
-            ("windows", "x86_64", "exe" | "msi" | "zip") | ("android", "aarch64", "apk")
+            ("windows", "x86_64", "exe" | "msi" | "zip")
+                | ("android", "aarch64", "apk")
+                | ("macos", "aarch64", "tar_gz")
+                | ("linux", "x86_64" | "aarch64", "appimage")
         );
         if !valid_target {
             return Err(AppError::Validation("平台或架构不属于正式更新目标".into()));
         }
+        let update_package_kind = match query.update_package_kind.as_deref() {
+            None => query.package_kind.clone(),
+            Some("zip")
+                if policy_version == 2
+                    && query.platform == "windows"
+                    && query.architecture == "x86_64"
+                    && matches!(query.package_kind.as_str(), "exe" | "zip") =>
+            {
+                "zip".to_owned()
+            }
+            Some(_) => return Err(AppError::Validation("更新交付形态不受支持".into())),
+        };
         let (current_text, current_version) = normalize_semantic_version(&query.current_version)
             .ok_or_else(|| AppError::Validation("current_version 必须是有效语义版本".into()))?;
         Ok(Self {
@@ -213,6 +240,7 @@ impl TryFrom<UpdateCheckQuery> for ValidatedQuery {
             platform: query.platform,
             architecture: query.architecture,
             package_kind: query.package_kind,
+            update_package_kind,
             current_text,
             current_version,
             current_install_sha256: query.current_install_sha256,
@@ -288,3 +316,4 @@ fn is_lower_sha256(value: &str) -> bool {
             .bytes()
             .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
 }
+

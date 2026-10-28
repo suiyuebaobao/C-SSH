@@ -19,10 +19,12 @@ pub(crate) async fn execute(pool: &PgPool, query: PageQuery) -> AppResult<Page<A
         .map_err(map_read_error)?;
     let rows = sqlx::query_as::<_, AuditRow>(
         r#"
-        SELECT id, actor_account_id, action, resource_kind, resource_id,
-               outcome, request_id, details, created_at
-        FROM audit_events
-        ORDER BY created_at DESC, id DESC
+        SELECT event.id, actor.id AS actor_account_id, event.action,
+               event.resource_kind, event.resource_id, event.outcome,
+               event.request_id, event.details, event.created_at
+        FROM audit_events AS event
+        LEFT JOIN accounts AS actor ON actor.id = event.actor_account_id
+        ORDER BY event.created_at DESC, event.id DESC
         LIMIT $1 OFFSET $2
         "#,
     )

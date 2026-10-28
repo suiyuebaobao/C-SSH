@@ -11,10 +11,10 @@ pub(super) fn page_content() -> PageContent {
     page(
         PageId::Documentation,
         "C-SSH 使用文档｜连接与运维实操指南",
-        "C-SSH 0.9.6使用文档：经典／工作台、主机短卡、Agent部署、持久终端、监控、文件、AI与日志。",
+        "C-SSH 0.9.7使用文档：经典／工作台、Agent接入、持久终端、监控并发、服务器浏览器、AI进度与用量、手动云同步和文件管理。",
         "DOCS / TASK GUIDES",
         "从第一台主机开始使用 C-SSH",
-        "按C-SSH 0.9.6的目录完成一个任务；可以先预览CSV导入、跳过轻量引导，再按需使用终端、监控与AI。",
+        "按C-SSH 0.9.7的目录完成一个任务；可以先预览CSV导入、跳过轻量引导，再按需使用终端、监控与AI。",
     )
     .with_actions(vec![
         action("添加第一台主机", "#add-host", "button button-primary"),
@@ -70,6 +70,8 @@ fn groups() -> Vec<DocumentationGroup> {
                 link("monitoring", "05", "启用监控并看历史"),
                 link("files", "06", "浏览并传输文件"),
                 link("ai-assistant", "07", "配置并运行 AI 助手"),
+                link("ai-usage-and-tasks", "11", "AI并行任务与用量"),
+                link("server-browser", "12", "独立服务器浏览器"),
             ],
         ),
         group(
@@ -92,9 +94,9 @@ fn sections() -> Vec<DocumentationSection> {
             "打开已安装的客户端后，先确定连接模式、主机身份与数据边界。",
             vec![
                 text(
-                    "0.9.6",
-                    "双界面、短卡片与切换修正",
-                    "经典界面与新工作台并存，三桌面提供三档同款短卡和更清晰的AI聊天；修复只读载入中切换主机、删除目标后隐藏页跳转，日志显示安全设置的实际新值。",
+                    "0.9.7",
+                    "AI、服务器浏览器与同步改进",
+                    "AI任务并行与实时进度、上下文和缓存统计、独立服务器浏览器、监控队列与选择性压缩、手动云同步及Android终端和历史修复。完整变化见更新日志。",
                     false,
                 ),
                 text(
@@ -114,6 +116,58 @@ fn sections() -> Vec<DocumentationSection> {
                     "确认 Cloud 数据边界",
                     "SSH 数据面始终由客户端直连服务器；Creation Cloud 只保存账号、设备和允许同步的数据，不代理终端或远程命令。",
                     false,
+                ),
+            ],
+        ),
+        section(
+            "ai-usage-and-tasks",
+            "11 / AI TASKS & USAGE",
+            "查看AI进度、并发与用量",
+            "在设置的AI模型执行设置中调整独立任务并发；需要时展开聊天中的执行详情。",
+            vec![
+                text(
+                    "PROGRESS",
+                    "及时看见结果",
+                    "主画面保留简洁摘要，子任务进度和已有结果持续更新；插话、暂停、停止及接续沿当前会话处理。",
+                    false,
+                ),
+                text(
+                    "USAGE",
+                    "累计与上下文分开",
+                    "累计使用Token包含历次请求及子任务；上下文是主助手单次输入，不是累计总量。缓存缺失显示未报告，刷新期间保留上次确认值。",
+                    false,
+                ),
+                text(
+                    "MEMORY",
+                    "保留原始记录",
+                    "上下文按模型实际窗口处理，长会话采用有界读取；AI对话与原始记忆保存在本机，不参与Cloud配置同步。",
+                    false,
+                ),
+            ],
+        ),
+        section(
+            "server-browser",
+            "12 / SERVER BROWSER",
+            "使用独立服务器浏览器环境",
+            "从桌面主机的服务器浏览器入口进入列表；主机需有可用Agent，本机需安装Google Chrome。",
+            vec![
+                text(
+                    "ENVIRONMENT",
+                    "一个环境一套资料",
+                    "同一服务器可新增多个环境，各自保存浏览数据、固定种子和设置。打开前检查Chrome与Agent能力；关闭或重开不重置已有身份。",
+                    false,
+                ),
+                text(
+                    "SETTINGS",
+                    "系统、语言与权限",
+                    "在环境设置中选择系统、时区、语言及权限。定位、麦克风和摄像头按设置正常询问；网站仍可能要求验证。",
+                    false,
+                ),
+                text(
+                    "MOBILE",
+                    "当前平台边界",
+                    "Windows、Mac和Linux提供此入口；Android入口隐藏且验证暂停，iOS继续暂停。",
+                    true,
                 ),
             ],
         ),

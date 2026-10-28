@@ -1,7 +1,7 @@
 //! 定义不暴露本站路径或外链凭据的公开下载清单。
 
 use chrono::{DateTime, Utc};
-use cloud_domain::AppResult;
+use cloud_domain::{AppError, AppResult};
 use serde::Serialize;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -63,20 +63,31 @@ pub(crate) struct PublicCatalogRow {
     pub byte_size: i64,
     pub sha256: String,
     pub updater_signature: Option<String>,
-    pub source_id: Uuid,
-    pub source_kind: String,
-    pub provider_name: String,
-    pub sort_order: i32,
+    pub source_id: Option<Uuid>,
+    pub source_kind: Option<String>,
+    pub provider_name: Option<String>,
+    pub sort_order: Option<i32>,
 }
 
 impl PublicCatalogRow {
-    pub(crate) fn source(&self) -> AppResult<PublicSource> {
-        Ok(PublicSource {
-            id: self.source_id,
-            source_kind: SourceKind::try_from(self.source_kind.as_str())?,
-            provider_name: self.provider_name.clone(),
-            sort_order: self.sort_order,
-            download_path: format!("assets/{}/sources/{}", self.asset_id, self.source_id),
-        })
+    pub(crate) fn source(&self) -> AppResult<Option<PublicSource>> {
+        match (
+            self.source_id,
+            self.source_kind.as_deref(),
+            self.provider_name.as_deref(),
+            self.sort_order,
+        ) {
+            (None, None, None, None) => Ok(None),
+            (Some(id), Some(kind), Some(provider_name), Some(sort_order)) => {
+                Ok(Some(PublicSource {
+                    id,
+                    source_kind: SourceKind::try_from(kind)?,
+                    provider_name: provider_name.into(),
+                    sort_order,
+                    download_path: format!("assets/{}/sources/{id}", self.asset_id),
+                }))
+            }
+            _ => Err(AppError::Storage("公开下载来源字段不完整".into())),
+        }
     }
 }

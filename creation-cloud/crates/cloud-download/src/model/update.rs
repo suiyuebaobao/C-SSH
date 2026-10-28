@@ -13,6 +13,8 @@ pub struct UpdateCheckQuery {
     pub platform: String,
     pub architecture: String,
     pub package_kind: String,
+    #[serde(default)]
+    pub update_package_kind: Option<String>,
     pub current_version: String,
     pub current_install_sha256: Option<String>,
     #[serde(default = "default_channel")]
@@ -79,3 +81,4 @@ fn default_channel() -> String {
 fn default_locale() -> String {
     "zh-CN".to_owned()
 }
+

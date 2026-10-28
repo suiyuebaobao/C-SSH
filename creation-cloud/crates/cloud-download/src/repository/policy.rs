@@ -63,16 +63,16 @@ pub(crate) async fn targets(pool: &PgPool) -> AppResult<Vec<PolicyTargetRow>> {
     sqlx::query_as(
         "SELECT release.id, release.version, release.revision, release.published_at, \
                 COUNT(DISTINCT asset.id) AS asset_count, \
+                COALESCE(jsonb_agg(DISTINCT jsonb_build_array(asset.platform, asset.architecture, \
+                    asset.package_kind)) FILTER (WHERE asset.id IS NOT NULL), '[]'::jsonb) AS asset_identities, \
                 COUNT(DISTINCT asset.id) FILTER (WHERE \
-                    (asset.platform = 'windows' AND asset.architecture = 'x86_64' \
-                     AND asset.package_kind IN ('exe', 'msi', 'zip')) \
-                    OR (asset.platform = 'android' AND asset.architecture = 'aarch64' \
-                        AND asset.package_kind = 'apk')) AS formal_asset_count, \
-                COUNT(DISTINCT asset.id) FILTER (WHERE asset.platform = 'windows' \
-                    AND asset.package_kind IN ('exe', 'msi', 'zip') \
+                    formal_update_asset(release.id, asset.platform, asset.architecture, asset.package_kind)) AS formal_asset_count, \
+                COUNT(DISTINCT asset.id) FILTER (WHERE \
+                    formal_update_asset(release.id, asset.platform, asset.architecture, asset.package_kind) \
+                    AND desktop_updater_signature_asset(asset.platform, asset.package_kind) \
                     AND asset.updater_signature IS NOT NULL) AS required_signature_count, \
-                COUNT(DISTINCT asset.id) FILTER (WHERE source.source_kind = 'local' \
-                    AND source.enabled = TRUE) AS local_source_count \
+                COUNT(DISTINCT asset.id) FILTER (WHERE source.source_kind = 'local' AND source.enabled = TRUE \
+                    AND formal_update_asset(release.id, asset.platform, asset.architecture, asset.package_kind)) AS local_source_count \
          FROM releases AS release \
          LEFT JOIN release_assets AS asset ON asset.release_id = release.id \
          LEFT JOIN release_sources AS source ON source.asset_id = asset.id \
@@ -140,6 +140,7 @@ pub(crate) async fn policy_assets(
          JOIN release_sources AS source ON source.asset_id = asset.id \
          WHERE release.id = $1 AND release.status = 'published' AND release.channel = 'stable' \
            AND source.enabled = TRUE AND source.source_kind = 'local' \
+           AND formal_update_asset(release.id, asset.platform, asset.architecture, asset.package_kind) \
          ORDER BY asset.id, source.sort_order, source.created_at, source.id \
          FOR SHARE OF release, asset, source",
     )
@@ -164,6 +165,20 @@ pub(crate) async fn target_version(
     .ok_or_else(|| AppError::Conflict("目标正式版本不存在或尚未发布".into()))
 }
 
+pub(crate) async fn release_asset_identities(
+    transaction: &mut Transaction<'_, Postgres>,
+    release_id: Uuid,
+) -> AppResult<Vec<(String, String, String)>> {
+    sqlx::query_as(
+        "SELECT platform, architecture, package_kind FROM release_assets \
+         WHERE release_id = $1 ORDER BY id FOR SHARE",
+    )
+    .bind(release_id)
+    .fetch_all(&mut **transaction)
+    .await
+    .map_err(write_error)
+}
+
 pub(crate) async fn forced_identities(
     transaction: &mut Transaction<'_, Postgres>,
     versions: &[String],
@@ -174,11 +189,7 @@ pub(crate) async fn forced_identities(
          FROM releases AS release \
          JOIN release_assets AS asset ON asset.release_id = release.id \
          WHERE release.status = 'published' AND release.channel = 'stable' \
-           AND release.version = ANY($1) AND ( \
-             (asset.platform = 'windows' AND asset.architecture = 'x86_64' \
-              AND asset.package_kind IN ('exe', 'msi', 'zip')) \
-             OR (asset.platform = 'android' AND asset.architecture = 'aarch64' \
-                 AND asset.package_kind = 'apk')) \
+           AND release.version = ANY($1) \
          ORDER BY release.version, asset.platform, asset.architecture, asset.package_kind \
          FOR SHARE OF release, asset",
     )

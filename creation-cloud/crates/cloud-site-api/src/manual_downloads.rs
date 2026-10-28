@@ -67,16 +67,17 @@ pub fn platforms(
     }
     let en = locale == Locale::En;
     let mut result = Vec::new();
-    if !published.iter().any(|p| p.name == "macOS") {
+    let macos = missing_assets(
+        version,
+        revision,
+        published,
+        "macos",
+        &[("aarch64", "dmg", "macOS-arm64.dmg")],
+    );
+    if !macos.is_empty() {
         result.push(ManualPlatform {
             name: "macOS".into(),
-            assets: vec![asset(
-                version,
-                revision,
-                "DMG",
-                "Apple Silicon · macOS 13+",
-                "macOS-arm64.dmg",
-            )],
+            assets: macos,
             note: if en {
                 "Ad-hoc signed, not notarized. No Intel build or automatic updater."
             } else {
@@ -86,27 +87,69 @@ pub fn platforms(
         });
     }
     if matches!(version, "0.9.2" | "0.9.3" | "0.9.4" | "0.9.6") {
-        if !published
-            .iter()
-            .any(|p| p.name == "Windows" && p.assets.iter().any(|a| a.architecture == "arm64"))
-        {
+        let windows = missing_assets(
+            version,
+            revision,
+            published,
+            "windows",
+            &[
+                ("aarch64", "exe", "arm64-setup.exe"),
+                ("aarch64", "zip", "portable-Windows-arm64.zip"),
+            ],
+        );
+        if !windows.is_empty() {
             result.push(ManualPlatform {
-                name: "Windows ARM64".into(),
-                assets: vec![asset(version, revision, "NSIS", "Windows 11 ARM64", "arm64-setup.exe"), asset(version, revision, "Portable ZIP", "Windows 11 ARM64", "portable-Windows-arm64.zip")],
-                note: if en { "Native ARM64 client. Install and update manually; choose the x64 downloads above for x64 Windows." }
-                else { "原生 ARM64 客户端，手动安装与更新；x64 Windows 请使用 x64 下载。" }.into(),
+                name: "Windows".into(),
+                assets: windows,
+                note: if en { "ARM64 builds require Windows 11 ARM64 and manual installation and updates. Choose x86_64 for x64 Windows." }
+                else { "ARM64 包用于 Windows 11 ARM64，手动安装与更新；x64 Windows 请选择 x86_64。" }.into(),
             });
         }
-        if !published.iter().any(|p| p.name == "Linux") {
+        let linux = missing_assets(
+            version,
+            revision,
+            published,
+            "linux",
+            &[
+                ("x86_64", "deb", "amd64.deb"),
+                ("x86_64", "appimage", "amd64.AppImage"),
+                ("aarch64", "deb", "arm64.deb"),
+                ("aarch64", "appimage", "aarch64.AppImage"),
+            ],
+        );
+        if !linux.is_empty() {
             result.push(ManualPlatform {
                 name: "Linux".into(),
-                assets: vec![asset(version, revision, "deb", "x86_64 / amd64", "amd64.deb"), asset(version, revision, "AppImage", "x86_64 / amd64", "amd64.AppImage"), asset(version, revision, "deb", "ARM64 / aarch64", "arm64.deb"), asset(version, revision, "AppImage", "ARM64 / aarch64", "aarch64.AppImage")],
+                assets: linux,
                 note: if en { "Verified on Ubuntu 24.04 with X11. Requires an unlocked desktop Secret Service keyring; AppImage also needs FUSE support. Other distributions and Wayland are not covered by this verification." }
                 else { "已在 Ubuntu 24.04／X11 验证。需要已解锁的桌面 Secret Service 密钥环，AppImage 还需 FUSE 支持；本轮未覆盖其他发行版和 Wayland。" }.into(),
             });
         }
     }
     result
+}
+
+fn missing_assets(
+    version: &str,
+    revision: i32,
+    published: &[PublishedPlatformView],
+    platform: &str,
+    candidates: &[(&str, &str, &str)],
+) -> Vec<PublishedAssetView> {
+    candidates
+        .iter()
+        .filter(|(architecture, kind, _)| {
+            !published
+                .iter()
+                .filter(|current| current.name.eq_ignore_ascii_case(platform))
+                .flat_map(|current| &current.assets)
+                .any(|current| {
+                    current.architecture == *architecture
+                        && current.package_kind.eq_ignore_ascii_case(kind)
+                })
+        })
+        .map(|(architecture, kind, suffix)| asset(version, revision, kind, architecture, suffix))
+        .collect()
 }
 
 fn asset(
@@ -129,3 +172,4 @@ fn asset(
         )),
     }
 }
+

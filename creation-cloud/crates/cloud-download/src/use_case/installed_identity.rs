@@ -31,11 +31,15 @@ impl Service {
         validate_release(&release, &input)?;
         let assets =
             repository::installed_identity::lock_assets(&mut transaction, input.release_id).await?;
-        validate_assets(&assets, input.release_id, &input.entries)?;
-        let idempotent = assets.iter().zip(&input.entries).all(|(asset, entry)| {
-            asset.installed_sha256.as_deref() == Some(entry.installed_sha256.as_str())
-        });
-        for (asset, entry) in assets.iter().zip(&input.entries) {
+        let canonical_assets =
+            validate_assets(&assets, &input.version, input.release_id, &input.entries)?;
+        let idempotent = canonical_assets
+            .iter()
+            .zip(&input.entries)
+            .all(|(asset, entry)| {
+                asset.installed_sha256.as_deref() == Some(entry.installed_sha256.as_str())
+            });
+        for (asset, entry) in canonical_assets.iter().zip(&input.entries) {
             cloud_release::record_installed_sha256_in_transaction(
                 actor,
                 &mut transaction,
@@ -156,22 +160,40 @@ fn validate_release(
     Ok(())
 }
 
-fn validate_assets(
-    assets: &[repository::installed_identity::LockedIdentityAsset],
+fn validate_assets<'a>(
+    assets: &'a [repository::installed_identity::LockedIdentityAsset],
+    version: &str,
     release_id: uuid::Uuid,
     entries: &[InstalledIdentityEntryInput],
-) -> AppResult<()> {
-    if assets.len() != entries.len() {
+) -> AppResult<Vec<&'a repository::installed_identity::LockedIdentityAsset>> {
+    let identities = assets
+        .iter()
+        .map(|asset| {
+            (
+                asset.platform.as_str(),
+                asset.architecture.as_str(),
+                asset.package_kind.as_str(),
+            )
+        })
+        .collect::<Vec<_>>();
+    if !cloud_domain::release_asset_set_is_complete(version, &identities)
+        || assets.iter().any(|asset| asset.release_id != release_id)
+    {
         return Err(AppError::Conflict(
-            "目标版本资产数量与安装身份清单不一致".into(),
+            "目标版本实际资产集合不完整或不合法".into(),
         ));
     }
-    for (asset, entry) in assets.iter().zip(entries) {
-        if asset.release_id != release_id
-            || asset.platform != entry.platform
-            || asset.architecture != entry.architecture
-            || asset.package_kind != entry.package_kind
-            || asset.file_name != entry.file_name
+    let mut canonical_assets = Vec::with_capacity(entries.len());
+    for entry in entries {
+        let asset = assets
+            .iter()
+            .find(|asset| {
+                asset.platform == entry.platform
+                    && asset.architecture == entry.architecture
+                    && asset.package_kind == entry.package_kind
+            })
+            .ok_or_else(|| AppError::Conflict("目标版本缺少安装身份资产".into()))?;
+        if asset.file_name != entry.file_name
             || asset.byte_size != entry.byte_size
             || asset.sha256 != entry.download_sha256
         {
@@ -179,8 +201,9 @@ fn validate_assets(
                 "目标版本资产身份与发布清单不一致".into(),
             ));
         }
+        canonical_assets.push(asset);
     }
-    Ok(())
+    Ok(canonical_assets)
 }
 
 fn strict_sha256(value: &str, field: &str) -> AppResult<()> {
@@ -216,3 +239,4 @@ fn expected_file_name(version: &str, package_kind: &str) -> String {
         _ => unreachable!("正式身份只包含版本合同声明的包形态"),
     }
 }
+

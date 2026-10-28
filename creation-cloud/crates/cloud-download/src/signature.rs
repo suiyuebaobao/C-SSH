@@ -34,11 +34,8 @@ pub(crate) fn validate_for_asset(
 }
 
 fn accepts_asset(platform: &str, package_kind: &str) -> bool {
-    platform.trim().eq_ignore_ascii_case("windows")
-        && matches!(
-            package_kind.trim().to_ascii_lowercase().as_str(),
-            "exe" | "msi" | "zip"
-        )
+    cloud_domain::is_desktop_updater_asset(
+        &platform.trim().to_ascii_lowercase(), &package_kind.trim().to_ascii_lowercase())
 }
 
 impl Service {
@@ -77,10 +74,10 @@ pub(crate) async fn set_in_transaction(
     let result = sqlx::query(
         "UPDATE release_assets AS asset SET updater_signature = $2 \
          FROM releases AS release WHERE asset.id = $1 AND release.id = asset.release_id \
-           AND asset.platform = 'windows' \
-           AND asset.package_kind IN ('exe', 'msi', 'zip') \
+           AND desktop_updater_signature_asset(asset.platform, asset.package_kind) \
            AND (release.status IN ('draft', 'validating') \
-             OR (release.status = 'published' \
+             OR (release.status = 'published' AND asset.platform = 'windows' \
+                 AND asset.package_kind IN ('exe', 'msi', 'zip') \
                  AND asset.updater_signature IS NULL))",
     )
     .bind(asset_id)
@@ -128,3 +125,4 @@ fn require_actor(actor: &AdminActor) -> AppResult<Uuid> {
         Ok(actor_id)
     }
 }
+

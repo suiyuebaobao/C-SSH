@@ -168,6 +168,9 @@ impl Service {
                 return Err(AppError::Validation("更新目标不能是关闭版本".into()));
             }
             validate_forced_versions(&draft.forced_versions, Some(&target_version))?;
+            let identities =
+                repository::policy::release_asset_identities(transaction, target_id).await?;
+            validate_release_asset_set(&target_version, &identities)?;
             let assets = preferred_policy_assets(
                 repository::policy::policy_assets(transaction, target_id).await?,
             );

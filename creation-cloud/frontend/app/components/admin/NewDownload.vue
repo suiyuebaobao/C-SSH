@@ -18,10 +18,33 @@ const external = ref(""),
 const file = ref<File | null>(null),
   signature = ref<File | null>(null);
 const assets = ref<AdminAsset[]>([]);
-const packages = computed(() => platform.value === "android" ? ["apk"] : ["exe", "zip"]);
-watch(platform, (value) => {
-  architecture.value = value === "android" ? "aarch64" : "x86_64";
+const platformFormats: Record<
+  string,
+  { name: string; architectures: string[]; packages: string[] }
+> = {
+  windows: {
+    name: "Windows",
+    architectures: ["x86_64", "aarch64"],
+    packages: ["exe", "zip"],
+  },
+  macos: { name: "macOS", architectures: ["aarch64"], packages: ["dmg"] },
+  android: { name: "Android", architectures: ["aarch64"], packages: ["apk"] },
+  linux: {
+    name: "Linux",
+    architectures: ["x86_64", "aarch64"],
+    packages: ["deb", "appimage"],
+  },
+};
+const packages = computed(() => platformFormats[platform.value]!.packages);
+const architectures = computed(
+  () => platformFormats[platform.value]!.architectures,
+);
+watch(platform, () => {
+  architecture.value = architectures.value[0]!;
   packageKind.value = packages.value[0]!;
+});
+watch([platform, architecture, packageKind], () => {
+  file.value = null;
   signature.value = null;
 });
 const busy = ref(false),
@@ -85,7 +108,11 @@ async function upload() {
         body.set("sha256", sha256.value);
       }
     }
-    if (platform.value === "windows" && signature.value)
+    if (
+      mode.value === "local" &&
+      platform.value === "windows" &&
+      signature.value
+    )
       body.set("updater_signature", signature.value);
     await api("/api/v1/admin/downloads/new", "POST", body);
     notice.value = t("下载已登记。", "Download registered.");
@@ -118,27 +145,24 @@ async function upload() {
         >{{ t("平台", "Platform")
         }}<select v-model="platform">
           <option
-            v-for="value in ['windows', 'android']"
+            v-for="(definition, value) in platformFormats"
             :key="value"
             :value="value"
           >
-            {{ value }}
+            {{ definition.name }}
           </option>
         </select></label
       ><label
         >{{ t("架构", "Architecture")
         }}<select v-model="architecture">
-          <option v-if="platform === 'windows'" value="x86_64">x86_64</option>
-          <option v-else value="aarch64">ARM64</option>
+          <option v-for="value in architectures" :key="value" :value="value">
+            {{ value === "aarch64" ? "ARM64 / aarch64" : "x64 / x86_64" }}
+          </option>
         </select></label
       ><label
         >{{ t("包格式", "Package")
         }}<select v-model="packageKind">
-          <option
-            v-for="value in packages"
-            :key="value"
-            :value="value"
-          >
+          <option v-for="value in packages" :key="value" :value="value">
             {{ value }}
           </option>
         </select></label
@@ -151,6 +175,7 @@ async function upload() {
       ><label v-if="mode === 'local'"
         >{{ t("客户端文件", "Client file")
         }}<input
+          :key="`${platform}:${architecture}:${packageKind}`"
           type="file"
           required
           @change="
@@ -187,13 +212,14 @@ async function upload() {
           ><label
             >SHA256<input v-model="sha256" required pattern="[a-fA-F0-9]{64}"
           /></label></details></template
-      ><label v-if="platform === 'windows'"
+      ><label v-if="platform === 'windows' && mode === 'local'"
         >{{
           t(
             "更新签名文件（本地上传必需）",
             "Updater signature file (required for local upload)",
           )
         }}<input
+          :key="`signature:${platform}:${architecture}:${packageKind}`"
           type="file"
           accept=".sig"
           :required="mode === 'local'"
@@ -201,6 +227,22 @@ async function upload() {
             signature = ($event.target as HTMLInputElement).files?.[0] || null
           "
       /></label>
+      <p v-if="platform === 'windows' && mode === 'external'" class="muted">
+        {{
+          t(
+            "外链登记后，请在资产的「来源与校验」中上传 Windows 更新签名，完成后才能发布。",
+            "After registering a link, upload the Windows updater signature under Sources & integrity before publishing.",
+          )
+        }}
+      </p>
+      <p class="muted">
+        {{
+          t(
+            "iOS 尚未公开发布，不提供安装包上传。",
+            "iOS is not publicly released; package uploads are unavailable.",
+          )
+        }}
+      </p>
       <p v-if="error" role="alert" class="form-error">{{ error }}</p>
       <p v-if="notice" role="status" class="form-success">{{ notice }}</p>
       <button class="button primary" :disabled="busy">

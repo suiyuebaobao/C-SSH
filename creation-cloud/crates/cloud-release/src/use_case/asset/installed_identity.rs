@@ -39,5 +39,7 @@ fn is_formal_identity(asset: &ReleaseAsset) -> bool {
             asset.package_kind.as_str(),
         ),
         ("windows", "x86_64", "exe" | "msi" | "zip") | ("android", "aarch64", "apk")
+        | ("macos", "aarch64", "tar_gz") | ("linux", "x86_64" | "aarch64", "appimage")
     )
 }
+

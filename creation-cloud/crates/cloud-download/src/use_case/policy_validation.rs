@@ -84,15 +84,34 @@ pub(super) fn policy_target_is_eligible(row: &crate::model::PolicyTargetRow) -> 
     let Ok(signature_count) = i64::try_from(
         expected
             .iter()
-            .filter(|(platform, _, _)| *platform == "windows")
+            .filter(|(platform, _, kind)| cloud_domain::is_desktop_updater_asset(platform, kind))
             .count(),
     ) else {
         return false;
     };
-    row.asset_count == expected_count
+    validate_release_asset_set(&row.version, &row.asset_identities).is_ok()
+        && usize::try_from(row.asset_count).ok() == Some(row.asset_identities.len())
         && row.formal_asset_count == expected_count
         && row.required_signature_count == signature_count
         && row.local_source_count == expected_count
+}
+
+pub(super) fn validate_release_asset_set(
+    version: &str,
+    identities: &[(String, String, String)],
+) -> AppResult<()> {
+    let identities = identities
+        .iter()
+        .map(|(platform, architecture, kind)| {
+            (platform.as_str(), architecture.as_str(), kind.as_str())
+        })
+        .collect::<Vec<_>>();
+    if !cloud_domain::release_asset_set_is_complete(version, &identities) {
+        return Err(AppError::Conflict(
+            "策略发布必须使用完整合法的实际资产集合".into(),
+        ));
+    }
+    Ok(())
 }
 
 pub(super) fn validate_formal_assets(version: &str, assets: &[PolicyAssetRow]) -> AppResult<()> {
@@ -121,8 +140,7 @@ pub(super) fn validate_formal_assets(version: &str, assets: &[PolicyAssetRow]) -
         {
             return Err(AppError::Conflict("策略目标资产或本站来源身份无效".into()));
         }
-        let windows_update_asset = asset.platform == "windows"
-            && matches!(asset.package_kind.as_str(), "exe" | "msi" | "zip");
+        let windows_update_asset = cloud_domain::is_desktop_updater_asset(&asset.platform, &asset.package_kind);
         match (windows_update_asset, asset.updater_signature.as_deref()) {
             (true, Some(signature)) => {
                 crate::signature::validate(signature)?;
@@ -172,9 +190,19 @@ pub(super) fn validate_forced_identities(
             .iter()
             .filter(|row| row.version == version && row.revision == revision)
             .collect::<Vec<_>>();
-        if revision_rows.len() != expected.len() {
+        let identities = revision_rows
+            .iter()
+            .map(|row| {
+                (
+                    row.platform.as_str(),
+                    row.architecture.as_str(),
+                    row.package_kind.as_str(),
+                )
+            })
+            .collect::<Vec<_>>();
+        if !cloud_domain::release_asset_set_is_complete(version, &identities) {
             return Err(AppError::Conflict(
-                "强制版本修订的安装身份数量不完整".into(),
+                "强制版本修订的实际资产集合不完整或不合法".into(),
             ));
         }
         for identity in expected.iter().copied() {

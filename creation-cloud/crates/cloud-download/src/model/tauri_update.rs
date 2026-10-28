@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct TauriUpdateQuery {
+    #[serde(default = "default_platform")]
+    pub platform: String,
     pub architecture: String,
     pub package_kind: String,
     pub current_version: String,
@@ -35,6 +37,8 @@ pub(crate) struct TauriPlatformUpdate {
 fn default_channel() -> String {
     "stable".to_owned()
 }
+
+fn default_platform() -> String { "windows".to_owned() }
 
 fn default_locale() -> String {
     "zh-CN".to_owned()

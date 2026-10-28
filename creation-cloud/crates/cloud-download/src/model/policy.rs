@@ -118,6 +118,7 @@ pub(crate) struct PolicyTargetRow {
     pub revision: i32,
     pub published_at: DateTime<Utc>,
     pub asset_count: i64,
+    pub asset_identities: sqlx::types::Json<Vec<(String, String, String)>>,
     pub formal_asset_count: i64,
     pub required_signature_count: i64,
     pub local_source_count: i64,

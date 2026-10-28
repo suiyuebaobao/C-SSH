@@ -1,4 +1,4 @@
-//! 读取已发布版本、资产和已启用来源的扁平公开投影。
+//! 保留已发布资产身份，并以可空字段投影其已启用来源。
 
 use cloud_domain::AppResult;
 use cloud_store::PgPool;
@@ -18,8 +18,9 @@ pub(crate) async fn execute(pool: &PgPool) -> AppResult<Vec<PublicCatalogRow>> {
                sources.sort_order
         FROM releases
         JOIN release_assets AS assets ON assets.release_id = releases.id
-        JOIN release_sources AS sources ON sources.asset_id = assets.id
-        WHERE releases.status = 'published' AND sources.enabled = TRUE
+        LEFT JOIN release_sources AS sources
+          ON sources.asset_id = assets.id AND sources.enabled = TRUE
+        WHERE releases.status = 'published'
         ORDER BY releases.published_at DESC, releases.id DESC,
                  assets.platform, assets.architecture, assets.package_kind,
                  sources.sort_order, sources.created_at, sources.id

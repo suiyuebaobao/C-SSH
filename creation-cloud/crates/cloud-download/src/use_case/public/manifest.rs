@@ -57,7 +57,10 @@ pub(crate) fn assemble(rows: Vec<PublicCatalogRow>) -> AppResult<Vec<PublicRelea
         let Some(asset) = release.assets.last_mut() else {
             return Err(AppError::Internal("公开资产聚合状态无效".into()));
         };
-        asset.sources.push(row.source()?);
+        // 无启用来源仍保留登记身份，避免后续手动下载投影补回已停用的同项资产。
+        if let Some(source) = row.source()? {
+            asset.sources.push(source);
+        }
     }
     // 同版本以修订倒序；旧修订仍保留在清单，不因发布日期碰巧相同而选错包。
     releases.sort_by(|left, right| {
