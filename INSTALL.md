@@ -1,15 +1,12 @@
-# C-SSH 0.9.6 修訂3安裝與資料保全
+# C-SSH 0.9.7 安裝與資料保全
 
+[下載](README.md#downloads) · [English](INSTALL_EN.md)
 
-[下载](README.md#downloads) · [English](INSTALL_EN.md)
-
-0.9.6只发公告，不弹升级提醒、不强制更新；请自行下载并安装。
-
-本次僅公告、手動下載，不提醒升級、不強制更新。產品版本仍為0.9.6，修訂3使用新tag `v0.9.6-r3`；四平台十項，iOS不上传，所有舊Release與原0.9.6資產保持。Android／iOS構建號9006000，wire及簽名身份不變。
+本版本會提示新版本，請自行前往下載頁下載安裝；不強制更新，不在背景下載或安裝。Android構建號9007000，iOS繼續暫停。
 
 ## 安装前
 
-- 从官网或suiyuebaobao/C-SSH的v0.9.6-r3取得安装包，按首页SHA256核对。
+- 从官网或suiyuebaobao/C-SSH的v0.9.7取得安装包，按首页SHA256核对。
 - 退出C-SSH，保全重要数据。Cloud仅手动同步加密配置，不包含AI对话与长期记忆；保留数据保护密码。
 
 ## Windows x64／ARM64
@@ -21,14 +18,14 @@
 
 ## M系列Mac
 
-- 打开C-SSH_0.9.6_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
+- 打开C-SSH_0.9.7_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
 - 仅Apple Silicon，最低系统目标macOS13；ad-hoc签名、未经公证。首次打开的系统许可参见[Apple官方说明](https://support.apple.com/zh-cn/102445)，不要把系统密码发到反馈中。
-- 当前没有Mac自动更新，后续单独开发。
+- 本版本只提示并引导手动下载，不执行自动安装。
 
 ## Android arm64
 
-- 用系统安装器安装C-SSH_0.9.6_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
-- 沿用原正式簽名；修訂3最終APK沿用原正式簽名；相容同簽名安裝可保留資料覆蓋。相容且同簽名的舊版可保留資料覆蓋，無需卸載。
+- 用系统安装器安装C-SSH_0.9.7_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
+- 沿用既有正式簽名；相容且同簽名的舊版可保留資料覆蓋，無需卸載。
 - 更早旧签名不能直接覆盖；卸载会清除本地数据，尤其AI对话和记忆不在Cloud同步范围。未确认数据保全前不要卸载或清库。
 
 ## Linux x86_64／ARM64
@@ -45,11 +42,6 @@
 地址直接填IPv4或域名，客户端自动判断，端口单独填写；自建云见[接入说明](SELF_HOSTING.md)。iOS本次无公开下载。
 
 
-## 本輪資料與驗證
+## 資料相容性
 
-本修訂產品版本仍為0.9.6、SQLite26。以對應平台套件於原位置更新並保留既有資料及系統鑰匙圈／密鑰庫；Mac為ad-hoc簽章、未公證。只公告與手動下載，不推送升级提醒或強制更新。
-
-- Windows／Mac／Linux 經典與工作台的搜尋按鈕、原面板、快捷鍵及窄視窗排版完成 170 項直接前端檢查、38 組布局；三端前端構建通過。
-- 十項正式包已完成對應的來源與包體檢查；九項桌面新包確認包含最終搜尋介面，Windows 四包取得新的實際安裝身份與有效簽名。Mac 為 arm64、ad-hoc 簽章，未公證。
-- Agent 實測涵蓋 Mac 三台 Linux 節點、Windows 11 ARM64 的原生 ARM64／相容 x64，以及 Linux 兩架構 VM；本次搜尋修正沿用未變更 Rust 流程的原始證據，不外推為新包全功能重測或 Windows x64 實體機驗收。
-- Android arm64 正式 APK 沿用原簽名，已在 SDK Emulator 經正常介面完成既有 Agent 復用、就緒、憑據保存與監控載入；不外推為真機或一般主機刪除驗收。iOS 僅同步源碼與前端，不上傳。
+0.9.7使用SQLite27。請保全完整資料及原系統鑰匙圈／密鑰庫，讓程式沿正常前向遷移接續；不要刪除資料或密鑰處理啟動問題。新格式資料庫不可交給較舊程式開啟。Cloud不包含AI對話與記憶；回退需要相配的舊程式及升級前完整備份。實際驗證範圍見[更新列表](CHANGELOG.md)。

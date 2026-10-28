@@ -1,63 +1,123 @@
-# C-SSH 0.9.6 — Revision 3
+# C-SSH 0.9.7
 
-[中文](README.md) · [Website](https://c-ssh.com) · [Installation](INSTALL_EN.md)
+[中文](README.md) · [Website](https://c-ssh.com) · [Installation and data](INSTALL_EN.md)
 
+This release brings together recent improvements to the AI assistant, server browser, monitoring, cloud sync, and the Windows, macOS, Linux, and Android interfaces. It also addresses problems found during everyday use, including stalled conversations, confusing status displays, and connection switching.
 
-A server-operations client for Windows, Apple Silicon Mac, Android and Linux. Local SSH/Agent operations do not require Cloud login.
+**This release uses notifications and manual downloads only. Visit the download page to install it yourself. There are no forced upgrades or background downloads or installations.** iOS development and distribution remain paused.
 
-Announcements and manual downloads only, with no upgrade reminder or forced update. Version0.9.6, SQLite26 and build9006000 are unchanged. Revision3 uses the independent tag `v0.9.6-r3`; ten packages cover four platforms, iOS is not uploaded, and original0.9.6, revision2 and historical downloads remain available.
 
 ## Downloads
 
 | File | Bytes | Download |
 |---|---:|---|
-| C-SSH_0.9.6_x64-setup.exe | 47,912,113 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_x64-setup.exe) |
-| C-SSH_0.9.6_portable-Windows-x64.zip | 43,180,565 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_portable-Windows-x64.zip) |
-| C-SSH_0.9.6_arm64-setup.exe | 46,045,545 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_arm64-setup.exe) |
-| C-SSH_0.9.6_portable-Windows-arm64.zip | 41,861,101 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_portable-Windows-arm64.zip) |
-| C-SSH_0.9.6_macOS-arm64.dmg | 42,822,796 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_macOS-arm64.dmg) |
-| C-SSH_0.9.6_android-arm64.apk | 39,899,610 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_android-arm64.apk) |
-| C-SSH_0.9.6_amd64.deb | 44,271,530 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_amd64.deb) |
-| C-SSH_0.9.6_amd64.AppImage | 117,750,264 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_amd64.AppImage) |
-| C-SSH_0.9.6_arm64.deb | 43,422,970 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_arm64.deb) |
-| C-SSH_0.9.6_aarch64.AppImage | 116,779,528 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.6-r3/C-SSH_0.9.6_aarch64.AppImage) |
+| C-SSH_0.9.7_x64-setup.exe | 49,731,494 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_x64-setup.exe) |
+| C-SSH_0.9.7_portable-Windows-x64.zip | 45,010,208 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_portable-Windows-x64.zip) |
+| C-SSH_0.9.7_arm64-setup.exe | 47,816,201 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_arm64-setup.exe) |
+| C-SSH_0.9.7_portable-Windows-arm64.zip | 43,592,452 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_portable-Windows-arm64.zip) |
+| C-SSH_0.9.7_macOS-arm64.dmg | 47,725,501 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_macOS-arm64.dmg) |
+| C-SSH_0.9.7_android-arm64.apk | 45,779,461 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_android-arm64.apk) |
+| C-SSH_0.9.7_arm64.deb | 46,732,072 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_arm64.deb) |
+| C-SSH_0.9.7_aarch64.AppImage | 119,740,936 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_aarch64.AppImage) |
+| C-SSH_0.9.7_amd64.deb | 47,644,200 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_amd64.deb) |
+| C-SSH_0.9.7_amd64.AppImage | 120,789,496 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_amd64.AppImage) |
 
 ## Added
 
-- A separate revision-3 download record preserves original 0.9.6, revision 2 and historical downloads.
+### Concurrent AI tasks and clearer progress
+
+- Configure how many independent read-only tasks may run at once, including independent tasks on the same host. Additional work is queued.
+- Delegated tasks follow the main assistant's configured context window. Dependent work and changes requiring confirmation continue to respect ordering and permission boundaries.
+- Responses, subtask progress, and available results appear incrementally. A compact activity summary keeps the conversation readable, with details available on demand.
+- Interjections appear in the conversation, and pause, stop, and resume states are clearer.
+
+### Token usage, context, and cache statistics
+
+- See cumulative tokens, context usage, and cache hit rate. Android uses a compact three-value panel; desktop clients retain detailed statistics.
+- Cumulative tokens include reported input and output across requests and subtasks. Context usage describes one main-assistant request, with a short explanation to distinguish it from the accumulated total.
+- Previously confirmed values remain visible while a new turn or refresh is underway. Missing cache reports are shown as unknown rather than zero.
+- Provider-specific usage fields are normalized and requests deduplicated. Cache hit rate is weighted by observable input tokens rather than averaging request percentages.
+
+### Desktop server browser
+
+- Browse through a server Agent using the server's network exit on Windows, macOS, and Linux. A local Google Chrome installation is required and checked before launch.
+- Create multiple browser environments for one server, each with separate browsing data, a persistent fingerprint seed, and settings.
+- Configure operating-system presentation, timezone, language, and permissions. Location, microphone, and camera access can use normal permission prompts.
+- Improved reopening and recovery preserve environment data and identity after abnormal application exits.
+- The Android server-browser entry remains hidden while mobile validation is paused.
 
 ## Fixed
 
-- Adding an Agent host checks an existing Agent for compatibility first. Compatible Agents are reused without uploading, reinstalling or restarting. Missing Agents are installed; confirmed older versions follow the safe upgrade path. Unknown probe outcomes or future versions do not overwrite an installation.
-- Identity adoption, READY confirmation and credential persistence appear as separate real stages. A readiness failure is no longer reported as an initial SSH connection failure, and does not automatically replay installation.
-- Deployment progress is scoped to the current invocation, host and operation; late events after completion or leaving the view are rejected.
-- Windows and Mac workbench close buttons match the adjacent window controls in outline, background and size, while preserving danger hover and the existing exit action. Linux retains its normal system title bar.
-- Classic and workbench search entry points on Windows, Mac and Linux default to a magnifying-glass icon. Clicking opens the existing search panel, and the existing shortcuts are retained. The terminal toolbar wraps in narrow windows to keep search and connection controls from overlapping.
+### AI responsiveness, context, and history
+
+- Reduced repetitive directory reads, repeated queries, and unnecessary tool cycles during simple host checks.
+- Improved context preparation, stable prefixes, and history loading. Context handling follows the configured model window instead of imposing an unrelated small fixed limit.
+- Improved tool-result handling and long-conversation storage while preserving original records.
+- Addressed failures to send after pausing or interrupting, incorrect notices about another window taking over, and missing conversation content after reopening.
+- Fixed Mac crashes in affected AI execution paths.
+- Fixed Android history selection being invalidated by other conversations, history restoration changing the active model, and usage not refreshing after model-window changes.
+
+### Monitoring and local storage
+
+- Raised the configurable collection concurrency ceiling to 1000, with queuing and independent host scheduling. This is a configuration ceiling, not a throughput guarantee for every computer or network.
+- Reduced database overhead and repeated work in frequent collection paths.
+- Added selective compression for suitable communication payloads while leaving small responses uncompressed.
+- Improved Agent status refresh after cloud sync and clarified initial collection states without requiring an application restart.
+- Improved Windows Server Agent monitoring sampling costs and CPU usage.
+
+### Browser launch and stability
+
+- Improved first-launch reliability, preparation time, and retry behavior.
+- Fixed unexpected browser closure triggered by affected verification pages, page events, and navigation waits.
+- Browser environments retain separate cookies and other browsing data, with a stable identity across launches.
+- Websites and network exits still determine when a verification challenge appears. This release does not promise CAPTCHA-free access or complete concealment of every local fingerprint.
+
+### Agent access and Linux ARM compatibility
+
+- Improved access to existing Agents from multiple devices and handling of dedicated public keys.
+- Improved the detection, reuse, update, and readiness stages and their status messages.
+- Updated Linux x86_64 and ARM64 Agents, improved independent-channel compatibility, and recorded targeted UOS and Kylin ARM validation.
+- SSH-only hosts continue to respect their selected mode; updating the client does not automatically install an Agent on them.
+
+### Manual cloud sync and data protection
+
+- Reuse a valid data-protection verification within the same application process across page changes, checks, and subsequent sync operations. A new process requires verification again.
+- Added select-all and cloud-default choices and improved the sync list and confirmation dialogs.
+- Fixed Android's first-login download failure when the model catalog had not yet been cached. Downloads now obtain the required catalog themselves.
+- AI deletion records with no matching local account are no longer shown as downloadable configurations or allowed to block host downloads. Necessary internal sync acknowledgements remain.
+- Conflicts involving an existing local account still require a clear choice. Other accounts are not identified or removed by name. Sync remains manual and does not automatically upload AI conversations or memory.
+
+### Interface, terminals, and Android
+
+- Organized settings into four groups while preserving direct access to existing settings.
+- Improved desktop window controls, Mac corners, theme consistency, confirmation dialogs, and affected dark-theme text contrast.
+- Removed redundant Android context displays and corrected duplicated bottom safe-area spacing and keyboard-related layout problems.
+- Fixed host-card terminal entry selecting the wrong host and connection waits preventing users from switching hosts or terminals.
+- Late errors and authentication prompts from a previous connection no longer interfere with the newly selected terminal.
 
 ## Verified
 
-- Direct frontend verification completed 170 checks across 38 layouts for classic/workbench search buttons, the existing panel, shortcuts and narrow windows on Windows, Mac and Linux. All three frontend builds passed.
-- All ten release packages have matching source and package receipts. The nine refreshed desktop packages contain the final search interface; all four Windows packages have new actual installed identities and valid signatures. Mac is arm64, ad-hoc signed and not notarized.
-- Agent acceptance covers three Linux nodes through Mac, native ARM64 and compatible x64 execution on Windows 11 ARM64, and both Linux VM architectures. The search-only change reuses the unchanged Rust-flow evidence; it does not imply a new full-function test of every package or physical Windows x64 acceptance.
-- The Android arm64 release APK retains the existing signer. Its normal UI completed existing-Agent reuse, readiness, credential persistence and monitor loading on the SDK Emulator. This does not imply physical-device or ordinary host-deletion acceptance. iOS source and frontend are synchronized only and are not uploaded.
+The changes use their existing targeted shared-layer, interface, and native validation evidence. Release checks additionally cover version, architecture, embedded resources, signing, and packaging. These results are not presented as a fresh exhaustive test of every platform, distribution, or physical phone.
+
+The Android first-login cloud download fix was exercised in the normal Android SDK Emulator client against an authorized test account, including configuration download and subsequent checks without warming the model catalog first.
+
+macOS builds support Apple Silicon and remain ad-hoc signed, without Developer ID notarization. Android retains its existing APK signing identity. Keep important data before upgrading and do not open a migrated database with an older incompatible client.
 
 ## SHA256
 
 | File | SHA256 |
 |---|---|
-| C-SSH_0.9.6_x64-setup.exe | `68c108d74ce246513b87d66a10fb7bd88c2bc729d150394f09b1a1cfdad41de8` |
-| C-SSH_0.9.6_portable-Windows-x64.zip | `67e46eae24524e4478c014aaea660e8ad938dafe5269b9059cc8ed73327c95f2` |
-| C-SSH_0.9.6_arm64-setup.exe | `b3287cbcb86daac82963015d5abedb2786541c2c1f3e60bac6b2c125831eff0c` |
-| C-SSH_0.9.6_portable-Windows-arm64.zip | `ffee1c505cbd0883a20babeb51d9cada3173510c48f3247b897b26bbd85f13f5` |
-| C-SSH_0.9.6_macOS-arm64.dmg | `28d6962f39104739030dc192d513ae00f088e1bf32930a979ec887d5c05bf000` |
-| C-SSH_0.9.6_android-arm64.apk | `a0245a283b45ed9f1a5b4c35091ff419e1cc9bdf3054d4cef3f2488357c5d239` |
-| C-SSH_0.9.6_amd64.deb | `a482d1d7c9e452533c4980790b02f88a6d71bf350bd0a231e47216eeaff76a22` |
-| C-SSH_0.9.6_amd64.AppImage | `60ef49c4a3e9ac2abada6ad5f2baa0a6a43cb4a513ed5cc3f472fd8b2e42f218` |
-| C-SSH_0.9.6_arm64.deb | `117b9915c92af9eecbac46c9c51b37d5414a751fcfe85339f5f32e6be30c4794` |
-| C-SSH_0.9.6_aarch64.AppImage | `6528806c24497e6e696a1a038c0025819295c5cc68b9db959d1376d5f9abff14` |
+| C-SSH_0.9.7_x64-setup.exe | `5d372e069ec70ec43d04e4e7219bb0aae7990c6620a3ec9bc3a996c8321ed269` |
+| C-SSH_0.9.7_portable-Windows-x64.zip | `2d6b8418195887ef62ba3bd7e09ca8886d9bea7126e33a02df9d8bb9ebac6be0` |
+| C-SSH_0.9.7_arm64-setup.exe | `63db71cae80b4f2772ee9c7e8fcc5c96edcc1a982b5a797002b3e342edd69bc6` |
+| C-SSH_0.9.7_portable-Windows-arm64.zip | `834fc184cc0c234f22f5b2acbb8d7bb7d885b3e806da31d79ca83378250a7567` |
+| C-SSH_0.9.7_macOS-arm64.dmg | `8315451283855bf352b786161e4645a01671f8914db73d7c60026708d6f856c9` |
+| C-SSH_0.9.7_android-arm64.apk | `f425c11e4d60f134fc9cef1f099a73c9f8f57bd30e412d9024200f7698b5edae` |
+| C-SSH_0.9.7_arm64.deb | `15285fd9df875da5ce5538e63941840289b7004a2be3cf3313420fa2909181da` |
+| C-SSH_0.9.7_aarch64.AppImage | `15042627ac7499241c49b8ebe56c07690d88973aabf4128e1891475bad044fab` |
+| C-SSH_0.9.7_amd64.deb | `e0f9638ba7123fb07b4a158fd6b3090c4fd07bd6ee930320743b83e8fea01a8a` |
+| C-SSH_0.9.7_amd64.AppImage | `e8f9626789395baf6bccd2d00995f4d91326b6812b2321037184bd0350c4b733` |
 
 ## Data and source
 
-The product version remains 0.9.6 with SQLite 26. Update in place with the matching platform package while preserving existing data and OS Keychain/keystore entries. Mac is ad-hoc signed and not notarized. Announcement and manual download only, with no upgrade reminders or forced updates.
-
-AI conversations, raw records, Skills and long-term memory remain local and are not Cloud-sync data. Selected model context is sent to the chosen provider. This public repository contains docs, release binaries and the existing whitelisted Cloud source; client/shared-core/AI/Agent sources are not public.
+AI conversations and memory remain local. Cloud sync transfers selected encrypted configuration. This repository contains public documentation, downloads, and the Creation Cloud production source mirror; client and Agent source code is not public.

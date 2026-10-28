@@ -2,6 +2,97 @@
 
 # Changelog
 
+## 0.9.7 — AI, server browser, monitoring and sync improvements
+
+2026-10-28
+
+
+This release brings together recent improvements to the AI assistant, server browser, monitoring, cloud sync, and the Windows, macOS, Linux, and Android interfaces. It also addresses problems found during everyday use, including stalled conversations, confusing status displays, and connection switching.
+
+**This release uses notifications and manual downloads only. Visit the download page to install it yourself. There are no forced upgrades or background downloads or installations.** iOS development and distribution remain paused.
+
+### Added
+
+#### Concurrent AI tasks and clearer progress
+
+- Configure how many independent read-only tasks may run at once, including independent tasks on the same host. Additional work is queued.
+- Delegated tasks follow the main assistant's configured context window. Dependent work and changes requiring confirmation continue to respect ordering and permission boundaries.
+- Responses, subtask progress, and available results appear incrementally. A compact activity summary keeps the conversation readable, with details available on demand.
+- Interjections appear in the conversation, and pause, stop, and resume states are clearer.
+
+#### Token usage, context, and cache statistics
+
+- See cumulative tokens, context usage, and cache hit rate. Android uses a compact three-value panel; desktop clients retain detailed statistics.
+- Cumulative tokens include reported input and output across requests and subtasks. Context usage describes one main-assistant request, with a short explanation to distinguish it from the accumulated total.
+- Previously confirmed values remain visible while a new turn or refresh is underway. Missing cache reports are shown as unknown rather than zero.
+- Provider-specific usage fields are normalized and requests deduplicated. Cache hit rate is weighted by observable input tokens rather than averaging request percentages.
+
+#### Desktop server browser
+
+- Browse through a server Agent using the server's network exit on Windows, macOS, and Linux. A local Google Chrome installation is required and checked before launch.
+- Create multiple browser environments for one server, each with separate browsing data, a persistent fingerprint seed, and settings.
+- Configure operating-system presentation, timezone, language, and permissions. Location, microphone, and camera access can use normal permission prompts.
+- Improved reopening and recovery preserve environment data and identity after abnormal application exits.
+- The Android server-browser entry remains hidden while mobile validation is paused.
+
+### Fixed
+
+#### AI responsiveness, context, and history
+
+- Reduced repetitive directory reads, repeated queries, and unnecessary tool cycles during simple host checks.
+- Improved context preparation, stable prefixes, and history loading. Context handling follows the configured model window instead of imposing an unrelated small fixed limit.
+- Improved tool-result handling and long-conversation storage while preserving original records.
+- Addressed failures to send after pausing or interrupting, incorrect notices about another window taking over, and missing conversation content after reopening.
+- Fixed Mac crashes in affected AI execution paths.
+- Fixed Android history selection being invalidated by other conversations, history restoration changing the active model, and usage not refreshing after model-window changes.
+
+#### Monitoring and local storage
+
+- Raised the configurable collection concurrency ceiling to 1000, with queuing and independent host scheduling. This is a configuration ceiling, not a throughput guarantee for every computer or network.
+- Reduced database overhead and repeated work in frequent collection paths.
+- Added selective compression for suitable communication payloads while leaving small responses uncompressed.
+- Improved Agent status refresh after cloud sync and clarified initial collection states without requiring an application restart.
+- Improved Windows Server Agent monitoring sampling costs and CPU usage.
+
+#### Browser launch and stability
+
+- Improved first-launch reliability, preparation time, and retry behavior.
+- Fixed unexpected browser closure triggered by affected verification pages, page events, and navigation waits.
+- Browser environments retain separate cookies and other browsing data, with a stable identity across launches.
+- Websites and network exits still determine when a verification challenge appears. This release does not promise CAPTCHA-free access or complete concealment of every local fingerprint.
+
+#### Agent access and Linux ARM compatibility
+
+- Improved access to existing Agents from multiple devices and handling of dedicated public keys.
+- Improved the detection, reuse, update, and readiness stages and their status messages.
+- Updated Linux x86_64 and ARM64 Agents, improved independent-channel compatibility, and recorded targeted UOS and Kylin ARM validation.
+- SSH-only hosts continue to respect their selected mode; updating the client does not automatically install an Agent on them.
+
+#### Manual cloud sync and data protection
+
+- Reuse a valid data-protection verification within the same application process across page changes, checks, and subsequent sync operations. A new process requires verification again.
+- Added select-all and cloud-default choices and improved the sync list and confirmation dialogs.
+- Fixed Android's first-login download failure when the model catalog had not yet been cached. Downloads now obtain the required catalog themselves.
+- AI deletion records with no matching local account are no longer shown as downloadable configurations or allowed to block host downloads. Necessary internal sync acknowledgements remain.
+- Conflicts involving an existing local account still require a clear choice. Other accounts are not identified or removed by name. Sync remains manual and does not automatically upload AI conversations or memory.
+
+#### Interface, terminals, and Android
+
+- Organized settings into four groups while preserving direct access to existing settings.
+- Improved desktop window controls, Mac corners, theme consistency, confirmation dialogs, and affected dark-theme text contrast.
+- Removed redundant Android context displays and corrected duplicated bottom safe-area spacing and keyboard-related layout problems.
+- Fixed host-card terminal entry selecting the wrong host and connection waits preventing users from switching hosts or terminals.
+- Late errors and authentication prompts from a previous connection no longer interfere with the newly selected terminal.
+
+### Verified
+
+The changes use their existing targeted shared-layer, interface, and native validation evidence. Release checks additionally cover version, architecture, embedded resources, signing, and packaging. These results are not presented as a fresh exhaustive test of every platform, distribution, or physical phone.
+
+The Android first-login cloud download fix was exercised in the normal Android SDK Emulator client against an authorized test account, including configuration download and subsequent checks without warming the model catalog first.
+
+macOS builds support Apple Silicon and remain ad-hoc signed, without Developer ID notarization. Android retains its existing APK signing identity. Keep important data before upgrading and do not open a migrated database with an older incompatible client.
+
+
 ## 0.9.6 — Revision 3: Agent reuse and readiness progress
 
 2026-10-12
