@@ -1,5 +1,6 @@
 //! 封装账号主机、AI provider 密文与统一 revision 流的数据库边界。
 
+mod account_deletion;
 mod admin_delete;
 mod admin_sync;
 mod ai;
@@ -19,6 +20,7 @@ use cloud_store::PgPool;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+pub use account_deletion::prepare_account_deletion;
 pub(crate) use admin_delete::{
     host as delete_admin_host, proxy_profile as delete_admin_proxy_profile,
     sync_record as delete_admin_sync_record,

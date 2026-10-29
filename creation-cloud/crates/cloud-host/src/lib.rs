@@ -10,6 +10,7 @@ mod types;
 mod validation;
 
 pub use protection_mailer::{ProtectionResetMailer, ProtectionResetMailerFuture};
+pub use repository::prepare_account_deletion;
 pub use router::{host_router, management_router, router, sync_router};
 pub use service::Service;
 pub use types::{

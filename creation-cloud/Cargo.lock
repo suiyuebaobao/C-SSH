@@ -334,6 +334,7 @@ dependencies = [
  "chrono",
  "cloud-auth",
  "cloud-domain",
+ "cloud-host",
  "cloud-notification",
  "cloud-store",
  "serde",

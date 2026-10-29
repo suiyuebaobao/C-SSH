@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 2026-10-30 — Cloud account deletion fix
+
+Fixes account deletion being blocked by device references when the account has hosts, AI configurations, proxy profiles, or synchronization history. Dependencies and the account are deleted in one transaction; failures roll back completely and other accounts remain unchanged.
+
+Verified account isolation, rollback, and concurrent writes in an isolated database, plus real deletion API calls on the private deployment. The same fix is deployed to the official Cloud. This server maintenance update does not change client versions, HTTPS settings, database schema, or existing installers.
+
 ## 0.9.7 — Kylin, AI, Server Browser, monitoring, and sync improvements
 
 2026-10-28

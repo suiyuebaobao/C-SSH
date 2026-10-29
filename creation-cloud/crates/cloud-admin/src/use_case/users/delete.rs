@@ -30,6 +30,7 @@ impl Service {
             "user.admin_delete",
         )
         .await?;
+        cloud_host::prepare_account_deletion(&mut transaction, account_id).await?;
         repository::users::delete::execute(&mut transaction, account_id).await?;
         transaction
             .commit()
