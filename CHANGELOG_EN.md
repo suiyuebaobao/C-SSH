@@ -60,6 +60,18 @@ The account and its dependent synchronization records are handled in one databas
 - macOS remains available for Apple Silicon. The app is not notarized with an Apple Developer ID; this installation limitation is unchanged.
 - iOS development and releases remain paused. The mobile server-browser entry remains hidden.
 
+### Added
+
+Automatic Cloud address detection and explicitly enabled trusted private-network HTTP access.
+
+### Fixed
+
+Connection-stage errors, same-IP hosts on different ports, Android session recovery, host deletion waits, Agent diagnostic maintenance overhead, and administrator account deletion. The seven sections above describe the resulting behavior.
+
+### Verified
+
+Windows x64/ARM64 installation, portable packages, manual upgrade from 0.9.7 and exit checks; native Cloud connection and persistence on both Linux architectures; Mac package and embedded-resource checks; Android API36 arm64 emulator coverage for same-signature installation, retained data and native Cloud settings. Asset signatures, official HTTPS and backend data preservation checks passed. Unchanged features reuse existing results; emulator evidence is not a claim about every physical phone.
+
 ## 2026-10-30 — Cloud account deletion fix
 
 Fixes account deletion being blocked by device references when the account has hosts, AI configurations, proxy profiles, or synchronization history. Dependencies and the account are deleted in one transaction; failures roll back completely and other accounts remain unchanged.

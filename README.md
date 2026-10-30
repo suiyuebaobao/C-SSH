@@ -56,6 +56,18 @@
 - macOS 继续提供 Apple Silicon 版本；当前未取得 Apple Developer ID 公证，安装边界与上一版相同。
 - iOS 开发及发布继续暂停；移动端服务器浏览器入口仍保持隐藏。
 
+## Added / 新增
+
+第三方云地址自动识别与明确启用的可信内网 HTTP 接入。
+
+## Fixed / 修正
+
+SSH 分阶段错误提示、同 IP 不同端口主机、Android 会话恢复、主机删除等待、Agent 诊断维护开销及后台账号删除。详细行为见上文七项说明。
+
+## Verified / 本轮验证范围
+
+Windows x64／ARM64 的安装、免安装、0.9.7 覆盖更新与退出检查；Linux 两架构原生云接入与保存恢复；Mac 包及内嵌资源检查；Android API36 arm64 模拟器同签名覆盖、数据保留与原生云设置。更新资产签名、官方 HTTPS 及服务端数据保全检查通过。复用未变化功能的既有通过记录，不将模拟器结果视为所有手机真机验证。
+
 ## Downloads
 
 | File | Bytes | Download |
