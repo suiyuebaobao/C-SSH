@@ -1,8 +1,8 @@
-# C-SSH 0.9.7 features
+# C-SSH 0.9.8 features
 
 [Home](README_EN.md) · [中文](FEATURES.md) · [Installation](INSTALL_EN.md)
 
-Windows x64/ARM64, Apple Silicon Mac, Linux x86_64/ARM64, and Android arm64 share the core runtime, with desktop and mobile layouts. Version 0.9.7 uses notifications and manual downloads only. iOS remains paused.
+Windows x64/ARM64, Apple Silicon Mac, Linux x86_64/ARM64, and Android arm64 share the core runtime, with desktop and mobile layouts. Version 0.9.8 uses notifications and manual downloads only. iOS remains paused.
 
 ## AI workspace
 
@@ -38,7 +38,7 @@ Clients can save the embedded Windows Setup ZIP, with system sharing on Android.
 
 ## Cloud and data protection
 
-Local operations work without signing in. Choose official or self-hosted HTTPS Cloud, with separate sign-in, source, and sync state. Sync is manual and transfers selected hosts, proxy routes, and model configuration with sensitive fields encrypted by the client. AI conversations and long-term memory stay local.
+Local operations work without signing in. Choose the official HTTPS Cloud or a self-hosted Cloud, including explicitly configured private-network HTTP, with separate sign-in, source, and sync state. Sync is manual and transfers selected hosts, proxy routes, and model configuration with sensitive fields encrypted by the client. AI conversations and long-term memory stay local.
 
 Valid data-protection verification is reused within the current process and required again after reopening. Select-all and cloud-default choices simplify sync. AI deletion records without a corresponding local account no longer clutter the list; existing local conflicts retain an explicit choice.
 

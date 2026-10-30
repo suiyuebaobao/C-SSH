@@ -4,6 +4,7 @@ mod captcha;
 mod cookie;
 mod credential_limiter;
 mod handler;
+mod intranet_transport;
 mod login_limiter;
 mod mailer;
 mod middleware;
@@ -32,6 +33,7 @@ pub use middleware::{
 };
 pub use request_metadata::TrustedRequestMetadata;
 pub use service::Service;
+pub use intranet_transport::cookies as intranet_http_cookies;
 pub use session::{AuthenticatedSession, IssuedSession, SessionMetadata, SessionView};
 pub use use_case::{
     AuthSettings, ChangePassword, ClientLoginConfig, Login, LoginCaptchaSettings, LoginOutcome,

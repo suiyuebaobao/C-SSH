@@ -1,12 +1,12 @@
-# C-SSH 0.9.7 installation and data preservation
+# C-SSH 0.9.8 installation and data preservation
 
 [Downloads](README_EN.md#downloads) · [中文](INSTALL.md)
 
-This release notifies users and directs them to download and install manually. There are no forced upgrades or background downloads or installations. Android build number: 9007000. iOS remains paused.
+This release notifies users and directs them to download and install manually. There are no forced upgrades or background downloads or installations. Android build number: 9008000. iOS remains paused.
 
 ## Before installation
 
-Use the official website or suiyuebaobao/C-SSH v0.9.7 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
+Use the official website or suiyuebaobao/C-SSH v0.9.8 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
 
 ## Windows x64 / ARM64
 
@@ -19,11 +19,11 @@ Choose the package for your CPU; native ARM64 was validated on Windows 11 ARM64.
 
 ## Apple Silicon Mac
 
-Open C-SSH_0.9.7_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. For 0.9.7, all platforms use notifications and manual downloads only.
+Open C-SSH_0.9.8_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. For 0.9.8, all platforms use notifications and manual downloads only.
 
 ## Android arm64
 
-Install C-SSH_0.9.7_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The existing release signer is retained; The final revision3 APK retains the existing release signer; preserve data when replacing a compatible same-signer installation. Compatible earlier builds with the same signer can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
+Install C-SSH_0.9.8_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The existing release signer is retained; The final revision3 APK retains the existing release signer; preserve data when replacing a compatible same-signer installation. Compatible earlier builds with the same signer can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
 
 ## Linux x86_64 / ARM64
 
@@ -42,4 +42,4 @@ Enter an IPv4 address or domain directly, with a separate port. See [self-hosted
 
 ## Data compatibility
 
-Version 0.9.7 uses SQLite27. Preserve the complete data directory and existing OS keychain/vault, and allow the normal forward migration. Do not delete data or keys to address startup problems. Do not open a migrated database with an older incompatible client. Cloud does not contain AI conversations or memory; rollback requires the matching old program and a complete pre-upgrade backup. See the [changelog](CHANGELOG_EN.md) for validation boundaries.
+Version 0.9.8 uses SQLite27. Preserve the complete data directory and existing OS keychain/vault, and allow the normal forward migration. Do not delete data or keys to address startup problems. Do not open a migrated database with an older incompatible client. Cloud does not contain AI conversations or memory; rollback requires the matching old program and a complete pre-upgrade backup. See the [changelog](CHANGELOG_EN.md) for validation boundaries.

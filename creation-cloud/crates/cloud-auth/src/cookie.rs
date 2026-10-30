@@ -9,6 +9,18 @@ const SESSION_COOKIE: &str = "creation_session";
 const PASSWORD_RESET_EMAIL_COOKIE: &str = "creation_password_reset_email";
 const COOKIE_PATH: &str = "/";
 
+pub(crate) fn transport_cookie_names() -> [&'static str; 6] {
+    use crate::captcha::CaptchaPurpose;
+    [
+        SESSION_COOKIE,
+        PASSWORD_RESET_EMAIL_COOKIE,
+        captcha_cookie_name(CaptchaPurpose::Register),
+        captcha_cookie_name(CaptchaPurpose::Login),
+        captcha_cookie_name(CaptchaPurpose::AdminLogin),
+        captcha_cookie_name(CaptchaPurpose::PasswordReset),
+    ]
+}
+
 pub(crate) fn session_header(raw_token: &str, expires_at: DateTime<Utc>) -> AppResult<HeaderValue> {
     session_header_at(raw_token, expires_at, Utc::now())
 }

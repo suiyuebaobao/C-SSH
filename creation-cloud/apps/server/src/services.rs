@@ -56,7 +56,14 @@ impl AppServices {
                 )
             }
             None => (
-                cloud_auth::Service::new(pool.clone(), config.session_ttl),
+                match &config.intranet {
+                    Some(intranet) => cloud_auth::Service::with_captcha_key(
+                        pool.clone(),
+                        config.session_ttl,
+                        intranet.captcha_key(),
+                    ),
+                    None => cloud_auth::Service::new(pool.clone(), config.session_ttl),
+                },
                 cloud_host::Service::new(pool.clone()),
             ),
         };

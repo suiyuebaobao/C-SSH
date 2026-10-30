@@ -1,12 +1,12 @@
-# C-SSH 0.9.7 安装与数据保护
+# C-SSH 0.9.8 安装与数据保护
 
 [下载](README.md#downloads) · [English](INSTALL_EN.md)
 
-本版本会提示新版本，请自行前往下载页下载安装；不强制更新，不在背景下载或安装。Android构建号9007000，iOS继续暂停。
+本版本会提示新版本，请自行前往下载页下载安装；不强制更新，不在背景下载或安装。Android构建号9008000，iOS继续暂停。
 
 ## 安装前
 
-- 从官网或suiyuebaobao/C-SSH的v0.9.7取得安装包，按首页SHA256核对。
+- 从官网或suiyuebaobao/C-SSH的v0.9.8取得安装包，按首页SHA256核对。
 - 退出C-SSH，保护重要数据。Cloud仅手动同步加密配置，不包含AI对话与长期记忆；保留数据保护密码。
 
 ## Windows x64／ARM64
@@ -18,13 +18,13 @@
 
 ## M系列Mac
 
-- 打开C-SSH_0.9.7_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
+- 打开C-SSH_0.9.8_macOS-arm64.dmg，将C-SSH.app拖到Applications；替换应用时保留Application Support数据和钥匙串条目。
 - 仅Apple Silicon，最低系统目标macOS13；ad-hoc签名、未经公证。首次打开的系统许可参见[Apple官方说明](https://support.apple.com/zh-cn/102445)，不要把系统密码发到反馈中。
 - 本版本只提示并引导手动下载，不执行自动安装。
 
 ## Android arm64
 
-- 用系统安装器安装C-SSH_0.9.7_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
+- 用系统安装器安装C-SSH_0.9.8_android-arm64.apk；仅arm64，最低系统目标Android7/API24。
 - 沿用既有正式签名；兼容且同签名的旧版可保留数据覆盖，无需卸载。
 - 更早旧签名不能直接覆盖；卸载会清除本地数据，尤其AI对话和记忆不在Cloud同步范围。未确认数据保护前不要卸载或清库。
 
@@ -44,4 +44,4 @@
 
 ## 数据兼容性
 
-0.9.7使用SQLite27。请保护完整数据及原系统钥匙圈／密钥库，让程序沿正常前向迁移接续；不要删除数据或密钥处理启动问题。新格式数据库不可交给较旧程序开启。Cloud不包含AI对话与记忆；回退需要相配的旧程序及升级前完整备份。实际验证范围见[更新列表](CHANGELOG.md)。
+0.9.8使用SQLite27。请保护完整数据及原系统钥匙圈／密钥库，让程序沿正常前向迁移接续；不要删除数据或密钥处理启动问题。新格式数据库不可交给较旧程序开启。Cloud不包含AI对话与记忆；回退需要相配的旧程序及升级前完整备份。实际验证范围见[更新列表](CHANGELOG.md)。

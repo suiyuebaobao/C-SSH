@@ -174,7 +174,7 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .merge(protected)
         .layer(middleware::from_fn(noindex_response));
 
-    Router::new()
+    let router = Router::new()
         .nest("/api/v1", api)
         .route("/health/live", get(health_live))
         .route(
@@ -185,7 +185,16 @@ pub fn build(services: AppServices, config: CloudConfig) -> Router {
         .layer(CompressionLayer::new())
         .layer(TraceLayer::new_for_http().make_span_with(http_trace::make_span))
         .layer(middleware::from_fn(proxy_headers::attach))
-        .layer(middleware::from_fn(request_id::attach))
+        .layer(middleware::from_fn(request_id::attach));
+    if config
+        .intranet
+        .as_ref()
+        .is_some_and(|intranet| intranet.uses_http())
+    {
+        router.layer(middleware::from_fn(cloud_auth::intranet_http_cookies))
+    } else {
+        router
+    }
 }
 
 async fn noindex_response(request: Request, next: Next) -> Response {
@@ -250,3 +259,4 @@ fn health_response(status: StatusCode, body: &'static str) -> impl IntoResponse 
         (status, body),
     )
 }
+

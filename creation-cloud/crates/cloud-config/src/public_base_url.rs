@@ -5,6 +5,22 @@ use url::{Host, Url};
 
 const DEFAULT_PUBLIC_BASE_URL: &str = "http://127.0.0.1:8088";
 
+pub(super) fn resolve_intranet_transport(value: Option<&str>, http: bool) -> Result<Url> {
+    let url = parse_root(value.context("内网部署必须显式提供根地址")?)?;
+    if url.scheme() != if http { "http" } else { "https" } {
+        bail!("内网地址协议与显式传输模式不一致");
+    }
+    let private = match url.host() {
+        Some(Host::Ipv4(ip)) => ip.is_private(),
+        Some(Host::Ipv6(ip)) => (ip.segments()[0] & 0xfe00) == 0xfc00,
+        _ => false,
+    };
+    if !private {
+        bail!("内网部署只接受RFC1918或ULA地址");
+    }
+    Ok(url)
+}
+
 pub(super) fn resolve(environment: &str, configured_value: Option<&str>) -> Result<Url> {
     if environment == "production" && configured_value.is_none_or(|value| value.trim().is_empty()) {
         bail!("production 环境必须显式提供 CLOUD_PUBLIC_BASE_URL");

@@ -5,6 +5,7 @@ use std::{env, net::SocketAddr, path::PathBuf, time::Duration};
 use anyhow::{Context, Result, bail};
 use url::Url;
 
+mod intranet;
 mod maintenance;
 mod proxy;
 mod public_base_url;
@@ -26,8 +27,10 @@ pub struct CloudConfig {
     pub maintenance: MaintenanceConfig,
     pub proxy: ProxyConfig,
     pub smtp: Option<SmtpConfig>,
+    pub intranet: Option<IntranetConfig>,
 }
 
+pub use intranet::IntranetConfig;
 pub use maintenance::{MaintenanceConfig, TaskSchedule};
 pub use proxy::ProxyConfig;
 pub use smtp::{SmtpConfig, SmtpSecurity};
@@ -42,8 +45,15 @@ impl CloudConfig {
             .context("CLOUD_BIND_ADDR 不是合法监听地址")?;
         let database_url = required("CLOUD_DATABASE_URL")?;
         let configured_public_base_url = read_optional("CLOUD_PUBLIC_BASE_URL")?;
-        let public_base_url =
-            public_base_url::resolve(&environment, configured_public_base_url.as_deref())?;
+        let intranet = IntranetConfig::from_env()?;
+        let public_base_url = if let Some(intranet) = &intranet {
+            public_base_url::resolve_intranet_transport(
+                configured_public_base_url.as_deref(),
+                intranet.uses_http(),
+            )?
+        } else {
+            public_base_url::resolve(&environment, configured_public_base_url.as_deref())?
+        };
         let google_site_verification = read_site_verification("CLOUD_GOOGLE_SITE_VERIFICATION")?;
         let baidu_site_verification = read_site_verification("CLOUD_BAIDU_SITE_VERIFICATION")?;
         let download_root = PathBuf::from(read("CLOUD_DOWNLOAD_ROOT", "./data/downloads"));
@@ -56,7 +66,7 @@ impl CloudConfig {
         }
         let maintenance = MaintenanceConfig::from_env()?;
         let proxy = ProxyConfig::from_env()?;
-        let smtp = SmtpConfig::from_env()?;
+        let smtp = SmtpConfig::from_env_for_deployment(intranet.is_some())?;
         Ok(Self {
             bind_addr,
             database_url,
@@ -70,6 +80,7 @@ impl CloudConfig {
             maintenance,
             proxy,
             smtp,
+            intranet,
         })
     }
 }

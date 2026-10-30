@@ -1,113 +1,89 @@
-# C-SSH 0.9.7
+# C-SSH 0.9.8
 
-[简体中文](README.md) · [Website](https://c-ssh.com/en) · [Installation](INSTALL_EN.md) · [Changelog](CHANGELOG_EN.md)
+[中文](README.md) · [Website](https://c-ssh.com) · [Installation](INSTALL_EN.md) · [Features](FEATURES_EN.md) · [Self-hosting](SELF_HOSTING_EN.md) · [Changelog](CHANGELOG_EN.md)
 
-This release improves server connectivity, the AI assistant, Server Browser, monitoring collection, and cloud synchronization across Windows, macOS, Linux, and Android.
+This release updates Windows, macOS, Linux and Android, together with the C-SSH Agents. It focuses on host connection errors, self-hosted Cloud access, Android session recovery, host deletion and diagnostic overhead.
 
-## 1. Kylin and ARM server compatibility
+## 1. Clearer host connection errors
 
-Improves compatibility with Kylin Linux Advanced Server V10 ARM64, including its 64KiB memory-page environment. The changes cover Agent connectivity, monitoring, file operations, persistent terminals, and command execution.
+When adding a host, connection failures now appear in a dialog that matches the C-SSH interface. Messages distinguish address resolution, network connectivity, SSH handshake, authentication and proxy authentication failures so that users can identify which part of the connection needs attention.
 
-Fixes initial Agent channel failures in specific SSH configurations and compatibility checks that failed when the relevant logs were large. The ARM Agent is updated to the current version.
+Closing the dialog preserves the entered connection details. An authentication rejection is not automatically labeled an incorrect password: the username, key and server authentication policy may also be responsible.
 
-## 2. Agent connectivity across devices
+## 2. Separate hosts at the same IP address
 
-Updates the Linux x64, Linux ARM64, and Windows Server Agents.
+Fixes hosts with the same address but different SSH ports being treated as duplicates during creation or synchronization. Connection endpoints are identified by both address and SSH port; their host records, credentials, trust records and Cloud mappings remain separate.
 
-Improves authorization and Agent reuse when multiple computers or phones connect to the same server, including fixes for some public-key authorization conflicts. Improves existing-Agent detection, capability checks, and update handling, and fixes deployment status not refreshing promptly after cloud synchronization.
+Existing host identities are preserved. Adding a different port does not require deleting the original host or replacing its credentials.
 
-## 3. Desktop Server Browser
+## 3. Automatic protocol detection for self-hosted Cloud
 
-Windows, macOS, and Linux can use local Chrome through the server's Agent.
+In Settings → Cloud service → Self-hosted cloud, enter an IP address, domain or address with a port. Test the connection to see the detected protocol, then save and switch. A protocol prefix is optional for a new address.
 
-Each server can have multiple browser environments, with separate cookies, login sessions, browsing data, and fixed fingerprint seeds. Settings include the displayed operating system, timezone, language, location, microphone, and camera permissions.
+Detection tries HTTPS first. An explicitly configured, trusted private-network deployment may use HTTP without importing certificates on every client. The interface displays the selected protocol and warns that HTTP traffic is not encrypted.
 
-Improves launch speed and first-launch reliability, fixes unexpected browser closure on some websites and verification pages, improves recovery after an abnormal exit, and adds a reminder when Chrome is not installed.
+Explicit or previously saved HTTPS addresses, certificate verification failures and public-network addresses are never silently downgraded to HTTP. Detection sends no existing account credentials or session cookies. The official Cloud continues to use HTTPS. Self-hosted servers must use a compatible server version and explicitly enable the private-network HTTP mode.
 
-## 4. AI concurrency and query efficiency
+## 4. Android AI session recovery after interruptions
 
-Adds configurable AI task concurrency and queuing. Independent read-only tasks can run concurrently across servers or on the same server. Workers inherit the main Agent's context-window configuration for the current run.
+Improves recovery when the phone is locked, the network disconnects, connectivity returns or the app returns to the foreground. Addresses blocked follow-up messages, unrecognized task errors and save state that did not recover promptly.
 
-Improves server-status checks by reducing repeated file reads, duplicate queries, and unnecessary tool steps. Dependent operations and changes still run in the required order.
+Recovery reconciles the original task with locally saved state, preserves content already received and allows the conversation to continue. It does not automatically replay model requests or remote modification commands. Related save acknowledgements are handled in the correct order to reduce discrepancies between stored conversation content and the displayed state.
 
-## 5. Live AI responses, progress, and conversation recovery
+## 5. Less unnecessary waiting when deleting hosts
 
-Responses appear as the model returns them, with timely worker progress, results, and errors.
+Fixes host deletion waiting on a resource lock already held by the same cleanup operation when the host has server-browser environments. This could leave the interface showing “Deleting” for an unnecessarily long time.
 
-The main conversation shows compact progress and result summaries. Full tool activity is available under View details.
+The deletion path now releases the relevant resources before completing browser-environment cleanup. The remote Agent uninstall attempt remains time limited; a failure does not indefinitely block deletion of the local host record.
 
-Fixes missing interjection messages, sending failures after pausing, and some conversation recovery failures after interruption or abnormal exit. Improves saved-history conflict detection and fixes some Mac AI crashes.
+## 6. Lower Agent diagnostic overhead
 
-## 6. AI context, long conversations, and usage
+When diagnostics are disabled, recording work is skipped earlier. The Linux Agent summarizes normal, short monitoring operations while retaining the necessary details for errors, slow operations and other activity that needs diagnosis.
 
-Context preparation follows the model's actual window instead of a fixed 256K threshold. Tool results are no longer uniformly cut to a fixed character count; large results can be read in pages as needed.
+Log maintenance uses bounded periodic work instead of heavier cleanup on request paths. The Windows Agent receives the corresponding maintenance scheduling changes. These changes target diagnostic recording and maintenance costs; they do not reduce monitoring frequency or change logging settings for other server programs.
 
-Long conversations use chunked storage and loading, addressing the previous 256MiB whole-conversation limit and reducing waits when reopening long chats or preparing context.
+## 7. Cloud administrator account deletion
 
-Adds actual usage reporting for **cumulative tokens used, context usage, and cache hit rate**, normalizes usage fields across model APIs, and includes worker usage. The last confirmed values remain visible during execution. Missing cache data is not treated as a zero hit rate.
+Fixes deletion being blocked by device references when an account contains hosts, AI configurations, proxy profiles or synchronization history.
 
-Cumulative tokens used counts usage across requests in the conversation. Context usage measures the main assistant's input for one request; the two are explained separately.
+The account and its dependent synchronization records are handled in one database transaction. Failures roll back completely, and other accounts remain unchanged. Administrator protections, global history and audit requirements remain in place. The official Cloud has received this backend fix; self-hosted deployments need the updated server implementation.
 
-## 7. Monitoring and transfer efficiency
+## Versions and installation
 
-Raises the configurable collection concurrency limit to **1,000**, improves queuing and scheduling, and reduces delays during the first refresh and the impact of slow hosts on other hosts.
-
-Optimizes local database access and reduces duplicate operations. Larger monitoring-history responses use selective compression to reduce transfer volume, while small responses remain lightweight.
-
-## 8. Cloud synchronization and password verification
-
-After data-protection password verification, the running application reuses that verification when changing pages, checking changes, uploading, and downloading.
-
-Adds Select all and a default cloud choice, with clearer sync-item layout and prompts.
-
-Fixes download confirmation failures after the first Android login. Deleted AI accounts that are also absent locally no longer repeatedly appear as pending sync items.
-
-## 9. Android interface and interaction fixes
-
-Brings shared AI, context, memory, and usage changes to Android, with a usage summary at the bottom and a compact three-value detail panel.
-
-Fixes excessive bottom space and keyboard/safe-area spacing. Fixes opening the wrong host's terminal from a host action card and being unable to change hosts while a connection is pending.
-
-Fixes AI history selection, restored history interfering with the active model settings, and usage not refreshing after the model context window changes.
-
-## 10. Desktop interface consistency
-
-Aligns shared settings and AI interfaces across Windows, macOS, and Linux. Settings are organized into four category cards with direct access to individual settings.
-
-Confirmation dialogs use C-SSH's own style. Improves Mac window controls and corners, and text contrast in some dark dialogs.
-
-**Updating:** This release provides an update notice. Download the new client from the official website and install it yourself; there is no forced update or automatic download and installation.
+- Windows, macOS, Linux and Android clients, and C-SSH Agents: 0.9.8.
+- This release announces the update and directs users to download and install it manually. It does not force updates or download and install them automatically.
+- Keep the existing installation identity and local data. Do not uninstall, clear app data or remove keys as an update step.
+- macOS remains available for Apple Silicon. The app is not notarized with an Apple Developer ID; this installation limitation is unchanged.
+- iOS development and releases remain paused. The mobile server-browser entry remains hidden.
 
 ## Downloads
 
 | File | Bytes | Download |
 |---|---:|---|
-| C-SSH_0.9.7_x64-setup.exe | 49,731,494 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_x64-setup.exe) |
-| C-SSH_0.9.7_portable-Windows-x64.zip | 45,010,208 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_portable-Windows-x64.zip) |
-| C-SSH_0.9.7_arm64-setup.exe | 47,816,201 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_arm64-setup.exe) |
-| C-SSH_0.9.7_portable-Windows-arm64.zip | 43,592,452 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_portable-Windows-arm64.zip) |
-| C-SSH_0.9.7_macOS-arm64.dmg | 47,725,501 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_macOS-arm64.dmg) |
-| C-SSH_0.9.7_android-arm64.apk | 45,779,461 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_android-arm64.apk) |
-| C-SSH_0.9.7_arm64.deb | 46,732,072 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_arm64.deb) |
-| C-SSH_0.9.7_aarch64.AppImage | 119,740,936 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_aarch64.AppImage) |
-| C-SSH_0.9.7_amd64.deb | 47,644,200 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_amd64.deb) |
-| C-SSH_0.9.7_amd64.AppImage | 120,789,496 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_amd64.AppImage) |
+| C-SSH_0.9.8_arm64-setup.exe | 55,120,724 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_arm64-setup.exe) |
+| C-SSH_0.9.8_portable-Windows-arm64.zip | 50,865,532 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_portable-Windows-arm64.zip) |
+| C-SSH_0.9.8_portable-Windows-x64.zip | 52,359,569 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_portable-Windows-x64.zip) |
+| C-SSH_0.9.8_x64-setup.exe | 57,113,796 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_x64-setup.exe) |
+| C-SSH_0.9.8_macOS-arm64.dmg | 55,033,590 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_macOS-arm64.dmg) |
+| C-SSH_0.9.8_android-arm64.apk | 53,086,313 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_android-arm64.apk) |
+| C-SSH_0.9.8_aarch64.AppImage | 127,085,064 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_aarch64.AppImage) |
+| C-SSH_0.9.8_amd64.AppImage | 128,088,568 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_amd64.AppImage) |
+| C-SSH_0.9.8_amd64.deb | 54,934,216 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_amd64.deb) |
+| C-SSH_0.9.8_arm64.deb | 54,041,416 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_arm64.deb) |
 
 ## SHA256
 
 | File | SHA256 |
 |---|---|
-| C-SSH_0.9.7_x64-setup.exe | `5d372e069ec70ec43d04e4e7219bb0aae7990c6620a3ec9bc3a996c8321ed269` |
-| C-SSH_0.9.7_portable-Windows-x64.zip | `2d6b8418195887ef62ba3bd7e09ca8886d9bea7126e33a02df9d8bb9ebac6be0` |
-| C-SSH_0.9.7_arm64-setup.exe | `63db71cae80b4f2772ee9c7e8fcc5c96edcc1a982b5a797002b3e342edd69bc6` |
-| C-SSH_0.9.7_portable-Windows-arm64.zip | `834fc184cc0c234f22f5b2acbb8d7bb7d885b3e806da31d79ca83378250a7567` |
-| C-SSH_0.9.7_macOS-arm64.dmg | `8315451283855bf352b786161e4645a01671f8914db73d7c60026708d6f856c9` |
-| C-SSH_0.9.7_android-arm64.apk | `f425c11e4d60f134fc9cef1f099a73c9f8f57bd30e412d9024200f7698b5edae` |
-| C-SSH_0.9.7_arm64.deb | `15285fd9df875da5ce5538e63941840289b7004a2be3cf3313420fa2909181da` |
-| C-SSH_0.9.7_aarch64.AppImage | `15042627ac7499241c49b8ebe56c07690d88973aabf4128e1891475bad044fab` |
-| C-SSH_0.9.7_amd64.deb | `e0f9638ba7123fb07b4a158fd6b3090c4fd07bd6ee930320743b83e8fea01a8a` |
-| C-SSH_0.9.7_amd64.AppImage | `e8f9626789395baf6bccd2d00995f4d91326b6812b2321037184bd0350c4b733` |
+| C-SSH_0.9.8_arm64-setup.exe | `e79dc574d0278dc419bdc130eaf4201afd33b31029f40dbccf0fe222f475cbcb` |
+| C-SSH_0.9.8_portable-Windows-arm64.zip | `c499806e7d5bef2a48691e083fb24ec789235ae2e939da24e3b3bffd77cd00cd` |
+| C-SSH_0.9.8_portable-Windows-x64.zip | `9b926ad08286e5c7fefbbb9eed40293ad45f8a0f036af7de0922201610a40941` |
+| C-SSH_0.9.8_x64-setup.exe | `e526564486f14f84aec0ab265cd7eb92c892d5dfbc759e62461548eefccc8e82` |
+| C-SSH_0.9.8_macOS-arm64.dmg | `73a2d6136fb6f4d34aa245984eae008e732152807878349479b25b947e9a1af1` |
+| C-SSH_0.9.8_android-arm64.apk | `add46254cfdfc322d575da5f36328822e3b3b97b9c10b1d41f4f5a603f41bda1` |
+| C-SSH_0.9.8_aarch64.AppImage | `2873949dfbfda78456b19e1aecdeb8b8a58d134651adfc71b2e4536a32ccff20` |
+| C-SSH_0.9.8_amd64.AppImage | `f936a01b9621173f66be8c43ce77c53d6fe9e5206f1b9d52a5453ac5f39cba3b` |
+| C-SSH_0.9.8_amd64.deb | `00630c2cc0cb1fdf1d23d80bb83242c85a13e09f977b25b3cb29952ee2c41a20` |
+| C-SSH_0.9.8_arm64.deb | `97105e890023f27d8b69f300745f09e248e2eb5542c68668ef2802e4a38ba2e4` |
 
-## Data and source
-
-AI conversations and memory remain local. Cloud sync transfers selected encrypted configuration. This repository contains public documentation, downloads, and the Creation Cloud production source mirror; client and Agent source code is not public.
+AI conversations and original memory remain local. Cloud synchronizes selected encrypted configuration. This repository contains documentation, downloads and the Creation Cloud production-source mirror; client and Agent source code is not public.

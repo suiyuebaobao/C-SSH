@@ -46,6 +46,14 @@ impl Service {
         }
     }
 
+    /// 内网无邮件部署仍使用持久验证码密钥；邮件能力保持明确不可用。
+    #[must_use]
+    pub fn with_captcha_key(pool: PgPool, session_ttl: Duration, key: [u8; 64]) -> Self {
+        let mut service = Self::new(pool, session_ttl);
+        service.captcha_key = Arc::from(key);
+        service
+    }
+
     #[must_use]
     pub fn with_verification(
         pool: PgPool,

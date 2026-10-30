@@ -1,113 +1,89 @@
-# C-SSH 0.9.7
+# C-SSH 0.9.8
 
-[English](README_EN.md) · [官网](https://c-ssh.com) · [安装说明](INSTALL.md) · [更新日志](CHANGELOG.md)
+[English](README_EN.md) · [官网](https://c-ssh.com) · [安装说明](INSTALL.md) · [功能详解](FEATURES.md) · [自建云](SELF_HOSTING.md) · [更新日志](CHANGELOG.md)
 
-本次更新集中改善服务器接入、AI 助手、服务器浏览器、监控采集与云端同步，并同步更新 Windows、macOS、Linux 和 Android 客户端。
+本次更新面向 Windows、macOS、Linux 和 Android，集中处理主机接入、第三方云连接、Android 会话恢复，以及删除和诊断记录相关问题。客户端与自研 Agent 同步更新至 0.9.8。
 
-## 1. 麒麟与 ARM 服务器适配
+## 1. 主机连接失败，提示更清楚
 
-完善麒麟高级服务器操作系统 V10 ARM64 适配，支持其 64KiB 内存页环境。改善 Agent 接入、监控采集、文件操作、持久终端与命令执行的兼容性。
+新增主机时，连接错误改用 C-SSH 自身样式的弹窗显示，并按实际失败阶段区分地址解析、网络连接、SSH 握手、身份验证和代理认证问题，方便判断应该检查哪一项。
 
-修正特定 SSH 环境下首次建立 Agent 通道失败，以及日志量较大时兼容性检测失败的问题。ARM Agent 同步更新至当前版本。
+关闭错误提示后保留已填写的连接资料，便于修改后重试。身份验证被服务器拒绝时，不再笼统地判定为“密码错误”；用户名、密钥和服务器认证策略也可能影响结果。
 
-## 2. Agent 接入与多设备使用
+## 2. 相同 IP、不同 SSH 端口可以分别管理
 
-更新 Linux x64、Linux ARM64 及 Windows Server Agent。
+修正相同地址使用不同 SSH 端口时，新增或同步主机可能被误认为重复的问题。现在按照地址和 SSH 端口识别连接端点，各自主机资料、凭据、信任记录与云同步映射保持独立。
 
-改善多台电脑、手机接入同一服务器的授权与复用流程，修正部分公钥授权冲突。完善已有 Agent 的识别、能力检测与更新流程，并修正云端同步后主机部署状态未及时刷新的问题。
+已有主机的身份保持，不要求删除后重新添加，也不会因为新增另一个端口而覆盖原来的凭据。
 
-## 3. 桌面服务器浏览器
+## 3. 第三方云地址自动识别
 
-Windows、macOS、Linux 支持通过服务器 Agent 使用本机 Chrome 浏览网站。
+在“设置 → 云服务 → 自建云”中，可以直接填写 IP、域名或带端口的地址，点击“测试连接”后查看识别结果，再保存并切换；不必每次手动输入协议前缀。
 
-同一台服务器可建立多个浏览器环境，每个环境独立保存 Cookie、登录状态、浏览数据与固定指纹种子，并可设置显示系统、时区、语言，以及定位、麦克风和摄像头权限。
+首次未指定协议时优先检测 HTTPS。经明确配置的可信内网云可使用 HTTP，不需要在每台访问设备上导入证书。界面会清楚显示实际协议，并提示 HTTP 传输未加密，仅适合可信内网。
 
-改善启动速度与首次打开成功率，修正部分网站、安全验证页导致浏览器意外关闭的问题，完善异常退出后的环境恢复，并增加未安装 Chrome 时的提示。
+明确指定或已经保存的 HTTPS 地址、HTTPS 证书验证失败，以及公开网络地址，都不会悄悄降级为 HTTP。连接检测不会携带原账号的密码或会话信息。官方云继续使用 HTTPS；自建服务端需采用支持此模式的新版本并明确启用内网 HTTP。
 
-## 4. AI 并发执行与查询效率
+## 4. Android 锁屏、断网后的 AI 会话恢复
 
-增加可设置的 AI 任务并发与排队机制，支持多台主机，以及同一台主机上的独立只读任务同时执行。子 Agent 沿用主 Agent 本次设置的上下文窗口。
+改善 Android 在锁屏、网络中断、重新联网或返回前台后，AI 会话无法继续发送、错误提示无法识别，以及保存状态未及时恢复的问题。
 
-优化服务器状态检查流程，减少重复读文件、反复查询及不必要的工具步骤。有依赖关系或涉及修改的操作仍依序处理。
+恢复时会核对原任务和本机保存状态，保留已收到的内容，并允许在原会话继续交流；不会自动重发模型请求或远端修改命令。修正相关保存回执的处理时序，减少中断后聊天内容与页面状态不一致的情况。
 
-## 5. AI 即时回答、进度与会话恢复
+## 5. 减少删除主机时的不必要等待
 
-回答随模型返回逐步显示，子任务进度、结果与错误及时更新。
+修正删除带有服务器浏览器环境的主机时，清理流程重复等待自身资源锁，可能造成长时间停留在“正在删除”的问题。
 
-聊天主界面改用精简的进度与结果摘要，完整工具操作可通过“查看详情”展开。
+删除完成后正确释放资源，再执行浏览器环境收尾；远端短时卸载尝试仍有时间限制，失败不会无限阻挡本机删除。
 
-修正插话内容未显示、暂停后无法继续发送，以及中断、异常退出后部分会话无法正常恢复的问题。改善历史保存冲突判断，修正部分 Mac AI 崩溃问题。
+## 6. 降低 Agent 诊断记录的开销
 
-## 6. AI 上下文、长会话与用量统计
+诊断关闭时更早跳过记录处理；Linux Agent 对正常、短时的监控操作采用汇总记录，异常、慢操作和需要追踪的业务仍保留必要细节。
 
-上下文整理改为依据模型实际窗口，不再采用固定 256K 门槛；工具结果不再一律截取固定字数，大结果可按需分页读取。
+日志维护改为有界的周期任务，减少在请求处理中进行较重清理的机会。Windows Agent 同步调整相关维护调度。此优化针对诊断记录和维护开销，不降低实际监控采样频率，也不改动服务器其他程序的日志设置。
 
-长会话采用分块保存与加载，处理原先整份会话 256MiB 限制造成的阻断，减少重新打开长聊天与准备上下文的等待。
+## 7. 云端后台账号删除修复
 
-新增真实用量统计，显示 **累计使用 Token、上下文用量与缓存命中率**，统一处理不同模型接口的用量字段，并计入子任务。执行期间继续显示上次已确认数据，供应商未提供的缓存数据不再误作零命中。
+修正删除包含主机、AI 配置、代理或同步历史的账号时，可能被设备关联约束阻挡的问题。
 
-“累计使用 Token”表示会话历次请求的累计用量；“上下文用量”表示主助手单次请求的输入量，两者分开说明。
+相关同步依赖与账号在同一笔数据库事务中清理；出现错误时完整回滚，其他账号的数据保持不变。管理员保护、全局历史记录和审计要求继续保留。官方云已同步此项后端修正，自建云需更新服务端才能采用。
 
-## 7. 监控采集与数据传输优化
+## 版本与更新方式
 
-采集并发上限提高至可设置的 **1,000**，完善排队与调度，改善启动后首轮数据更新及慢主机影响其他主机的情况。
-
-优化本机数据库读写，减少重复操作；较大的监控历史响应采用选择性压缩，降低传输量，小数据维持轻量传输。
-
-## 8. 云端同步与密码验证
-
-同一次程序运行期间，完成一次数据保护密码验证后，切页、检查、上传与下载可沿用验证，减少重复输入。
-
-同步界面增加全选与默认采用云端选项，改善项目排列和操作提示。
-
-修正 Android 首次登录后确认下载失败的问题；已删除且本机也不存在的 AI 账号，不再反复出现在待同步列表中。
-
-## 9. Android 界面与操作修复
-
-同步共享层的 AI、上下文、记忆与用量统计改动，使用底部用量摘要及简洁的三项详情。
-
-修正底部大面积空白、键盘与安全区间距问题。修正从主机功能卡片进入终端时未选中对应主机，以及连接等待期间无法切换主机的问题。
-
-修正 AI 历史对话无法选取、历史模型干扰当前设置，以及切换模型窗口后用量未刷新的问题。
-
-## 10. 桌面界面统一与细节改善
-
-Windows、macOS、Linux 的共用设置与 AI 界面统一调整。设置首页整合为四个分类卡片，子项可直接进入对应设置。
-
-确认弹窗改用 C-SSH 自身样式，改善 Mac 窗口控制、圆角，以及部分深色弹窗文字不清楚的问题。
-
-**更新方式：**本次版本只提供更新提示，请前往官网下载并自行安装；不强制更新，也不自动下载安装。
+- Windows、macOS、Linux、Android 客户端及自研 Agent：0.9.8。
+- 本次通过公告提示更新，请前往官网下载并手动安装；不强制更新，不自动下载安装。
+- 使用原安装身份覆盖更新，保留既有本机资料；请勿为更新而卸载、清空数据或手动删除密钥。
+- macOS 继续提供 Apple Silicon 版本；当前未取得 Apple Developer ID 公证，安装边界与上一版相同。
+- iOS 开发及发布继续暂停；移动端服务器浏览器入口仍保持隐藏。
 
 ## Downloads
 
 | File | Bytes | Download |
 |---|---:|---|
-| C-SSH_0.9.7_x64-setup.exe | 49,731,494 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_x64-setup.exe) |
-| C-SSH_0.9.7_portable-Windows-x64.zip | 45,010,208 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_portable-Windows-x64.zip) |
-| C-SSH_0.9.7_arm64-setup.exe | 47,816,201 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_arm64-setup.exe) |
-| C-SSH_0.9.7_portable-Windows-arm64.zip | 43,592,452 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_portable-Windows-arm64.zip) |
-| C-SSH_0.9.7_macOS-arm64.dmg | 47,725,501 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_macOS-arm64.dmg) |
-| C-SSH_0.9.7_android-arm64.apk | 45,779,461 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_android-arm64.apk) |
-| C-SSH_0.9.7_arm64.deb | 46,732,072 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_arm64.deb) |
-| C-SSH_0.9.7_aarch64.AppImage | 119,740,936 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_aarch64.AppImage) |
-| C-SSH_0.9.7_amd64.deb | 47,644,200 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_amd64.deb) |
-| C-SSH_0.9.7_amd64.AppImage | 120,789,496 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.7/C-SSH_0.9.7_amd64.AppImage) |
+| C-SSH_0.9.8_arm64-setup.exe | 55,120,724 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_arm64-setup.exe) |
+| C-SSH_0.9.8_portable-Windows-arm64.zip | 50,865,532 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_portable-Windows-arm64.zip) |
+| C-SSH_0.9.8_portable-Windows-x64.zip | 52,359,569 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_portable-Windows-x64.zip) |
+| C-SSH_0.9.8_x64-setup.exe | 57,113,796 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_x64-setup.exe) |
+| C-SSH_0.9.8_macOS-arm64.dmg | 55,033,590 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_macOS-arm64.dmg) |
+| C-SSH_0.9.8_android-arm64.apk | 53,086,313 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_android-arm64.apk) |
+| C-SSH_0.9.8_aarch64.AppImage | 127,085,064 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_aarch64.AppImage) |
+| C-SSH_0.9.8_amd64.AppImage | 128,088,568 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_amd64.AppImage) |
+| C-SSH_0.9.8_amd64.deb | 54,934,216 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_amd64.deb) |
+| C-SSH_0.9.8_arm64.deb | 54,041,416 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.8/C-SSH_0.9.8_arm64.deb) |
 
 ## SHA256
 
 | File | SHA256 |
 |---|---|
-| C-SSH_0.9.7_x64-setup.exe | `5d372e069ec70ec43d04e4e7219bb0aae7990c6620a3ec9bc3a996c8321ed269` |
-| C-SSH_0.9.7_portable-Windows-x64.zip | `2d6b8418195887ef62ba3bd7e09ca8886d9bea7126e33a02df9d8bb9ebac6be0` |
-| C-SSH_0.9.7_arm64-setup.exe | `63db71cae80b4f2772ee9c7e8fcc5c96edcc1a982b5a797002b3e342edd69bc6` |
-| C-SSH_0.9.7_portable-Windows-arm64.zip | `834fc184cc0c234f22f5b2acbb8d7bb7d885b3e806da31d79ca83378250a7567` |
-| C-SSH_0.9.7_macOS-arm64.dmg | `8315451283855bf352b786161e4645a01671f8914db73d7c60026708d6f856c9` |
-| C-SSH_0.9.7_android-arm64.apk | `f425c11e4d60f134fc9cef1f099a73c9f8f57bd30e412d9024200f7698b5edae` |
-| C-SSH_0.9.7_arm64.deb | `15285fd9df875da5ce5538e63941840289b7004a2be3cf3313420fa2909181da` |
-| C-SSH_0.9.7_aarch64.AppImage | `15042627ac7499241c49b8ebe56c07690d88973aabf4128e1891475bad044fab` |
-| C-SSH_0.9.7_amd64.deb | `e0f9638ba7123fb07b4a158fd6b3090c4fd07bd6ee930320743b83e8fea01a8a` |
-| C-SSH_0.9.7_amd64.AppImage | `e8f9626789395baf6bccd2d00995f4d91326b6812b2321037184bd0350c4b733` |
+| C-SSH_0.9.8_arm64-setup.exe | `e79dc574d0278dc419bdc130eaf4201afd33b31029f40dbccf0fe222f475cbcb` |
+| C-SSH_0.9.8_portable-Windows-arm64.zip | `c499806e7d5bef2a48691e083fb24ec789235ae2e939da24e3b3bffd77cd00cd` |
+| C-SSH_0.9.8_portable-Windows-x64.zip | `9b926ad08286e5c7fefbbb9eed40293ad45f8a0f036af7de0922201610a40941` |
+| C-SSH_0.9.8_x64-setup.exe | `e526564486f14f84aec0ab265cd7eb92c892d5dfbc759e62461548eefccc8e82` |
+| C-SSH_0.9.8_macOS-arm64.dmg | `73a2d6136fb6f4d34aa245984eae008e732152807878349479b25b947e9a1af1` |
+| C-SSH_0.9.8_android-arm64.apk | `add46254cfdfc322d575da5f36328822e3b3b97b9c10b1d41f4f5a603f41bda1` |
+| C-SSH_0.9.8_aarch64.AppImage | `2873949dfbfda78456b19e1aecdeb8b8a58d134651adfc71b2e4536a32ccff20` |
+| C-SSH_0.9.8_amd64.AppImage | `f936a01b9621173f66be8c43ce77c53d6fe9e5206f1b9d52a5453ac5f39cba3b` |
+| C-SSH_0.9.8_amd64.deb | `00630c2cc0cb1fdf1d23d80bb83242c85a13e09f977b25b3cb29952ee2c41a20` |
+| C-SSH_0.9.8_arm64.deb | `97105e890023f27d8b69f300745f09e248e2eb5542c68668ef2802e4a38ba2e4` |
 
-## 数据与源码
-
-AI 对话和记忆保存在本机；Cloud 仅同步用户选择的加密配置。本仓库提供公开说明、下载及 Creation Cloud 生产源码镜像，客户端与 Agent 源码不在公开范围。
+AI 对话和原始记忆保存在本机；Cloud 仅同步用户选择的加密配置。公开仓库包含说明、下载和 Creation Cloud 生产源码镜像，客户端与 Agent 源码不在公开范围。

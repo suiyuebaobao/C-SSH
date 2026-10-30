@@ -41,7 +41,7 @@ impl fmt::Debug for SmtpConfig {
 }
 
 impl SmtpConfig {
-    pub(crate) fn from_env() -> Result<Option<Self>> {
+    pub(crate) fn from_env_for_deployment(intranet: bool) -> Result<Option<Self>> {
         let host = optional_env("CLOUD_SMTP_HOST")?;
         let username = optional_env("CLOUD_SMTP_USERNAME")?;
         let from_address = optional_env("CLOUD_SMTP_FROM")?;
@@ -49,6 +49,21 @@ impl SmtpConfig {
         let verification_key_file = optional_env("CLOUD_EMAIL_CODE_HMAC_KEY_FILE")?;
         let port = optional_env("CLOUD_SMTP_PORT")?;
         let security = optional_env("CLOUD_SMTP_SECURITY")?;
+
+        if intranet
+            && [
+                host.as_ref(),
+                username.as_ref(),
+                from_address.as_ref(),
+                password_file.as_ref(),
+                port.as_ref(),
+                security.as_ref(),
+            ]
+            .into_iter()
+            .all(|value| value.is_none())
+        {
+            return Ok(None);
+        }
 
         let has_any = [
             host.as_ref(),
@@ -167,3 +182,4 @@ fn read_secret_file(name: &str, path: &PathBuf) -> Result<String> {
     }
     Ok(value)
 }
+
