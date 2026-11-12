@@ -66,3 +66,4 @@ pub(crate) async fn completed_history(
         .map_err(map_storage)?;
     Ok(())
 }
+

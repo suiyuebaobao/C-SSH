@@ -28,3 +28,4 @@ impl AdminActor {
         self.account_id
     }
 }
+

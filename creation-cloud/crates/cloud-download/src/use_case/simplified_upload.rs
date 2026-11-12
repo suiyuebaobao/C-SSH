@@ -151,3 +151,4 @@ fn external_source_input(asset_id: Uuid, external_url: &str) -> AppResult<Create
         enabled: true,
     })
 }
+

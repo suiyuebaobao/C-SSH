@@ -88,3 +88,4 @@ fn validate(input: AdminCreateUserInput) -> AppResult<ValidatedCreate> {
         admin_login_name,
     })
 }
+

@@ -106,3 +106,4 @@ fn can_accumulate_failures(account: &LoginAccount) -> bool {
         && (account.role == "admin"
             || (account.role == "user" && account.email_verified_at.is_some()))
 }
+

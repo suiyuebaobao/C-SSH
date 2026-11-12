@@ -30,3 +30,4 @@ fn canonicalize(value: Value) -> Value {
         value => value,
     }
 }
+

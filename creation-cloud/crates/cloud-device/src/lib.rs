@@ -2,24 +2,27 @@
 
 mod handler;
 mod model;
+mod policy;
 mod repository;
 mod service;
 mod session;
 mod use_case;
 mod validation;
+pub use policy::{AccountDevicePolicy, DeviceQuotaResolver, UpdateDevicePolicy};
 
 use axum::{
-    Router,
     routing::{delete, get, post},
+    Router,
 };
 
 pub use model::{
     CreateDeviceOutcome, Device, DeviceSessionResult, DeviceSessionView, Platform, SessionView,
 };
 pub use service::Service;
+pub use use_case::identity::BindDeviceIdentity;
 pub use use_case::{CreateDevice, UpdateDevice};
 
-/// Hard per-account bound for devices that can retain an active device session.
+/// 历史默认值；实际准入采用后台全站值和账号覆盖，不再把此常量当硬上限。
 ///
 /// Device creation serializes on the owning account row before enforcing this
 /// limit, so concurrent registrations cannot exceed it.
@@ -29,6 +32,7 @@ pub const MAX_ACTIVE_DEVICES_PER_ACCOUNT: i64 = 16;
 #[must_use = "路由必须挂载到服务端才会生效"]
 pub fn router(service: Service) -> Router {
     Router::new()
+        .route("/{id}/identity", post(handler::identity::bind))
         .route("/sessions", get(handler::session::list_self))
         .route(
             "/sessions/{session_id}",
@@ -51,6 +55,10 @@ pub fn router(service: Service) -> Router {
 #[must_use = "the router must be mounted for session management to be available"]
 pub fn management_router(service: Service) -> Router {
     Router::new()
+        .route(
+            "/users/{account_id}/device-policy",
+            get(handler::policy::get).put(handler::policy::update),
+        )
         .route("/sessions", get(handler::session::list_admin))
         .route(
             "/sessions/{session_id}",
@@ -62,3 +70,4 @@ pub fn management_router(service: Service) -> Router {
         )
         .with_state(service)
 }
+

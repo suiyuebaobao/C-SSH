@@ -308,3 +308,4 @@ async fn not_found(tx: DbTransaction<'_>, message: &str) -> AppResult<()> {
     tx.rollback().await.map_err(storage)?;
     Err(AppError::NotFound(message.to_owned()))
 }
+

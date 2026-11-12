@@ -22,3 +22,4 @@ pub(crate) async fn execute(connection: &mut PgConnection, id: Uuid) -> AppResul
         .map_err(map_read_error)?
         .ok_or_else(|| AppError::NotFound("资产不存在".into()))
 }
+

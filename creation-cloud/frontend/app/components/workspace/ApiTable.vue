@@ -74,6 +74,7 @@ defineExpose({ load, items });
         <tbody>
           <tr
             v-for="(item, index) in items"
+            :data-row-id="String(item.id || item.session_id || item.account_id || '')"
             :key="
               String(item.id || item.session_id || item.account_id || index)
             "

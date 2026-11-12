@@ -129,3 +129,4 @@ fn rate_limited(seconds: u64) -> AppError {
         retry_after_seconds: seconds.max(1),
     }
 }
+

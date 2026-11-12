@@ -140,3 +140,4 @@ fn resource(path: &str) -> (String, Option<String>) {
         .map(|value| value.to_string());
     (kind, id)
 }
+

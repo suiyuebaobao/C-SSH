@@ -273,3 +273,4 @@ fn integer_in(value: &Value, minimum: i64, maximum: i64) -> bool {
         .as_i64()
         .is_some_and(|number| (minimum..=maximum).contains(&number))
 }
+

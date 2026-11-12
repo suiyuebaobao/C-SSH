@@ -4,14 +4,14 @@ use cloud_domain::{AppError, AppResult};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
-use crate::{AdminUser, model::AdminUserRow, repository::map_read_error};
+use crate::{model::AdminUserRow, repository::map_read_error, AdminUser};
 
 pub(crate) const GET_SQL: &str = r#"
     SELECT accounts.id, accounts.email, accounts.admin_login_name,
            accounts.email_verified_at IS NOT NULL AS email_verified,
            COALESCE(user_profiles.display_name, '') AS display_name,
            accounts.role, accounts.status,
-           (SELECT count(*)::BIGINT FROM devices WHERE devices.account_id = accounts.id)
+           (SELECT count(*)::BIGINT FROM device_identity_groups WHERE device_identity_groups.account_id = accounts.id)
                AS device_count,
            (SELECT count(*)::BIGINT FROM cloud_hosts
             WHERE cloud_hosts.account_id = accounts.id

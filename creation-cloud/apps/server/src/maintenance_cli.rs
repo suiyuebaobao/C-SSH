@@ -54,3 +54,4 @@ fn write_json<T: Serialize>(value: &T) -> Result<()> {
     output.write_all(b"\n")?;
     Ok(())
 }
+

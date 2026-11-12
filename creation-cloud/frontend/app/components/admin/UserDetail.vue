@@ -5,13 +5,19 @@ const api = useCloudApi();
 const user = ref<Record<string, unknown> | null>(null);
 const error = ref("");
 const prefix = computed(() => `/api/v1/admin/users/${props.id}`);
-onMounted(async () => {
+let profileGeneration = 0;
+watch(() => props.id, async () => {
+  const generation = ++profileGeneration;
+  user.value = null;
+  error.value = "";
   try {
-    user.value = await api(`${prefix.value}/profile`);
+    const profile = await api<Record<string, unknown>>(`${prefix.value}/profile`);
+    if (generation === profileGeneration) user.value = profile;
   } catch (cause) {
-    error.value = cloudError(cause, en.value);
+    if (generation === profileGeneration) error.value = cloudError(cause, en.value);
   }
-});
+}, { immediate: true });
+onBeforeUnmount(() => { profileGeneration++; });
 const hosts = computed(() => [
   { key: "id", label: t("加密主机编号", "Encrypted host ID") },
   { key: "revision", label: t("版本", "Revision") },
@@ -57,7 +63,7 @@ const sessions = computed(() => [
       )
     }}
   </p>
-  <WorkspaceApiTable :endpoint="`${prefix}/hosts`" :columns="hosts"
+  <WorkspaceApiTable :key="`${prefix}/hosts`" :endpoint="`${prefix}/hosts`" :columns="hosts"
     ><template #actions="{ row, reload }"
       ><WorkspaceConfirmAction
         v-if="!row.deleted"
@@ -72,7 +78,7 @@ const sessions = computed(() => [
         @done="reload" /></template
   ></WorkspaceApiTable>
   <h2>{{ t("同步记录", "Sync records") }}</h2>
-  <WorkspaceApiTable :endpoint="`${prefix}/sync-records`" :columns="sync"
+  <WorkspaceApiTable :key="`${prefix}/sync-records`" :endpoint="`${prefix}/sync-records`" :columns="sync"
     ><template #actions="{ row, reload }"
       ><WorkspaceConfirmAction
         :label="t('删除记录', 'Delete record')"
@@ -82,8 +88,9 @@ const sessions = computed(() => [
         :endpoint="`${prefix}/sync-records/${encodeURIComponent(String(row.record_id))}`"
         @done="reload" /></template
   ></WorkspaceApiTable>
+  <AdminUserDevicePolicy v-if="user" :account-id="id" />
   <h2>{{ t("登录会话", "Sign-in sessions") }}</h2>
-  <WorkspaceApiTable :endpoint="`${prefix}/sessions`" :columns="sessions"
+  <WorkspaceApiTable :key="`${prefix}/sessions`" :endpoint="`${prefix}/sessions`" :columns="sessions"
     ><template #actions="{ row, reload }"
       ><WorkspaceConfirmAction
         :label="t('撤销', 'Revoke')"

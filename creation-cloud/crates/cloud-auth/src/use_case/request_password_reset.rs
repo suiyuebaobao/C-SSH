@@ -171,3 +171,4 @@ fn sanitize_request_id(value: Option<String>) -> String {
 fn valid_captcha_code(code: &str) -> bool {
     code.len() == crate::captcha::CODE_LENGTH && code.bytes().all(|byte| byte.is_ascii_digit())
 }
+

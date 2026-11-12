@@ -31,3 +31,4 @@ pub async fn with_semantic_audit_tracking<T>(future: impl Future<Output = T>) ->
 pub fn mark_semantic_audit_recorded() {
     let _ = SEMANTIC_AUDIT_RECORDED.try_with(|recorded| recorded.set(true));
 }
+

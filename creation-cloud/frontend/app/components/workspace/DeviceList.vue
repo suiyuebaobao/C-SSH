@@ -23,6 +23,7 @@ const sessionEndpoint = computed(() =>
 const deviceColumns = computed(() => [
   { key: "name", label: t("名称", "Name") },
   { key: "platform", label: t("平台", "Platform") },
+  { key: "identity", label: t("设备识别", "Device identity") },
   { key: "last_seen_at", label: t("最近活动", "Last seen") },
   { key: "revoked_at", label: t("撤销时间", "Revoked") },
 ]);
@@ -57,6 +58,7 @@ async function refresh() {
 <template>
   <h1>{{ t("设备与会话", "Devices & sessions") }}</h1>
   <h2>{{ t("已登记设备", "Registered devices") }}</h2>
+  <p>{{ t("同一设备的不同客户端版本合计一台。旧版未提供稳定指纹的登记保留原记录，不按IP或名称合并。", "Versions sharing a stable device identity count as one device. Legacy registrations without it remain separate; IP addresses and names are not used to merge devices.") }}</p>
   <form
     v-if="admin"
     class="filter-bar"
@@ -69,9 +71,10 @@ async function refresh() {
   </form>
   <WorkspaceApiTable
     ref="devices"
+    :key="deviceEndpoint"
     :endpoint="deviceEndpoint"
     :columns="deviceColumns"
-    ><template #actions="{ row }"
+    ><template #identity="{ row }"><span v-if="row.physical_device_fingerprint" :title="String(row.physical_device_fingerprint)">{{ t("稳定设备", "Recognized device") }}</span><span v-else>{{ t("旧版登记", "Legacy registration") }}</span></template><template #actions="{ row }"
       ><button
         v-if="!admin"
         class="button"
@@ -83,8 +86,8 @@ async function refresh() {
         :label="t('撤销设备', 'Revoke device')"
         :message="
           t(
-            '该设备的全部会话将立即失效。其他设备和云端密文保持不变。',
-            'All sessions on this device will be revoked. Other devices and encrypted data remain unchanged.',
+            '该设备（含同机其他版本）的全部会话将立即失效。其他设备和云端密文保持不变。',
+            'All sessions on this device, including other versions, will be revoked. Other devices and encrypted data remain unchanged.',
           )
         "
         :endpoint="`${prefix}/${row.id}${admin ? '/revoke' : ''}`"

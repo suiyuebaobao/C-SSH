@@ -11,3 +11,4 @@ pub(crate) fn make_span(request: &Request<Body>) -> Span {
         path = %request.uri().path()
     )
 }
+

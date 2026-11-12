@@ -6,14 +6,14 @@ use cloud_store::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    MAX_ACTIVE_DEVICES_PER_ACCOUNT,
     model::{CreateDeviceOutcome, Device, DeviceRow, DeviceSessionView},
     session,
 };
 
 use super::error;
 
-pub(crate) const LOCK_ACCOUNT_SQL: &str = "SELECT id, email, email_verified_at, admin_login_name, role, credential_version \
+pub(crate) const LOCK_ACCOUNT_SQL: &str =
+    "SELECT id, email, email_verified_at, admin_login_name, role, credential_version \
      FROM accounts WHERE id = $1 AND status = 'active' \
        AND (role = 'admin' OR email_verified_at IS NOT NULL) FOR UPDATE";
 pub(crate) const LOCK_SESSION_SQL: &str = "SELECT device_id, session_kind, absolute_expires_at, \
@@ -29,7 +29,7 @@ pub(crate) const INSERT_DEVICE_SESSION_SQL: &str = "INSERT INTO sessions \
       client_version, device_fingerprint) \
      VALUES ($1, $2, $3, $4, 'device', $5, $6, $7, $8, $9::inet, $10, $11, $12)";
 pub(crate) const COUNT_ACTIVE_DEVICES_SQL: &str =
-    "SELECT count(*)::BIGINT FROM devices WHERE account_id = $1 AND revoked_at IS NULL";
+    "SELECT count(*)::BIGINT FROM device_identity_groups WHERE account_id = $1 AND is_active";
 
 type AccountRow = (
     Uuid,
@@ -60,8 +60,12 @@ pub(crate) async fn bind(
     user_agent: Option<&str>,
     client_version: Option<&str>,
     device_fingerprint: Option<&str>,
+    physical_device_fingerprint: Option<&str>,
+    quota: crate::DeviceQuotaResolver,
 ) -> AppResult<CreateDeviceOutcome> {
     let mut transaction = pool.begin().await.map_err(error::storage)?;
+    // 固定锁序：全站策略共享锁在账号锁之前，管理员改限额不能穿过在途准入。
+    let global_maximum = quota(&mut transaction).await?;
     let account = sqlx::query_as::<_, AccountRow>(LOCK_ACCOUNT_SQL)
         .bind(current_session.account_id)
         .fetch_optional(&mut *transaction)
@@ -79,7 +83,7 @@ pub(crate) async fn bind(
 
     let existing = sqlx::query_as::<_, DeviceRow>(
         "SELECT id, account_id, name, platform, public_id, last_seen_at, revoked_at, \
-                created_at, updated_at FROM devices \
+                created_at, updated_at, physical_device_fingerprint FROM devices \
          WHERE account_id = $1 AND public_id = $2 FOR UPDATE",
     )
     .bind(current_session.account_id)
@@ -90,6 +94,11 @@ pub(crate) async fn bind(
 
     let (device, created) = match existing {
         Some(row) => {
+            let registration_name = if physical_device_fingerprint.is_some() {
+                row.2.clone()
+            } else {
+                name.to_owned()
+            };
             if row.6.is_some() {
                 return Err(AppError::Conflict(
                     "已撤销的设备标识不能重新登记".to_owned(),
@@ -98,18 +107,27 @@ pub(crate) async fn bind(
             if row.3 != platform {
                 return Err(AppError::Conflict("设备平台与既有登记不一致".to_owned()));
             }
+            if row.9.as_deref().is_some_and(|stored| {
+                physical_device_fingerprint.is_some_and(|incoming| incoming != stored)
+            }) {
+                return Err(AppError::Conflict(
+                    "当前安装实例的设备身份已变化".to_owned(),
+                ));
+            }
             if active_session.0.is_some_and(|device_id| device_id != row.0) {
                 return Err(AppError::Conflict("当前会话已绑定其它设备".to_owned()));
             }
             let row = sqlx::query_as::<_, DeviceRow>(
-                "UPDATE devices SET name = $3, last_seen_at = now(), updated_at = now() \
+                "UPDATE devices SET name = $3, last_seen_at = now(), updated_at = now(), \
+                 physical_device_fingerprint = COALESCE(physical_device_fingerprint, $4) \
                  WHERE account_id = $1 AND id = $2 AND revoked_at IS NULL \
                  RETURNING id, account_id, name, platform, public_id, last_seen_at, \
-                           revoked_at, created_at, updated_at",
+                           revoked_at, created_at, updated_at, physical_device_fingerprint",
             )
             .bind(current_session.account_id)
             .bind(row.0)
-            .bind(name)
+            .bind(&registration_name)
+            .bind(physical_device_fingerprint)
             .fetch_one(&mut *transaction)
             .await
             .map_err(error::storage)?;
@@ -119,28 +137,46 @@ pub(crate) async fn bind(
             if active_session.0.is_some() {
                 return Err(AppError::Conflict("当前会话已绑定其它设备".to_owned()));
             }
+            let same_device_name = match physical_device_fingerprint {
+                Some(fingerprint) => sqlx::query_scalar::<_, String>(
+                    "SELECT d.name FROM device_identity_groups g JOIN devices d ON d.id=g.representative_id \
+                     WHERE g.account_id=$1 AND g.platform=$2 AND g.identity_key=$3 AND g.is_active",
+                ).bind(current_session.account_id).bind(platform).bind(fingerprint)
+                 .fetch_optional(&mut *transaction).await.map_err(error::storage)?,
+                None => None,
+            };
+            let maximum = sqlx::query_scalar::<_, Option<i32>>(
+                "SELECT maximum FROM account_device_policies WHERE account_id=$1",
+            )
+            .bind(current_session.account_id)
+            .fetch_optional(&mut *transaction)
+            .await
+            .map_err(error::storage)?
+            .flatten()
+            .map_or(global_maximum, i64::from);
             let active_device_count = sqlx::query_scalar::<_, i64>(COUNT_ACTIVE_DEVICES_SQL)
                 .bind(current_session.account_id)
                 .fetch_one(&mut *transaction)
                 .await
                 .map_err(error::storage)?;
-            if active_device_count >= MAX_ACTIVE_DEVICES_PER_ACCOUNT {
+            if same_device_name.is_none() && active_device_count >= maximum {
                 return Err(AppError::Conflict(
                     "账号的活动设备数量已达到上限".to_owned(),
                 ));
             }
             let row = sqlx::query_as::<_, DeviceRow>(
                 "INSERT INTO devices \
-                 (id, account_id, name, platform, public_id, last_seen_at) \
-                 VALUES ($1, $2, $3, $4, $5, now()) \
+                 (id, account_id, name, platform, public_id, last_seen_at, physical_device_fingerprint) \
+                 VALUES ($1, $2, $3, $4, $5, now(), $6) \
                  RETURNING id, account_id, name, platform, public_id, last_seen_at, \
-                           revoked_at, created_at, updated_at",
+                           revoked_at, created_at, updated_at, physical_device_fingerprint",
             )
             .bind(Uuid::now_v7())
             .bind(current_session.account_id)
-            .bind(name)
+            .bind(same_device_name.as_deref().unwrap_or(name))
             .bind(platform)
             .bind(public_id)
+            .bind(physical_device_fingerprint)
             .fetch_one(&mut *transaction)
             .await
             .map_err(error::create)?;

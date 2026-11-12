@@ -5,19 +5,44 @@ use cloud_store::PgPool;
 use uuid::Uuid;
 
 use crate::{
+    use_case::{self, create::TrustedRequestMetadata, CreateDevice, UpdateDevice},
     CreateDeviceOutcome, Device, SessionView,
-    use_case::{self, CreateDevice, UpdateDevice, create::TrustedRequestMetadata},
 };
 
 #[derive(Clone)]
 pub struct Service {
     pool: PgPool,
+    quota: crate::DeviceQuotaResolver,
 }
 
 impl Service {
+    pub async fn bind_identity(
+        &self,
+        session: &AuthenticatedSession,
+        device: Uuid,
+        input: crate::BindDeviceIdentity,
+    ) -> AppResult<Device> {
+        use_case::identity::execute(&self.pool, session, device, input).await
+    }
+    pub async fn admin_device_policy(
+        &self,
+        session: &AuthenticatedSession,
+        account: Uuid,
+    ) -> AppResult<crate::AccountDevicePolicy> {
+        use_case::policy::read(&self.pool, session, account, self.quota).await
+    }
+
+    pub async fn admin_update_device_policy(
+        &self,
+        session: &AuthenticatedSession,
+        account: Uuid,
+        input: crate::UpdateDevicePolicy,
+    ) -> AppResult<crate::AccountDevicePolicy> {
+        use_case::policy::update(&self.pool, session, account, input, self.quota).await
+    }
     #[must_use]
-    pub fn new(pool: PgPool) -> Self {
-        Self { pool }
+    pub fn new(pool: PgPool, quota: crate::DeviceQuotaResolver) -> Self {
+        Self { pool, quota }
     }
 
     pub async fn create(
@@ -35,7 +60,7 @@ impl Service {
         command: CreateDevice,
         metadata: TrustedRequestMetadata,
     ) -> AppResult<CreateDeviceOutcome> {
-        use_case::create::execute(&self.pool, session, command, metadata).await
+        use_case::create::execute(&self.pool, session, command, metadata, self.quota).await
     }
 
     pub async fn get(&self, session: &AuthenticatedSession, device_id: Uuid) -> AppResult<Device> {

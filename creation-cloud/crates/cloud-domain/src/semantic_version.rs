@@ -179,3 +179,4 @@ fn compare_prerelease(
         }
     }
 }
+

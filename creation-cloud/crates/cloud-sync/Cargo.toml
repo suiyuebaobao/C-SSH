@@ -19,6 +19,7 @@ tokio.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
+cloud-auth.workspace = true
 cloud-device.workspace = true
 
 [lints]

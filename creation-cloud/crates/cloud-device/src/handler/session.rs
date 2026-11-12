@@ -67,3 +67,4 @@ fn deletion_response(session_id: Uuid, current_session_id: Uuid) -> Response {
     }
     response
 }
+

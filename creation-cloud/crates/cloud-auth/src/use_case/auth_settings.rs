@@ -1,12 +1,19 @@
 //! 读取四项认证开关与三项安全策略，并由管理员以一个 revision/CAS 原子更新。
 
 use chrono::{DateTime, Utc};
-use cloud_domain::{AdminActor, AppError, AppResult, mark_semantic_audit_recorded};
+use cloud_domain::{mark_semantic_audit_recorded, AdminActor, AppError, AppResult};
 use cloud_store::PgPool;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::repository;
+
+/// 设备域通过装配层注入此公开策略用例；共享锁覆盖随后整个准入事务。
+pub fn lock_device_quota<'a, 'c>(
+    transaction: &'a mut cloud_store::Transaction<'c, cloud_store::Postgres>,
+) -> std::pin::Pin<Box<dyn std::future::Future<Output = AppResult<i64>> + Send + 'a>> {
+    Box::pin(async move { repository::settings::device_quota(transaction).await })
+}
 
 #[derive(Clone, Debug, Serialize)]
 pub struct AuthSettings {
@@ -17,6 +24,7 @@ pub struct AuthSettings {
     pub email_cooldown_seconds: i32,
     pub login_failure_threshold: i32,
     pub login_lockout_minutes: i32,
+    pub max_active_devices_per_account: i32,
     pub revision: i64,
     pub updated_by: Option<Uuid>,
     pub updated_at: DateTime<Utc>,
@@ -32,6 +40,8 @@ pub struct UpdateAuthSettings {
     pub email_cooldown_seconds: i32,
     pub login_failure_threshold: i32,
     pub login_lockout_minutes: i32,
+    #[serde(default)]
+    pub max_active_devices_per_account: Option<i32>,
     pub expected_revision: i64,
 }
 
@@ -40,6 +50,7 @@ pub struct ClientLoginConfig {
     pub revision: i64,
     pub captcha_enabled: bool,
     pub email_code_enabled: bool,
+    pub device_identity_version: u8,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -68,7 +79,7 @@ pub(crate) async fn get(pool: &PgPool, actor: &AdminActor) -> AppResult<AuthSett
 pub(crate) async fn update(
     pool: &PgPool,
     actor: &AdminActor,
-    input: UpdateAuthSettings,
+    mut input: UpdateAuthSettings,
 ) -> AppResult<AuthSettings> {
     let actor_id = require_actor(actor)?;
     validate_input(&input)?;
@@ -77,6 +88,11 @@ pub(crate) async fn update(
         .await
         .map_err(|_| AppError::Storage("认证设置事务启动失败".to_owned()))?;
     let current = repository::settings::lock(&mut transaction).await?;
+    input.max_active_devices_per_account = Some(
+        input
+            .max_active_devices_per_account
+            .unwrap_or(current.max_active_devices_per_account),
+    );
     if current.revision != input.expected_revision {
         return Err(AppError::Conflict(
             "认证设置已变化，请刷新后重试".to_owned(),
@@ -89,6 +105,7 @@ pub(crate) async fn update(
         && current.email_cooldown_seconds == input.email_cooldown_seconds
         && current.login_failure_threshold == input.login_failure_threshold
         && current.login_lockout_minutes == input.login_lockout_minutes
+        && Some(current.max_active_devices_per_account) == input.max_active_devices_per_account
     {
         return Err(AppError::Conflict("认证设置没有变化".to_owned()));
     }
@@ -148,6 +165,14 @@ pub(crate) async fn update(
 }
 
 fn validate_input(input: &UpdateAuthSettings) -> AppResult<()> {
+    if input
+        .max_active_devices_per_account
+        .is_some_and(|value| !(1..=1000).contains(&value))
+    {
+        return Err(AppError::Validation(
+            "每账号设备上限必须在1到1000之间".to_owned(),
+        ));
+    }
     if input.expected_revision < 1 {
         return Err(AppError::Validation(
             "expected_revision 必须大于零".to_owned(),
@@ -184,3 +209,4 @@ fn require_actor(actor: &AdminActor) -> AppResult<Uuid> {
         Ok(actor_id)
     }
 }
+

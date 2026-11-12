@@ -21,7 +21,7 @@ pub use http_range::{ByteRange, InvalidByteRange};
 pub use page::{Page, PageQuery};
 pub use release_contract::{
     FormalReleaseAssetIdentity, MANUAL_RELEASE_ASSETS, formal_release_asset_identities,
-    release_asset_set_is_complete, is_desktop_updater_asset,
+    is_desktop_updater_asset, release_asset_is_allowed, release_asset_set_is_complete,
 };
 pub use request_context::{
     current_request_id, mark_semantic_audit_recorded, with_request_id, with_semantic_audit_tracking,

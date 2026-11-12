@@ -277,3 +277,4 @@ fn empty_object() -> Value {
 const fn default_true() -> bool {
     true
 }
+

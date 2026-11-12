@@ -311,3 +311,4 @@ fn delivery_cooldown_active(
     now.signed_duration_since(delivery_started_at).num_seconds()
         < i64::from(cooldown_seconds.max(1))
 }
+

@@ -120,3 +120,4 @@ pub(crate) fn render_svg(code: &str) -> String {
     svg.push_str("</svg>");
     svg
 }
+

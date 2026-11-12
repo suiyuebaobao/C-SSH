@@ -20,12 +20,13 @@ mod validation;
 mod verification;
 
 use axum::{
-    Router,
     extract::DefaultBodyLimit,
     middleware as axum_middleware,
     routing::{get, post},
+    Router,
 };
 
+pub use intranet_transport::cookies as intranet_http_cookies;
 pub use mailer::{VerificationMailer, VerificationPurpose};
 pub use middleware::{
     authenticate_page_session, authenticate_session, require_admin, require_csrf,
@@ -33,8 +34,8 @@ pub use middleware::{
 };
 pub use request_metadata::TrustedRequestMetadata;
 pub use service::Service;
-pub use intranet_transport::cookies as intranet_http_cookies;
 pub use session::{AuthenticatedSession, IssuedSession, SessionMetadata, SessionView};
+pub use use_case::auth_settings::lock_device_quota;
 pub use use_case::{
     AuthSettings, ChangePassword, ClientLoginConfig, Login, LoginCaptchaSettings, LoginOutcome,
     LoginVerificationRequired, PasswordResetVerificationRequired, Register, RegistrationOutcome,

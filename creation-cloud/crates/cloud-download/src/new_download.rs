@@ -289,3 +289,4 @@ fn required(value: Option<String>, field: &str) -> AppResult<String> {
         .filter(|value| !value.is_empty())
         .ok_or_else(|| AppError::Validation(format!("{field}不能为空")))
 }
+

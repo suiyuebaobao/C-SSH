@@ -200,3 +200,4 @@ impl From<cloud_download::PublicSource> for ClientDownloadSource {
         }
     }
 }
+

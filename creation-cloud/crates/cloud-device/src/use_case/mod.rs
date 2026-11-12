@@ -3,7 +3,9 @@
 pub(crate) mod create;
 pub(crate) mod delete;
 pub(crate) mod get;
+pub(crate) mod identity;
 pub(crate) mod list;
+pub(crate) mod policy;
 pub(crate) mod session;
 pub(crate) mod update;
 

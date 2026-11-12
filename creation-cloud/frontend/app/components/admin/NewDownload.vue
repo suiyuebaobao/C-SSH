@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AdminRelease, AdminAsset } from "~/types/releases";
+import { releaseFormFormats } from "~/utils/releaseAssets";
 const emit = defineEmits<{ done: [] }>();
 const { t, en } = useLocale();
 const api = useCloudApi();
@@ -18,28 +19,15 @@ const external = ref(""),
 const file = ref<File | null>(null),
   signature = ref<File | null>(null);
 const assets = ref<AdminAsset[]>([]);
-const platformFormats: Record<
-  string,
-  { name: string; architectures: string[]; packages: string[] }
-> = {
-  windows: {
-    name: "Windows",
-    architectures: ["x86_64", "aarch64"],
-    packages: ["exe", "zip"],
-  },
-  macos: { name: "macOS", architectures: ["aarch64"], packages: ["dmg"] },
-  android: { name: "Android", architectures: ["aarch64"], packages: ["apk"] },
-  linux: {
-    name: "Linux",
-    architectures: ["x86_64", "aarch64"],
-    packages: ["deb", "appimage"],
-  },
-};
-const packages = computed(() => platformFormats[platform.value]!.packages);
+const platformFormats = computed(() => releaseFormFormats(
+  releases.value.find(item => item.id === release.value)?.version ?? "",
+));
+const packages = computed(() => platformFormats.value[platform.value]?.packages ?? []);
 const architectures = computed(
-  () => platformFormats[platform.value]!.architectures,
+  () => platformFormats.value[platform.value]?.architectures ?? [],
 );
-watch(platform, () => {
+watch([platform, platformFormats], () => {
+  if (!platformFormats.value[platform.value]) platform.value = "windows";
   architecture.value = architectures.value[0]!;
   packageKind.value = packages.value[0]!;
 });

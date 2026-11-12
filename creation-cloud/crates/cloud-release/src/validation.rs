@@ -1,6 +1,9 @@
 //! 集中校验版本和资产输入，避免 handler 与 SQL 重复业务规则。
 
-use cloud_domain::{AppError, AppResult, MANUAL_RELEASE_ASSETS, formal_release_asset_identities};
+use cloud_domain::{
+    AppError, AppResult, MANUAL_RELEASE_ASSETS, formal_release_asset_identities,
+    release_asset_is_allowed,
+};
 use uuid::Uuid;
 
 pub(crate) const MAX_ASSET_BYTES: i64 = 4 * 1024 * 1024 * 1024;
@@ -90,7 +93,8 @@ pub(crate) fn asset_identity(
     package_kind: &str,
 ) -> AppResult<()> {
     if !MANUAL_RELEASE_ASSETS.contains(&(platform, architecture, package_kind))
-        && (platform, architecture, package_kind) != ("macos", "aarch64", "tar_gz") {
+        && (platform, architecture, package_kind) != ("macos", "aarch64", "tar_gz")
+    {
         return Err(AppError::Validation("平台、架构与包类型组合无效".into()));
     }
     Ok(())
@@ -103,14 +107,11 @@ pub(crate) fn asset_identity_for_release(
     package_kind: &str,
 ) -> AppResult<()> {
     asset_identity(platform, architecture, package_kind)?;
-    let expected = formal_release_asset_identities(version)
+    formal_release_asset_identities(version)
         .ok_or_else(|| AppError::Internal("数据库中的版本号无效".into()))?;
-    if package_kind == "tar_gz" && !expected.contains(&(platform, architecture, package_kind)) {
-        return Err(AppError::Validation("此版本尚未采用Mac更新资产合同".into()));
-    }
-    if expected.len() == 4 && !expected.contains(&(platform, architecture, package_kind)) {
+    if !release_asset_is_allowed(version, (platform, architecture, package_kind)) {
         return Err(AppError::Validation(
-            "历史版本不允许新增手动分发平台".into(),
+            "此版本不允许该平台、架构或包类型".into(),
         ));
     }
     Ok(())

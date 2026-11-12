@@ -20,3 +20,4 @@ fn masked_label(value: &str) -> String {
         .next()
         .map_or_else(|| "***".to_owned(), |first| format!("{first}***"))
 }
+

@@ -24,3 +24,4 @@ pub(crate) async fn execute(
         .map_err(map_read_error)?
         .ok_or_else(|| AppError::NotFound("资产不存在".into()))
 }
+

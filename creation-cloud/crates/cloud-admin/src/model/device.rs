@@ -115,6 +115,7 @@ pub struct AdminDevice {
     pub revoked_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub physical_device_fingerprint: Option<String>,
 }
 
 #[derive(Clone, Debug, FromRow)]
@@ -130,6 +131,7 @@ pub(crate) struct AdminDeviceRow {
     pub revoked_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub physical_device_fingerprint: Option<String>,
 }
 
 impl TryFrom<AdminDeviceRow> for AdminDevice {
@@ -152,6 +154,7 @@ impl TryFrom<AdminDeviceRow> for AdminDevice {
             revoked_at: row.revoked_at,
             created_at: row.created_at,
             updated_at: row.updated_at,
+            physical_device_fingerprint: row.physical_device_fingerprint,
         })
     }
 }

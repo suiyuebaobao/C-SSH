@@ -1,4 +1,4 @@
-# C-SSH 0.9.8 features
+# C-SSH 0.9.9 features
 
 [Home](README_EN.md) · [中文](FEATURES.md) · [Installation](INSTALL_EN.md)
 
@@ -47,3 +47,7 @@ Valid data-protection verification is reused within the current process and requ
 Classic and workbench views retain appearance preferences, with settings organized into four groups. Desktop window controls, themes, and dialogs follow the Mac design baseline. Android improves safe areas, keyboard layout, and usage displays.
 
 Mac supports Apple Silicon and remains ad-hoc signed without notarization. Mobile and desktop entry points differ; iOS is paused. Diagnostics are disabled by default. Validation is environment-specific and does not guarantee every failure or distribution combination. See the [changelog](CHANGELOG_EN.md) for details.
+
+## Current 0.9.9 scope
+
+Windows x64, Mac arm64 and Android arm64 are updated; Linux stays on 0.9.8. Independent AI sessions, incremental history, shared bodies and selective lossless Zstd compression reduce repeated storage. Clients provide Cloud resource CRUD and add-from-local with modal login. Manual sync and data protection remain. Device quotas use stable identity with global and per-account limits. Android gains compact spacing, chat font settings and ordinary terminals by default. See [this release](README_EN.md).

@@ -305,3 +305,4 @@ fn header_end(bytes: &[u8]) -> Result<usize, AuthorizationError> {
         .map(|position| position + 4)
         .ok_or(AuthorizationError::Unavailable)
 }
+

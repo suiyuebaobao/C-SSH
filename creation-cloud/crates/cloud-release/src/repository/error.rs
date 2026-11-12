@@ -24,3 +24,4 @@ pub(crate) fn map_write_error(error: sqlx::Error, conflict: &str) -> AppError {
 fn is_conflict_code(code: &str) -> bool {
     matches!(code, "23503" | "23505" | "P0001")
 }
+

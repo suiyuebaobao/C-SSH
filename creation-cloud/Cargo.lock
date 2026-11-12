@@ -401,6 +401,8 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "cloud-admin",
+ "cloud-auth",
  "cloud-domain",
  "cloud-notification",
  "cloud-store",
@@ -411,6 +413,8 @@ dependencies = [
  "sha2",
  "sqlx",
  "tokio",
+ "tower",
+ "url",
  "uuid",
 ]
 
@@ -662,6 +666,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "cloud-auth",
  "cloud-device",
  "cloud-domain",
  "cloud-store",

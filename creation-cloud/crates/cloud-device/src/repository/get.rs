@@ -4,12 +4,13 @@ use cloud_domain::AppResult;
 use cloud_store::PgPool;
 use uuid::Uuid;
 
-use crate::{Device, model::DeviceRow};
+use crate::{model::DeviceRow, Device};
 
 use super::error;
 
-pub(crate) const FIND_SQL: &str = "SELECT id, account_id, name, platform, public_id, last_seen_at, \
-     revoked_at, created_at, updated_at \
+pub(crate) const FIND_SQL: &str =
+    "SELECT id, account_id, name, platform, public_id, last_seen_at, \
+     revoked_at, created_at, updated_at, physical_device_fingerprint \
      FROM devices WHERE account_id = $1 AND id = $2";
 
 pub(crate) async fn find(

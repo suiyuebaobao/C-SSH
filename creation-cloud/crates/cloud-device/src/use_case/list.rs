@@ -4,7 +4,7 @@ use cloud_domain::AuthenticatedSession;
 use cloud_domain::{AppResult, Page, PageQuery};
 use cloud_store::PgPool;
 
-use crate::{Device, repository};
+use crate::{repository, Device};
 
 pub(crate) async fn execute(
     pool: &PgPool,
@@ -12,7 +12,8 @@ pub(crate) async fn execute(
     page: PageQuery,
 ) -> AppResult<Page<Device>> {
     let page = page.normalized();
-    let (items, total) = repository::list::find(pool, session.account_id, page).await?;
+    let (items, total) =
+        repository::list::find(pool, session.account_id, page, session.device_id).await?;
     Ok(Page {
         items,
         page: page.page,

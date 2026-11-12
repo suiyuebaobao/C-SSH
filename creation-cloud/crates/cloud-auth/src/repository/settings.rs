@@ -20,6 +20,7 @@ type SettingsRow = (
     i64,
     Option<Uuid>,
     DateTime<Utc>,
+    i32,
 );
 
 pub(crate) struct InvalidatedChallenges {
@@ -35,7 +36,7 @@ pub(crate) async fn read(pool: &PgPool) -> AppResult<AuthSettings> {
         "SELECT email_verification_enabled, user_captcha_enabled, \
                 admin_email_verification_enabled, admin_captcha_enabled, \
                 email_cooldown_seconds, login_failure_threshold, login_lockout_minutes, \
-                revision, updated_by, updated_at \
+                revision, updated_by, updated_at, max_active_devices_per_account \
          FROM auth_settings WHERE singleton = TRUE",
     )
     .fetch_optional(pool)
@@ -50,7 +51,7 @@ pub(crate) async fn lock(transaction: &mut Transaction<'_, Postgres>) -> AppResu
         "SELECT email_verification_enabled, user_captcha_enabled, \
                 admin_email_verification_enabled, admin_captcha_enabled, \
                 email_cooldown_seconds, login_failure_threshold, login_lockout_minutes, \
-                revision, updated_by, updated_at \
+                revision, updated_by, updated_at, max_active_devices_per_account \
          FROM auth_settings WHERE singleton = TRUE FOR UPDATE",
     )
     .fetch_optional(&mut **transaction)
@@ -66,6 +67,7 @@ pub(crate) async fn client_login_config(pool: &PgPool) -> AppResult<ClientLoginC
         revision: settings.revision,
         captcha_enabled: settings.user_captcha_enabled,
         email_code_enabled: settings.email_verification_enabled,
+        device_identity_version: 1,
     })
 }
 
@@ -79,7 +81,7 @@ pub(crate) async fn update(
          SET email_verification_enabled = $1, user_captcha_enabled = $2, \
              admin_email_verification_enabled = $3, admin_captcha_enabled = $4, \
              email_cooldown_seconds = $5, login_failure_threshold = $6, \
-             login_lockout_minutes = $7, \
+             login_lockout_minutes = $7, max_active_devices_per_account = $10, \
              revision = revision + 1, updated_by = $8, updated_at = now() \
          WHERE singleton = TRUE AND revision = $9 \
            AND (email_verification_enabled IS DISTINCT FROM $1 \
@@ -88,11 +90,12 @@ pub(crate) async fn update(
              OR admin_captcha_enabled IS DISTINCT FROM $4 \
              OR email_cooldown_seconds IS DISTINCT FROM $5 \
              OR login_failure_threshold IS DISTINCT FROM $6 \
-             OR login_lockout_minutes IS DISTINCT FROM $7) \
+             OR login_lockout_minutes IS DISTINCT FROM $7 \
+             OR max_active_devices_per_account IS DISTINCT FROM $10) \
          RETURNING email_verification_enabled, user_captcha_enabled, \
                    admin_email_verification_enabled, admin_captcha_enabled, \
                    email_cooldown_seconds, login_failure_threshold, login_lockout_minutes, \
-                   revision, updated_by, updated_at",
+                   revision, updated_by, updated_at, max_active_devices_per_account",
     )
     .bind(input.email_verification_enabled)
     .bind(input.user_captcha_enabled)
@@ -103,6 +106,11 @@ pub(crate) async fn update(
     .bind(input.login_lockout_minutes)
     .bind(actor_id)
     .bind(input.expected_revision)
+    .bind(
+        input
+            .max_active_devices_per_account
+            .ok_or_else(|| AppError::Internal("设备上限未完成归一".to_owned()))?,
+    )
     .fetch_optional(&mut **transaction)
     .await
     .map_err(error::storage)?
@@ -218,7 +226,8 @@ pub(crate) async fn audit(
                     'user_login_challenges_invalidated', $13::bigint, \
                     'user_captcha_challenges_invalidated', $14::bigint, \
                     'admin_login_challenges_invalidated', $15::bigint, \
-                    'admin_captcha_challenges_invalidated', $16::bigint \
+                    'admin_captcha_challenges_invalidated', $16::bigint, \
+                    'max_active_devices_per_account', $17::integer \
                  ))",
     )
     .bind(Uuid::now_v7())
@@ -237,6 +246,7 @@ pub(crate) async fn audit(
     .bind(i64::try_from(invalidated.user_captcha).unwrap_or(i64::MAX))
     .bind(i64::try_from(invalidated.admin_login).unwrap_or(i64::MAX))
     .bind(i64::try_from(invalidated.admin_captcha).unwrap_or(i64::MAX))
+    .bind(settings.max_active_devices_per_account)
     .execute(&mut **transaction)
     .await
     .map_err(|_| AppError::Storage("保存认证设置审计失败".to_owned()))?;
@@ -255,9 +265,24 @@ fn into_settings(row: SettingsRow) -> AuthSettings {
         revision: row.7,
         updated_by: row.8,
         updated_at: row.9,
+        max_active_devices_per_account: row.10,
     }
 }
 
 fn missing() -> AppError {
     AppError::Storage("认证设置单例缺失".to_owned())
+}
+
+pub(crate) async fn device_quota(transaction: &mut Transaction<'_, Postgres>) -> AppResult<i64> {
+    let limit = sqlx::query_scalar::<_, i32>(
+        "SELECT max_active_devices_per_account FROM auth_settings WHERE singleton = TRUE FOR SHARE",
+    )
+    .fetch_optional(&mut **transaction)
+    .await
+    .map_err(error::storage)?
+    .ok_or_else(missing)?;
+    if !(1..=1000).contains(&limit) {
+        return Err(AppError::Storage("设备上限配置无效".to_owned()));
+    }
+    Ok(i64::from(limit))
 }

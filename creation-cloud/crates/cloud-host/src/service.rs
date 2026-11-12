@@ -434,3 +434,4 @@ fn validate_account_id(account_id: Uuid) -> AppResult<()> {
         Ok(())
     }
 }
+

@@ -259,3 +259,4 @@ fn parse_basic(value: &[u8]) -> Result<Credentials, ConnectRequestError> {
         password: Zeroizing::new(password.to_owned()),
     })
 }
+

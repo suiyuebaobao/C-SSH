@@ -24,3 +24,4 @@ pub(crate) async fn execute(connection: &mut PgConnection, id: Uuid) -> AppResul
         .ok_or_else(|| AppError::NotFound("版本不存在".into()))?;
     Release::try_from(row)
 }
+

@@ -197,3 +197,4 @@ fn ipv6_in_network(address: Ipv6Addr, network: Ipv6Addr, prefix: u32) -> bool {
     let mask = u128::MAX << (128 - prefix);
     u128::from_be_bytes(address.octets()) & mask == u128::from_be_bytes(network.octets()) & mask
 }
+

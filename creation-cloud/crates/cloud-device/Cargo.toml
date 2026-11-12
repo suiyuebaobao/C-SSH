@@ -20,6 +20,10 @@ sqlx.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
+cloud-auth.workspace = true
+cloud-admin.workspace = true
+url.workspace = true
+tower.workspace = true
 tokio.workspace = true
 
 [lints]

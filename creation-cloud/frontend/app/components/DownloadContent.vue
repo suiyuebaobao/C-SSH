@@ -1,36 +1,11 @@
 <script setup lang="ts">
-import type { Platform, SiteDocument } from "~/types/site";
-type DownloadPlatform = Platform & { note?: string };
+import type { SiteDocument } from "~/types/site";
+import { latestDownloadPlatforms } from "~/utils/releaseAssets";
 const props = defineProps<{ document: SiteDocument }>();
 const en = computed(() => props.document.view.shell.locale === "en");
 const latest = computed(() => props.document.catalog?.latest);
 const selection = ref("all");
-const platforms = computed(() => {
-  const result: DownloadPlatform[] = [];
-  const sources: DownloadPlatform[] = [
-    ...(latest.value?.platforms ?? []),
-    ...(latest.value?.manual_platforms ?? []),
-  ];
-  for (const platform of sources) {
-    const existing = result.find((item) => item.name === platform.name);
-    if (!existing) {
-      result.push({ ...platform, assets: [...platform.assets] });
-      continue;
-    }
-    for (const asset of platform.assets) {
-      if (
-        !existing.assets.some(
-          (item) =>
-            item.architecture === asset.architecture &&
-            item.package_kind === asset.package_kind,
-        )
-      )
-        existing.assets.push(asset);
-    }
-    if ("note" in platform) existing.note = platform.note;
-  }
-  return result;
-});
+const platforms = computed(() => latestDownloadPlatforms(props.document.catalog?.releases ?? []));
 const visible = computed(() =>
   platforms.value.filter(
     (platform) =>
@@ -74,7 +49,8 @@ const visible = computed(() =>
           :key="platform.name"
           class="card download-card"
         >
-          <h2>{{ platform.name }}</h2>
+          <h2>{{ platform.name }} <small>v{{ platform.version }}</small></h2>
+          <p v-if="platform.version !== latest.version" class="muted">{{ en ? "Not updated in this release; latest published version shown." : "此平台本次未更新，提供最近已发布版本。" }}</p>
           <p v-if="'note' in platform">{{ platform.note }}</p>
           <div class="download-options">
             <template

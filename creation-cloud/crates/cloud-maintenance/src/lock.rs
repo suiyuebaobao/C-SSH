@@ -102,3 +102,4 @@ async fn configure_session(connection: &mut PgConnection) -> AppResult<()> {
     }
     Ok(())
 }
+

@@ -59,3 +59,4 @@ fn response(outcome: LoginOutcome) -> AppResult<Response> {
         }
     }
 }
+

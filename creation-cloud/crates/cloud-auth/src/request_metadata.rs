@@ -36,3 +36,4 @@ fn sanitize_user_agent(value: Option<&str>) -> Option<String> {
     let sanitized = sanitized.trim();
     (!sanitized.is_empty()).then(|| sanitized.to_owned())
 }
+

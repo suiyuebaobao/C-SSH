@@ -69,3 +69,4 @@ fn validate_identification(line: &[u8]) -> bool {
         .unwrap_or(body.len());
     software_end > prefix.len() && body.iter().all(|byte| (b' '..=b'~').contains(byte))
 }
+

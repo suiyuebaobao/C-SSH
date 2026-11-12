@@ -48,3 +48,4 @@ pub fn internal_router(service: Service) -> Router {
         .layer(DefaultBodyLimit::max(MAX_REQUEST_BYTES))
         .layer(middleware::from_fn(handler::no_store))
 }
+

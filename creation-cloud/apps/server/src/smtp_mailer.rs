@@ -164,3 +164,4 @@ fn smtp_error_class(error: &SmtpError) -> &'static str {
         "network_or_connection"
     }
 }
+

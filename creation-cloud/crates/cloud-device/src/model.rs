@@ -39,6 +39,7 @@ pub(crate) type DeviceRow = (
     Option<DateTime<Utc>>,
     DateTime<Utc>,
     DateTime<Utc>,
+    Option<String>,
 );
 
 #[derive(Clone, Debug, Serialize)]
@@ -52,6 +53,7 @@ pub struct Device {
     pub revoked_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub physical_device_fingerprint: Option<String>,
 }
 
 pub struct CreateDeviceOutcome {
@@ -124,6 +126,7 @@ impl Device {
             revoked_at: row.6,
             created_at: row.7,
             updated_at: row.8,
+            physical_device_fingerprint: row.9,
         }
     }
 }

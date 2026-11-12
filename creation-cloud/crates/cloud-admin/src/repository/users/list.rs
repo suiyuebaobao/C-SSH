@@ -5,7 +5,7 @@ use cloud_store::PgPool;
 use sqlx::FromRow;
 
 use crate::{
-    AdminUser, model::AdminUserListFilter, model::AdminUserRow, repository::map_read_error,
+    model::AdminUserListFilter, model::AdminUserRow, repository::map_read_error, AdminUser,
 };
 
 #[derive(FromRow)]
@@ -33,7 +33,7 @@ pub(crate) const LIST_SQL: &str = r#"
            accounts.email_verified_at IS NOT NULL AS email_verified,
            COALESCE(user_profiles.display_name, '') AS display_name,
            accounts.role, accounts.status,
-           (SELECT count(*)::BIGINT FROM devices WHERE devices.account_id = accounts.id)
+           (SELECT count(*)::BIGINT FROM device_identity_groups WHERE device_identity_groups.account_id = accounts.id)
                AS device_count,
            (SELECT count(*)::BIGINT FROM cloud_hosts
             WHERE cloud_hosts.account_id = accounts.id
@@ -98,3 +98,4 @@ fn search_pattern(value: &str) -> String {
         .replace('_', r"\_");
     format!("%{escaped}%")
 }
+

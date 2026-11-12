@@ -71,7 +71,7 @@ impl AppServices {
             admin: cloud_admin::Service::new(pool.clone()),
             announcement: cloud_announcement::Service::new(pool.clone()),
             auth,
-            device: cloud_device::Service::new(pool.clone()),
+            device: cloud_device::Service::new(pool.clone(), cloud_auth::lock_device_quota),
             download: cloud_download::Service::with_public_base_url(
                 pool.clone(),
                 config.download_root.clone(),

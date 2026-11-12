@@ -24,3 +24,4 @@ pub(crate) async fn execute(pool: &PgPool) -> AppResult<FeedbackOverview> {
         .await
         .map_err(error::read)
 }
+

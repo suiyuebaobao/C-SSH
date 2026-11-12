@@ -4,13 +4,13 @@ use cloud_domain::{AppError, AppResult};
 use cloud_store::PgPool;
 use uuid::Uuid;
 
-use crate::{AdminDevice, model::AdminDeviceRow, repository::map_read_error};
+use crate::{model::AdminDeviceRow, repository::map_read_error, AdminDevice};
 
 pub(crate) const GET_SQL: &str = r#"
     SELECT devices.id, devices.account_id, accounts.email AS owner_email,
            accounts.admin_login_name AS owner_admin_login_name,
            devices.name, devices.platform, devices.public_id, devices.last_seen_at,
-           devices.revoked_at, devices.created_at, devices.updated_at
+           devices.revoked_at, devices.created_at, devices.updated_at, devices.physical_device_fingerprint
     FROM devices
     JOIN accounts ON accounts.id = devices.account_id
     WHERE devices.id = $1

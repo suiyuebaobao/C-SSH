@@ -26,6 +26,12 @@ const DESKTOP_FORMAL_ASSETS: [FormalReleaseAssetIdentity; 6] = [
     ("linux", "aarch64", "appimage"),
 ];
 
+const MANUAL_ONLY_ASSETS: [FormalReleaseAssetIdentity; 3] = [
+    ("windows", "x86_64", "zip"),
+    ("macos", "aarch64", "dmg"),
+    ("android", "aarch64", "apk"),
+];
+
 pub const MANUAL_RELEASE_ASSETS: [FormalReleaseAssetIdentity; 10] = [
     ("windows", "x86_64", "exe"),
     ("windows", "x86_64", "zip"),
@@ -57,7 +63,30 @@ pub fn formal_release_asset_identities(
     })
 }
 
-/// 旧四项、当前三项或完整十项才是闭合发布，不能丢掉扩展项后再判定。
+fn manual_only_release(value: &str) -> bool {
+    let Some((_, version)) = normalize_semantic_version(value) else {
+        return false;
+    };
+    let (_, boundary) = normalize_semantic_version("0.9.9-0").expect("fixed release boundary");
+    version >= boundary
+}
+
+/// 只限制新版本创建的资产；历史发布记录及下载不被新矩阵删除或改写。
+#[must_use]
+pub fn release_asset_is_allowed(value: &str, identity: (&str, &str, &str)) -> bool {
+    let Some(canonical) = formal_release_asset_identities(value) else {
+        return false;
+    };
+    if manual_only_release(value) {
+        return MANUAL_ONLY_ASSETS.contains(&identity);
+    }
+    if canonical == LEGACY_FORMAL_ASSETS {
+        return canonical.contains(&identity);
+    }
+    MANUAL_RELEASE_ASSETS.contains(&identity) || canonical.contains(&identity)
+}
+
+/// 各版本采用自己的闭合集合；缺项、多项和重复项均不能发布。
 #[must_use]
 pub fn release_asset_set_is_complete(value: &str, assets: &[(&str, &str, &str)]) -> bool {
     let Some(canonical) = formal_release_asset_identities(value) else {
@@ -66,10 +95,17 @@ pub fn release_asset_set_is_complete(value: &str, assets: &[(&str, &str, &str)])
     let matches = |expected: &[FormalReleaseAssetIdentity]| {
         assets.len() == expected.len() && expected.iter().all(|identity| assets.contains(identity))
     };
+    // 手动下载三件套与updater/安装身份六件套分开；缺少更新包不能被误判可自动更新。
+    if manual_only_release(value) {
+        return matches(&MANUAL_ONLY_ASSETS);
+    }
     if canonical == DESKTOP_FORMAL_ASSETS {
-        return matches(canonical) || (assets.len() == MANUAL_RELEASE_ASSETS.len() + 1
-            && MANUAL_RELEASE_ASSETS.iter().all(|identity| assets.contains(identity))
-            && assets.contains(&("macos", "aarch64", "tar_gz")));
+        return matches(canonical)
+            || (assets.len() == MANUAL_RELEASE_ASSETS.len() + 1
+                && MANUAL_RELEASE_ASSETS
+                    .iter()
+                    .all(|identity| assets.contains(identity))
+                && assets.contains(&("macos", "aarch64", "tar_gz")));
     }
     matches(canonical) || (canonical == CURRENT_FORMAL_ASSETS && matches(&MANUAL_RELEASE_ASSETS))
 }
@@ -77,7 +113,9 @@ pub fn release_asset_set_is_complete(value: &str, assets: &[(&str, &str, &str)])
 /// 签名信任根的适用资产；是否属于某个版本的完整集合由上面的版本合同判定。
 #[must_use]
 pub fn is_desktop_updater_asset(platform: &str, kind: &str) -> bool {
-    matches!((platform, kind), ("windows", "exe" | "msi" | "zip")
-        | ("macos", "tar_gz") | ("linux", "appimage"))
+    matches!(
+        (platform, kind),
+        ("windows", "exe" | "msi" | "zip") | ("macos", "tar_gz") | ("linux", "appimage")
+    )
 }
 

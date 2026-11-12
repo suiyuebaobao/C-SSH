@@ -418,3 +418,4 @@ fn file_stamp(metadata: &std::fs::Metadata) -> FileStamp {
         ],
     }
 }
+

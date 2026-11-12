@@ -262,3 +262,4 @@ impl Service {
         protocol == TargetProtocol::Ssh || self.config.rdp_node_ids.contains(&node_id)
     }
 }
+

@@ -318,3 +318,4 @@ fn mark_cancelled(completion: &mut RunCompletion) {
 fn terminal_deadline_error(phase: &'static str) -> AppError {
     AppError::Unavailable(format!("维护任务未在绝对截止时间内完成终态收敛: {phase}"))
 }
+

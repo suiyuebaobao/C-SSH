@@ -120,3 +120,4 @@ fn parse_cursor(value: &str) -> AppResult<(i16, DateTime<Utc>, Uuid)> {
     }
     Ok((rank, at, id))
 }
+

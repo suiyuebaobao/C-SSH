@@ -16,3 +16,4 @@ pub(crate) async fn execute(connection: &mut PgConnection, release_id: Uuid) -> 
         .map_err(map_read_error)?
         .ok_or_else(|| AppError::NotFound("版本不存在".into()))
 }
+

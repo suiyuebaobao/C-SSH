@@ -1,31 +1,32 @@
-# C-SSH 0.9.8 installation and data preservation
+# C-SSH 0.9.9 installation and data preservation
 
 [Downloads](README_EN.md#downloads) · [中文](INSTALL.md)
 
-This release notifies users and directs them to download and install manually. There are no forced upgrades or background downloads or installations. Android build number: 9008000. iOS remains paused.
+This release notifies users and directs them to download and install manually. There are no forced upgrades or background downloads or installations. Android build number: 9009000. iOS remains paused.
 
 ## Before installation
 
-Use the official website or suiyuebaobao/C-SSH v0.9.8 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
+Use the official website or suiyuebaobao/C-SSH v0.9.9 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
 
-## Windows x64 / ARM64
+## Windows x64
 
-Choose the package for your CPU; native ARM64 was validated on Windows 11 ARM64.
+This release provides only a Portable ZIP. New client installers and native ARM64 packages are paused. An existing WebView2 Runtime is required.
 
-- Run the NSIS installer in the original installation directory. WebView2 Runtime must already be available; the installer has no Authenticode signature.
-- For a new portable installation, extract and run C-SSH/C-SSH.exe.
-- Portable upgrade from 0.9.0 or later: exit, back up the old EXE and old Setup in the adjacent Windows folder, preserve data in place, then adopt the new EXE and let it release matching Setup. A stale Setup is rejected rather than silently overwritten.
-- Never replace a running EXE or overwrite/delete data. Handle historical MSI installations using their original installation method.
+- New installation: extract and run `C-SSH/C-SSH.exe`; do not run from inside the ZIP.
+- From 0.9.8: exit normally, keep adjacent `data` and existing OS keys, and replace only the EXE. Known 0.9.7/0.9.8 management Setup resources are upgraded safely; no manual deletion is required. Unknown files are rejected rather than overwritten.
+- Do not replace a running executable or clear data. Published older installers remain available; no new NSIS/MSI is supplied.
 
 ## Apple Silicon Mac
 
-Open C-SSH_0.9.8_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. For 0.9.8, all platforms use notifications and manual downloads only.
+Open C-SSH_0.9.9_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Application Support data and Keychain entries when replacing the app. Only Apple Silicon is provided; minimum target macOS13. The app is ad-hoc signed and not notarized; follow [Apple guidance](https://support.apple.com/102445) for its system permission. For 0.9.9, all platforms use notifications and manual downloads only.
 
 ## Android arm64
 
-Install C-SSH_0.9.8_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The existing release signer is retained; The final revision3 APK retains the existing release signer; preserve data when replacing a compatible same-signer installation. Compatible earlier builds with the same signer can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
+Install C-SSH_0.9.9_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The existing release signer is retained; preserve data when replacing a compatible same-signer installation. Compatible earlier builds with the same signer can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
 
 ## Linux x86_64 / ARM64
+
+Linux is not updated in this release. The following instructions apply to the existing 0.9.8 downloads.
 
 - Choose an amd64 or arm64 deb for your CPU and install through the Debian/Ubuntu package manager.
 - Make the AppImage executable before launching; Mounted launch needs FUSE; Current package verification is described below; direct AppImage startup requires FUSE. The aarch64 AppImage is the ARM64 build.
@@ -42,4 +43,4 @@ Enter an IPv4 address or domain directly, with a separate port. See [self-hosted
 
 ## Data compatibility
 
-Version 0.9.8 uses SQLite27. Preserve the complete data directory and existing OS keychain/vault, and allow the normal forward migration. Do not delete data or keys to address startup problems. Do not open a migrated database with an older incompatible client. Cloud does not contain AI conversations or memory; rollback requires the matching old program and a complete pre-upgrade backup. See the [changelog](CHANGELOG_EN.md) for validation boundaries.
+Version 0.9.9 uses SQLite28. Preserve the complete data directory and existing OS keychain/vault, and allow the normal forward migration. Do not delete data or keys to address startup problems. Do not open a migrated database with an older incompatible client. Cloud does not contain AI conversations or memory; rollback requires the matching old program and a complete pre-upgrade backup. See the [changelog](CHANGELOG_EN.md) for validation boundaries.

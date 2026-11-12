@@ -110,3 +110,4 @@ pub(crate) fn login_verification_destination(
     };
     format!("{path}?{}", query.finish())
 }
+

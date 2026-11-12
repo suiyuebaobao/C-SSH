@@ -67,3 +67,4 @@ fn parse(arguments: impl IntoIterator<Item = String>) -> Result<Command> {
 fn parse_task(value: &str) -> Result<MaintenanceTask> {
     MaintenanceTask::from_str(value).map_err(|()| anyhow::anyhow!("未知维护任务"))
 }
+

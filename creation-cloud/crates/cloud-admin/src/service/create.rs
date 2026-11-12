@@ -72,3 +72,4 @@ fn map_create_error(error: sqlx::Error) -> AppError {
         map_write_error(error)
     }
 }
+

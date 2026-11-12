@@ -212,3 +212,4 @@ impl AdminUser {
         self.full_email.as_deref().unwrap_or("—")
     }
 }
+

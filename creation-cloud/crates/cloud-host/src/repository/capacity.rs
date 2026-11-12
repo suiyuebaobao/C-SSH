@@ -358,3 +358,4 @@ const fn bool_delta(before: bool, after: bool) -> i64 {
         _ => 0,
     }
 }
+

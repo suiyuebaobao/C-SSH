@@ -5,7 +5,7 @@ use cloud_store::PgPool;
 use sqlx::FromRow;
 
 use crate::{
-    AdminDevice, model::AdminDeviceListFilter, model::AdminDeviceRow, repository::map_read_error,
+    model::AdminDeviceListFilter, model::AdminDeviceRow, repository::map_read_error, AdminDevice,
 };
 
 #[derive(FromRow)]
@@ -15,22 +15,23 @@ struct CountRow {
 
 pub(crate) const COUNT_SQL: &str = r#"
     SELECT count(*)::BIGINT AS total
-    FROM devices
+    FROM device_identity_groups
     WHERE ($1::UUID IS NULL OR account_id = $1)
       AND ($2::TEXT IS NULL OR platform = $2)
-      AND ($3::BOOLEAN IS NULL OR (revoked_at IS NOT NULL) = $3)
+      AND ($3::BOOLEAN IS NULL OR (NOT is_active) = $3)
 "#;
 
 pub(crate) const LIST_SQL: &str = r#"
     SELECT devices.id, devices.account_id, accounts.email AS owner_email,
            accounts.admin_login_name AS owner_admin_login_name,
            devices.name, devices.platform, devices.public_id, devices.last_seen_at,
-           devices.revoked_at, devices.created_at, devices.updated_at
-    FROM devices
+           devices.revoked_at, devices.created_at, devices.updated_at, devices.physical_device_fingerprint
+    FROM device_identity_groups grouped
+    JOIN devices ON devices.id = grouped.representative_id
     JOIN accounts ON accounts.id = devices.account_id
     WHERE ($1::UUID IS NULL OR devices.account_id = $1)
       AND ($2::TEXT IS NULL OR devices.platform = $2)
-      AND ($3::BOOLEAN IS NULL OR (devices.revoked_at IS NOT NULL) = $3)
+      AND ($3::BOOLEAN IS NULL OR (NOT grouped.is_active) = $3)
     ORDER BY devices.created_at DESC, devices.id DESC
     LIMIT $4 OFFSET $5
 "#;

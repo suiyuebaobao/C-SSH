@@ -19,3 +19,4 @@ pub fn normalize_admin_login_name(value: &str) -> AppResult<String> {
     }
     Ok(normalized)
 }
+

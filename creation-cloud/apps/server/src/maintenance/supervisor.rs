@@ -211,3 +211,4 @@ fn next_wait(interval: Duration, outcome: Option<RunOutcome>) -> Duration {
         interval
     }
 }
+

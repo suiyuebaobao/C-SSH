@@ -26,3 +26,4 @@ pub(crate) async fn execute(
         .ok_or_else(|| AppError::NotFound("下载来源不存在".into()))?;
     ReleaseSource::try_from(row)
 }
+

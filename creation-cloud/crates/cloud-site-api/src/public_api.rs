@@ -134,3 +134,4 @@ pub async fn preview(
         Json(document(view, &config, None, Vec::new())),
     ))
 }
+

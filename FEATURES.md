@@ -1,8 +1,8 @@
-# C-SSH 0.9.8 功能详解
+# C-SSH 0.9.9 功能详解
 
 [返回首页](README.md) · [English](FEATURES_EN.md) · [安装说明](INSTALL.md)
 
-Windows x64／ARM64、Apple Silicon Mac、Linux x86_64／ARM64和Android arm64共用核心业务，界面依桌面与手机调整。0.9.8只提示并引导手动下载，不自动或强制更新；iOS继续暂停。
+Windows x64／ARM64、Apple Silicon Mac、Linux x86_64／ARM64和Android arm64共用核心业务，界面依桌面与手机调整。0.9.9只提示并引导手动下载，不自动或强制更新；iOS继续暂停。
 
 ## AI 工作台
 
@@ -47,3 +47,7 @@ CPU、内存、磁碟、网路、历史曲线与Top程序；采集并发可调�
 经典与工作台并存，保留外观偏好；设置整理为四组卡片。三桌面按Mac蓝本改善视窗、主题与确认框，Android修正底部安全区、键盘及用量布局。
 
 Mac仅Apple Silicon、ad-hoc签名且未公证。Android与桌面入口有平台差异，iOS暂停。诊断预设关闭，验证按实际环境记录，不保证所有故障、网路或发行版组合。详细改动与验证范围见[更新列表](CHANGELOG.md)。
+
+## 0.9.9 当前范围
+
+本次 Windows x64／Mac arm64／Android arm64 更新；Linux 保持0.9.8。AI会话可分别运行，历史采用增量保存、正文共享引用与选择性Zstd无损压缩。客户端云端资料可增删改及从本机添加，登录采用弹窗；手动上传/下载与数据保护机制保持。后台按稳定设备身份计算上限，支持全站默认和账号覆盖。安卓取消会话标签行、调整留白、提供聊天字号设置，默认普通终端。详见[本次更新](README.md)。

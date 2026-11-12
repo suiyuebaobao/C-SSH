@@ -206,3 +206,4 @@ fn login_redirect(request: &Request) -> Redirect {
     let encoded = url::form_urlencoded::byte_serialize(next.as_bytes()).collect::<String>();
     Redirect::to(&format!("/login?next={encoded}"))
 }
+

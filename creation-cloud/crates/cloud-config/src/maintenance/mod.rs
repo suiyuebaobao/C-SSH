@@ -170,3 +170,4 @@ fn hours(value: u64) -> Duration {
 fn days(value: u64) -> Duration {
     hours(value * 24)
 }
+

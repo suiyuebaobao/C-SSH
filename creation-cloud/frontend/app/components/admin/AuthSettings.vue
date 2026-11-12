@@ -9,6 +9,14 @@ const busy = ref(false),
   notice = ref("");
 const fields: FormField[] = [
   {
+    key: "max_active_devices_per_account",
+    label: ["全站默认客户端设备上限", "Default client device limit per account"],
+    kind: "number",
+    min: 1,
+    max: 1000,
+    required: true,
+  },
+  {
     key: "email_verification_enabled",
     label: ["用户邮箱验证码", "User email verification"],
     kind: "checkbox",
@@ -90,6 +98,7 @@ async function save() {
 <template>
   <section class="card">
     <h2>{{ t("认证与安全", "Authentication & security") }}</h2>
+    <p>{{ t("同一台电脑或手机升级不重复计数；单个账号可在用户详情覆盖此上限。不限制服务器数量，调低不会强制下线现有设备。", "Upgrades on the same device do not use another slot. User details can override the limit. Server counts are unaffected; lowering it does not sign out existing devices.") }}</p>
     <p>
       {{
         t(
