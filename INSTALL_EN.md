@@ -6,14 +6,14 @@ This release notifies users and directs them to download and install manually. T
 
 ## Before installation
 
-Use the official website or suiyuebaobao/C-SSH v0.9.9 release and verify SHA256. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
+Use the official website or the [v0.9.9-r2 release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.9-r2), select your platform, and verify SHA256. The Windows, Mac, and Android files are unchanged; users already running 0.9.9 do not need another download. Exit C-SSH and preserve important data. Cloud explicitly syncs encrypted configuration, not AI conversations or long-term memory; retain your data-protection password.
 
 ## Windows x64
 
 This release provides only a Portable ZIP. New client installers and native ARM64 packages are paused. An existing WebView2 Runtime is required.
 
 - New installation: extract and run `C-SSH/C-SSH.exe`; do not run from inside the ZIP.
-- From 0.9.8: exit normally, keep adjacent `data` and existing OS keys, and replace only the EXE. Known 0.9.7/0.9.8 management Setup resources are upgraded safely; no manual deletion is required. Unknown files are rejected rather than overwritten.
+- From 0.9.8: exit normally, keep adjacent `data` and existing OS keys, and replace only the EXE. The application handles its supporting components; manual deletion is not required. If a warning appears, preserve existing data before addressing it.
 - Do not replace a running executable or clear data. Published older installers remain available; no new NSIS/MSI is supplied.
 
 ## Apple Silicon Mac
@@ -24,14 +24,14 @@ Open C-SSH_0.9.9_macOS-arm64.dmg and drag C-SSH.app to Applications. Preserve Ap
 
 Install C-SSH_0.9.9_android-arm64.apk with the system installer. Only arm64 is supplied; minimum target Android7/API24. The existing release signer is retained; preserve data when replacing a compatible same-signer installation. Compatible earlier builds with the same signer can be replaced while keeping data, without uninstalling. Earlier builds with a different signer cannot be replaced directly. Uninstalling clears local data, including AI history and memory not covered by Cloud sync; preserve it before considering uninstall.
 
-## Linux x86_64 / ARM64
+## Linux x86_64
 
-Linux is not updated in this release. The following instructions apply to the existing 0.9.8 downloads.
+This release provides C-SSH_0.9.9_amd64.AppImage.
 
-- Choose an amd64 or arm64 deb for your CPU and install through the Debian/Ubuntu package manager.
-- Make the AppImage executable before launching; Mounted launch needs FUSE; Current package verification is described below; direct AppImage startup requires FUSE. The aarch64 AppImage is the ARM64 build.
-- Validated on Ubuntu 24.04.5 with X11 and a desktop Secret Service such as GNOME Keyring. Other distributions and Wayland remain unvalidated.
-- Keep the existing data directory and system keyring during upgrades. Do not substitute copying encrypted databases from another device for migration. Linux uses manual downloads in this release.
+- Make the downloaded file executable, then launch it. Normal mounted operation requires FUSE.
+- This release was tested on an X11 desktop. A desktop Secret Service such as GNOME Keyring is required. Other distributions and Wayland remain unvalidated.
+- Exit the old application before upgrading and retain the existing data directory and system keyring. Do not substitute copying encrypted databases from another device for normal migration.
+- Older Linux ARM64 and deb packages remain in [past releases](https://github.com/suiyuebaobao/C-SSH/releases); they are older versions, not new 0.9.9 builds.
 
 ## Windows server management Setup
 
@@ -43,4 +43,4 @@ Enter an IPv4 address or domain directly, with a separate port. See [self-hosted
 
 ## Data compatibility
 
-Version 0.9.9 uses SQLite28. Preserve the complete data directory and existing OS keychain/vault, and allow the normal forward migration. Do not delete data or keys to address startup problems. Do not open a migrated database with an older incompatible client. Cloud does not contain AI conversations or memory; rollback requires the matching old program and a complete pre-upgrade backup. See the [changelog](CHANGELOG_EN.md) for validation boundaries.
+Version 0.9.9 updates the local data format during upgrade. Preserve the complete data directory and existing OS keychain/vault, and allow the normal forward migration. Do not delete data or keys to address startup problems. Do not open a migrated database with an older incompatible client. Cloud does not contain AI conversations or memory; rollback requires the matching old program and a complete pre-upgrade backup. See the [changelog](CHANGELOG_EN.md) for validation boundaries.

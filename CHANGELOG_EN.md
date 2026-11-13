@@ -1,5 +1,14 @@
 [简体中文](CHANGELOG.md) | **English**
 
+## 0.9.9 — Linux release (r2), 2026-11-13
+
+- Adds the Linux x86_64 AppImage, aligned with the Mac 0.9.9 interface and workflows.
+- Improves AI conversations, cloud sign-in, and startup, and fixes some result display issues.
+- Tests covered the relevant interface, AI conversation flows, and data retention after upgrading.
+- Windows, Mac, and Android retain the previously published 0.9.9 files; no repeat download is needed. Installation remains manual.
+
+[Download this release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.9-r2) · [Installation](INSTALL_EN.md)
+
 ## 0.9.9 — 2026-11-13
 
 This release provides a Windows x64 portable ZIP, a macOS Apple Silicon DMG, and an Android arm64 APK. Linux remains on 0.9.8, and iOS development remains paused. Updates are announced for manual download and installation; no automatic or forced installation is enabled.

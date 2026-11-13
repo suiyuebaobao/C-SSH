@@ -12,7 +12,7 @@ Creation Cloud 是独立控制面，提供账号、设备、用户主动发起�
 
 ## 下载资产与签名
 
-0.9.9只发布Windows x64 ZIP、Mac arm64 DMG、Android arm64 APK三项手动下载。新服务端按版本接受该完整集合；不会因此自动进入更新投放。Linux最近公开版本仍是0.9.8，旧安装包和发布记录保留。Windows ZIP的原更新签名需随正常后台上传登记；不替换官方签名根。公开清单`GET /api/v1/downloads/releases`提供真实文件信息与来源。
+0.9.9修订2提供Windows x64 ZIP、Mac arm64 DMG、Linux x86_64 AppImage和Android arm64 APK四项手动下载；其中Windows、Mac、Android文件与首次0.9.9发布相同，无需重复下载。新服务端同时保留原三项集合与本次四项集合的发布支持；不会因此自动进入更新投放。旧安装包和发布记录保留。Windows ZIP及Linux AppImage的原更新签名需随正常后台上传登记；不替换官方签名根。公开清单`GET /api/v1/downloads/releases`提供真实文件信息与来源。对应文件见[v0.9.9-r2发布页](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.9-r2)。
 
 ## 数据与迁移
 

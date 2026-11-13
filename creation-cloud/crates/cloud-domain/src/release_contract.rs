@@ -32,6 +32,13 @@ const MANUAL_ONLY_ASSETS: [FormalReleaseAssetIdentity; 3] = [
     ("android", "aarch64", "apk"),
 ];
 
+const MANUAL_LINUX_ASSETS: [FormalReleaseAssetIdentity; 4] = [
+    MANUAL_ONLY_ASSETS[0],
+    MANUAL_ONLY_ASSETS[1],
+    MANUAL_ONLY_ASSETS[2],
+    ("linux", "x86_64", "appimage"),
+];
+
 pub const MANUAL_RELEASE_ASSETS: [FormalReleaseAssetIdentity; 10] = [
     ("windows", "x86_64", "exe"),
     ("windows", "x86_64", "zip"),
@@ -78,7 +85,7 @@ pub fn release_asset_is_allowed(value: &str, identity: (&str, &str, &str)) -> bo
         return false;
     };
     if manual_only_release(value) {
-        return MANUAL_ONLY_ASSETS.contains(&identity);
+        return MANUAL_LINUX_ASSETS.contains(&identity);
     }
     if canonical == LEGACY_FORMAL_ASSETS {
         return canonical.contains(&identity);
@@ -95,9 +102,9 @@ pub fn release_asset_set_is_complete(value: &str, assets: &[(&str, &str, &str)])
     let matches = |expected: &[FormalReleaseAssetIdentity]| {
         assets.len() == expected.len() && expected.iter().all(|identity| assets.contains(identity))
     };
-    // 手动下载三件套与updater/安装身份六件套分开；缺少更新包不能被误判可自动更新。
+    // 手动三件/四件套与updater六件套分开，补发Linux不代表具备自动更新资格。
     if manual_only_release(value) {
-        return matches(&MANUAL_ONLY_ASSETS);
+        return matches(&MANUAL_ONLY_ASSETS) || matches(&MANUAL_LINUX_ASSETS);
     }
     if canonical == DESKTOP_FORMAL_ASSETS {
         return matches(canonical)

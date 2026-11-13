@@ -1,5 +1,14 @@
 **简体中文** | [English](CHANGELOG_EN.md)
 
+## 0.9.9 — Linux 补充发布（r2），2026-11-13
+
+- 新增 Linux x86_64 AppImage，按 Mac 0.9.9 的界面与使用方式对齐。
+- 改善 AI 多会话、云账号登录和启动体验，修正部分结果显示问题。
+- 已验证本次相关界面、AI 会话及升级后资料保留。
+- Windows、Mac 和 Android 沿用此前 0.9.9 文件，无需重复下载；本次仍为手动下载安装。
+
+[下载本次版本](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.9-r2) · [安装说明](INSTALL.md)
+
 ## 0.9.9 — 2026-11-13
 
 本次发布 Windows x64 便携版、macOS Apple Silicon 版和 Android arm64 版。Linux 客户端继续提供 0.9.8，iOS 继续暂停。本次只通过公告提示并引导手动下载，不自动下载安装，也不强制升级。

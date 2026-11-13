@@ -12,7 +12,7 @@ Self-hosted operators may publish a notice linking to official downloads. When h
 
 ## Download assets and signatures
 
-0.9.9 publishes exactly three manual downloads: Windows x64 ZIP, Mac arm64 DMG and Android arm64 APK. The updated server accepts that version-specific complete set without making it eligible for automatic updates. Linux stays on 0.9.8; previous installers and releases remain. Register the original Windows ZIP updater signature through the normal admin upload flow; do not replace the official signing root. `GET /api/v1/downloads/releases` returns actual file identities and sources.
+0.9.9 revision 2 provides four manual downloads: Windows x64 ZIP, Mac arm64 DMG, Linux x86_64 AppImage, and Android arm64 APK. Windows, Mac, and Android files match the original 0.9.9 release and do not require another download. The updated server accepts both the original three-file set and the new four-file set without making either eligible for automatic updates. Previous installers and releases remain. Register the original Windows ZIP and Linux AppImage updater signatures through the normal admin upload flow; do not replace the official signing root. `GET /api/v1/downloads/releases` returns actual file identities and sources. See the [v0.9.9-r2 release](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.9-r2) for files.
 
 ## Data and migrations
 

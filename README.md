@@ -1,81 +1,36 @@
 # C-SSH 0.9.9
 
-[English](README_EN.md) · [官网](https://c-ssh.com) · [安装说明](INSTALL.md) · [功能详解](FEATURES.md) · [自建云](SELF_HOSTING.md) · [更新日志](CHANGELOG.md)
+[English](README_EN.md) · [官网](https://c-ssh.com) · [安装说明](INSTALL.md) · [功能介绍](FEATURES.md) · [自建云](SELF_HOSTING.md) · [更新日志](CHANGELOG.md)
 
-本次发布 Windows x64 便携版、macOS Apple Silicon 版和 Android arm64 版。Linux 客户端继续提供 0.9.8，iOS 继续暂停。本次只通过公告提示并引导手动下载，不自动下载安装，也不强制升级。
+C-SSH 将主机管理、终端、文件、监控和 AI 助手放在同一个客户端中。本次补充 Linux x86_64 AppImage，按 Mac 0.9.9 的界面与使用方式对齐。
 
-## AI 会话与本地存储
+## 这次更新
 
-- 多个 AI 会话可以分别运行。检查一台主机时，可以切换到另一台主机继续提问，各自保留进度、结果和运行状态；停止操作针对当前任务。
-- 改善聊天滚动和 AI 执行时的界面负担。工具进度采用简洁摘要，详细参数、结果及子任务信息按需展开，减少密集步骤占满聊天窗口。
-- AI 历史采用消息增量保存、正文共享引用和选择性 Zstd 无损压缩，减少全局／项目会话反复保存整份内容造成的写入与存储膨胀。不同事件、顺序、来源和原始内容继续保留。
-- 长历史先加载最近内容，再按需向前读取；显示分页不会删减原始记忆，也不等于缩小模型的上下文窗口。本地压缩不代表模型计费 Token 自动减少。
-- 修正历史翻页与新结果保存同时发生时的版本竞争，避免把已经失效的旧页回执误报为当前聊天保存失败。安卓进一步区分历史读取失败和实际写入失败。
-- 改善后台会话、页面恢复及停止后的状态收尾；不会为了恢复界面而自动重发模型请求或远端修改命令。
+- 改善多个 AI 会话同时运行时的切换、进度显示和任务控制。
+- 改善云账号登录、页面加载和启动体验。
+- 修正部分工具结果与搜索内容的显示问题。
 
-## 统一网络搜索与网页读取
+Windows、Mac 和 Android 的 0.9.9 文件保持不变，已使用这些版本的用户无需重复下载。本次由用户手动下载安装，不自动或强制升级。
 
-- 各模型使用统一的搜索入口，按当前账号和接口能力选择供应商搜索；不可用时采用网站搜索路径，不自动更换聊天模型或账号。
-- 完善多来源搜索及故障切换，修正 Bing 语言协商和合法空摘要结果的展示。网页读取继续保留地址、重定向和内网访问保护。
-- 搜索是否可用仍取决于供应商能力、当前网络和目标站点，不把某一次测试成功当作长期可用保证。
+## 主要功能
 
-## 云账号与云端资料管理
+- 管理主机、终端、文件和监控，支持 Agent 与普通 SSH 连接。
+- 在全局、项目或单台主机中使用 AI，查看任务进度和结果。
+- 手动管理与同步云端配置，也可不登录使用本机功能。
+- 桌面服务器浏览器使用 Google Chrome；手机端暂不提供该入口。
 
-- Windows、Mac 和安卓接入统一的账号入口与登录弹窗；未登录时仍可使用本机功能。
-- 客户端可管理已上传的云端主机、AI 账号和代理资料，并提供从本机添加、编辑、删除及显式下载入口。云端与本机分开处理，上传和下载由用户决定。
-- 改善云账号初始化和状态刷新，减少重复加载、界面长期停留在读取状态及重复触发请求的问题。
-- 改善同一台设备使用多个版本时被重复计数的问题；后台可设置全站默认设备上限，并为单个账号覆盖。不同安装实例的数据和同步状态仍各自独立。
-- 保留现有数据保护机制。密钥明文不进入 Cloud；手动同步只传输受保护密文，不包含 AI 对话和原始记忆。
-
-## 启动、主机接入与 Windows 更新
-
-- 取消客户端自定义启动动画，去掉装饰性的等待；必要的本地初始化、数据迁移和版本门禁仍然保留。
-- Windows 已有管理元件通过验证后不再重复解压。只替换 EXE 从 0.9.7／0.9.8 接续时，可识别并安全换版已知旧元件，保留 data；陌生文件和异常链接不会被覆盖。
-- 安装／修复 Agent 时，改进专用公钥被拒绝及账号公钥认证关闭的识别与受控处理，减少重复安装；保留已有凭据和服务器业务资料。
-- 内置 Linux x64／ARM64 Agent、Windows Agent 及 Windows 管理 Setup 同步为 0.9.9，现有协议与架构范围保持。Windows 服务器管理 Setup 不受客户端安装版暂停的影响。
-
-## Android 体验调整
-
-- 收紧顶部、内容区和底部导航的多余留白，调整登录弹窗布局，使手机页面更协调。
-- AI 会话通过原有主机／作用域下拉和历史入口选择，取消占空间的独立会话标签行；后台会话能力保留。
-- AI 设置中可以调整聊天字号，并在重新打开后保留。
-- 新打开终端或切换主机时默认使用普通终端；持久化终端由用户主动选择。
-- 主机状态圆点与监控状态使用同一份数据，避免显示正常却仍为灰点；监控正常不会被冒充为 Agent 已部署。
-- 移动端服务器浏览器继续隐藏，不在本次恢复。
-
-## 下载与升级
-
-- Windows：仅提供 x64 Portable ZIP，不再新增客户端安装包。先退出旧程序，解压后替换原使用目录中的 C-SSH.exe，保留相邻 data 文件夹；不要直接在压缩包内运行。
-- Mac：提供 M 系列 arm64 DMG，保持原应用身份和资料位置；仍为 ad-hoc 签名、未经公证，不提供 Intel 包。
-- Android：提供原签名 arm64 APK，可覆盖安装；不要为升级而卸载或清空数据。
-- 本版将本机数据格式前进到 SQLite schema 28。首次升级可能需要完成数据整理，请等待；已升级的数据不要再交给旧版程序打开。
-- Linux 本次未更新，官网下载页面会标明其最近发布版本，不把旧文件标成 0.9.9。
-
-## 本次验证范围
-
-复用已通过且未改变的功能证据，只补本次发布相关检查。Windows 验证了 0.9.8 只换 EXE、旧管理元件换版、分组／设置／历史原文保留、新增保存和重新打开；文件换版的 Win32 定向测试通过。Android 在 API 36 arm64 SDK Emulator 验证原签名覆盖、安装身份和旧资料保留、新增保存及重开。Mac 完成当前源码构建、签名、内嵌资源及 DMG 挂载检查，并沿用此前功能验证。以上不代表所有实体设备、系统版本或网络环境都重新测试了一遍。
-
-## Added / 新增
-
-独立 AI 会话、客户端云端资料管理、后台设备限额与安卓聊天字号入口。
-
-## Fixed / 修正
-
-历史保存与分页竞争、重复存储、账号初始化、Bing 搜索、Windows 管理组件接续，以及安卓留白和状态显示；详见上文。
-
-## Verified / 验证
-
-验证范围与限制见上文“本次验证范围”。
+功能与平台差异见[功能介绍](FEATURES.md)。本次验证了 Linux 的相关界面、AI 会话及升级后资料保留；不代表已验证所有发行版和网络环境。
 
 ## Downloads
 
-| File | Bytes | Download |
-|---|---:|---|
-| C-SSH_0.9.9_portable-Windows-x64.zip | 46,581,351 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9/C-SSH_0.9.9_portable-Windows-x64.zip) |
-| C-SSH_0.9.9_macOS-arm64.dmg | 48,915,525 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9/C-SSH_0.9.9_macOS-arm64.dmg) |
-| C-SSH_0.9.9_android-arm64.apk | 46,778,053 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9/C-SSH_0.9.9_android-arm64.apk) |
+| Platform | File | Bytes | Download |
+|---|---|---:|---|
+| Windows x64 | C-SSH_0.9.9_portable-Windows-x64.zip | 46,581,351 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9-r2/C-SSH_0.9.9_portable-Windows-x64.zip) |
+| Mac Apple Silicon | C-SSH_0.9.9_macOS-arm64.dmg | 48,915,525 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9-r2/C-SSH_0.9.9_macOS-arm64.dmg) |
+| Linux x86_64 | C-SSH_0.9.9_amd64.AppImage | 122,038,776 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9-r2/C-SSH_0.9.9_amd64.AppImage) |
+| Android arm64 | C-SSH_0.9.9_android-arm64.apk | 46,778,053 | [Download](https://github.com/suiyuebaobao/C-SSH/releases/download/v0.9.9-r2/C-SSH_0.9.9_android-arm64.apk) |
 
-Linux 保留 [0.9.8 下载](https://github.com/suiyuebaobao/C-SSH/releases/tag/v0.9.8)，本次没有 Linux 新包。
+安装步骤与数据保留要求见[安装说明](INSTALL.md)。Linux ARM64 与 deb 等旧包保留在[历史发布](https://github.com/suiyuebaobao/C-SSH/releases)，不属于本次新包；iOS 暂停。
 
 ## SHA256
 
@@ -83,4 +38,5 @@ Linux 保留 [0.9.8 下载](https://github.com/suiyuebaobao/C-SSH/releases/tag/v
 |---|---|
 | C-SSH_0.9.9_portable-Windows-x64.zip | `f8e7b58ae96a6fcb603bd16af9d30090d0ce9d8defdd7f369ff4e9f157c93c34` |
 | C-SSH_0.9.9_macOS-arm64.dmg | `6d6c5b49a1e3d052c41c63345ec874699b340073ba4035b4b148bedf7b6dc8ad` |
+| C-SSH_0.9.9_amd64.AppImage | `f045637980ced45a0b0d9ebd25c3a6a3dc41cff16e3b249e162875e33cf051cf` |
 | C-SSH_0.9.9_android-arm64.apk | `960bba3cd79935f7bf46410d8ddd402dc70650d521c378616b8677c688d6bd02` |

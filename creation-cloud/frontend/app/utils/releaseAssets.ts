@@ -1,7 +1,7 @@
 // 仅投影发布表单选项与已发布下载目录；实际发布权限和闭合集合由服务端校验。
 import type { Platform, Release } from "~/types/site";
 
-export function manualThreePlatformRelease(version: string): boolean {
+export function manualOnlyRelease(version: string): boolean {
   const match = /^(\d+)\.(\d+)\.(\d+)(?:[-+]|$)/.exec(version);
   if (!match) return false;
   const [major, minor, patch] = match.slice(1).map(Number);
@@ -9,13 +9,13 @@ export function manualThreePlatformRelease(version: string): boolean {
 }
 
 export function releaseFormFormats(version: string) {
-  const manual = manualThreePlatformRelease(version);
+  const manual = manualOnlyRelease(version);
   const formats: Record<string, { name: string; architectures: string[]; packages: string[] }> = {
     windows: { name: "Windows", architectures: manual ? ["x86_64"] : ["x86_64", "aarch64"], packages: manual ? ["zip"] : ["exe", "zip"] },
     macos: { name: "macOS", architectures: ["aarch64"], packages: ["dmg"] },
     android: { name: "Android", architectures: ["aarch64"], packages: ["apk"] },
+    linux: { name: "Linux", architectures: manual ? ["x86_64"] : ["x86_64", "aarch64"], packages: manual ? ["appimage"] : ["deb", "appimage"] },
   };
-  if (!manual) formats.linux = { name: "Linux", architectures: ["x86_64", "aarch64"], packages: ["deb", "appimage"] };
   return formats;
 }
 

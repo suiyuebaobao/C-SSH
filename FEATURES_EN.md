@@ -1,53 +1,43 @@
 # C-SSH 0.9.9 features
 
-[Home](README_EN.md) · [中文](FEATURES.md) · [Installation](INSTALL_EN.md)
+[Home](README_EN.md) · [简体中文](FEATURES.md) · [Installation](INSTALL_EN.md)
 
-Windows x64/ARM64, Apple Silicon Mac, Linux x86_64/ARM64, and Android arm64 share the core runtime, with desktop and mobile layouts. Version 0.9.8 uses notifications and manual downloads only. iOS remains paused.
+Current downloads cover Windows x64, Apple Silicon Mac, Linux x86_64, and Android arm64. Linux now moves to 0.9.9; the other three platforms retain their previously released 0.9.9 files. Desktop interfaces follow the Mac baseline, while mobile uses touch-friendly layouts. Installation is manual. iOS remains paused.
 
-## AI workspace
+## AI assistant
 
-Global, project, and host scopes; provider accounts and custom endpoints; model-window settings; permission modes and operation confirmation. Independent read-only tasks can run concurrently, including on the same host, with additional work queued.
+- Ask questions across all hosts, a project, or one host; configure model accounts, endpoints, and context windows.
+- Run independent conversations, switch hosts while preserving progress and results, and stop the selected task.
+- See responses and progress as they arrive, with concise summaries and expandable details. Interjections, pause, and resume are supported.
+- View cumulative tokens, context usage, and cache hit rate. Cumulative usage includes requests and subtasks; context represents one main-assistant input. Values remain unknown when the provider does not report them.
+- Improved long-chat loading, saving, and storage use while keeping original records locally. Operations remain subject to permission modes and confirmation requirements.
 
-Responses, subtask progress, and available results appear incrementally. A concise activity summary expands into tool, command, and file details. Interjections, pause, stop, and resume have clearer states. Context follows the configured model window, while long-history and tool-result handling preserve original local records.
+## Hosts, terminals, and files
 
-The usage panel shows cumulative tokens, context usage, and cache hit rate. Cumulative usage includes requests and subtasks; context represents one main-assistant input. Missing provider reports remain unknown, and cached input still occupies context.
+Manage hosts, groups, favorites, and proxy routes through Agent or plain SSH. Use IPv4, domains, and separate ports; existing IPv6 hosts retain their supported connection paths. Plain SSH mode does not install an Agent automatically.
+
+Use ordinary or persistent terminals, browse and transfer files, and edit or manage remote files. Desktop clients provide multiple terminals, separate remote desktop windows, port forwarding, and command broadcasting. Mobile has no forwarding or broadcast pages. Android host cards open the selected host terminal, with ordinary mode used by default for new connections.
+
+## Monitoring and server management
+
+View CPU, memory, disks, networking, history, and processes. Collection concurrency can be set up to 1000, with remaining tasks queued. Actual speed depends on the client, servers, and network.
+
+Process, service, firewall, and container management depends on the target system and permissions. Linux x86_64/ARM64 and Windows servers are supported, with additional compatibility work for Kylin Linux Advanced Server V10 ARM64. Clients can export the Windows server management installer for a server administrator to install manually; ordinary remote desktop access does not require it.
 
 ## Desktop server browser
 
-Windows, Mac, and Linux use local Google Chrome with traffic and DNS handled through the host Agent. Chrome availability is checked before launch. Multiple environments per host retain separate browsing data, stable seeds, and settings.
+Windows, Mac, and Linux use Google Chrome and prompt when it is missing. Browse through the selected server, with multiple environments per server that retain separate data and settings.
 
-Configure OS presentation, timezone, language, and permissions while retaining normal browsing features. Launch, verification-page stability, and recovery have improved. Websites may still require verification; complete fingerprint concealment is not promised. The Android entry remains hidden while mobile validation is paused.
+Configure OS presentation, timezone, language, and permissions. Websites may still request verification; complete browser-fingerprint concealment is not promised. The Android entry is currently hidden.
 
-## Hosts, connections, and terminals
+## Cloud accounts and data protection
 
-Add, edit, search, favorite, and group hosts using IPv4, domains, separate ports, passwords or keys, and proxy routes. Existing IPv6 hosts retain their supported connection paths. Agent and plain SSH modes remain distinct; SSH-only hosts do not receive automatic Agent installation.
+Local features remain available without signing in. Choose official or self-hosted Cloud, sign in through a dialog, and manage uploaded resources from the client, including adding local items, editing, deleting, and manually downloading.
 
-Linux persistent terminals use tmux, and Windows uses Agent Terminal2/psmux. Desktop clients provide multiple tabs and independent RDP windows. Android host cards open the selected host terminal, allow switching during connection waits, and reject late results from the previous target.
+Hosts, proxy routes, and model configuration sync only through user action. Sensitive information is encrypted; AI conversations and long-term memory are not included in Cloud sync. Valid data-protection verification is reused within the running app and requested again after reopening.
 
-## Monitoring, files, and administration
+## Interface and platform notes
 
-CPU, memory, disks, networking, history charts, and top processes. Collection concurrency is configurable up to 1000 with queuing and independent scheduling. Database improvements and selective compression reduce repeated work and traffic; throughput depends on the computer and network.
+Appearance and grouped settings are available. Android supports chat text-size controls and refined spacing around content and navigation. Monitoring health is shown separately from Agent deployment status.
 
-Browse, transfer, edit, create, rename, delete, and verify files. System, process, firewall, container, and service operations follow host capabilities and permissions. Port forwarding, command libraries, broadcast execution, and access grants are desktop features; Android has no forwarding or broadcast pages.
-
-## Agent and Windows management access
-
-Improved Agent reuse, multi-device authorization, readiness, and update messages. Linux x86_64/ARM64 and Windows servers use their corresponding protocol backends. Improves Agent connectivity and administration on Kylin Linux Advanced Server V10 ARM64 with 64KiB memory pages, including initial independent-channel failures in specific SSH configurations.
-
-Clients can save the embedded Windows Setup ZIP, with system sharing on Android. Install it manually on the Windows server and then connect using a Windows account. Plain RDP does not require Setup; there is no OCR-driven or unattended installation.
-
-## Cloud and data protection
-
-Local operations work without signing in. Choose the official HTTPS Cloud or a self-hosted Cloud, including explicitly configured private-network HTTP, with separate sign-in, source, and sync state. Sync is manual and transfers selected hosts, proxy routes, and model configuration with sensitive fields encrypted by the client. AI conversations and long-term memory stay local.
-
-Valid data-protection verification is reused within the current process and required again after reopening. Select-all and cloud-default choices simplify sync. AI deletion records without a corresponding local account no longer clutter the list; existing local conflicts retain an explicit choice.
-
-## Interface and platform boundaries
-
-Classic and workbench views retain appearance preferences, with settings organized into four groups. Desktop window controls, themes, and dialogs follow the Mac design baseline. Android improves safe areas, keyboard layout, and usage displays.
-
-Mac supports Apple Silicon and remains ad-hoc signed without notarization. Mobile and desktop entry points differ; iOS is paused. Diagnostics are disabled by default. Validation is environment-specific and does not guarantee every failure or distribution combination. See the [changelog](CHANGELOG_EN.md) for details.
-
-## Current 0.9.9 scope
-
-Windows x64, Mac arm64 and Android arm64 are updated; Linux stays on 0.9.8. Independent AI sessions, incremental history, shared bodies and selective lossless Zstd compression reduce repeated storage. Clients provide Cloud resource CRUD and add-from-local with modal login. Manual sync and data protection remain. Device quotas use stable identity with global and per-account limits. Android gains compact spacing, chat font settings and ordinary terminals by default. See [this release](README_EN.md).
+Mac supports Apple Silicon and is currently not notarized. This Linux release provides an x86_64 AppImage; older builds for other architectures remain in past releases. See [Installation](INSTALL_EN.md) for requirements and data preservation. Validation is environment-specific and does not cover every system and network combination.
